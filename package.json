@@ -90,21 +90,23 @@
     "tailwindcss": "^3.0.0",
     "tracked-built-ins": "^3.3.0",
     "typescript": "^5.5.3",
-    "@ember-data/adapter": "5.4.0-alpha.98",
-    "@ember-data/graph": "5.4.0-alpha.98",
-    "@ember-data/json-api": "5.4.0-alpha.98",
-    "@ember-data/legacy-compat": "5.4.0-alpha.98",
-    "@ember-data/model": "5.4.0-alpha.98",
+
+
     "@ember-data/request": "5.4.0-alpha.98",
     "@ember-data/request-utils": "5.4.0-alpha.98",
-    "@ember-data/rest": "5.4.0-alpha.98",
-    "@ember-data/serializer": "5.4.0-alpha.98",
     "@ember-data/store": "5.4.0-alpha.98",
+    "@ember-data/json-api": "5.4.0-alpha.98",
+    "@ember-data/graph": "5.4.0-alpha.98",
     "@ember-data/tracking": "5.4.0-alpha.98",
     "@warp-drive/core-types": "0.0.0-alpha.84",
     "@warp-drive/schema-record": "0.0.0-alpha.84",
     "@warp-drive/build-config": "0.0.0-alpha.35",
     "@warp-drive/ember": "0.0.0-alpha.60",
+
+
+
+    "@ember-data/rest": "^5.3.8",
+
     "webpack": "^5.92.1"
   },
   "engines": {
