@@ -6,7 +6,7 @@ import Fetch from '@ember-data/request/fetch';
 import { CacheHandler } from '@ember-data/store';
 
 export default class MyStoreService extends Store {
-  constructor(args) {
+  constructor(args: unknown) {
     super(args);
     // @service requestManager;
     this.requestManager = new RequestManager();
