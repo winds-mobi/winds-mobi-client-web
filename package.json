@@ -105,9 +105,13 @@
 
 
 
-    "@ember-data/rest": "^5.3.8",
 
     "webpack": "^5.92.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@embroider/macros": "1.13.1"
+    }
   },
   "engines": {
     "node": ">= 18"
