@@ -1,9 +1,18 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import Store from 'ember-data/store';
 import { service } from '@ember/service';
+import RequestManager from '@ember-data/request';
+import Fetch from '@ember-data/request/fetch';
+import { CacheHandler } from '@ember-data/store';
 
 export default class MyStoreService extends Store {
-  @service requestManager;
+  constructor(args) {
+    super(args);
+    // @service requestManager;
+    this.requestManager = new RequestManager();
+    this.requestManager.use([Fetch]);
+    this.requestManager.useCache(CacheHandler);
+  }
 }
 
 // // Don't remove this declaration: this is what enables TypeScript to resolve
