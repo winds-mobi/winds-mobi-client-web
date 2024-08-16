@@ -1,9 +1,11 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import Store from '@ember-data/store';
-import { service } from '@ember/service';
 import RequestManager from '@ember-data/request';
 import Fetch from '@ember-data/request/fetch';
-import { CacheHandler } from '@ember-data/store';
+import Store, { CacheHandler } from '@ember-data/store';
+import { CachePolicy } from '@ember-data/request-utils';
+import type { CacheCapabilitiesManager } from '@ember-data/store/-types/q/cache-capabilities-manager';
+import type { Cache } from '@warp-drive/core-types/cache';
+import JSONAPICache from '@ember-data/json-api';
 
 export default class MyStoreService extends Store {
   constructor(args: unknown) {
@@ -12,6 +14,15 @@ export default class MyStoreService extends Store {
     this.requestManager = new RequestManager();
     this.requestManager.use([Fetch]);
     this.requestManager.useCache(CacheHandler);
+
+    this.lifetimes = new CachePolicy({
+      apiCacheHardExpires: 60 * 60 * 1000,
+      apiCacheSoftExpires: 60 * 1000,
+    });
+  }
+
+  createCache(capabilities: CacheCapabilitiesManager): Cache {
+    return new JSONAPICache(capabilities);
   }
 }
 

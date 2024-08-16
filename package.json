@@ -41,9 +41,6 @@
     "@glint/environment-ember-template-imports": "^1.4.0",
     "@glint/template": "^1.4.0",
     "@tsconfig/ember": "^3.0.8",
-    "@types/ember__polyfills": "^4.0.6",
-    "@types/qunit": "^2.19.10",
-    "@types/rsvp": "^4.0.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.0.2",
@@ -104,7 +101,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@embroider/macros": "1.13.5"
+      "@embroider/macros": "1.13.1"
     }
   },
   "engines": {
