@@ -90,8 +90,6 @@
     "tailwindcss": "^3.0.0",
     "tracked-built-ins": "^3.3.0",
     "typescript": "^5.5.3",
-
-
     "@ember-data/request": "5.4.0-alpha.98",
     "@ember-data/request-utils": "5.4.0-alpha.98",
     "@ember-data/store": "5.4.0-alpha.98",
@@ -102,15 +100,11 @@
     "@warp-drive/schema-record": "0.0.0-alpha.84",
     "@warp-drive/build-config": "0.0.0-alpha.35",
     "@warp-drive/ember": "0.0.0-alpha.60",
-
-
-
-
     "webpack": "^5.92.1"
   },
   "pnpm": {
     "overrides": {
-      "@embroider/macros": "1.13.1"
+      "@embroider/macros": "1.13.5"
     }
   },
   "engines": {
