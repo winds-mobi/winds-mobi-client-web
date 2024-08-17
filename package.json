@@ -50,9 +50,9 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@warp-drive/build-config": "0.0.0-alpha.35",
-    "@warp-drive/core-types": "0.0.0-alpha.84",
-    "@warp-drive/ember": "0.0.0-alpha.60",
-    "@warp-drive/schema-record": "0.0.0-alpha.84",
+    "@warp-drive/core-types": "0.0.0-alpha.85",
+    "@warp-drive/ember": "0.0.0-alpha.61",
+    "@warp-drive/schema-record": "0.0.0-alpha.85",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^8.2.2",
     "ember-apply": "^2.12.0",
@@ -97,11 +97,6 @@
     "tracked-built-ins": "^3.3.0",
     "typescript": "^5.5.3",
     "webpack": "^5.93.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@embroider/macros": "1.13.1"
-    }
   },
   "engines": {
     "node": ">= 18"
