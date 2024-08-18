@@ -17,10 +17,35 @@ module.exports = function (defaults) {
     staticModifiers: true,
     staticComponents: true,
     staticEmberSource: true,
+
     skipBabel: [
       {
         package: 'qunit',
       },
     ],
+
+
+            packagerOptions: {
+              webpackConfig: {
+                module: {
+                  rules: [
+                    {
+                      test: /.css$/i,
+                      use: [
+                        {
+                          loader: 'postcss-loader',
+                          options: {
+                            postcssOptions: {
+                              config: 'config/postcss.config.js',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            }
+          
   });
 };
