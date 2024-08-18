@@ -1,7 +1,8 @@
 import Component from '@glimmer/component';
 import { findRecord } from '@ember-data/rest/request';
 import { Request } from '@warp-drive/ember';
-import { query } from '@ember-data/rest/request';
+// import { query } from '@ember-data/rest/request';
+import { query } from '@ember-data/json-api/request';
 // @ts-expect-error No TS stuff yet
 import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
@@ -11,6 +12,8 @@ import { divIcon } from 'ember-leaflet/helpers/div-icon';
 import { concat } from '@ember/helper';
 import MarkerLayerComponent from './marker-layer.ts';
 import Arrow from './arrow';
+import type MyStoreService from 'winds-mobi-client-web/services/my-store.js';
+import type { Station } from 'winds-mobi-client-web/services/my-store.js';
 
 const arrowIcon = icon([], {
   iconUrl: '/images/arrow.png',
@@ -33,7 +36,7 @@ export interface FooSignature {
 }
 
 export default class Foo extends Component<FooSignature> {
-  @service myStore;
+  @service declare myStore: MyStoreService;
 
   // https://winds.mobi/api/2.3/stations/?keys=short&keys=loc&keys=status&keys=pv-name&keys=alt&keys=peak&keys=last._id&keys=last.w-dir&keys=last.w-avg&keys=last.w-max&limit=12&near-lat=46.68032645342222&near-lon=7.853595728058556
 
@@ -44,7 +47,7 @@ export default class Foo extends Component<FooSignature> {
   zoom = 13;
 
   get request() {
-    const options = query(
+    const options = query<Station>(
       'stations',
       {
         keys: [
