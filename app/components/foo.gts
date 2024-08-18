@@ -7,7 +7,9 @@ import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
 import { get } from '@ember/helper';
 import { icon } from 'ember-leaflet/helpers/icon';
+import { divIcon } from 'ember-leaflet/helpers/div-icon';
 import { concat } from '@ember/helper';
+import MarkerLayerComponent from './marker-layer.ts';
 
 const arrowIcon = icon([], {
   iconUrl: '/images/arrow.png',
@@ -18,7 +20,19 @@ const arrowIcon = icon([], {
   shadowSize: [41, 41],
   style: 'bg-color: red',
   class: 'bar',
-  className: 'baz',
+  className: 'rotate-[17deg]',
+});
+
+const customIcon = divIcon([], {
+  iconUrl: '/images/arrow.png',
+  iconSize: [24, 24],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+  style: 'bg-color: red',
+  class: 'bar',
+  html: '<div class="rotate-[17deg] w-full h-full "><img class="w-full h-full" src="/images/arrow.png" /></div>',
 });
 
 export interface FooSignature {
@@ -71,6 +85,10 @@ export default class Foo extends Component<FooSignature> {
   }
 
   <template>
+    before
+    <span class='rotate-[17deg]'>mirek</span>
+    after
+
     <Request @request={{this.request}}>
       <:loading>
         ---
@@ -91,15 +109,27 @@ export default class Foo extends Component<FooSignature> {
           <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
 
           {{#each result.data as |r|}}
+
             <layers.marker
               @lat={{get r.loc.coordinates '1'}}
               @lng={{get r.loc.coordinates '0'}}
-              @icon={{arrowIcon}}
-              style={{concat 'rotation:' (get r.last 'w-dir')}}
-              @className='foo'
-              as |marker|
-            >
-              mirek</layers.marker>
+              @icon={{customIcon}}
+            />
+
+            {{!-- <layers.marker
+                @lat={{get r.loc.coordinates '1'}}
+                @lng={{get r.loc.coordinates '0'}}
+                @icon={{arrowIcon}}
+                @rotationAngle={{get r.last 'w-dir'}}
+              />
+
+              <MarkerLayerComponent
+                @lat={{get r.loc.coordinates '1'}}
+                @lng={{get r.loc.coordinates '0'}}
+                @icon={{arrowIcon}}
+                @rotationAngle={{get r.last 'w-dir'}}
+              /> --}}
+
           {{/each}}
         </LeafletMap>
       </:content>
