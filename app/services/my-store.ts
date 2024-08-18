@@ -6,6 +6,13 @@ import { CachePolicy } from '@ember-data/request-utils';
 import type { CacheCapabilitiesManager } from '@ember-data/store/-types/q/cache-capabilities-manager';
 import type { Cache } from '@warp-drive/core-types/cache';
 import JSONAPICache from '@ember-data/json-api';
+import { SchemaService } from '@warp-drive/schema-record/schema';
+import {
+  instantiateRecord,
+  teardownRecord,
+} from '@warp-drive/schema-record/hooks';
+import type { SchemaRecord } from '@warp-drive/schema-record/record';
+import type { StableRecordIdentifier } from '@warp-drive/core-types';
 
 export default class MyStoreService extends Store {
   constructor(args: unknown) {
@@ -23,6 +30,21 @@ export default class MyStoreService extends Store {
 
   createCache(capabilities: CacheCapabilitiesManager): Cache {
     return new JSONAPICache(capabilities);
+  }
+
+  createSchemaService() {
+    return new SchemaService();
+  }
+
+  instantiateRecord(
+    identifier: StableRecordIdentifier,
+    createRecordArgs: { [key: string]: unknown },
+  ) {
+    return instantiateRecord(this, identifier, createRecordArgs);
+  }
+
+  teardownRecord(record: SchemaRecord): void {
+    teardownRecord(record);
   }
 }
 
