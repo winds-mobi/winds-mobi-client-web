@@ -3,6 +3,7 @@ import { LegacyNetworkHandler } from '@ember-data/legacy-compat';
 import type { Handler, NextFn, RequestContext } from '@ember-data/request';
 import RequestManager from '@ember-data/request';
 import Fetch from '@ember-data/request/fetch';
+import StationHandler from '../handlers/station';
 
 /* eslint-disable no-console */
 const TestHandler: Handler = {
@@ -17,7 +18,7 @@ const TestHandler: Handler = {
 export default class RequestManagerService extends RequestManager {
   constructor(args?: Record<string | symbol, unknown>) {
     super(args);
-    this.use([LegacyNetworkHandler, TestHandler, Fetch]);
+    this.use([StationHandler, LegacyNetworkHandler, TestHandler, Fetch]);
   }
 }
 

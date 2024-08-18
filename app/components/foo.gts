@@ -1,9 +1,25 @@
 import Component from '@glimmer/component';
 import { findRecord } from '@ember-data/rest/request';
+import { Request } from '@warp-drive/ember';
 import { query } from '@ember-data/rest/request';
 // @ts-expect-error No TS stuff yet
 import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
+import { get } from '@ember/helper';
+import { icon } from 'ember-leaflet/helpers/icon';
+import { concat } from '@ember/helper';
+
+const arrowIcon = icon([], {
+  iconUrl: '/images/arrow.png',
+  iconSize: [24, 24],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+  style: 'bg-color: red',
+  class: 'bar',
+  className: 'baz',
+});
 
 export interface FooSignature {
   Args: {};
@@ -20,15 +36,11 @@ export default class Foo extends Component<FooSignature> {
 
   //
 
-  data = [];
-
   lat = 46.68;
   lng = 7.853;
   zoom = 13;
 
-  constructor() {
-    super(...arguments);
-    // const options = findRecord('ember-developer', '1', { include: ['pets', 'friends'] });
+  get request() {
     const options = query(
       'stations',
       {
@@ -55,29 +67,43 @@ export default class Foo extends Component<FooSignature> {
         },
       },
     );
-    this.data = this.myStore.request(options);
+    return this.myStore.request(options);
   }
+
   <template>
-    {{log this.data}}
+    <Request @request={{this.request}}>
+      <:loading>
+        ---
+      </:loading>
 
-    --
-    <LeafletMap
-      style='width: 100%; height: 64em'
-      @lat={{this.lat}}
-      @lng={{this.lng}}
-      @zoom={{this.zoom}}
-      as |layers|
-    >
-      <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+      <:content as |result state|>
 
-      {{#each this.data as |r|}}
-        <layers.marker
-          @lat={{r.loc.coordinates.[1]}}
-          @lng={{r.loc.coordinates.[0]}}
-          as |marker|
-        />
-      {{/each}}
-    </LeafletMap>
+        {{log '--' result}}
+
+        --
+        <LeafletMap
+          style='width: 100%; height: 64em'
+          @lat={{this.lat}}
+          @lng={{this.lng}}
+          @zoom={{this.zoom}}
+          as |layers|
+        >
+          <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+
+          {{#each result.data as |r|}}
+            <layers.marker
+              @lat={{get r.loc.coordinates '1'}}
+              @lng={{get r.loc.coordinates '0'}}
+              @icon={{arrowIcon}}
+              style={{concat 'rotation:' (get r.last 'w-dir')}}
+              @className='foo'
+              as |marker|
+            >
+              mirek</layers.marker>
+          {{/each}}
+        </LeafletMap>
+      </:content>
+    </Request>
     --
   </template>
 }
