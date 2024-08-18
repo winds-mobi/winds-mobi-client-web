@@ -18,6 +18,7 @@ import {
 import { SchemaRecord } from '@warp-drive/schema-record/record';
 import type { StableRecordIdentifier } from '@warp-drive/core-types';
 import type { Type } from '@warp-drive/core-types/symbols';
+import StationHandler from 'winds-mobi-client-web/handlers/station';
 
 const StationSchema = withDefaults({
   type: 'station',
@@ -26,6 +27,11 @@ const StationSchema = withDefaults({
       name: 'short',
       kind: 'field',
     },
+    {
+      name: 'loc',
+      kind: 'object',
+    },
+    { name: 'last', kind: 'object' },
   ],
 });
 
@@ -41,7 +47,7 @@ export default class MyStoreService extends Store {
     super(args);
     // @service requestManager;
     this.requestManager = new RequestManager();
-    this.requestManager.use([Fetch]);
+    this.requestManager.use([StationHandler, Fetch]);
     this.requestManager.useCache(CacheHandler);
 
     this.lifetimes = new CachePolicy({
