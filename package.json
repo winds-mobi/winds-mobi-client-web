@@ -33,6 +33,7 @@
     "@ember-data/request": "5.4.0-alpha.94",
     "@ember-data/request-utils": "5.4.0-alpha.94",
     "@ember-data/store": "5.4.0-alpha.94",
+    "@ember-data/rest": "5.4.0-alpha.94",
     "@ember-data/tracking": "5.4.0-alpha.94",
     "@ember/optional-features": "^2.1.0",
     "@ember/string": "^3.1.1",
