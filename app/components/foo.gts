@@ -15,18 +15,6 @@ import Arrow from './arrow';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
-const arrowIcon = icon([], {
-  iconUrl: '/images/arrow.png',
-  iconSize: [24, 24],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-  style: 'bg-color: red',
-  class: 'bar',
-  className: 'rotate-[17deg]',
-});
-
 export interface FooSignature {
   Args: {};
   Blocks: {
@@ -37,10 +25,6 @@ export interface FooSignature {
 
 export default class Foo extends Component<FooSignature> {
   @service declare store: StoreService;
-
-  // https://winds.mobi/api/2.3/stations/?keys=short&keys=loc&keys=status&keys=pv-name&keys=alt&keys=peak&keys=last._id&keys=last.w-dir&keys=last.w-avg&keys=last.w-max&limit=12&near-lat=46.68032645342222&near-lon=7.853595728058556
-
-  //
 
   lat = 46.68;
   lng = 7.853;
@@ -77,20 +61,12 @@ export default class Foo extends Component<FooSignature> {
   }
 
   <template>
-    before
-    <span class='rotate-[17deg]'>mirek</span>
-    after
-
     <Request @request={{this.request}}>
       <:loading>
         ---
       </:loading>
 
       <:content as |result state|>
-
-        {{log '--' result}}
-
-        --
         <LeafletMap
           style='width: 100%; height: 64em'
           @lat={{this.lat}}
@@ -120,21 +96,6 @@ export default class Foo extends Component<FooSignature> {
                 </marker.popup>
               </layers.marker>
             </Arrow>
-
-            {{!-- <layers.marker
-                @lat={{get r.loc.coordinates '1'}}
-                @lng={{get r.loc.coordinates '0'}}
-                @icon={{arrowIcon}}
-                @rotationAngle={{get r.last 'w-dir'}}
-              />
-
-              <MarkerLayerComponent
-                @lat={{get r.loc.coordinates '1'}}
-                @lng={{get r.loc.coordinates '0'}}
-                @icon={{arrowIcon}}
-                @rotationAngle={{get r.last 'w-dir'}}
-              /> --}}
-
           {{/each}}
         </LeafletMap>
       </:content>
