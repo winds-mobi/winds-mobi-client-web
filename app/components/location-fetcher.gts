@@ -3,6 +3,7 @@ import { action } from '@ember/object';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { task } from 'ember-concurrency';
+import { Button } from '@frontile/buttons';
 
 interface GeolocationPosition {
   coords: {
@@ -42,7 +43,7 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
     }
   });
   <template>
-    <button
+    <Button
       type='button'
       {{on 'click' this.getLocationTask.perform}}
       disabled={{this.getLocationTask.isRunning}}
@@ -52,7 +53,7 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
       {{else}}
         Get Location
       {{/if}}
-    </button>
+    </Button>
 
     {{yield this.latitude this.longitude}}
   </template>
