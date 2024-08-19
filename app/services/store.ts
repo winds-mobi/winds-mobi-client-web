@@ -42,10 +42,9 @@ export type Station = {
   [Type]: 'user';
 };
 
-export default class MyStoreService extends Store {
+export default class StoreService extends Store {
   constructor(args: unknown) {
     super(args);
-    // @service requestManager;
     this.requestManager = new RequestManager();
     this.requestManager.use([StationHandler, Fetch]);
     this.requestManager.useCache(CacheHandler);
@@ -78,13 +77,3 @@ export default class MyStoreService extends Store {
     teardownRecord(record);
   }
 }
-
-// // Don't remove this declaration: this is what enables TypeScript to resolve
-// // this service using `Owner.lookup('service:my-store')`, as well
-// // as to check when you pass the service name as an argument to the decorator,
-// // like `@service('my-store') declare altName: MyStoreService;`.
-// declare module '@ember/service' {
-//   interface Registry {
-//     'my-store': MyStoreService;
-//   }
-// }

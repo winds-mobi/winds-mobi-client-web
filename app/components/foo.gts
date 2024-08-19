@@ -12,8 +12,8 @@ import { divIcon } from 'ember-leaflet/helpers/div-icon';
 import { concat } from '@ember/helper';
 import MarkerLayerComponent from './marker-layer.ts';
 import Arrow from './arrow';
-import type MyStoreService from 'winds-mobi-client-web/services/my-store.js';
-import type { Station } from 'winds-mobi-client-web/services/my-store.js';
+import type StoreService from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 const arrowIcon = icon([], {
   iconUrl: '/images/arrow.png',
@@ -36,7 +36,7 @@ export interface FooSignature {
 }
 
 export default class Foo extends Component<FooSignature> {
-  @service declare myStore: MyStoreService;
+  @service declare store: StoreService;
 
   // https://winds.mobi/api/2.3/stations/?keys=short&keys=loc&keys=status&keys=pv-name&keys=alt&keys=peak&keys=last._id&keys=last.w-dir&keys=last.w-avg&keys=last.w-max&limit=12&near-lat=46.68032645342222&near-lon=7.853595728058556
 
@@ -73,7 +73,7 @@ export default class Foo extends Component<FooSignature> {
         },
       },
     );
-    return this.myStore.request(options);
+    return this.store.request(options);
   }
 
   <template>
