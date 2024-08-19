@@ -4,6 +4,9 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { task } from 'ember-concurrency';
 import { Button } from '@frontile/buttons';
+import Gps from 'ember-phosphor-icons/components/ph-gps';
+import GpsFix from 'ember-phosphor-icons/components/ph-gps-fix';
+import GpsSlash from 'ember-phosphor-icons/components/ph-gps-slash';
 
 interface GeolocationPosition {
   coords: {
@@ -25,21 +28,19 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
   @tracked longitude: number | null = 7;
 
   getLocationTask = task(async () => {
-    if (navigator.geolocation) {
-      try {
-        const position: GeolocationPosition = await new Promise(
-          (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          },
-        );
+    try {
+      const position: GeolocationPosition = await new Promise(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        },
+      );
 
-        this.latitude = position.coords.latitude;
-        this.longitude = position.coords.longitude;
-      } catch (error) {
-        console.error('Error fetching location:', error);
-      }
-    } else {
-      console.error('Geolocation is not supported by this browser.');
+      this.latitude = position.coords.latitude;
+      this.longitude = position.coords.longitude;
+
+      return true;
+    } catch (error) {
+      throw new Error('Error fetching location:', error);
     }
   });
   <template>
@@ -48,11 +49,20 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
       {{on 'click' this.getLocationTask.perform}}
       disabled={{this.getLocationTask.isRunning}}
     >
-      {{#if this.getLocationTask.isRunning}}
-        <span class='spinner'>Loading...</span>
+      {{log this.getLocationTask.last.isSuccessful}}
+      {{log this.getLocationTask.last.value}}
+
+      {{#if this.getLocationTask.last.value}}
+        <GpsFix />
       {{else}}
-        Get Location
+        {{#if this.getLocationTask.last.isError}}
+          <GpsSlash />
+        {{else}}
+          <Gps class={{if this.getLocationTask.isRunning 'animate-pulse'}} />
+        {{/if}}
       {{/if}}
+
+      Get Location
     </Button>
 
     {{yield this.latitude this.longitude}}
