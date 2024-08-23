@@ -2,11 +2,19 @@
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
-module.exports = function (defaults) {
+module.exports = async function (defaults) {
   const app = new EmberApp(defaults, {
     'ember-cli-babel': { enableTypeScriptTransform: true },
+    babel: {
+      plugins: [
+        require.resolve('ember-concurrency/async-arrow-task-transform'),
+      ],
+    },
+  });
 
-    // Add options here
+  const { setConfig } = await import('@warp-drive/build-config');
+  setConfig(app, __dirname, {
+    // WarpDrive/EmberData settings go here (if any)
   });
 
   const { Webpack } = require('@embroider/webpack');

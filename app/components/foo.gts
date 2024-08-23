@@ -1,7 +1,8 @@
 import Component from '@glimmer/component';
 import { findRecord } from '@ember-data/rest/request';
 import { Request } from '@warp-drive/ember';
-import { query } from '@ember-data/rest/request';
+// import { query } from '@ember-data/rest/request';
+import { query } from '@ember-data/json-api/request';
 // @ts-expect-error No TS stuff yet
 import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
@@ -11,18 +12,10 @@ import { divIcon } from 'ember-leaflet/helpers/div-icon';
 import { concat } from '@ember/helper';
 import MarkerLayerComponent from './marker-layer.ts';
 import Arrow from './arrow';
-
-const arrowIcon = icon([], {
-  iconUrl: '/images/arrow.png',
-  iconSize: [24, 24],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-  style: 'bg-color: red',
-  class: 'bar',
-  className: 'rotate-[17deg]',
-});
+import type StoreService from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
+import LocationFetcher from './location-fetcher';
+import type LocationService from 'winds-mobi-client-web/services/location.js';
 
 export interface FooSignature {
   Args: {};
@@ -33,18 +26,15 @@ export interface FooSignature {
 }
 
 export default class Foo extends Component<FooSignature> {
-  @service myStore;
+  @service declare store: StoreService;
+  @service declare location: LocationService;
 
-  // https://winds.mobi/api/2.3/stations/?keys=short&keys=loc&keys=status&keys=pv-name&keys=alt&keys=peak&keys=last._id&keys=last.w-dir&keys=last.w-avg&keys=last.w-max&limit=12&near-lat=46.68032645342222&near-lon=7.853595728058556
-
-  //
-
-  lat = 46.68;
+  lat = 30.68;
   lng = 7.853;
   zoom = 13;
 
   get request() {
-    const options = query(
+    const options = query<Station>(
       'stations',
       {
         keys: [
@@ -70,28 +60,20 @@ export default class Foo extends Component<FooSignature> {
         },
       },
     );
-    return this.myStore.request(options);
+    return this.store.request(options);
   }
 
   <template>
-    before
-    <span class='rotate-[17deg]'>mirek</span>
-    after
-
     <Request @request={{this.request}}>
       <:loading>
         ---
       </:loading>
 
       <:content as |result state|>
-
-        {{log '--' result}}
-
-        --
         <LeafletMap
           style='width: 100%; height: 64em'
-          @lat={{this.lat}}
-          @lng={{this.lng}}
+          @lat={{this.location.latitude}}
+          @lng={{this.location.longitude}}
           @zoom={{this.zoom}}
           as |layers|
         >
@@ -110,28 +92,13 @@ export default class Foo extends Component<FooSignature> {
                 @icon={{icon}}
                 as |marker|
               >
-                <marker.popup @popupOpen={{true}}>
+                <marker.popup @popupOpen={{false}}>
                   {{get r.last 'w-avg'}}
                   /
                   {{get r.last 'w-max'}}
                 </marker.popup>
               </layers.marker>
             </Arrow>
-
-            {{!-- <layers.marker
-                @lat={{get r.loc.coordinates '1'}}
-                @lng={{get r.loc.coordinates '0'}}
-                @icon={{arrowIcon}}
-                @rotationAngle={{get r.last 'w-dir'}}
-              />
-
-              <MarkerLayerComponent
-                @lat={{get r.loc.coordinates '1'}}
-                @lng={{get r.loc.coordinates '0'}}
-                @icon={{arrowIcon}}
-                @rotationAngle={{get r.last 'w-dir'}}
-              /> --}}
-
           {{/each}}
         </LeafletMap>
       </:content>
