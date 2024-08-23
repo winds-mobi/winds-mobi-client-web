@@ -33,20 +33,36 @@ export default class Arrow extends Component<ArrowSignature> {
     'border-red-800',
     'border-red-900',
   ];
+
+  arrow = [
+    'text-lime-600',
+    'text-green-600',
+    'text-teal-400',
+    'text-cyan-600',
+    'text-sky-600',
+    'text-blue-700',
+    'text-purple-800',
+    'text-fuchsia-500',
+    'text-red-900',
+  ];
   get icon() {
     const avg =
       this.bg[Math.floor((this.args.avg / 40) * (this.bg.length - 1))];
     const max =
       this.border[Math.floor((this.args.max / 40) * (this.border.length - 1))];
+    const arrow =
+      this.arrow[Math.floor((this.args.avg / 40) * (this.arrow.length - 1))];
 
     return divIcon([], {
       iconUrl: '/images/arrow.png',
-      iconSize: [24, 24],
+      iconSize: [32, 32],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       tooltipAnchor: [16, -28],
       shadowSize: [41, 41],
-      html: `<div class="w-full h-full" style="transform: rotate(${this.args.rotate}deg)">
+      html: `<div class="w-full h-full ${arrow}" style="transform: rotate(${
+        this.args.rotate + 90
+      }deg); fill: currentColor">
 
 
 
@@ -54,20 +70,11 @@ export default class Arrow extends Component<ArrowSignature> {
 
 
 
-
-
-
-      <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	 class="w-full h-full ${avg}" viewBox="0 0 416.979 416.979"
-	 xml:space="preserve">
-<g>
-	<path d="M208.489,416.979c115.146,0,208.49-93.344,208.49-208.489C416.979,93.344,323.635,0,208.489,0S0,93.343,0,208.489
-		C0,323.635,93.343,416.979,208.489,416.979z M127.24,219.452l68.259-118.21c2.68-4.641,7.632-7.499,12.99-7.499
-		s10.31,2.858,12.99,7.499l68.258,118.21c2.682,4.642,2.682,10.359,0.002,15c-2.68,4.642-7.631,7.501-12.99,7.501h-33.26v66.282
-		c0,8.284-6.715,15-15,15h-40c-8.284,0-15-6.716-15-15v-66.282H140.23c-5.359,0-10.312-2.859-12.991-7.501
-		C124.56,229.812,124.56,224.094,127.24,219.452z"/>
-</g>
+<svg version="1.1" baseProfile="tiny" xmlns="http://www.w3.org/2000/svg" viewBox="-150 -70 340 140" fill="currentColor">
+    <path d="M20,67.1C48.9,58.5,70,31.7,70,0S48.9-58.5,20-67.1V-150h-40v82.9C-48.9-58.5-70-31.7-70,0s21.1,58.5,50,67.1V115l-50-25L0,190L70,90l-50,25V67.1z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z" transform="rotate(-90)" />
 </svg>
+
+
 
 
       </div>`,
@@ -76,3 +83,6 @@ export default class Arrow extends Component<ArrowSignature> {
 
   <template>{{yield this.icon}}</template>
 }
+
+// TODO: Arrow can't change colour on non-inlined images
+// <img src="images/arrow-round-right.svg" />
