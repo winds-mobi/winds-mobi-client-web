@@ -54,7 +54,6 @@ export default class Foo extends Component<FooSignature> {
         'near-lon': 7.853595728058556,
       },
       {
-        namespace: '2.3',
         urlParamsSettings: {
           arrayFormat: 'repeat',
         },
