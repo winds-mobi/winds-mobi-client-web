@@ -3,8 +3,8 @@ import { tracked } from '@glimmer/tracking';
 import { task } from 'ember-concurrency';
 
 export default class LocationService extends Service {
-  @tracked latitude: number | null = 30;
-  @tracked longitude: number | null = 7;
+  @tracked latitude: number | null = 46.68;
+  @tracked longitude: number | null = 7.85;
 
   getLocationTask = task(async () => {
     try {
