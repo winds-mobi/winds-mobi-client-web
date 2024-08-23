@@ -15,6 +15,7 @@ import Arrow from './arrow';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import LocationFetcher from './location-fetcher';
+import type LocationService from 'winds-mobi-client-web/services/location.js';
 
 export interface FooSignature {
   Args: {};
@@ -26,6 +27,7 @@ export interface FooSignature {
 
 export default class Foo extends Component<FooSignature> {
   @service declare store: StoreService;
+  @service declare location: LocationService;
 
   lat = 30.68;
   lng = 7.853;
@@ -68,41 +70,37 @@ export default class Foo extends Component<FooSignature> {
       </:loading>
 
       <:content as |result state|>
-        <LocationFetcher as |latitude longitude|>
-          {{latitude}},
-          {{longitude}}
-          <LeafletMap
-            style='width: 100%; height: 64em'
-            @lat={{latitude}}
-            @lng={{longitude}}
-            @zoom={{this.zoom}}
-            as |layers|
-          >
-            <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+        <LeafletMap
+          style='width: 100%; height: 64em'
+          @lat={{this.location.latitude}}
+          @lng={{this.location.longitude}}
+          @zoom={{this.zoom}}
+          as |layers|
+        >
+          <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
 
-            {{#each result.data as |r|}}
-              <Arrow
-                @rotate={{get r.last 'w-dir'}}
-                @avg={{get r.last 'w-avg'}}
-                @max={{get r.last 'w-max'}}
-                as |icon|
+          {{#each result.data as |r|}}
+            <Arrow
+              @rotate={{get r.last 'w-dir'}}
+              @avg={{get r.last 'w-avg'}}
+              @max={{get r.last 'w-max'}}
+              as |icon|
+            >
+              <layers.marker
+                @lat={{get r.loc.coordinates '1'}}
+                @lng={{get r.loc.coordinates '0'}}
+                @icon={{icon}}
+                as |marker|
               >
-                <layers.marker
-                  @lat={{get r.loc.coordinates '1'}}
-                  @lng={{get r.loc.coordinates '0'}}
-                  @icon={{icon}}
-                  as |marker|
-                >
-                  <marker.popup @popupOpen={{false}}>
-                    {{get r.last 'w-avg'}}
-                    /
-                    {{get r.last 'w-max'}}
-                  </marker.popup>
-                </layers.marker>
-              </Arrow>
-            {{/each}}
-          </LeafletMap>
-        </LocationFetcher>
+                <marker.popup @popupOpen={{false}}>
+                  {{get r.last 'w-avg'}}
+                  /
+                  {{get r.last 'w-max'}}
+                </marker.popup>
+              </layers.marker>
+            </Arrow>
+          {{/each}}
+        </LeafletMap>
       </:content>
     </Request>
     --

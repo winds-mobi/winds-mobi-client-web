@@ -9,6 +9,8 @@ import GpsFix from 'ember-phosphor-icons/components/ph-gps-fix';
 import GpsSlash from 'ember-phosphor-icons/components/ph-gps-slash';
 import { ToggleButton } from '@frontile/buttons';
 import { t } from 'ember-intl';
+import type LocationService from 'winds-mobi-client-web/services/location';
+import { inject as service } from '@ember/service';
 
 interface GeolocationPosition {
   coords: {
@@ -26,49 +28,32 @@ export interface LocationFetcherSignature {
 }
 
 export default class LocationFetcher extends Component<LocationFetcherSignature> {
-  @tracked latitude: number | null = 30;
-  @tracked longitude: number | null = 7;
+  @service declare location: LocationService;
 
-  getLocationTask = task(async () => {
-    try {
-      const position: GeolocationPosition = await new Promise(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        },
-      );
-
-      this.latitude = position.coords.latitude;
-      this.longitude = position.coords.longitude;
-
-      return true;
-    } catch (error) {
-      throw new Error('Error fetching location:', error);
-    }
-  });
   <template>
     <ToggleButton
       type='button'
-      @onChange={{this.getLocationTask.perform}}
-      @isSelected={{if this.getLocationTask.last.value true false}}
-      disabled={{this.getLocationTask.isRunning}}
+      @onChange={{this.location.getLocationTask.perform}}
+      @isSelected={{if this.location.getLocationTask.last.value true false}}
+      disabled={{this.location.getLocationTask.isRunning}}
       class='flex align-middle items-center gap-2'
     >
-      {{log this.getLocationTask.last.isSuccessful}}
-      {{log this.getLocationTask.last.value}}
+      {{log this.location.getLocationTask.last.isSuccessful}}
+      {{log this.location.getLocationTask.last.value}}
 
-      {{#if this.getLocationTask.last.value}}
+      {{#if this.location.getLocationTask.last.value}}
         <GpsFix />
       {{else}}
-        {{#if this.getLocationTask.last.isError}}
+        {{#if this.location.getLocationTask.last.isError}}
           <GpsSlash />
         {{else}}
-          <Gps class={{if this.getLocationTask.isRunning 'animate-pulse'}} />
+          <Gps
+            class={{if this.location.getLocationTask.isRunning 'animate-pulse'}}
+          />
         {{/if}}
       {{/if}}
 
       {{t 'location-fetcher.center'}}
     </ToggleButton>
-
-    {{yield this.latitude this.longitude}}
   </template>
 }
