@@ -15,7 +15,10 @@ export default class List extends Component<ListSignature> {
   <template>
     <ToggleButton class='flex align-middle items-center gap-2'>
       <ListBullets />
-      {{t 'list.toggle'}}
+
+      <span class='hidden lg:inline'>
+        {{t 'list.toggle'}}
+      </span>
     </ToggleButton>
   </template>
 }

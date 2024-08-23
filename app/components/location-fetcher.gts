@@ -53,7 +53,9 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
         {{/if}}
       {{/if}}
 
-      {{t 'location-fetcher.center'}}
+      <span class='hidden lg:inline'>
+        {{t 'location-fetcher.center'}}
+      </span>
     </ToggleButton>
   </template>
 }

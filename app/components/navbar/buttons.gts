@@ -16,7 +16,7 @@ export default class NavbarButtons extends Component<NavbarButtonsSignature> {
   <template>
     <div class='flex flex-1 lg:justify-end px-2 lg:px-0 py-2'>
 
-      <div class='hidden lg:ml-6 lg:flex lg:space-x-8'>
+      <div class='lg:ml-6 flex lg:space-x-8 gap-2'>
 
         <LocationFetcher />
 

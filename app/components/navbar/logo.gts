@@ -7,7 +7,7 @@ import { t } from 'ember-intl';
       src='/images/windmobile.png'
       alt={{t 'application.name'}}
     />
-    <span class='pl-2'>
+    <span class='pl-2 hidden lg:inline'>
       {{t 'application.name'}}
     </span>
   </div>
