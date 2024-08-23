@@ -1,2 +1,8 @@
 application:
   name: winds.mobi
+
+location-fetcher:
+  center: center
+
+list:
+  toggle: list

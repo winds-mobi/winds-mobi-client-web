@@ -7,6 +7,8 @@ import { Button } from '@frontile/buttons';
 import Gps from 'ember-phosphor-icons/components/ph-gps';
 import GpsFix from 'ember-phosphor-icons/components/ph-gps-fix';
 import GpsSlash from 'ember-phosphor-icons/components/ph-gps-slash';
+import { ToggleButton } from '@frontile/buttons';
+import { t } from 'ember-intl';
 
 interface GeolocationPosition {
   coords: {
@@ -44,10 +46,12 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
     }
   });
   <template>
-    <Button
+    <ToggleButton
       type='button'
-      {{on 'click' this.getLocationTask.perform}}
+      @onChange={{this.getLocationTask.perform}}
+      @isSelected={{if this.getLocationTask.last.value true false}}
       disabled={{this.getLocationTask.isRunning}}
+      class='flex align-middle items-center gap-2'
     >
       {{log this.getLocationTask.last.isSuccessful}}
       {{log this.getLocationTask.last.value}}
@@ -62,8 +66,8 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
         {{/if}}
       {{/if}}
 
-      Get Location
-    </Button>
+      {{t 'location-fetcher.center'}}
+    </ToggleButton>
 
     {{yield this.latitude this.longitude}}
   </template>
