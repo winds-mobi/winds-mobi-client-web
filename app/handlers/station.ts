@@ -23,7 +23,7 @@ interface Station {
 
 const StationHandler: Handler = {
   async request<T>(context: RequestContext, next: NextFn<T>) {
-    const regex = /^\/[^\/]+\/stations/;
+    const regex = /.*\/stations/;
 
     if (!regex.test(context.request.url)) return next(context.request);
     // if (context.request.op !== 'station') return next(context.request);
