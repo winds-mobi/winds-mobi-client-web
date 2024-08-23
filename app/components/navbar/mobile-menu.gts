@@ -19,10 +19,10 @@ export interface NavbarMobileMenuSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignature> {
   <template>
-    <!-- Mobile menu, show/hide based on menu state. -->
+    {{!-- Mobile menu, show/hide based on menu state. --}}
     <div class='lg:hidden' id='mobile-menu'>
       <div class='space-y-1 pb-3 pt-2'>
-        <!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" -->
+        {{!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" --}}
         <a
           href='#'
           class='block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700'

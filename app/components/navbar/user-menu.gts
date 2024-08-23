@@ -14,7 +14,7 @@ export default class NavbarUserMenu extends Component<NavbarUserMenuSignature> {
   @tracked isMenuVisible = false;
 
   <template>
-    <!-- Profile dropdown -->
+    {{!-- Profile dropdown --}}
     <div class='relative ml-4 flex-shrink-0'>
       <div>
         <button
@@ -34,7 +34,7 @@ export default class NavbarUserMenu extends Component<NavbarUserMenuSignature> {
         </button>
       </div>
 
-      <!--
+      {{!--
             Dropdown menu, show/hide based on menu state.
 
             Entering: "transition ease-out duration-100"
@@ -43,7 +43,7 @@ export default class NavbarUserMenu extends Component<NavbarUserMenuSignature> {
             Leaving: "transition ease-in duration-75"
               From: "transform opacity-100 scale-100"
               To: "transform opacity-0 scale-95"
-          -->
+          --}}
       {{#if this.isMenuVisible}}
         <div
           class='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'
@@ -52,7 +52,7 @@ export default class NavbarUserMenu extends Component<NavbarUserMenuSignature> {
           aria-labelledby='user-menu-button'
           tabindex='-1'
         >
-          <!-- Active: "bg-gray-100", Not Active: "" -->
+          {{!-- Active: "bg-gray-100", Not Active: "" --}}
           <a
             href='#'
             class='block px-4 py-2 text-sm text-gray-700'
