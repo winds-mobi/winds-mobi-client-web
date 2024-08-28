@@ -32,12 +32,26 @@ const StationSchema = withDefaults({
       kind: 'object',
     },
     { name: 'last', kind: 'object' },
+    { name: 'alt', kind: 'field' },
+    { name: 'pv-name', kind: 'field' },
   ],
 });
 
 export type Station = {
   id: string;
   short: string;
+  loc: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  last: {
+    _id: number;
+    'w-dir': number;
+    'w-avg': number;
+    'w-max': number;
+  };
+  alt: number;
+  'pv-name': string;
 
   [Type]: 'user';
 };

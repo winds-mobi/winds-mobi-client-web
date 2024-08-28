@@ -55,12 +55,10 @@ export default class Arrow extends Component<ArrowSignature> {
 
     return divIcon([], {
       iconUrl: '/images/arrow.png',
-      iconSize: [32, 32],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      tooltipAnchor: [16, -28],
-      shadowSize: [41, 41],
-      html: `<div class="w-full h-full ${arrow}" style="transform: rotate(${
+      iconSize: [42, 42],
+      iconAnchor: [21, 21],
+      popupAnchor: [0, -14],
+      html: `<div class="flex w-full h-full ${arrow}" style="transform: rotate(${
         this.args.rotate + 90
       }deg); fill: currentColor">
 

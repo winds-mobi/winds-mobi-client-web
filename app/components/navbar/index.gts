@@ -18,7 +18,7 @@ export interface NavbarSignature {
 export default class Navbar extends Component<NavbarSignature> {
   <template>
     <nav class='bg-white shadow'>
-      <div class='mx-auto max-w-7xl px-2 sm:px-4 lg:px-8'>
+      <div class='px-2 sm:px-4 lg:px-8'>
         <div class='flex h-16 justify-between'>
           <NavbarLogo />
 

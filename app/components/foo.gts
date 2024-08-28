@@ -16,6 +16,7 @@ import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import LocationFetcher from './location-fetcher';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
+import Details from './details';
 
 export interface FooSignature {
   Args: {};
@@ -70,7 +71,7 @@ export default class Foo extends Component<FooSignature> {
 
       <:content as |result state|>
         <LeafletMap
-          style='width: 100%; height: 64em'
+          class='w-full h-full'
           @lat={{this.location.latitude}}
           @lng={{this.location.longitude}}
           @zoom={{this.zoom}}
@@ -92,9 +93,7 @@ export default class Foo extends Component<FooSignature> {
                 as |marker|
               >
                 <marker.popup @popupOpen={{false}}>
-                  {{get r.last 'w-avg'}}
-                  /
-                  {{get r.last 'w-max'}}
+                  <Details @station={{r}} />
                 </marker.popup>
               </layers.marker>
             </Arrow>
