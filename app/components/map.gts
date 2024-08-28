@@ -1,24 +1,17 @@
 import Component from '@glimmer/component';
-import { findRecord } from '@ember-data/rest/request';
 import { Request } from '@warp-drive/ember';
 // import { query } from '@ember-data/rest/request';
 import { query } from '@ember-data/json-api/request';
 // @ts-expect-error No TS stuff yet
 import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
-import { get } from '@ember/helper';
-import { icon } from 'ember-leaflet/helpers/icon';
-import { divIcon } from 'ember-leaflet/helpers/div-icon';
-import { concat } from '@ember/helper';
-import MarkerLayerComponent from './marker-layer.ts';
 import Arrow from './arrow';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import LocationFetcher from './location-fetcher';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
 import Details from './details';
 
-export interface FooSignature {
+export interface MapSignature {
   Args: {};
   Blocks: {
     default: [];
@@ -26,7 +19,7 @@ export interface FooSignature {
   Element: null;
 }
 
-export default class Foo extends Component<FooSignature> {
+export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
   @service declare location: LocationService;
 
@@ -36,7 +29,7 @@ export default class Foo extends Component<FooSignature> {
 
   get request() {
     const options = query<Station>(
-      'stations',
+      'station',
       {
         keys: [
           'short',
@@ -81,14 +74,14 @@ export default class Foo extends Component<FooSignature> {
 
           {{#each result.data as |r|}}
             <Arrow
-              @rotate={{get r.last 'w-dir'}}
-              @avg={{get r.last 'w-avg'}}
-              @max={{get r.last 'w-max'}}
+              @direction={{r.last.direction}}
+              @speed={{r.last.speed}}
+              @gusts={{r.last.gusts}}
               as |icon|
             >
               <layers.marker
-                @lat={{get r.loc.coordinates '1'}}
-                @lng={{get r.loc.coordinates '0'}}
+                @lat={{r.latitude}}
+                @lng={{r.longitude}}
                 @icon={{icon}}
                 as |marker|
               >

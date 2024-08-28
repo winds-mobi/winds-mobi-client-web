@@ -2,9 +2,13 @@ import Component from '@glimmer/component';
 import { divIcon } from 'ember-leaflet/helpers/div-icon';
 
 export interface ArrowSignature {
-  Args: {};
+  Args: {
+    direction: number;
+    speed: number;
+    gusts: number;
+  };
   Blocks: {
-    default: [];
+    default: [typeof divIcon];
   };
   Element: null;
 }
@@ -47,11 +51,13 @@ export default class Arrow extends Component<ArrowSignature> {
   ];
   get icon() {
     const avg =
-      this.bg[Math.floor((this.args.avg / 40) * (this.bg.length - 1))];
+      this.bg[Math.floor((this.args.speed / 40) * (this.bg.length - 1))];
     const max =
-      this.border[Math.floor((this.args.max / 40) * (this.border.length - 1))];
+      this.border[
+        Math.floor((this.args.gusts / 40) * (this.border.length - 1))
+      ];
     const arrow =
-      this.arrow[Math.floor((this.args.avg / 40) * (this.arrow.length - 1))];
+      this.arrow[Math.floor((this.args.speed / 40) * (this.arrow.length - 1))];
 
     return divIcon([], {
       iconUrl: '/images/arrow.png',
@@ -59,7 +65,7 @@ export default class Arrow extends Component<ArrowSignature> {
       iconAnchor: [21, 21],
       popupAnchor: [0, -14],
       html: `<div class="flex w-full h-full ${arrow}" style="transform: rotate(${
-        this.args.rotate + 90
+        this.args.direction + 90
       }deg); fill: currentColor">
 
 

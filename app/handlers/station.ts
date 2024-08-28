@@ -13,19 +13,27 @@ export interface Response {
 interface Station {
   _id: string;
   alt: number;
-  loc: number;
-  peak: any;
-  pvName: any;
+  loc: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  peak: boolean;
+  'pv-name': string;
   short: string;
-  status: string;
-  last: any;
+  status: 'green';
+  last: {
+    _id: number;
+    'w-dir': number;
+    'w-avg': number;
+    'w-max': number;
+  };
 }
 
 const StationHandler: Handler = {
   async request<T>(context: RequestContext, next: NextFn<T>) {
     const regex = /.*\/stations/;
 
-    if (!regex.test(context.request.url)) return next(context.request);
+    if (!regex.test(context.request.url || '')) return next(context.request);
     // if (context.request.op !== 'station') return next(context.request);
 
     try {
@@ -37,7 +45,19 @@ const StationHandler: Handler = {
         return {
           type: 'station',
           id: elm._id,
-          attributes: elm,
+          attributes: {
+            altitude: elm.alt,
+            latitude: elm.loc.coordinates[1],
+            longitude: elm.loc.coordinates[0],
+            isPeak: elm.peak,
+            providerName: elm['pv-name'],
+            name: elm['short'],
+            last: {
+              direction: elm.last['w-dir'],
+              speed: elm.last['w-avg'],
+              gusts: elm.last['w-max'],
+            },
+          },
         };
       });
 

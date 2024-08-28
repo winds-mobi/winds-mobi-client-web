@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import { get } from '@ember/helper';
 import Heart from 'ember-phosphor-icons/components/ph-heart';
 import Wind from 'ember-phosphor-icons/components/ph-wind';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
@@ -17,19 +16,18 @@ export interface DetailsIndexSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class DetailsIndex extends Component<DetailsIndexSignature> {
   <template>
-    {{log @station}}
     <div class='flex flex-col'>
       <div>
         <Heart class='inline' />
-        {{@station.short}}
+        {{@station.name}}
       </div>
       <div>
-        {{formatNumber @station.alt style='unit' unit='meter'}}
+        {{formatNumber @station.altitude style='unit' unit='meter'}}
       </div>
       <div>
         <Wind class='inline' />
         {{formatNumber
-          (get @station.last 'w-avg')
+          @station.last.speed
           style='unit'
           unit='kilometer-per-hour'
         }}
@@ -37,13 +35,13 @@ export default class DetailsIndex extends Component<DetailsIndexSignature> {
       <div>
         <Speedometer class='inline' />
         {{formatNumber
-          (get @station.last 'w-max')
+          @station.last.gusts
           style='unit'
           unit='kilometer-per-hour'
         }}
       </div>
       <div>
-        {{get @station 'pv-name'}}
+        {{@station.providerName}}
       </div>
     </div>
   </template>
