@@ -70,7 +70,7 @@ export default class Foo extends Component<FooSignature> {
 
       <:content as |result state|>
         <LeafletMap
-          style='width: 100%; height: 64em'
+          class='w-full h-full'
           @lat={{this.location.latitude}}
           @lng={{this.location.longitude}}
           @zoom={{this.zoom}}
