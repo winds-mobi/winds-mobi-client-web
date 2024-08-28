@@ -97,3 +97,9 @@ export default class Map extends Component<MapSignature> {
     --
   </template>
 }
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    Map: typeof Map;
+  }
+}

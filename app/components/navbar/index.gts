@@ -2,9 +2,9 @@ import Component from '@glimmer/component';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
 import NavbarButtons from './buttons';
-import NavbarNotifications from './notifications';
+// import NavbarNotifications from './notifications';
 import NavbarUserMenu from './user-menu';
-import NavbarMobileMenu from './mobile-menu';
+// import NavbarMobileMenu from './mobile-menu';
 
 export interface NavbarSignature {
   Args: {};
@@ -38,4 +38,10 @@ export default class Navbar extends Component<NavbarSignature> {
       {{! <NavbarMobileMenu /> }}
     </nav>
   </template>
+}
+
+declare module '@glint/environment-ember-loose/registry' {
+  export default interface Registry {
+    Navbar: typeof Navbar;
+  }
 }
