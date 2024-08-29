@@ -36,9 +36,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   <template>
     <Request @request={{this.historyRequest}}>
-      <:content as |r s|>
-        {{log r}}
-        {{log s}}
+      <:content as |result state|>
+        {{#each result.data as |r|}}
+          {{log r.speed}}
+        {{/each}}
       </:content>
     </Request>
 
