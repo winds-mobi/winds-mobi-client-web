@@ -28,6 +28,7 @@ const StationSchema = withDefaults({
     { name: 'longitude', kind: 'field' },
     { name: 'isPeak', kind: 'field' },
     { name: 'providerName', kind: 'field' },
+    { name: 'providerUrl', kind: 'field' },
     { name: 'name', kind: 'field' },
     { name: 'last', kind: 'object' },
   ],
@@ -40,11 +41,13 @@ export type Station = {
   longitude: number;
   isPeak: boolean;
   providerName: string;
+  providerUrl: string;
   name: string;
   last: {
     direction: number;
     speed: number;
     gusts: number;
+    temperature: number;
   };
 
   [Type]: 'station';

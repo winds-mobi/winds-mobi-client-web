@@ -7,10 +7,10 @@ import {
 // import type { Pin } from 'the-mountains-are-calling/services/settings';
 
 export interface Response {
-  content: Station[];
+  content: StationApiPayload[];
 }
 
-interface Station {
+interface StationApiPayload {
   _id: string;
   alt: number;
   loc: {
@@ -21,15 +21,17 @@ interface Station {
   'pv-name': string;
   short: string;
   status: 'green';
+  url: string;
   last: {
     _id: number;
     'w-dir': number;
     'w-avg': number;
     'w-max': number;
+    temp: number;
   };
 }
 
-function renameFields(elm) {
+function renameFields(elm: StationApiPayload) {
   return {
     type: 'station',
     id: elm._id,
@@ -39,11 +41,13 @@ function renameFields(elm) {
       longitude: elm.loc.coordinates[0],
       isPeak: elm.peak,
       providerName: elm['pv-name'],
+      providerUrl: elm['url'],
       name: elm['short'],
       last: {
         direction: elm.last['w-dir'],
         speed: elm.last['w-avg'],
         gusts: elm.last['w-max'],
+        temperature: elm.last['temp'],
       },
     },
   };

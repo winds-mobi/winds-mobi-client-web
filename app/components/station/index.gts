@@ -7,6 +7,7 @@ import { formatNumber } from 'ember-intl';
 import { query } from '@ember-data/json-api/request';
 import { findRecord } from '@ember-data/json-api/request';
 import { Request } from '@warp-drive/ember';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 
 export interface StationIndexSignature {
@@ -19,26 +20,30 @@ export interface StationIndexSignature {
   Element: null;
 }
 
-export default class Station extends Component<StationIndexSignature> {
+export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
 
   get request() {
     const options = findRecord<Station>('station', this.args.stationId, {
-      keys: [
-        'short',
-        'loc',
-        'status',
-        'pv-name',
-        'alt',
-        'peak',
-        'last._id',
-        'last.w-dir',
-        'last.w-avg',
-        'last.w-max',
-      ],
-      limit: 12,
-      'near-lat': 46.68032645342222,
-      'near-lon': 7.853595728058556,
+      // TODO: JSON:API does not like QP for `findRecord`
+      // keys: [
+      //   'pv-name',
+      //   'short',
+      //   'name',
+      //   'alt',
+      //   'peak',
+      //   'status',
+      //   'loc',
+      //   'url',
+      //   'last._id',
+      //   'last.w-dir',
+      //   'last.w-avg',
+      //   'last.w-max',
+      //   'last.temp',
+      //   'last.hum',
+      //   'last.rain',
+      //   'last.pres',
+      // ],
     });
     return this.store.request(options);
   }
@@ -50,40 +55,52 @@ export default class Station extends Component<StationIndexSignature> {
       </:loading>
 
       <:content as |result state|>
-        {{log result.data.altitude}}
-        {{log result.data}}
-        {{log state}}
-        {{log this.args.stationId}}
+        <div
+          class='bg-gray-50 border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl'
+        >
+          <div class='px-4 py-5 sm:p-6'>
 
-        {{!-- <div class='flex flex-col'>
-          <div>
-            {{! <Heart class='inline' /> }}
-            {{@station.name}}
+            <div class='flex flex-col'>
+              <div>
+                {{! <Heart class='inline' /> }}
+                {{result.data.name}}
+              </div>
+              <div>
+                <Mountains class='inline' />
+                {{formatNumber result.data.altitude style='unit' unit='meter'}}
+              </div>
+              <div>
+                <Wind class='inline' />
+                {{formatNumber
+                  result.data.last.speed
+                  style='unit'
+                  unit='kilometer-per-hour'
+                }}
+              </div>
+              <div>
+                <Speedometer class='inline' />
+                {{formatNumber
+                  result.data.last.gusts
+                  style='unit'
+                  unit='kilometer-per-hour'
+                }}
+              </div>
+              <div>
+                <a href={{result.data.providerUrl}}>
+                  {{result.data.providerName}}
+                </a>
+              </div>
+              <div>
+                {{formatNumber
+                  result.data.last.temperature
+                  style='unit'
+                  unit='celsius'
+                }}
+              </div>
+            </div>
+            <!-- Content goes here -->
           </div>
-          <div>
-            <Mountains class='inline' />
-            {{formatNumber @station.altitude style='unit' unit='meter'}}
-          </div>
-          <div>
-            <Wind class='inline' />
-            {{formatNumber
-              @station.last.speed
-              style='unit'
-              unit='kilometer-per-hour'
-            }}
-          </div>
-          <div>
-            <Speedometer class='inline' />
-            {{formatNumber
-              @station.last.gusts
-              style='unit'
-              unit='kilometer-per-hour'
-            }}
-          </div>
-          <div>
-        {{@station.providerName}}
-      </div>
-        </div> --}}
+        </div>
       </:content>
     </Request>
   </template>
@@ -91,6 +108,6 @@ export default class Station extends Component<StationIndexSignature> {
 
 declare module '@glint/environment-ember-loose/registry' {
   export default interface Registry {
-    Station: typeof Station;
+    Station: typeof StationIndex;
   }
 }

@@ -31,18 +31,19 @@ export default class Map extends Component<MapSignature> {
     const options = query<Station>(
       'station',
       {
-        keys: [
-          'short',
-          'loc',
-          'status',
-          'pv-name',
-          'alt',
-          'peak',
-          'last._id',
-          'last.w-dir',
-          'last.w-avg',
-          'last.w-max',
-        ],
+        // TODO: If we query this and <Station /> station details, then the value might be overwritten and keys might be missing for <Station />, so I'm querying everything here for now.
+        // keys: [
+        //   'short',
+        //   'loc',
+        //   'status',
+        //   'pv-name',
+        //   'alt',
+        //   'peak',
+        //   'last._id',
+        //   'last.w-dir',
+        //   'last.w-avg',
+        //   'last.w-max',
+        // ],
         limit: 12,
         'near-lat': 46.68032645342222,
         'near-lon': 7.853595728058556,
