@@ -19,6 +19,7 @@ import { SchemaRecord } from '@warp-drive/schema-record/record';
 import type { StableRecordIdentifier } from '@warp-drive/core-types';
 import type { Type } from '@warp-drive/core-types/symbols';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
+import HistoryHandler from 'winds-mobi-client-web/handlers/history';
 
 const StationSchema = withDefaults({
   type: 'station',
@@ -31,6 +32,15 @@ const StationSchema = withDefaults({
     { name: 'providerUrl', kind: 'field' },
     { name: 'name', kind: 'field' },
     { name: 'last', kind: 'object' },
+  ],
+});
+
+const HistorySchema = withDefaults({
+  type: 'history',
+  fields: [
+    { name: 'direction', kind: 'field' },
+    { name: 'speed', kind: 'field' },
+    { name: 'gusts', kind: 'field' },
   ],
 });
 
@@ -53,11 +63,20 @@ export type Station = {
   [Type]: 'station';
 };
 
+export type History = {
+  id: string;
+  direction: number;
+  speed: number;
+  gusts: number;
+
+  [Type]: 'history';
+};
+
 export default class StoreService extends Store {
   constructor(args: unknown) {
     super(args);
     this.requestManager = new RequestManager();
-    this.requestManager.use([StationHandler, Fetch]);
+    this.requestManager.use([StationHandler, HistoryHandler, Fetch]);
     this.requestManager.useCache(CacheHandler);
 
     this.lifetimes = new CachePolicy({
@@ -73,6 +92,7 @@ export default class StoreService extends Store {
   createSchemaService() {
     const schema = new SchemaService();
     schema.registerResource(StationSchema);
+    schema.registerResource(HistorySchema);
     registerDerivations(schema);
     return schema;
   }

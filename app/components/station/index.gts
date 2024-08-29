@@ -7,8 +7,9 @@ import { formatNumber } from 'ember-intl';
 // import { findRecord } from '@ember-data/json-api/request';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type { Station, History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
+import { historyQuery } from 'winds-mobi-client-web/builders/history';
 
 export interface StationIndexSignature {
   Args: {
@@ -23,13 +24,25 @@ export interface StationIndexSignature {
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
 
-  get request() {
+  get stationRequest() {
     const options = findRecord<Station>('station', this.args.stationId);
     return this.store.request(options);
   }
 
+  get historyRequest() {
+    const options = historyQuery<History>('history', this.args.stationId);
+    return this.store.request(options);
+  }
+
   <template>
-    <Request @request={{this.request}}>
+    <Request @request={{this.historyRequest}}>
+      <:content as |r s|>
+        {{log r}}
+        {{log s}}
+      </:content>
+    </Request>
+
+    <Request @request={{this.stationRequest}}>
       <:loading>
         ---
       </:loading>
