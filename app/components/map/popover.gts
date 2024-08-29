@@ -7,7 +7,7 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 import { formatNumber } from 'ember-intl';
 import { LinkTo } from '@ember/routing';
 
-export interface DetailsIndexSignature {
+export interface MapPopoverSignature {
   Args: { station: Station };
   Blocks: {
     default: [];
@@ -16,7 +16,7 @@ export interface DetailsIndexSignature {
 }
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
-export default class DetailsIndex extends Component<DetailsIndexSignature> {
+export default class MapPopover extends Component<MapPopoverSignature> {
   <template>
     <div class='flex flex-col'>
       <LinkTo
