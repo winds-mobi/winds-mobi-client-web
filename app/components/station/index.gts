@@ -25,7 +25,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   get request() {
     const options = findRecord<Station>('station', this.args.stationId);
-    console.log(options);
     return this.store.request(options);
   }
 
