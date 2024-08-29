@@ -23,37 +23,34 @@ import StationHandler from 'winds-mobi-client-web/handlers/station';
 const StationSchema = withDefaults({
   type: 'station',
   fields: [
-    {
-      name: 'short',
-      kind: 'field',
-    },
-    {
-      name: 'loc',
-      kind: 'object',
-    },
+    { name: 'altitude', kind: 'field' },
+    { name: 'latitude', kind: 'field' },
+    { name: 'longitude', kind: 'field' },
+    { name: 'isPeak', kind: 'field' },
+    { name: 'providerName', kind: 'field' },
+    { name: 'providerUrl', kind: 'field' },
+    { name: 'name', kind: 'field' },
     { name: 'last', kind: 'object' },
-    { name: 'alt', kind: 'field' },
-    { name: 'pv-name', kind: 'field' },
   ],
 });
 
 export type Station = {
   id: string;
-  short: string;
-  loc: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
+  altitude: number;
+  latitude: number;
+  longitude: number;
+  isPeak: boolean;
+  providerName: string;
+  providerUrl: string;
+  name: string;
   last: {
-    _id: number;
-    'w-dir': number;
-    'w-avg': number;
-    'w-max': number;
+    direction: number;
+    speed: number;
+    gusts: number;
+    temperature: number;
   };
-  alt: number;
-  'pv-name': string;
 
-  [Type]: 'user';
+  [Type]: 'station';
 };
 
 export default class StoreService extends Store {

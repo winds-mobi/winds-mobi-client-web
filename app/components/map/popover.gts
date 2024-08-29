@@ -1,12 +1,13 @@
 import Component from '@glimmer/component';
-import { get } from '@ember/helper';
-import Heart from 'ember-phosphor-icons/components/ph-heart';
+// import Heart from 'ember-phosphor-icons/components/ph-heart';
 import Wind from 'ember-phosphor-icons/components/ph-wind';
+import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import { formatNumber } from 'ember-intl';
+import { LinkTo } from '@ember/routing';
 
-export interface DetailsIndexSignature {
+export interface MapPopoverSignature {
   Args: { station: Station };
   Blocks: {
     default: [];
@@ -15,21 +16,25 @@ export interface DetailsIndexSignature {
 }
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
-export default class DetailsIndex extends Component<DetailsIndexSignature> {
+export default class MapPopover extends Component<MapPopoverSignature> {
   <template>
-    {{log @station}}
     <div class='flex flex-col'>
+      <LinkTo
+        @route='map.station'
+        @model={{@station.id}}
+        class='font-bold text-lg'
+      >
+        {{! <Heart class='inline' /> }}
+        {{@station.name}}
+      </LinkTo>
       <div>
-        <Heart class='inline' />
-        {{@station.short}}
-      </div>
-      <div>
-        {{formatNumber @station.alt style='unit' unit='meter'}}
+        <Mountains class='inline' />
+        {{formatNumber @station.altitude style='unit' unit='meter'}}
       </div>
       <div>
         <Wind class='inline' />
         {{formatNumber
-          (get @station.last 'w-avg')
+          @station.last.speed
           style='unit'
           unit='kilometer-per-hour'
         }}
@@ -37,14 +42,14 @@ export default class DetailsIndex extends Component<DetailsIndexSignature> {
       <div>
         <Speedometer class='inline' />
         {{formatNumber
-          (get @station.last 'w-max')
+          @station.last.gusts
           style='unit'
           unit='kilometer-per-hour'
         }}
       </div>
-      <div>
-        {{get @station 'pv-name'}}
-      </div>
+      {{!-- <div>
+        {{@station.providerName}}
+      </div> --}}
     </div>
   </template>
 }

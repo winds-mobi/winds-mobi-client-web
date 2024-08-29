@@ -18,4 +18,11 @@ declare module '@glint/environment-ember-loose/registry' {
     extends EmberIntlRegistry /* other addon registries */ {
     // local entries
   }
+
+  export default interface Registry {
+    'page-title': HelperLike<{
+      Args: { Positional: [title: string] };
+      Return: void;
+    }>;
+  }
 }

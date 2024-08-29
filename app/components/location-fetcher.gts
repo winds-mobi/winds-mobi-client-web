@@ -38,9 +38,6 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
       disabled={{this.location.getLocationTask.isRunning}}
       class='flex align-middle items-center gap-2'
     >
-      {{log this.location.getLocationTask.last.isSuccessful}}
-      {{log this.location.getLocationTask.last.value}}
-
       {{#if this.location.getLocationTask.last.value}}
         <GpsFix />
       {{else}}
