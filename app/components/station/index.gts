@@ -4,11 +4,14 @@ import Wind from 'ember-phosphor-icons/components/ph-wind';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import { formatNumber } from 'ember-intl';
-import { query } from '@ember-data/json-api/request';
-import { findRecord } from '@ember-data/json-api/request';
+// import { findRecord } from '@ember-data/json-api/request';
+import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type { Station, History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
+import { historyQuery } from 'winds-mobi-client-web/builders/history';
+
+import StationWinds from './winds';
 
 export interface StationIndexSignature {
   Args: {
@@ -23,33 +26,18 @@ export interface StationIndexSignature {
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
 
-  get request() {
-    const options = findRecord<Station>('station', this.args.stationId, {
-      // TODO: JSON:API does not like QP for `findRecord`
-      // keys: [
-      //   'pv-name',
-      //   'short',
-      //   'name',
-      //   'alt',
-      //   'peak',
-      //   'status',
-      //   'loc',
-      //   'url',
-      //   'last._id',
-      //   'last.w-dir',
-      //   'last.w-avg',
-      //   'last.w-max',
-      //   'last.temp',
-      //   'last.hum',
-      //   'last.rain',
-      //   'last.pres',
-      // ],
-    });
+  get stationRequest() {
+    const options = findRecord<Station>('station', this.args.stationId);
+    return this.store.request(options);
+  }
+
+  get historyRequest() {
+    const options = historyQuery<History>('history', this.args.stationId);
     return this.store.request(options);
   }
 
   <template>
-    <Request @request={{this.request}}>
+    <Request @request={{this.stationRequest}}>
       <:loading>
         ---
       </:loading>
@@ -61,7 +49,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
           <div class='px-4 py-5 sm:p-6'>
 
             <div class='flex flex-col'>
-              <div>
+              <div class='font-bold text-lg'>
                 {{! <Heart class='inline' /> }}
                 {{result.data.name}}
               </div>
@@ -86,7 +74,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
                 }}
               </div>
               <div>
-                <a href={{result.data.providerUrl}}>
+                <a href={{result.data.providerUrl.en}}>
                   {{result.data.providerName}}
                 </a>
               </div>
@@ -97,8 +85,16 @@ export default class StationIndex extends Component<StationIndexSignature> {
                   unit='celsius'
                 }}
               </div>
+              <div>
+                <Request @request={{this.historyRequest}}>
+                  <:content as |result state|>
+                    <StationWinds @history={{result.data}} />
+
+                  </:content>
+                </Request>
+              </div>
             </div>
-            {{!-- Content goes here --}}
+            {{! Content goes here }}
           </div>
         </div>
       </:content>

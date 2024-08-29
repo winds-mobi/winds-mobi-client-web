@@ -55,10 +55,13 @@ function renameFields(elm: StationApiPayload) {
 
 const StationHandler: Handler = {
   async request<T>(context: RequestContext, next: NextFn<T>) {
-    const regex = /.*\/stations/;
+    const isHistoric = /.*\/historic\//;
+    const isStation = /.*\/station\//;
+    const url = context.request.url || '';
 
-    if (!regex.test(context.request.url || '')) return next(context.request);
-    // if (context.request.op !== 'station') return next(context.request);
+    if (isHistoric.test(url) && !isStation.test(url)) {
+      return next(context.request);
+    }
 
     try {
       const { content } = (await next(context.request)) as Response;
