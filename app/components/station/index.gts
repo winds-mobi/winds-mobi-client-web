@@ -66,7 +66,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
                 }}
               </div>
               <div>
-                <a href={{result.data.providerUrl}}>
+                <a href={{result.data.providerUrl.en}}>
                   {{result.data.providerName}}
                 </a>
               </div>
