@@ -3,6 +3,7 @@ import { pluralize } from '@ember-data/request-utils/string';
 import type { QueryParamsSource } from '@warp-drive/core-types/params';
 import type { TypeFromInstance } from '@warp-drive/core-types/record';
 import type { FindRecordOptions } from '@warp-drive/core-types/request';
+import { query as jsonApiQuery } from '@ember-data/json-api/request';
 
 const defaultQuery = {
   keys: [
@@ -54,4 +55,16 @@ function findRecord<T>(
   };
 }
 
-export { findRecord };
+function query<T>(
+  type: TypeFromInstance<T>,
+  query?: QueryParamsSource,
+  options?: FindRecordOptions,
+) {
+  return jsonApiQuery(
+    type,
+    { ...defaultQuery, ...query },
+    { ...defaultOptions, ...options },
+  );
+}
+
+export { findRecord, query };

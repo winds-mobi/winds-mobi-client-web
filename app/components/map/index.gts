@@ -1,7 +1,8 @@
 import Component from '@glimmer/component';
 import { Request } from '@warp-drive/ember';
 // import { query } from '@ember-data/rest/request';
-import { query } from '@ember-data/json-api/request';
+// import { query } from '@ember-data/json-api/request';
+import { query } from 'winds-mobi-client-web/builders/station';
 // @ts-expect-error No TS stuff yet
 import LeafletMap from 'ember-leaflet/components/leaflet-map';
 import { inject as service } from '@ember/service';
@@ -28,32 +29,11 @@ export default class Map extends Component<MapSignature> {
   zoom = 13;
 
   get request() {
-    const options = query<Station>(
-      'station',
-      {
-        // TODO: If we query this and <Station /> station details, then the value might be overwritten and keys might be missing for <Station />, so I'm querying everything here for now.
-        // keys: [
-        //   'short',
-        //   'loc',
-        //   'status',
-        //   'pv-name',
-        //   'alt',
-        //   'peak',
-        //   'last._id',
-        //   'last.w-dir',
-        //   'last.w-avg',
-        //   'last.w-max',
-        // ],
-        limit: 12,
-        'near-lat': 46.68032645342222,
-        'near-lon': 7.853595728058556,
-      },
-      {
-        urlParamsSettings: {
-          arrayFormat: 'repeat',
-        },
-      },
-    );
+    const options = query<Station>('station', {
+      limit: 12,
+      'near-lat': 46.68032645342222,
+      'near-lon': 7.853595728058556,
+    });
     return this.store.request(options);
   }
 
