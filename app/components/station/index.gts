@@ -4,8 +4,8 @@ import Wind from 'ember-phosphor-icons/components/ph-wind';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import { formatNumber } from 'ember-intl';
-import { query } from '@ember-data/json-api/request';
-import { findRecord } from '@ember-data/json-api/request';
+// import { findRecord } from '@ember-data/json-api/request';
+import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
@@ -24,27 +24,37 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
 
   get request() {
-    const options = findRecord<Station>('station', this.args.stationId, {
-      // TODO: JSON:API does not like QP for `findRecord`
-      // keys: [
-      //   'pv-name',
-      //   'short',
-      //   'name',
-      //   'alt',
-      //   'peak',
-      //   'status',
-      //   'loc',
-      //   'url',
-      //   'last._id',
-      //   'last.w-dir',
-      //   'last.w-avg',
-      //   'last.w-max',
-      //   'last.temp',
-      //   'last.hum',
-      //   'last.rain',
-      //   'last.pres',
-      // ],
-    });
+    const options = findRecord<Station>(
+      'station',
+      this.args.stationId,
+      {
+        // TODO: JSON:API does not like QP for `findRecord`
+        keys: [
+          'pv-name',
+          'short',
+          'name',
+          'alt',
+          'peak',
+          'status',
+          'loc',
+          'url',
+          'last._id',
+          'last.w-dir',
+          'last.w-avg',
+          'last.w-max',
+          'last.temp',
+          'last.hum',
+          'last.rain',
+          'last.pres',
+        ],
+      },
+      {
+        urlParamsSettings: {
+          arrayFormat: 'repeat',
+        },
+      },
+    );
+    console.log(options);
     return this.store.request(options);
   }
 
@@ -98,7 +108,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
                 }}
               </div>
             </div>
-            {{!-- Content goes here --}}
+            {{! Content goes here }}
           </div>
         </div>
       </:content>
