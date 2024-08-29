@@ -30,7 +30,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   }
 
   get historyRequest() {
-    const options = historyQuery<History>('history', this.args.stationId);
+    const options = historyQuery<History>('historic', this.args.stationId);
     return this.store.request(options);
   }
 

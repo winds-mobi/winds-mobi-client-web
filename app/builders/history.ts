@@ -56,14 +56,24 @@ function historyQuery<T>(
   query?: QueryParamsSource,
   options?: FindRecordOptions,
 ): QueryRequestOptions {
+  const baseURL = buildBaseURL({
+    resourcePath: 'stations',
+    op: 'query',
+    identifier: { type },
+  });
+  const qp = buildQueryParams(
+    { ...defaultQuery, ...query },
+    { ...defaultOptions.urlParamsSettings, ...options?.urlParamsSettings },
+  );
+  const url = `${baseURL}/${id}/historic/?${qp}`;
+
   const jsonApiObject = jsonApiQuery(
     type,
     { ...defaultQuery, ...query },
     { ...defaultOptions, ...options },
   );
 
-  console.log({ jsonApiObject });
-  return { ...jsonApiObject };
+  return { ...jsonApiObject, url };
 }
 
 export { historyQuery };

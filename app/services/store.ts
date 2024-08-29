@@ -76,7 +76,7 @@ export default class StoreService extends Store {
   constructor(args: unknown) {
     super(args);
     this.requestManager = new RequestManager();
-    this.requestManager.use([StationHandler, HistoryHandler, Fetch]);
+    this.requestManager.use([HistoryHandler, StationHandler, Fetch]);
     this.requestManager.useCache(CacheHandler);
 
     this.lifetimes = new CachePolicy({
