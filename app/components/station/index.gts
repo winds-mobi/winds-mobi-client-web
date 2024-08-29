@@ -98,7 +98,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
                 }}
               </div>
             </div>
-            <!-- Content goes here -->
+            {{!-- Content goes here --}}
           </div>
         </div>
       </:content>
