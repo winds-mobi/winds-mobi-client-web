@@ -24,36 +24,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
 
   get request() {
-    const options = findRecord<Station>(
-      'station',
-      this.args.stationId,
-      {
-        // TODO: JSON:API does not like QP for `findRecord`
-        keys: [
-          'pv-name',
-          'short',
-          'name',
-          'alt',
-          'peak',
-          'status',
-          'loc',
-          'url',
-          'last._id',
-          'last.w-dir',
-          'last.w-avg',
-          'last.w-max',
-          'last.temp',
-          'last.hum',
-          'last.rain',
-          'last.pres',
-        ],
-      },
-      {
-        urlParamsSettings: {
-          arrayFormat: 'repeat',
-        },
-      },
-    );
+    const options = findRecord<Station>('station', this.args.stationId);
     console.log(options);
     return this.store.request(options);
   }
