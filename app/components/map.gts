@@ -10,6 +10,7 @@ import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
 import Details from './details';
+import { Drawer } from '@frontile/overlays';
 
 export interface MapSignature {
   Args: {};
@@ -94,7 +95,6 @@ export default class Map extends Component<MapSignature> {
         </LeafletMap>
       </:content>
     </Request>
-    --
   </template>
 }
 
