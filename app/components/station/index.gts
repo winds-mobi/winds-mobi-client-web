@@ -11,6 +11,8 @@ import type { Station, History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 
+import StationWinds from './winds';
+
 export interface StationIndexSignature {
   Args: {
     stationId: string;
@@ -35,14 +37,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
   }
 
   <template>
-    <Request @request={{this.historyRequest}}>
-      <:content as |result state|>
-        {{#each result.data as |r|}}
-          {{log r.speed}}
-        {{/each}}
-      </:content>
-    </Request>
-
     <Request @request={{this.stationRequest}}>
       <:loading>
         ---
@@ -90,6 +84,14 @@ export default class StationIndex extends Component<StationIndexSignature> {
                   style='unit'
                   unit='celsius'
                 }}
+              </div>
+              <div>
+                <Request @request={{this.historyRequest}}>
+                  <:content as |result state|>
+                    <StationWinds @history={{result.data}} />
+
+                  </:content>
+                </Request>
               </div>
             </div>
             {{! Content goes here }}

@@ -47,6 +47,8 @@ const HistoryHandler: Handler = {
         ? content.map((elm) => renameFields(elm))
         : renameFields(content);
 
+      console.log({ contedWithIds });
+
       const jsonApiLikeData = {
         links: {
           self: context.request.url,
