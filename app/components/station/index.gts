@@ -41,7 +41,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
           <div class='px-4 py-5 sm:p-6'>
 
             <div class='flex flex-col'>
-              <div>
+              <div class='font-bold text-lg'>
                 {{! <Heart class='inline' /> }}
                 {{result.data.name}}
               </div>
