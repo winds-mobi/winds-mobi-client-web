@@ -10,7 +10,6 @@ import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
 import Popover from './popover';
-import { Drawer } from '@frontile/overlays';
 
 export interface MapSignature {
   Args: {};

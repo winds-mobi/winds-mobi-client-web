@@ -29,6 +29,26 @@ interface Station {
   };
 }
 
+function renameFields(elm) {
+  return {
+    type: 'station',
+    id: elm._id,
+    attributes: {
+      altitude: elm.alt,
+      latitude: elm.loc.coordinates[1],
+      longitude: elm.loc.coordinates[0],
+      isPeak: elm.peak,
+      providerName: elm['pv-name'],
+      name: elm['short'],
+      last: {
+        direction: elm.last['w-dir'],
+        speed: elm.last['w-avg'],
+        gusts: elm.last['w-max'],
+      },
+    },
+  };
+}
+
 const StationHandler: Handler = {
   async request<T>(context: RequestContext, next: NextFn<T>) {
     const regex = /.*\/stations/;
@@ -41,25 +61,9 @@ const StationHandler: Handler = {
 
       // JSON-API requires us to have IDs
       // Timestamps should be unique-enough
-      const contedWithIds = content.map((elm) => {
-        return {
-          type: 'station',
-          id: elm._id,
-          attributes: {
-            altitude: elm.alt,
-            latitude: elm.loc.coordinates[1],
-            longitude: elm.loc.coordinates[0],
-            isPeak: elm.peak,
-            providerName: elm['pv-name'],
-            name: elm['short'],
-            last: {
-              direction: elm.last['w-dir'],
-              speed: elm.last['w-avg'],
-              gusts: elm.last['w-max'],
-            },
-          },
-        };
-      });
+      const contedWithIds = Array.isArray(content)
+        ? content.map((elm) => renameFields(elm))
+        : renameFields(content);
 
       const jsonApiLikeData = {
         links: {
