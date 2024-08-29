@@ -11,6 +11,9 @@ import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
 import Popover from './popover';
+import { action } from '@ember/object';
+import type RouterService from '@ember/routing/router-service';
+import { fn } from '@ember/helper';
 
 export interface MapSignature {
   Args: {};
@@ -23,6 +26,7 @@ export interface MapSignature {
 export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
   @service declare location: LocationService;
+  @service declare router: RouterService;
 
   lat = 30.68;
   lng = 7.853;
@@ -35,6 +39,10 @@ export default class Map extends Component<MapSignature> {
       'near-lon': 7.853595728058556,
     });
     return this.store.request(options);
+  }
+
+  @action stationSelected(stationId: string) {
+    this.router.transitionTo('map.station', stationId);
   }
 
   <template>
@@ -64,6 +72,7 @@ export default class Map extends Component<MapSignature> {
                 @lat={{r.latitude}}
                 @lng={{r.longitude}}
                 @icon={{icon}}
+                @onClick={{fn this.stationSelected r.id}}
                 as |marker|
               >
                 <marker.popup @popupOpen={{false}}>
