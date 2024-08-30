@@ -1,9 +1,6 @@
 import Component from '@glimmer/component';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
-import Wind from 'ember-phosphor-icons/components/ph-wind';
-import Mountains from 'ember-phosphor-icons/components/ph-mountains';
-import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
-import { formatNumber } from 'ember-intl';
+
 // import { findRecord } from '@ember-data/json-api/request';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
@@ -11,10 +8,12 @@ import type { Station, History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import { CloseButton } from '@frontile/buttons';
-import StationWinds from './winds';
+
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
+import StationDetails from './details';
+import StationWinds from './winds';
 
 export interface StationIndexSignature {
   Args: {
@@ -58,53 +57,17 @@ export default class StationIndex extends Component<StationIndexSignature> {
           <CloseButton {{on 'click' this.close}} class='float-right' />
           <div class='px-4 py-5 sm:p-6'>
 
-            <div class='flex flex-col'>
-              <div class='font-bold text-lg'>
-                {{! <Heart class='inline' /> }}
-                {{result.data.name}}
-              </div>
-              <div>
-                <Mountains class='inline' />
-                {{formatNumber result.data.altitude style='unit' unit='meter'}}
-              </div>
-              <div>
-                <Wind class='inline' />
-                {{formatNumber
-                  result.data.last.speed
-                  style='unit'
-                  unit='kilometer-per-hour'
-                }}
-              </div>
-              <div>
-                <Speedometer class='inline' />
-                {{formatNumber
-                  result.data.last.gusts
-                  style='unit'
-                  unit='kilometer-per-hour'
-                }}
-              </div>
-              <div>
-                <a href={{result.data.providerUrl.en}}>
-                  {{result.data.providerName}}
-                </a>
-              </div>
-              <div>
-                {{formatNumber
-                  result.data.last.temperature
-                  style='unit'
-                  unit='celsius'
-                }}
-              </div>
-              <div>
-                <Request @request={{this.historyRequest}}>
-                  <:content as |result state|>
-                    <StationWinds @history={{result.data}} />
-
-                  </:content>
-                </Request>
-              </div>
-            </div>
+            <StationDetails @station={{result.data}} />
             {{! Content goes here }}
+
+            <div>
+              <Request @request={{this.historyRequest}}>
+                <:content as |result state|>
+                  <StationWinds @history={{result.data}} />
+
+                </:content>
+              </Request>
+            </div>
           </div>
         </div>
       </:content>
