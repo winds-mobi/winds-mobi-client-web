@@ -14,6 +14,8 @@ import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
 import StationDetails from './details';
 import StationWinds from './winds';
+import { LinkTo } from '@ember/routing';
+import { t } from 'ember-intl';
 
 export interface StationIndexSignature {
   Args: {
@@ -55,7 +57,31 @@ export default class StationIndex extends Component<StationIndexSignature> {
           class='bg-gray-50 border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl'
         >
           <CloseButton {{on 'click' this.close}} class='float-right' />
+
+          <div class='border-b border-gray-200'>
+            <nav class='-mb-px flex w-full' aria-label='Tabs'>
+              <LinkTo
+                @route='map.station.details'
+                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                @activeClass='border-indigo-500 text-indigo-600'
+              >{{t 'station.summary'}}</LinkTo>
+              <LinkTo
+                @route='map.station.winds'
+                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                @activeClass='border-indigo-500 text-indigo-600'
+              >{{t 'station.wind'}}</LinkTo>
+              <LinkTo
+                @route='map.station.air'
+                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium'
+                aria-current='page'
+                @activeClass='border-indigo-500 text-indigo-600'
+              >{{t 'station.air'}}</LinkTo>
+            </nav>
+          </div>
+
           <div class='px-4 py-5 sm:p-6'>
+
+            {{yield}}
 
             <StationDetails @station={{result.data}} />
             {{! Content goes here }}
