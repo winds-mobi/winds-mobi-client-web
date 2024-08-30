@@ -2,6 +2,7 @@ import '@glint/environment-ember-loose';
 import type EmberConcurrencyRegistry from 'ember-concurrency/template-registry';
 import type EmberPhosphorIconsRegistery from 'ember-phosphor-icons/template-registry';
 import type EmberIntlRegistry from 'ember-intl/template-registry';
+import type EmberTruthRegistry from 'ember-truth-helpers/template-registry';
 
 declare module '@glint/environment-ember-loose/registry' {
   export default interface Registry
@@ -24,5 +25,10 @@ declare module '@glint/environment-ember-loose/registry' {
       Args: { Positional: [title: string] };
       Return: void;
     }>;
+  }
+
+  export default interface Registry
+    extends EmberTruthRegistry /* other addon registries */ {
+    // local entries
   }
 }
