@@ -41,6 +41,8 @@ const HistorySchema = withDefaults({
     { name: 'direction', kind: 'field' },
     { name: 'speed', kind: 'field' },
     { name: 'gusts', kind: 'field' },
+    { name: 'temperature', kind: 'field' },
+    { name: 'humidity', kind: 'field' },
   ],
 });
 
@@ -68,6 +70,8 @@ export type History = {
   direction: number;
   speed: number;
   gusts: number;
+  temperature: number;
+  humidity: number;
 
   [Type]: 'history';
 };

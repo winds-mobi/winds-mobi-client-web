@@ -5,7 +5,7 @@ import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import { formatNumber } from 'ember-intl';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-export interface StationDetailsSignature {
+export interface StationSummarySignature {
   Args: {
     station: Station;
   };
@@ -16,7 +16,7 @@ export interface StationDetailsSignature {
 }
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
-export default class StationSummary extends Component<StationDetailsSignature> {
+export default class StationSummary extends Component<StationSummarySignature> {
   <template>
     <div class='flex flex-col'>
       <div class='font-bold text-lg'>

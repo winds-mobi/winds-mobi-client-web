@@ -15,6 +15,8 @@ interface HistoryApiPayload {
   'w-dir': number;
   'w-avg': number;
   'w-max': number;
+  temp: number;
+  hum: 'number';
 }
 
 function renameFields(elm: HistoryApiPayload) {
@@ -25,6 +27,8 @@ function renameFields(elm: HistoryApiPayload) {
       direction: elm['w-dir'],
       speed: elm['w-avg'],
       gusts: elm['w-max'],
+      temperature: elm['temp'],
+      humidity: elm['hum'],
     },
   };
 }
