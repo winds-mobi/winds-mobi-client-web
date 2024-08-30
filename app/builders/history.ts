@@ -11,7 +11,7 @@ import { query as jsonApiQuery } from '@ember-data/json-api/request';
 import { findRecord as jsonApiFindRecord } from '@ember-data/json-api/request';
 
 const defaultQuery = {
-  keys: ['w-dir', 'w-avg', 'w-max'],
+  keys: ['w-dir', 'w-avg', 'w-max', 'temp', 'hum'],
   duration: 3600,
 };
 

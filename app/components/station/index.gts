@@ -17,6 +17,7 @@ import StationWinds from './winds';
 import { LinkTo } from '@ember/routing';
 import { t } from 'ember-intl';
 import { eq } from 'ember-truth-helpers';
+import StationAir from './air';
 
 export interface StationIndexSignature {
   Args: {
@@ -98,9 +99,14 @@ export default class StationIndex extends Component<StationIndexSignature> {
                 </:content>
               </Request>
 
-            {{else if
-              (eq this.router.currentRouteName 'map.station.air')
-            }}{{/if}}
+            {{else if (eq this.router.currentRouteName 'map.station.air')}}
+              <Request @request={{this.historyRequest}}>
+                <:content as |result state|>
+                  <StationAir @history={{result.data}} />
+
+                </:content>
+              </Request>
+            {{/if}}
 
           </div>
         </div>

@@ -49,7 +49,6 @@ export default class StationWinds extends Component<StationWindsSignature> {
   }
 
   <template>
-    {{log @history}}
     <HighCharts
       @content={{this.chartData}}
       @chartOptions={{this.chartOptions}}
