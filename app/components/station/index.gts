@@ -10,8 +10,11 @@ import { Request } from '@warp-drive/ember';
 import type { Station, History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
-
+import { CloseButton } from '@frontile/buttons';
 import StationWinds from './winds';
+import { action } from '@ember/object';
+import type RouterService from '@ember/routing/router-service';
+import { on } from '@ember/modifier';
 
 export interface StationIndexSignature {
   Args: {
@@ -25,6 +28,7 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare store: StoreService;
+  @service declare router: RouterService;
 
   get stationRequest() {
     const options = findRecord<Station>('station', this.args.stationId);
@@ -34,6 +38,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
   get historyRequest() {
     const options = historyQuery<History>('history', this.args.stationId);
     return this.store.request(options);
+  }
+
+  @action
+  close() {
+    this.router.transitionTo('map');
   }
 
   <template>
@@ -46,6 +55,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
         <div
           class='bg-gray-50 border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl'
         >
+          <CloseButton {{on 'click' this.close}} class='float-right' />
           <div class='px-4 py-5 sm:p-6'>
 
             <div class='flex flex-col'>
