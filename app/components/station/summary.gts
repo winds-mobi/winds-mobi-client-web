@@ -16,7 +16,7 @@ export interface StationDetailsSignature {
 }
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
-export default class StationDetails extends Component<StationDetailsSignature> {
+export default class StationSummary extends Component<StationDetailsSignature> {
   <template>
     <div class='flex flex-col'>
       <div class='font-bold text-lg'>
@@ -58,6 +58,6 @@ export default class StationDetails extends Component<StationDetailsSignature> {
 
 declare module '@glint/environment-ember-loose/registry' {
   export default interface Registry {
-    StationDetails: typeof StationDetails;
+    StationDetails: typeof StationSummary;
   }
 }
