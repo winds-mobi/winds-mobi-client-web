@@ -1,11 +1,11 @@
 {{!-- {{page-title (t "application.map")}} --}}
 
 <div class="h-full flex flex-col">
-  <div class="flex-1">
+  <div class="flex-1 min-h-96">
     <Map />
   </div>
 
-  <div>
+  <div class="overflow-y-scroll">
     {{outlet}}
   </div>
 </div>

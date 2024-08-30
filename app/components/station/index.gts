@@ -57,6 +57,9 @@ export default class StationIndex extends Component<StationIndexSignature> {
         <div
           class='bg-gray-50 border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl'
         >
+          <span class='float-left px-4 py-2 font-bold text-xl'>
+            {{result.data.name}}
+          </span>
           <CloseButton {{on 'click' this.close}} class='float-right' />
 
           <div class='border-b border-gray-200'>
