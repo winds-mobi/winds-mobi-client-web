@@ -12,7 +12,10 @@ export interface StationAirSignature {
 export default class StationAir extends Component<StationAirSignature> {
   get chartOptions() {
     return {
-      chart: { height: 300 },
+      chart: {
+        height: 300,
+        type: 'spline', // Use 'spline' for smoother lines
+      },
       title: {
         text: undefined,
       },
@@ -23,28 +26,45 @@ export default class StationAir extends Component<StationAirSignature> {
           hour: '%H:%M', // Format labels as hours and minutes
           minute: '%H:%M', // Format labels as hours and minutes
         },
+        crosshair: true, // Adds the vertical line on hover
       },
       yAxis: [
         {
-          // Primary Y-axis
+          // Primary Y-axis (left side)
           title: {
-            text: 'Temperature (°C)',
+            text: null,
           },
           labels: {
             format: '{value}°C',
           },
         },
         {
-          // Secondary Y-axis
+          // Secondary Y-axis (right side)
           title: {
-            text: 'Humidity (%)',
+            text: null,
           },
           labels: {
-            format: '{value}%',
+            format: '{value}%', // Format labels as percentages
           },
-          opposite: true, // Display this Y-axis on the right side
+          opposite: true, // Position this Y-axis on the right side
         },
       ],
+      legend: {
+        enabled: false, // Disable the legend
+      },
+      plotOptions: {
+        series: {
+          animation: {
+            // Disable animation for the initial render only
+            duration: 0, // Set duration to 0 to disable the initial animation
+          },
+        },
+      },
+      tooltip: {
+        xDateFormat: '%e %b %H:%M', // Custom format: "24 Dec 21:20"
+        shared: true, // Shows the values for all series on hover
+        crosshairs: true, // Draws a vertical line across the chart
+      },
     };
   }
 
@@ -61,10 +81,21 @@ export default class StationAir extends Component<StationAirSignature> {
       {
         name: 'Temperature',
         data: temperature,
+        color: 'red', // Set the color of the temperature line to red
+        marker: {
+          symbol:
+            'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E☀️%3C/text%3E%3C/svg%3E)', // Sun emoji
+        },
       },
       {
         name: 'Humidity',
         data: humidity,
+        yAxis: 1, // Associate this series with the second Y-axis (right side)
+        color: 'skyblue', // Set the color of the humidity line to light blue
+        marker: {
+          symbol:
+            'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E💧%3C/text%3E%3C/svg%3E)', // Water drop emoji
+        },
       },
     ];
   }
