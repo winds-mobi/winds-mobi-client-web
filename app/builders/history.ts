@@ -12,7 +12,7 @@ import { findRecord as jsonApiFindRecord } from '@ember-data/json-api/request';
 
 const defaultQuery = {
   keys: ['w-dir', 'w-avg', 'w-max', 'temp', 'hum'],
-  duration: 3600,
+  duration: 435600,
 };
 
 const defaultOptions = {

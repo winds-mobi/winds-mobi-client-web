@@ -13,7 +13,10 @@ export interface StationWindsSignature {
 export default class StationWinds extends Component<StationWindsSignature> {
   get chartOptions() {
     return {
-      chart: { height: 300 },
+      chart: {
+        height: 300,
+        type: 'spline', // Use 'spline' for smoother lines
+      },
       title: {
         text: undefined,
       },
@@ -24,16 +27,24 @@ export default class StationWinds extends Component<StationWindsSignature> {
           hour: '%H:%M', // Format labels as hours and minutes
           minute: '%H:%M', // Format labels as hours and minutes
         },
+
         crosshair: true, // Adds the vertical line on hover
       },
       yAxis: {
         title: {
-          text: 'km/h',
+          text: null,
+        },
+        labels: {
+          format: '{value} km/h', // Format labels as percentages
         },
       },
       tooltip: {
+        xDateFormat: '%e %b %H:%M', // Custom format: "24 Dec 21:20"
         shared: true, // Shows the values for all series on hover
         crosshairs: true, // Draws a vertical line across the chart
+      },
+      legend: {
+        enabled: false, // Disable the legend
       },
     };
   }
