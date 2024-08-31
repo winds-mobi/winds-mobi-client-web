@@ -24,11 +24,16 @@ export default class StationWinds extends Component<StationWindsSignature> {
           hour: '%H:%M', // Format labels as hours and minutes
           minute: '%H:%M', // Format labels as hours and minutes
         },
+        crosshair: true, // Adds the vertical line on hover
       },
       yAxis: {
         title: {
           text: 'km/h',
         },
+      },
+      tooltip: {
+        shared: true, // Shows the values for all series on hover
+        crosshairs: true, // Draws a vertical line across the chart
       },
     };
   }

@@ -23,6 +23,7 @@ export default class StationAir extends Component<StationAirSignature> {
           hour: '%H:%M', // Format labels as hours and minutes
           minute: '%H:%M', // Format labels as hours and minutes
         },
+        crosshair: true, // Adds the vertical line on hover
       },
       yAxis: [
         {
@@ -45,6 +46,10 @@ export default class StationAir extends Component<StationAirSignature> {
           opposite: true, // Display this Y-axis on the right side
         },
       ],
+      tooltip: {
+        shared: true, // Shows the values for all series on hover
+        crosshairs: true, // Draws a vertical line across the chart
+      },
     };
   }
 
