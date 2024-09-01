@@ -86,7 +86,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
             </nav>
           </div>
 
-          <div class='px-4 py-5 sm:p-6'>
+          <div>
             {{#if (eq this.router.currentRouteName 'map.station.summary')}}
               <StationSummary @station={{result.data}} />
             {{else if (eq this.router.currentRouteName 'map.station.winds')}}

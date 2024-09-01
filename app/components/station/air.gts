@@ -22,21 +22,12 @@ export default class StationAir extends Component<StationAirSignature> {
       },
       rangeSelector: {
         enabled: true, // Enable the range selector
+        inputEnabled: false, // Disable the date span input boxes
         buttons: [
           {
-            type: 'hour',
-            count: 6,
-            text: '6h',
-          },
-          {
-            type: 'hour',
-            count: 12,
-            text: '12h',
-          },
-          {
             type: 'day',
-            count: 1,
-            text: '1d',
+            count: 5,
+            text: '5d',
           },
           {
             type: 'day',
@@ -45,15 +36,21 @@ export default class StationAir extends Component<StationAirSignature> {
           },
           {
             type: 'day',
-            count: 5,
-            text: '5d',
+            count: 1,
+            text: '1d',
           },
           {
-            type: 'all',
-            text: 'All',
+            type: 'hour',
+            count: 12,
+            text: '12h',
+          },
+          {
+            type: 'hour',
+            count: 6,
+            text: '6h',
           },
         ],
-        selected: 0, // Default selected button index (e.g., 0 for '6h')
+        selected: 4, // Default selected button index (e.g., 0 for '6h')
       },
       title: {
         text: undefined,
@@ -61,15 +58,17 @@ export default class StationAir extends Component<StationAirSignature> {
       xAxis: {
         // categories: this.args.history.map((elm) => Number.parseInt(elm.id)),
         type: 'datetime',
-        dateTimeLabelFormats: {
-          hour: '%H:%M', // Format labels as hours and minutes
-          minute: '%H:%M', // Format labels as hours and minutes
-        },
+        // tickInterval: 3600 * 1000, // Set tick interval to 1 hour (3600 seconds * 1000 milliseconds)
+        gridLineWidth: 1, // Enable grid lines
+        // dateTimeLabelFormats: {
+        // hour: '%H:%M', // Format labels as hours and minutes
+        // minute: '%H:%M', // Format labels as hours and minutes
+        // },
         crosshair: true, // Adds the vertical line on hover
         // min: Date.now() - 100 * 60 * 60 * 1000, // 6 hours ago from now
         // max: Date.now(), // Current time
         scrollbar: {
-          enabled: true, // Enable the scrollbar for additional navigation
+          enabled: false, // Enable the scrollbar for additional navigation
         },
         // min: 0,
         // max: 100,
@@ -84,7 +83,7 @@ export default class StationAir extends Component<StationAirSignature> {
             text: null,
           },
           labels: {
-            format: '{value}°C',
+            format: '{value:.0f}°C',
           },
           opposite: false,
           style: { color: 'red' },
@@ -95,7 +94,7 @@ export default class StationAir extends Component<StationAirSignature> {
             text: null,
           },
           labels: {
-            format: '{value}%', // Format labels as percentages
+            format: '{value:.0f}%', // Format labels as percentages
           },
           style: { color: 'skyblue' },
           opposite: true, // Position this Y-axis on the right side
@@ -106,9 +105,9 @@ export default class StationAir extends Component<StationAirSignature> {
       },
       navigator: {
         enabled: false,
-        scrollbar: {
-          enabled: false, // Disable the scrollbar in the navigator
-        },
+        // scrollbar: {
+        // enabled: false, // Disable the scrollbar in the navigator
+        // },
       },
       plotOptions: {
         series: {
@@ -140,7 +139,13 @@ export default class StationAir extends Component<StationAirSignature> {
       {
         name: 'Temperature',
         data: temperature,
-        color: 'red', // Set the color of the temperature line to red
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+          stops: [
+            [0, 'blue'], // Color at 0°C
+            [1, 'red'], // Color at 30°C
+          ],
+        },
         marker: {
           symbol:
             'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E☀️%3C/text%3E%3C/svg%3E)', // Sun emoji
