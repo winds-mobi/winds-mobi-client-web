@@ -14,7 +14,46 @@ export default class StationAir extends Component<StationAirSignature> {
     return {
       chart: {
         height: 300,
+        zooming: {
+          type: 'x',
+        },
         type: 'spline', // Use 'spline' for smoother lines
+        panning: true, // Enable panning
+      },
+      rangeSelector: {
+        enabled: true, // Enable the range selector
+        buttons: [
+          {
+            type: 'hour',
+            count: 6,
+            text: '6h',
+          },
+          {
+            type: 'hour',
+            count: 12,
+            text: '12h',
+          },
+          {
+            type: 'day',
+            count: 1,
+            text: '1d',
+          },
+          {
+            type: 'day',
+            count: 2,
+            text: '2d',
+          },
+          {
+            type: 'day',
+            count: 5,
+            text: '5d',
+          },
+          {
+            type: 'all',
+            text: 'All',
+          },
+        ],
+        selected: 0, // Default selected button index (e.g., 0 for '6h')
       },
       title: {
         text: undefined,
@@ -27,6 +66,16 @@ export default class StationAir extends Component<StationAirSignature> {
           minute: '%H:%M', // Format labels as hours and minutes
         },
         crosshair: true, // Adds the vertical line on hover
+        // min: Date.now() - 100 * 60 * 60 * 1000, // 6 hours ago from now
+        // max: Date.now(), // Current time
+        scrollbar: {
+          enabled: true, // Enable the scrollbar for additional navigation
+        },
+        // min: 0,
+        // max: 100,
+
+        min: Date.now() - 6 * 60 * 60 * 1000, // 6 hours ago in milliseconds
+        max: Date.now(), // Current time in milliseconds
       },
       yAxis: [
         {
@@ -70,13 +119,14 @@ export default class StationAir extends Component<StationAirSignature> {
 
   get chartData() {
     const temperature = this.args.history.map((elm) => [
-      elm.id * 1000,
+      elm.timestamp,
       elm.temperature,
     ]);
     const humidity = this.args.history.map((elm) => [
-      elm.id * 1000,
+      elm.timestamp,
       elm.humidity,
     ]);
+
     return [
       {
         name: 'Temperature',
