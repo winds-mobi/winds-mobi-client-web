@@ -86,6 +86,8 @@ export default class StationAir extends Component<StationAirSignature> {
           labels: {
             format: '{value}°C',
           },
+          opposite: false,
+          style: { color: 'red' },
         },
         {
           // Secondary Y-axis (right side)
@@ -95,11 +97,18 @@ export default class StationAir extends Component<StationAirSignature> {
           labels: {
             format: '{value}%', // Format labels as percentages
           },
+          style: { color: 'skyblue' },
           opposite: true, // Position this Y-axis on the right side
         },
       ],
       legend: {
         enabled: false, // Disable the legend
+      },
+      navigator: {
+        enabled: false,
+        scrollbar: {
+          enabled: false, // Disable the scrollbar in the navigator
+        },
       },
       plotOptions: {
         series: {
@@ -136,6 +145,9 @@ export default class StationAir extends Component<StationAirSignature> {
           symbol:
             'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E☀️%3C/text%3E%3C/svg%3E)', // Sun emoji
         },
+        tooltip: {
+          valueSuffix: '°C', // Add degrees Celsius to the tooltip
+        },
       },
       {
         name: 'Humidity',
@@ -146,12 +158,16 @@ export default class StationAir extends Component<StationAirSignature> {
           symbol:
             'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E💧%3C/text%3E%3C/svg%3E)', // Water drop emoji
         },
+        tooltip: {
+          valueSuffix: '%', // Add percentage sign to the tooltip
+        },
       },
     ];
   }
 
   <template>
     <HighCharts
+      @mode='StockChart'
       @content={{this.chartData}}
       @chartOptions={{this.chartOptions}}
     />
