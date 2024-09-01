@@ -18,7 +18,7 @@ export interface StationSummarySignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationSummary extends Component<StationSummarySignature> {
   <template>
-    <div class='flex flex-col'>
+    <div class='flex flex-col px-4 py-5 sm:p-6'>
       <div class='font-bold text-lg'>
         {{! <Heart class='inline' /> }}
         {{@station.name}}
