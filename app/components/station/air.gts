@@ -139,7 +139,13 @@ export default class StationAir extends Component<StationAirSignature> {
       {
         name: 'Temperature',
         data: temperature,
-        color: 'red', // Set the color of the temperature line to red
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+          stops: [
+            [0, 'blue'], // Color at 0°C
+            [1, 'red'], // Color at 30°C
+          ],
+        },
         marker: {
           symbol:
             'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E☀️%3C/text%3E%3C/svg%3E)', // Sun emoji
