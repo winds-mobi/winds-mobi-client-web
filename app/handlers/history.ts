@@ -11,15 +11,18 @@ export interface Response {
 }
 
 interface HistoryApiPayload {
-  _id: string;
+  _id: number;
   'w-dir': number;
   'w-avg': number;
   'w-max': number;
   temp: number;
-  hum: 'number';
+  hum: number;
 }
 
 function renameFields(elm: HistoryApiPayload) {
+  // TODO: We should add `timestamp` field
+  // It is timestamp = id, but to not shoot
+  // ourselves in the foot in the end
   return {
     type: 'history',
     id: elm._id.toString(),
@@ -29,6 +32,7 @@ function renameFields(elm: HistoryApiPayload) {
       gusts: elm['w-max'],
       temperature: elm['temp'],
       humidity: elm['hum'],
+      timestamp: elm._id * 1000,
     },
   };
 }
@@ -48,7 +52,9 @@ const HistoryHandler: Handler = {
       // Timestamps should be unique-enough
 
       const contedWithIds = Array.isArray(content)
-        ? content.map((elm) => renameFields(elm))
+        ? content
+            .map((elm) => renameFields(elm))
+            .sort((a, b) => a.attributes.timestamp - b.attributes.timestamp)
         : renameFields(content);
 
       console.log({ contedWithIds });

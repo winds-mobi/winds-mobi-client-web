@@ -56,7 +56,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
       <:content as |result state|>
         <div
-          class='bg-gray-50 border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between'
+          class='border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between'
         >
           <span class='px-4 py-2 font-bold text-xl'>
             {{result.data.name}}
@@ -64,9 +64,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
           <CloseButton {{on 'click' this.close}} />
         </div>
 
-        <div
-          class='bg-gray-50 border-l-4 border-r-4 border-slate-400 overflow-y-scroll'
-        >
+        <div class='border-l-4 border-r-4 border-slate-400 overflow-y-scroll'>
           <div class='border-b border-gray-200'>
             <nav class='-mb-px flex w-full' aria-label='Tabs'>
               <LinkTo
