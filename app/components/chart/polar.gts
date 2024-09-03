@@ -19,17 +19,17 @@ export default class Polar extends Component<PolarSignature> {
       type: 'line',
     },
     title: {
-      text: 'Wind Direction',
+      text: undefined,
     },
-    pane: {
-      size: '80%',
+    legend: {
+      enabled: false, // Disable the legend
     },
     xAxis: {
       tickInterval: 45,
       min: 0,
       max: 360,
       labels: {
-        formatter: function (value) {
+        formatter: function ({ value }: { value: number }) {
           var directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
           return directions[Math.round(value / 45)];
         },
@@ -45,8 +45,15 @@ export default class Polar extends Component<PolarSignature> {
       showLastLabel: false,
     },
     tooltip: {
-      formatter: function (value) {
-        return '<b>Direction: </b>' + value + '°';
+      formatter: function (): string {
+        return '<b>Direction: </b>' + this.x + '°';
+      },
+    },
+    plotOptions: {
+      series: {
+        animation: {
+          duration: 0, // Set duration to 0 to disable the initial animation
+        },
       },
     },
   };

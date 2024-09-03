@@ -16,6 +16,8 @@ export interface StationSummarySignature {
   Element: null;
 }
 
+const COLORS = ['red', 'green', 'blue', 'orange', 'yellow'];
+
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationSummary extends Component<StationSummarySignature> {
   get demo() {
@@ -37,12 +39,11 @@ export default class StationSummary extends Component<StationSummarySignature> {
         //   [315, 0.8],
         //   [360, 20],
         // ],
-        data: this.args.history
-          .slice(-20)
-          .map((elm) => [
-            elm.direction,
-            1 - (now - elm.timestamp) / sixHoursInMs,
-          ]),
+        data: this.args.history.slice(-20).map((elm) => ({
+          x: elm.direction,
+          y: 1 - (now - elm.timestamp) / sixHoursInMs,
+          color: COLORS[Math.floor(elm.speed / 10)],
+        })),
         // pointStart: 0,
         // pointInterval: 45,
         connectEnds: false,
