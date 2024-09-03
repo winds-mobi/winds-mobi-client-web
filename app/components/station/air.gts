@@ -58,7 +58,8 @@ export default class StationAir extends Component<StationAirSignature> {
       xAxis: {
         // categories: this.args.history.map((elm) => Number.parseInt(elm.id)),
         type: 'datetime',
-        // tickInterval: 3600 * 1000, // Set tick interval to 1 hour (3600 seconds * 1000 milliseconds)
+        // tickInterval: 24 * 3600 * 1000, // Major ticks every day (24 hours)
+        // tickInterval: 6 * 3600 * 1000, // Minor ticks every 6 hours
         gridLineWidth: 1, // Enable grid lines
         // dateTimeLabelFormats: {
         // hour: '%H:%M', // Format labels as hours and minutes
@@ -73,8 +74,8 @@ export default class StationAir extends Component<StationAirSignature> {
         // min: 0,
         // max: 100,
 
-        min: Date.now() - 6 * 60 * 60 * 1000, // 6 hours ago in milliseconds
-        max: Date.now(), // Current time in milliseconds
+        // min: Date.now() - 6 * 60 * 60 * 1000, // 6 hours ago in milliseconds
+        // max: Date.now(), // Current time in milliseconds
       },
       yAxis: [
         {
@@ -158,7 +159,14 @@ export default class StationAir extends Component<StationAirSignature> {
         name: 'Humidity',
         data: humidity,
         yAxis: 1, // Associate this series with the second Y-axis (right side)
-        color: 'skyblue', // Set the color of the humidity line to light blue
+        // color: 'skyblue', // Set the color of the humidity line to light blue
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [
+            [0, 'skyblue'], // Color at 30°C
+            [1, 'grey'], // Color at 0°C
+          ],
+        },
         marker: {
           symbol:
             'url(data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 16 16%22%3E%3Ctext x=%220%22 y=%2212%22 font-size=%2216%22%3E💧%3C/text%3E%3C/svg%3E)', // Water drop emoji
