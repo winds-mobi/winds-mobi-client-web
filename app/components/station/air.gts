@@ -140,10 +140,10 @@ export default class StationAir extends Component<StationAirSignature> {
         name: 'Temperature',
         data: temperature,
         color: {
-          linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [
-            [0, 'blue'], // Color at 0°C
-            [1, 'red'], // Color at 30°C
+            [0, 'red'], // Color at 30°C
+            [1, 'blue'], // Color at 0°C
           ],
         },
         marker: {
