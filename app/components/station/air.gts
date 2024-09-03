@@ -56,26 +56,12 @@ export default class StationAir extends Component<StationAirSignature> {
         text: undefined,
       },
       xAxis: {
-        // categories: this.args.history.map((elm) => Number.parseInt(elm.id)),
         type: 'datetime',
-        // tickInterval: 24 * 3600 * 1000, // Major ticks every day (24 hours)
-        // tickInterval: 6 * 3600 * 1000, // Minor ticks every 6 hours
         gridLineWidth: 1, // Enable grid lines
-        // dateTimeLabelFormats: {
-        // hour: '%H:%M', // Format labels as hours and minutes
-        // minute: '%H:%M', // Format labels as hours and minutes
-        // },
         crosshair: true, // Adds the vertical line on hover
-        // min: Date.now() - 100 * 60 * 60 * 1000, // 6 hours ago from now
-        // max: Date.now(), // Current time
         scrollbar: {
           enabled: false, // Enable the scrollbar for additional navigation
         },
-        // min: 0,
-        // max: 100,
-
-        // min: Date.now() - 6 * 60 * 60 * 1000, // 6 hours ago in milliseconds
-        // max: Date.now(), // Current time in milliseconds
       },
       yAxis: [
         {
@@ -106,14 +92,10 @@ export default class StationAir extends Component<StationAirSignature> {
       },
       navigator: {
         enabled: false,
-        // scrollbar: {
-        // enabled: false, // Disable the scrollbar in the navigator
-        // },
       },
       plotOptions: {
         series: {
           animation: {
-            // Disable animation for the initial render only
             duration: 0, // Set duration to 0 to disable the initial animation
           },
         },
@@ -159,7 +141,6 @@ export default class StationAir extends Component<StationAirSignature> {
         name: 'Humidity',
         data: humidity,
         yAxis: 1, // Associate this series with the second Y-axis (right side)
-        // color: 'skyblue', // Set the color of the humidity line to light blue
         color: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [
