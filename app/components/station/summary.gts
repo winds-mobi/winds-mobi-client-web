@@ -4,6 +4,7 @@ import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import { formatNumber } from 'ember-intl';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import Polar from '../chart/polar';
 
 export interface StationSummarySignature {
   Args: {
@@ -17,6 +18,29 @@ export interface StationSummarySignature {
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationSummary extends Component<StationSummarySignature> {
+  get demo() {
+    return [
+      {
+        name: 'Wind Direction',
+        data: [
+          // Example wind direction data
+          [0, 0.1],
+          [45, 0.2],
+          [90, 0.3],
+          [135, 0.4],
+          [180, 0.5],
+          [225, 0.6],
+          [270, 0.7],
+          [315, 0.8],
+          [360, 0.9],
+        ],
+        // pointStart: 0,
+        // pointInterval: 45,
+        connectEnds: false,
+      },
+    ];
+  }
+
   <template>
     <div class='flex flex-col px-4 py-5 sm:p-6'>
       <div class='font-bold text-lg'>
@@ -51,6 +75,8 @@ export default class StationSummary extends Component<StationSummarySignature> {
       <div>
         {{formatNumber @station.last.temperature style='unit' unit='celsius'}}
       </div>
+
+      <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
 
     </div>
   </template>
