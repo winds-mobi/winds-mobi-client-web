@@ -63,7 +63,6 @@ const StationHandler: Handler = {
       return next(context.request);
     }
 
-    console.log(context);
     try {
       const { content } = (await next(context.request)) as Response;
 

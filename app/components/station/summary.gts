@@ -5,6 +5,7 @@ import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
 import { formatNumber } from 'ember-intl';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import Polar from '../chart/polar';
+import windToColour from '../../helpers/wind-to-colour';
 
 export interface StationSummarySignature {
   Args: {
@@ -22,8 +23,7 @@ const COLORS = ['red', 'green', 'blue', 'orange', 'yellow'];
 export default class StationSummary extends Component<StationSummarySignature> {
   get demo() {
     const now = Date.now();
-    const sixHoursInMs = 1 * 60 * 60 * 1000;
-    console.log(this.args.history);
+    const sixHoursInMs = 2 * 60 * 60 * 1000;
     return [
       {
         name: 'Wind Direction',
@@ -42,7 +42,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
         data: this.args.history.slice(-20).map((elm) => ({
           x: elm.direction,
           y: 1 - (now - elm.timestamp) / sixHoursInMs,
-          color: COLORS[Math.floor(elm.speed / 10)],
+          color: windToColour(elm.speed),
         })),
         // pointStart: 0,
         // pointInterval: 45,
@@ -89,6 +89,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
         </div>
       </div>
       <div class='w-1/2'>
+        {{log this.demo}}
         <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
       </div>
     </div>

@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { divIcon } from 'ember-leaflet/helpers/div-icon';
+import windToColour from '../../helpers/wind-to-colour';
 
 export interface ArrowSignature {
   Args: {
@@ -59,12 +60,14 @@ export default class Arrow extends Component<ArrowSignature> {
     const arrow =
       this.arrow[Math.floor((this.args.speed / 40) * (this.arrow.length - 1))];
 
+    const colour = windToColour(this.args.speed);
+
     return divIcon([], {
       iconUrl: '/images/arrow.png',
       iconSize: [42, 42],
       iconAnchor: [21, 21],
       popupAnchor: [0, -14],
-      html: `<div class="flex w-full h-full ${arrow}" style="transform: rotate(${
+      html: `<div class="flex w-full h-full" style="color: ${colour}; transform: rotate(${
         this.args.direction + 90
       }deg); fill: currentColor">
 
