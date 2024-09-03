@@ -19,21 +19,30 @@ export interface StationSummarySignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationSummary extends Component<StationSummarySignature> {
   get demo() {
+    const now = Date.now();
+    const sixHoursInMs = 1 * 60 * 60 * 1000;
+    console.log(this.args.history);
     return [
       {
         name: 'Wind Direction',
-        data: [
-          // Example wind direction data
-          [0, 0.1],
-          [45, 0.2],
-          [90, 0.3],
-          [135, 0.4],
-          [180, 0.5],
-          [225, 0.6],
-          [270, 0.7],
-          [315, 0.8],
-          [360, 0.9],
-        ],
+        // data: [
+        //   // Example wind direction data
+        //   [0, 0.1],
+        //   [45, 0.2],
+        //   [90, 0.3],
+        //   [135, 0.4],
+        //   [180, 0.5],
+        //   [225, 0.6],
+        //   [270, 0.7],
+        //   [315, 0.8],
+        //   [360, 20],
+        // ],
+        data: this.args.history
+          .slice(-20)
+          .map((elm) => [
+            elm.direction,
+            1 - (now - elm.timestamp) / sixHoursInMs,
+          ]),
         // pointStart: 0,
         // pointInterval: 45,
         connectEnds: false,
@@ -42,42 +51,45 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <div class='flex flex-col px-4 py-5 sm:p-6'>
-      <div class='font-bold text-lg'>
+    <div class='flex flex-row flex-wrap'>
+      <div class='font-bold text-lg col-span-2 w-full'>
         {{! <Heart class='inline' /> }}
         {{@station.name}}
       </div>
-      <div>
-        <Mountains class='inline' />
-        {{formatNumber @station.altitude style='unit' unit='meter'}}
-      </div>
-      <div>
-        <Wind class='inline' />
-        {{formatNumber
-          @station.last.speed
-          style='unit'
-          unit='kilometer-per-hour'
-        }}
-      </div>
-      <div>
-        <Speedometer class='inline' />
-        {{formatNumber
-          @station.last.gusts
-          style='unit'
-          unit='kilometer-per-hour'
-        }}
-      </div>
-      <div>
-        <a href={{@station.providerUrl.en}}>
-          {{@station.providerName}}
-        </a>
-      </div>
-      <div>
-        {{formatNumber @station.last.temperature style='unit' unit='celsius'}}
-      </div>
 
-      <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
-
+      <div class='flex flex-col px-4 py-5 sm:p-6 w-1/2'>
+        <div>
+          <Mountains class='inline' />
+          {{formatNumber @station.altitude style='unit' unit='meter'}}
+        </div>
+        <div>
+          <Wind class='inline' />
+          {{formatNumber
+            @station.last.speed
+            style='unit'
+            unit='kilometer-per-hour'
+          }}
+        </div>
+        <div>
+          <Speedometer class='inline' />
+          {{formatNumber
+            @station.last.gusts
+            style='unit'
+            unit='kilometer-per-hour'
+          }}
+        </div>
+        <div>
+          <a href={{@station.providerUrl.en}}>
+            {{@station.providerName}}
+          </a>
+        </div>
+        <div>
+          {{formatNumber @station.last.temperature style='unit' unit='celsius'}}
+        </div>
+      </div>
+      <div class='w-1/2'>
+        <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
+      </div>
     </div>
   </template>
 }
