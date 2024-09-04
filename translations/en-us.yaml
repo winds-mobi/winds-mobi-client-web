@@ -15,3 +15,23 @@ station:
     air: Air
   wind: Wind
   air: Air
+
+wind:
+  speed: Speed
+  gusts: Gusts
+  direction: Direction
+  minimum: Minimum
+  mean: Mean
+  maximum: Maximum
+
+air:
+  temperature: Temperature
+  humidity: Humidity
+  pressure: Pressure
+  rain: Rain
+
+format:
+  azimuth: "{azimuth}°"
+  percent: "{value}%"
+  pressure: "{value}hPA"
+  rain: "{value}l/m²"

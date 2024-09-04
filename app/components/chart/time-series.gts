@@ -15,7 +15,7 @@ export interface TimeSeriesSignature {
 export default class TimeSeries extends Component<TimeSeriesSignature> {
   defaultChartOptions = {
     chart: {
-      height: 300,
+      height: 400,
       type: 'spline', // Use 'spline' for smoother lines
       panning: {
         enabled: true, // Enable panning

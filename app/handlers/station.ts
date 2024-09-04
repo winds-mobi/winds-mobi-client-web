@@ -28,10 +28,18 @@ interface StationApiPayload {
     'w-avg': number;
     'w-max': number;
     temp: number;
+    hum: number;
+    pres?: {
+      qfe: number;
+      qnh: number;
+      qff: number;
+    };
+    rain: number;
   };
 }
 
 function renameFields(elm: StationApiPayload) {
+  console.log('TODO: this should not peek into all the stations:', elm.short);
   return {
     type: 'station',
     id: elm._id,
@@ -48,6 +56,9 @@ function renameFields(elm: StationApiPayload) {
         speed: elm.last['w-avg'],
         gusts: elm.last['w-max'],
         temperature: elm.last['temp'],
+        humidity: elm.last['hum'],
+        pressure: elm.last?.pres?.qfe,
+        rain: elm.last.rain,
       },
     },
   };
