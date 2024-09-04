@@ -62,23 +62,19 @@ export default class Map extends Component<MapSignature> {
           <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
 
           {{#each result.data as |r|}}
-            <Arrow
-              @direction={{r.last.direction}}
-              @speed={{r.last.speed}}
-              @gusts={{r.last.gusts}}
-              as |icon|
-            >
-              <layers.marker
+            <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
+              <layers.rotated-marker
                 @lat={{r.latitude}}
                 @lng={{r.longitude}}
                 @icon={{icon}}
+                @rotationAngle={{r.last.direction}}
                 @onClick={{fn this.stationSelected r.id}}
                 as |marker|
               >
                 <marker.popup @popupOpen={{false}}>
                   <Popover @station={{r}} />
                 </marker.popup>
-              </layers.marker>
+              </layers.rotated-marker>
             </Arrow>
           {{/each}}
         </LeafletMap>
