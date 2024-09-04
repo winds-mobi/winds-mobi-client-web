@@ -61,6 +61,9 @@ export type Station = {
     speed: number;
     gusts: number;
     temperature: number;
+    humidity: number;
+    pressure: number;
+    rain: number;
   };
 
   [Type]: 'station';

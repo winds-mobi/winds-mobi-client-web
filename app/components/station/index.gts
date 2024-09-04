@@ -55,59 +55,59 @@ export default class StationIndex extends Component<StationIndexSignature> {
       </:loading>
 
       <:content as |result state|>
-        <div
-          class='border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between'
-        >
-          <span class='px-4 py-2 font-bold text-xl'>
-            {{result.data.name}}
-          </span>
-          <CloseButton {{on 'click' this.close}} />
-        </div>
 
-        <div class='border-l-4 border-r-4 border-slate-400 overflow-y-scroll'>
-          <div class='border-b border-gray-200'>
-            <nav class='-mb-px flex w-full' aria-label='Tabs'>
-              <LinkTo
-                @route='map.station.summary'
-                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                @activeClass='border-indigo-500 text-indigo-600'
-              >{{t 'station.summary'}}</LinkTo>
-              <LinkTo
-                @route='map.station.winds'
-                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                @activeClass='border-indigo-500 text-indigo-600'
-              >{{t 'station.wind'}}</LinkTo>
-              <LinkTo
-                @route='map.station.air'
-                class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                aria-current='page'
-                @activeClass='border-indigo-500 text-indigo-600'
-              >{{t 'station.air'}}</LinkTo>
-            </nav>
-          </div>
+        <Request @request={{this.historyRequest}}>
+          <:content as |historyResult state2|>
+            <div
+              class='border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between'
+            >
+              <span class='px-4 py-2 font-bold text-xl'>
+                {{result.data.name}}
+              </span>
+              <CloseButton {{on 'click' this.close}} />
+            </div>
 
-          <div>
-            {{#if (eq this.router.currentRouteName 'map.station.summary')}}
-              <StationSummary @station={{result.data}} />
-            {{else if (eq this.router.currentRouteName 'map.station.winds')}}
-              <Request @request={{this.historyRequest}}>
-                <:content as |result state|>
-                  <StationWinds @history={{result.data}} />
+            <div
+              class='border-l-4 border-r-4 border-slate-400 overflow-y-scroll'
+            >
+              <div class='border-b border-gray-200'>
+                <nav class='-mb-px flex w-full' aria-label='Tabs'>
+                  <LinkTo
+                    @route='map.station.summary'
+                    class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    @activeClass='border-indigo-500 text-indigo-600'
+                  >{{t 'station.summary.title'}}</LinkTo>
+                  <LinkTo
+                    @route='map.station.winds'
+                    class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    @activeClass='border-indigo-500 text-indigo-600'
+                  >{{t 'station.wind'}}</LinkTo>
+                  <LinkTo
+                    @route='map.station.air'
+                    class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    aria-current='page'
+                    @activeClass='border-indigo-500 text-indigo-600'
+                  >{{t 'station.air'}}</LinkTo>
+                </nav>
+              </div>
 
-                </:content>
-              </Request>
-
-            {{else if (eq this.router.currentRouteName 'map.station.air')}}
-              <Request @request={{this.historyRequest}}>
-                <:content as |result state|>
-                  <StationAir @history={{result.data}} />
-
-                </:content>
-              </Request>
-            {{/if}}
-
-          </div>
-        </div>
+              <div>
+                {{#if (eq this.router.currentRouteName 'map.station.summary')}}
+                  <StationSummary
+                    @station={{result.data}}
+                    @history={{historyResult.data}}
+                  />
+                {{else if
+                  (eq this.router.currentRouteName 'map.station.winds')
+                }}
+                  <StationWinds @history={{historyResult.data}} />
+                {{else if (eq this.router.currentRouteName 'map.station.air')}}
+                  <StationAir @history={{historyResult.data}} />
+                {{/if}}
+              </div>
+            </div>
+          </:content>
+        </Request>
       </:content>
     </Request>
   </template>

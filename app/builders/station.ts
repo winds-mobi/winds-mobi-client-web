@@ -28,6 +28,7 @@ const defaultQuery = {
     'last.hum',
     'last.rain',
     'last.pres',
+    'last.hum',
   ],
 };
 

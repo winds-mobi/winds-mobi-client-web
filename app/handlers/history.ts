@@ -57,8 +57,6 @@ const HistoryHandler: Handler = {
             .sort((a, b) => a.attributes.timestamp - b.attributes.timestamp)
         : renameFields(content);
 
-      console.log({ contedWithIds });
-
       const jsonApiLikeData = {
         links: {
           self: context.request.url,
