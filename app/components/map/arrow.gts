@@ -24,8 +24,13 @@ export default class Arrow extends Component<ArrowSignature> {
       popupAnchor: [0, -14],
       html: `
         <div class="flex w-full h-full" style="color: ${colour}; fill: currentColor">
-          <svg version="1.1" baseProfile="tiny" xmlns="http://www.w3.org/2000/svg" viewBox="-150 -70 340 140" fill="currentColor">
-            <path d="M20,67.1C48.9,58.5,70,31.7,70,0S48.9-58.5,20-67.1V-150h-40v82.9C-48.9-58.5-70-31.7-70,0s21.1,58.5,50,67.1V115l-50-25L0,190L70,90l-50,25V67.1z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z" transform="rotate(-90)" />
+          <svg
+            version="1.1"
+            viewBox="-150 -70 140 340"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z" />
           </svg>
         </div>`,
     });
