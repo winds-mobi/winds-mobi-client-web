@@ -16,11 +16,12 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
   defaultChartOptions = {
     chart: {
       height: 300,
-      zooming: {
-        type: 'x',
-      },
       type: 'spline', // Use 'spline' for smoother lines
-      panning: true, // Enable panning
+      panning: {
+        enabled: true, // Enable panning
+        type: 'x', // Allow panning on the x-axis (or set to 'y' or 'xy')
+      },
+      zoomType: 'x', // Allow zooming on x-axis (needed for panning)
     },
     rangeSelector: {
       enabled: true, // Enable the range selector
@@ -61,11 +62,10 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       type: 'datetime',
       gridLineWidth: 1, // Enable grid lines
       crosshair: true, // Adds the vertical line on hover
-      scrollbar: {
-        enabled: false, // Enable the scrollbar for additional navigation
+      labels: {
+        format: '{value:%H:%M}<br>{value:%a}', // Format to show hour:minute, day of week
       },
     },
-
     legend: {
       enabled: false, // Disable the legend
     },
