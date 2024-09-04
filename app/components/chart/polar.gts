@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
+import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 
 export interface PolarSignature {
   Args: {
@@ -30,8 +31,7 @@ export default class Polar extends Component<PolarSignature> {
       max: 360,
       labels: {
         formatter: function ({ value }: { value: number }) {
-          var directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
-          return directions[Math.round(value / 45)];
+          return DIRECTIONS[Math.round(value / 45)];
         },
       },
     },

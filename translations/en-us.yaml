@@ -8,6 +8,10 @@ list:
   toggle: list
 
 station:
-  summary: Summary
+  summary:
+    title: Summary
+    wind: Wind
+    wind-last-hour: Wind - last hour
+    air: Air
   wind: Wind
   air: Air

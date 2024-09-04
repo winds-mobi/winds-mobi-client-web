@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import Wind from 'ember-phosphor-icons/components/ph-wind';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import Speedometer from 'ember-phosphor-icons/components/ph-speedometer';
-import { formatNumber } from 'ember-intl';
+import { formatNumber, t } from 'ember-intl';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import Polar from '../chart/polar';
 import windToColour from '../../helpers/wind-to-colour';
@@ -52,16 +52,25 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <div class='flex flex-row flex-wrap'>
+    <div class='flex flex-row flex-wrap px-4 py-5 sm:p-6'>
       <div class='font-bold text-lg col-span-2 w-full'>
         {{! <Heart class='inline' /> }}
         {{@station.name}}
       </div>
 
-      <div class='flex flex-col px-4 py-5 sm:p-6 w-1/2'>
+      <div class='flex flex-col w-1/2'>
+        <div>
+          <a href={{@station.providerUrl.en}}>
+            {{@station.providerName}}
+          </a>
+        </div>
         <div>
           <Mountains class='inline' />
           {{formatNumber @station.altitude style='unit' unit='meter'}}
+        </div>
+
+        <div class='font-bold pt-2'>
+          {{t 'station.summary.wind-last-hour'}}
         </div>
         <div>
           <Wind class='inline' />
@@ -79,17 +88,15 @@ export default class StationSummary extends Component<StationSummarySignature> {
             unit='kilometer-per-hour'
           }}
         </div>
-        <div>
-          <a href={{@station.providerUrl.en}}>
-            {{@station.providerName}}
-          </a>
+
+        <div class='font-bold pt-2'>
+          {{t 'station.summary.wind-last-hour'}}
         </div>
         <div>
           {{formatNumber @station.last.temperature style='unit' unit='celsius'}}
         </div>
       </div>
       <div class='w-1/2'>
-        {{log this.demo}}
         <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
       </div>
     </div>
