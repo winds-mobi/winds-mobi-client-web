@@ -15,6 +15,9 @@ export interface PolarSignature {
 
 export default class Polar extends Component<PolarSignature> {
   defaultChartOptions = {
+    credits: {
+      enabled: false,
+    },
     chart: {
       polar: true,
       type: 'line',
