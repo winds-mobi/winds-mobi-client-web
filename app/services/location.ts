@@ -3,10 +3,24 @@ import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { task } from 'ember-concurrency';
 import type { LeafletEvent } from 'leaflet';
+import { TrackedObject } from 'tracked-built-ins';
+
+interface GpsLocation {
+  latitude: number;
+  longitude: number;
+}
+
+interface MapLocation extends GpsLocation {
+  zoom: number;
+}
 
 export default class LocationService extends Service {
-  @tracked latitude: number | null = 46.68;
-  @tracked longitude: number | null = 7.85;
+  map: MapLocation = new TrackedObject({
+    latitude: 46.68,
+    longitude: 7.85,
+    zoom: 13,
+  });
+  @tracked gps: GpsLocation | undefined = undefined;
 
   getLocationFromGps = task(async () => {
     try {
@@ -16,26 +30,31 @@ export default class LocationService extends Service {
         },
       );
 
-      this.latitude = position.coords.latitude;
-      this.longitude = position.coords.longitude;
+      this.gps = new TrackedObject({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+
+      // On location (re)load we want to center the map
+      this.map.latitude = this.gps.latitude;
+      this.map.longitude = this.gps.longitude;
 
       return true;
     } catch (error) {
-      throw new Error('Error fetching location:' + error);
+      throw 'Error fetching location:' + error;
     }
   });
 
   @action
   updateLocation(e: LeafletEvent) {
-    console.log({ e });
-    const { lat, lng } = e.target.getCenter();
+    const { lat: latitude, lng: longitude } = e.target.getCenter();
 
-    if (this.latitude !== lat) {
-      this.latitude = lat;
+    // Keep those IFs here otherwise we get into an infinite re-render loop
+    if (this.map.latitude != latitude) {
+      this.map.latitude = latitude;
     }
-
-    if (this.longitude !== lng) {
-      this.longitude = lng;
+    if (this.map.longitude != longitude) {
+      this.map.longitude = longitude;
     }
   }
 }

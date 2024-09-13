@@ -28,15 +28,11 @@ export default class Map extends Component<MapSignature> {
   @service declare location: LocationService;
   @service declare router: RouterService;
 
-  lat = 30.68;
-  lng = 7.853;
-  zoom = 13;
-
   get request() {
     const options = query<Station>('station', {
       limit: 12,
-      'near-lat': this.location.latitude,
-      'near-lon': this.location.longitude,
+      'near-lat': this.location.map.latitude,
+      'near-lon': this.location.map.longitude,
     });
     return this.store.request(options);
   }
@@ -48,9 +44,9 @@ export default class Map extends Component<MapSignature> {
   <template>
     <LeafletMap
       class='w-full h-full'
-      @lat={{this.location.latitude}}
-      @lng={{this.location.longitude}}
-      @zoom={{this.zoom}}
+      @lat={{this.location.map.latitude}}
+      @lng={{this.location.map.longitude}}
+      @zoom={{this.location.map.zoom}}
       @onMoveend={{this.location.updateLocation}}
       as |layers|
     >
