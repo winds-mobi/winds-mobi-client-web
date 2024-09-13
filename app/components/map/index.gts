@@ -14,6 +14,7 @@ import Popover from './popover';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { fn } from '@ember/helper';
+import YouAreHere from './you-are-here';
 
 export interface MapSignature {
   Args: {};
@@ -28,15 +29,11 @@ export default class Map extends Component<MapSignature> {
   @service declare location: LocationService;
   @service declare router: RouterService;
 
-  lat = 30.68;
-  lng = 7.853;
-  zoom = 13;
-
   get request() {
     const options = query<Station>('station', {
       limit: 12,
-      'near-lat': 46.68032645342222,
-      'near-lon': 7.853595728058556,
+      'near-lat': this.location.map.latitude,
+      'near-lon': this.location.map.longitude,
     });
     return this.store.request(options);
   }
@@ -46,21 +43,24 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <Request @request={{this.request}}>
-      <:loading>
-        ---
-      </:loading>
+    <LeafletMap
+      class='w-full h-full'
+      @lat={{this.location.map.latitude}}
+      @lng={{this.location.map.longitude}}
+      @zoom={{this.location.map.zoom}}
+      @onMoveend={{this.location.updateLocation}}
+      as |layers|
+    >
+      <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
 
-      <:content as |result state|>
-        <LeafletMap
-          class='w-full h-full'
-          @lat={{this.location.latitude}}
-          @lng={{this.location.longitude}}
-          @zoom={{this.zoom}}
-          as |layers|
-        >
-          <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+      <YouAreHere @layers={{layers}} />
 
+      <Request @request={{this.request}}>
+        <:loading>
+          ---
+        </:loading>
+
+        <:content as |result state|>
           {{#each result.data as |r|}}
             <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
               <layers.rotated-marker
@@ -77,9 +77,9 @@ export default class Map extends Component<MapSignature> {
               </layers.rotated-marker>
             </Arrow>
           {{/each}}
-        </LeafletMap>
-      </:content>
-    </Request>
+        </:content>
+      </Request>
+    </LeafletMap>
   </template>
 }
 

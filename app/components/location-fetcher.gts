@@ -33,19 +33,22 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
   <template>
     <ToggleButton
       type='button'
-      @onChange={{this.location.getLocationTask.perform}}
-      @isSelected={{if this.location.getLocationTask.last.value true false}}
-      disabled={{this.location.getLocationTask.isRunning}}
+      @onChange={{this.location.getLocationFromGps.perform}}
+      @isSelected={{if this.location.getLocationFromGps.last.value true false}}
+      disabled={{this.location.getLocationFromGps.isRunning}}
       class='flex align-middle items-center gap-2'
     >
-      {{#if this.location.getLocationTask.last.value}}
+      {{#if this.location.getLocationFromGps.last.value}}
         <GpsFix />
       {{else}}
-        {{#if this.location.getLocationTask.last.isError}}
+        {{#if this.location.getLocationFromGps.last.isError}}
           <GpsSlash />
         {{else}}
           <Gps
-            class={{if this.location.getLocationTask.isRunning 'animate-pulse'}}
+            class={{if
+              this.location.getLocationFromGps.isRunning
+              'animate-pulse'
+            }}
           />
         {{/if}}
       {{/if}}
