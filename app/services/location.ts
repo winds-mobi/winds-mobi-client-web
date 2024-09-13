@@ -8,7 +8,7 @@ export default class LocationService extends Service {
   @tracked latitude: number | null = 46.68;
   @tracked longitude: number | null = 7.85;
 
-  getLocationTask = task(async () => {
+  getLocationFromGps = task(async () => {
     try {
       const position: GeolocationPosition = await new Promise(
         (resolve, reject) => {
@@ -26,7 +26,7 @@ export default class LocationService extends Service {
   });
 
   @action
-  manuallyUpdate(e: LeafletEvent) {
+  updateLocation(e: LeafletEvent) {
     console.log({ e });
     const { lat, lng } = e.target.getCenter();
 

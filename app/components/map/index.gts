@@ -46,22 +46,22 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <Request @request={{this.request}}>
-      <:loading>
-        ---
-      </:loading>
+    <LeafletMap
+      class='w-full h-full'
+      @lat={{this.location.latitude}}
+      @lng={{this.location.longitude}}
+      @zoom={{this.zoom}}
+      @onMoveend={{this.location.updateLocation}}
+      as |layers|
+    >
+      <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
 
-      <:content as |result state|>
-        <LeafletMap
-          class='w-full h-full'
-          @lat={{this.location.latitude}}
-          @lng={{this.location.longitude}}
-          @zoom={{this.zoom}}
-          @onMoveend={{this.location.manuallyUpdate}}
-          as |layers|
-        >
-          <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+      <Request @request={{this.request}}>
+        <:loading>
+          ---
+        </:loading>
 
+        <:content as |result state|>
           {{#each result.data as |r|}}
             <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
               <layers.rotated-marker
@@ -78,9 +78,9 @@ export default class Map extends Component<MapSignature> {
               </layers.rotated-marker>
             </Arrow>
           {{/each}}
-        </LeafletMap>
-      </:content>
-    </Request>
+        </:content>
+      </Request>
+    </LeafletMap>
   </template>
 }
 
