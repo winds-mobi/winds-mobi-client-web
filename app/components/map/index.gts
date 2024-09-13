@@ -35,8 +35,8 @@ export default class Map extends Component<MapSignature> {
   get request() {
     const options = query<Station>('station', {
       limit: 12,
-      'near-lat': 46.68032645342222,
-      'near-lon': 7.853595728058556,
+      'near-lat': this.location.latitude,
+      'near-lon': this.location.longitude,
     });
     return this.store.request(options);
   }
@@ -57,6 +57,7 @@ export default class Map extends Component<MapSignature> {
           @lat={{this.location.latitude}}
           @lng={{this.location.longitude}}
           @zoom={{this.zoom}}
+          @onMoveend={{this.location.manuallyUpdate}}
           as |layers|
         >
           <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />

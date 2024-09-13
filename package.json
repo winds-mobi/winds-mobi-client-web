@@ -54,6 +54,7 @@
     "@tsconfig/ember": "^3.0.8",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@types/leaflet": "1.9.12",
     "@warp-drive/build-config": "0.0.0-alpha.31",
     "@warp-drive/core-types": "0.0.0-alpha.93",
     "@warp-drive/ember": "0.0.0-alpha.69",
