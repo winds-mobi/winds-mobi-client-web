@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <!-- Outer glossy circle with sky blue -->
+  <circle cx="10" cy="10" r="8" fill="url(#glossGradient)" stroke="deepskyblue" stroke-width="1.5"/>
+
+  <!-- Inner shadow for 3D effect -->
+  <defs>
+    <!-- Shadow adjusted to a softer inner shadow with blue tint -->
+    <radialGradient id="shadowGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="30%" style="stop-color:#4682B4; stop-opacity:0.4" /> <!-- Steel Blue shadow -->
+      <stop offset="100%" style="stop-color:#000000; stop-opacity:0" />
+    </radialGradient>
+
+    <!-- Glossy gradient for outer blue circle -->
+    <linearGradient id="glossGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB; stop-opacity:1" /> <!-- Sky Blue -->
+      <stop offset="70%" style="stop-color:#00BFFF; stop-opacity:1" /> <!-- Deep Sky Blue -->
+    </linearGradient>
+  </defs>
+
+  <!-- Inner shadow effect -->
+  <circle cx="10" cy="10" r="8" fill="url(#shadowGradient)" />
+
+  <!-- Highlight for glossiness -->
+  <circle cx="7" cy="7" r="3" fill="white" opacity="0.5" />
+
+  <!-- Additional smaller highlight to enhance 3D effect -->
+  <circle cx="9" cy="9" r="1.5" fill="white" opacity="0.6" />
+</svg>

@@ -14,6 +14,7 @@ import Popover from './popover';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { fn } from '@ember/helper';
+import YouAreHere from './you-are-here';
 
 export interface MapSignature {
   Args: {};
@@ -51,6 +52,8 @@ export default class Map extends Component<MapSignature> {
       as |layers|
     >
       <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+
+      <YouAreHere @layers={{layers}} />
 
       <Request @request={{this.request}}>
         <:loading>
