@@ -157,8 +157,8 @@ importers:
         specifier: ^8.1.2
         version: 8.1.2(encoding@0.1.13)
       ember-highcharts:
-        specifier: ^6.1.2
-        version: 6.1.2(@glint/template@1.4.0)(ember-source@5.10.2(@glimmer/component@1.1.2(@babel/core@7.25.2))(@glint/template@1.4.0)(rsvp@4.8.5)(webpack@5.93.0))(highcharts@11.4.8)
+        specifier: github:MichalBryxi/ember-highcharts#7995a3e7d2203ce174c39e186acc9257d883bf61&path:ember-highcharts
+        version: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/7995a3e7d2203ce174c39e186acc9257d883bf61#path:ember-highcharts(@glint/template@1.4.0)(ember-source@5.10.2(@glimmer/component@1.1.2(@babel/core@7.25.2))(@glint/template@1.4.0)(rsvp@4.8.5)(webpack@5.93.0))(highcharts@11.4.8)
       ember-intl:
         specifier: ^7.0.5
         version: 7.0.5(@glint/template@1.4.0)(typescript@5.5.4)(webpack@5.93.0)
@@ -3673,8 +3673,9 @@ packages:
     peerDependencies:
       ember-source: ^3.25.0 || >=4.0.0
 
-  ember-highcharts@6.1.2:
-    resolution: {integrity: sha512-AGpBpQkwrvsLHR8d2W9O3dIclGeFRWDbUwWwGjU5sfEp1I1Yhwxk+gwwcPTe5b2G+snI2FhvFoLnvnNeMhL8cA==}
+  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/7995a3e7d2203ce174c39e186acc9257d883bf61#path:ember-highcharts:
+    resolution: {path: ember-highcharts, tarball: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/7995a3e7d2203ce174c39e186acc9257d883bf61}
+    version: 6.1.2
     peerDependencies:
       ember-source: '>= 3.28.0'
       highcharts: '>= 5.0.0'
@@ -13044,7 +13045,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-highcharts@6.1.2(@glint/template@1.4.0)(ember-source@5.10.2(@glimmer/component@1.1.2(@babel/core@7.25.2))(@glint/template@1.4.0)(rsvp@4.8.5)(webpack@5.93.0))(highcharts@11.4.8):
+  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/7995a3e7d2203ce174c39e186acc9257d883bf61#path:ember-highcharts(@glint/template@1.4.0)(ember-source@5.10.2(@glimmer/component@1.1.2(@babel/core@7.25.2))(@glint/template@1.4.0)(rsvp@4.8.5)(webpack@5.93.0))(highcharts@11.4.8):
     dependencies:
       '@babel/core': 7.25.2(supports-color@8.1.1)
       '@ember/render-modifiers': 2.1.0(@babel/core@7.25.2)(@glint/template@1.4.0)(ember-source@5.10.2(@glimmer/component@1.1.2(@babel/core@7.25.2))(@glint/template@1.4.0)(rsvp@4.8.5)(webpack@5.93.0))
