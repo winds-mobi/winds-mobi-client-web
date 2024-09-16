@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
+
 import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 
 export interface PolarSignature {
@@ -21,6 +22,7 @@ export default class Polar extends Component<PolarSignature> {
     chart: {
       polar: true,
       type: 'line',
+      spacing: [0, 0, 0, 0],
     },
     title: {
       text: undefined,
@@ -30,11 +32,16 @@ export default class Polar extends Component<PolarSignature> {
     },
     xAxis: {
       tickInterval: 45,
+      gridLineWidth: 0,
       min: 0,
       max: 360,
       labels: {
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
+        },
+        distance: 0,
+        style: {
+          fontSize: '9px',
         },
       },
     },
@@ -44,12 +51,12 @@ export default class Polar extends Component<PolarSignature> {
       labels: {
         enabled: false,
       },
-      gridLineInterpolation: 'polygon',
+      // gridLineInterpolation: 'polygon',
       showLastLabel: false,
     },
     tooltip: {
       formatter: function (): string {
-        return '<b>Direction: </b>' + this.x + '°';
+        return this.point.customTooltip;
       },
     },
     plotOptions: {
@@ -57,6 +64,16 @@ export default class Polar extends Component<PolarSignature> {
         animation: {
           duration: 0, // Set duration to 0 to disable the initial animation
         },
+        color: '#aaa',
+        // marker: {
+        //   enabled: false, // Disables markers for all series in this chart
+        // },
+        // states: {
+        //   hover: {
+        //     enabled: false, // Disables hover effect for all series in this chart
+        //   },
+        // },
+        // colorByPoint: true, // Ensure each point gets its own color
       },
     },
   };

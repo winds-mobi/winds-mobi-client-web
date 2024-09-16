@@ -7,6 +7,8 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 import Polar from '../chart/polar';
 import windToColour from '../../helpers/wind-to-colour';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
+import { type IntlService } from 'ember-intl';
+import { inject as service } from '@ember/service';
 
 export interface StationSummarySignature {
   Args: {
@@ -18,43 +20,34 @@ export interface StationSummarySignature {
   Element: null;
 }
 
-const COLORS = ['red', 'green', 'blue', 'orange', 'yellow'];
-
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationSummary extends Component<StationSummarySignature> {
+  @service declare intl: IntlService;
+
   get demo() {
     const now = Date.now();
-    const sixHoursInMs = 2 * 60 * 60 * 1000;
+    const nHoursInMs = 1 * 60 * 60 * 1000;
     return [
       {
         name: 'Wind Direction',
-        // data: [
-        //   // Example wind direction data
-        //   [0, 0.1],
-        //   [45, 0.2],
-        //   [90, 0.3],
-        //   [135, 0.4],
-        //   [180, 0.5],
-        //   [225, 0.6],
-        //   [270, 0.7],
-        //   [315, 0.8],
-        //   [360, 20],
-        // ],
         data: this.args.history.slice(-20).map((elm) => ({
           x: elm.direction,
-          y: 1 - (now - elm.timestamp) / sixHoursInMs,
+          y: 1 - (now - elm.timestamp) / nHoursInMs,
           color: windToColour(elm.speed),
+          customTooltip: this.intl.formatTime(elm.timestamp, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+          }),
         })),
-        // pointStart: 0,
-        // pointInterval: 45,
         connectEnds: false,
       },
     ];
   }
 
   <template>
-    <div class='flex flex-col sm:flex-row flex-wrap px-4 py-5 sm:p-6'>
-      <div class='flex flex-col w-full sm:w-1/2 gap-4'>
+    <div class='flex flex-row px-2 py-2 sm:p-6'>
+      <div class='flex flex-col w-2/3 gap-4'>
         <table class='w-full'>
           <caption class='text-left font-bold'>
             {{t 'station.summary.wind'}}
@@ -194,7 +187,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
         </table>
 
       </div>
-      <div class='w-full sm:w-1/2'>
+      <div class='w-1/3 items-start'>
         <Polar @chartData={{this.demo}} @chartOptions={{undefined}} />
       </div>
     </div>
