@@ -45,7 +45,6 @@ export default class Map extends Component<MapSignature> {
   <template>
     <LeafletMap
       class='w-full h-full'
-      @onResize={{log 'resize'}}
       @lat={{this.location.map.latitude}}
       @lng={{this.location.map.longitude}}
       @zoom={{this.location.map.zoom}}
