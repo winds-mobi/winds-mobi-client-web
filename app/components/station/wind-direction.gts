@@ -6,8 +6,12 @@ import { inject as service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import { fn } from '@ember/helper';
+import windToColour from '../../helpers/wind-to-colour';
+import Polar from '../chart/polar';
+import { type IntlService } from 'ember-intl';
+import { action } from '@ember/object';
 
-export interface StationWindsSignature {
+export interface WindDirectionSignature {
   Args: {
     stationId: string;
   };
@@ -18,35 +22,35 @@ export interface StationWindsSignature {
 }
 
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
-export default class StationWinds extends Component<StationWindsSignature> {
+export default class WindDirection extends Component<WindDirectionSignature> {
   @service declare store: StoreService;
+  @service declare intl: IntlService;
 
   get historyRequest() {
     const options = historyQuery<History>('history', this.args.stationId);
     return this.store.request(options);
   }
 
+  @action
   dataToChart(historyData) {
-    const speed = historyData.map((elm) => [elm.id * 1000, elm.speed]);
-    const gusts = historyData.map((elm) => [elm.id * 1000, elm.gusts]);
+    console.log(this);
+    const now = Date.now();
+    const nHoursInMs = 1 * 60 * 60 * 1000;
+    console.log();
     return [
       {
-        name: 'Wind',
-        data: speed,
-        tooltip: {
-          valueSuffix: 'km/h', // Add degrees Celsius to the tooltip
-        },
-        color: '#DAA520',
-        fillColor: 'rgba(230, 230, 230, 0.4)',
-        type: 'area', // Area chart for the second dataset
-      },
-      {
-        name: 'Gusts',
-        data: gusts,
-        tooltip: {
-          valueSuffix: 'km/h', // Add degrees Celsius to the tooltip
-        },
-        color: '#DAA520',
+        name: 'Wind Direction',
+        data: historyData.map((elm) => ({
+          x: elm.direction,
+          y: 1 - (now - elm.timestamp) / nHoursInMs,
+          color: windToColour(elm.speed),
+          customTooltip: this.intl.formatTime(elm.timestamp, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+          }),
+        })),
+        connectEnds: false,
       },
     ];
   }
@@ -71,10 +75,7 @@ export default class StationWinds extends Component<StationWindsSignature> {
     <Request @request={{this.historyRequest}}>
       <:content as |historyResult state|>
         {{#let (this.dataToChart historyResult.data) as |chartData|}}
-          <TimeSeries
-            @chartOptions={{this.chartOptions}}
-            @chartData={{chartData}}
-          />
+          <Polar @chartData={{chartData}} @chartOptions={{undefined}} />
         {{/let}}
       </:content>
     </Request>
