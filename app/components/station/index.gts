@@ -13,7 +13,7 @@ import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
 import StationSummary from './summary';
-import StationWinds from './winds';
+import StationWinds from './wind';
 import { LinkTo } from '@ember/routing';
 import { t } from 'ember-intl';
 import { eq } from 'ember-truth-helpers';
