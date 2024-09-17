@@ -5,7 +5,6 @@ import type { History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
-import { fn } from '@ember/helper';
 
 export interface StationWindsSignature {
   Args: {
@@ -17,7 +16,6 @@ export interface StationWindsSignature {
   Element: null;
 }
 
-// eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationWinds extends Component<StationWindsSignature> {
   @service declare store: StoreService;
 
@@ -26,9 +24,9 @@ export default class StationWinds extends Component<StationWindsSignature> {
     return this.store.request(options);
   }
 
-  dataToChart(historyData) {
-    const speed = historyData.map((elm) => [elm.id * 1000, elm.speed]);
-    const gusts = historyData.map((elm) => [elm.id * 1000, elm.gusts]);
+  dataToChart(historyData: History[]) {
+    const speed = historyData.map((elm) => [elm.timestamp, elm.speed]);
+    const gusts = historyData.map((elm) => [elm.timestamp, elm.gusts]);
     return [
       {
         name: 'Wind',

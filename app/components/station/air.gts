@@ -24,7 +24,7 @@ export default class StationAir extends Component<StationAirSignature> {
     return this.store.request(options);
   }
 
-  dataToChart(historyData) {
+  dataToChart(historyData: History[]) {
     const temperature = historyData.map((elm) => [
       elm.timestamp,
       elm.temperature,

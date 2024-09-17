@@ -1,11 +1,9 @@
 import Component from '@glimmer/component';
-import TimeSeries from '../chart/time-series';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import { inject as service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
-import { fn } from '@ember/helper';
 import windToColour from '../../helpers/wind-to-colour';
 import Polar from '../chart/polar';
 import { type IntlService } from 'ember-intl';
@@ -31,8 +29,9 @@ export default class WindDirection extends Component<WindDirectionSignature> {
     return this.store.request(options);
   }
 
+  // We need @action here to be able to reach this.intl
   @action
-  dataToChart(historyData) {
+  dataToChart(historyData: History[]) {
     console.log(this);
     const now = Date.now();
     const nHoursInMs = 1 * 60 * 60 * 1000;
