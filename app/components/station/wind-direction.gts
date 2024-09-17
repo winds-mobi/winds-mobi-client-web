@@ -56,22 +56,6 @@ export default class WindDirection extends Component<WindDirectionSignature> {
     ];
   }
 
-  get chartOptions() {
-    return {
-      yAxis: {
-        // Primary Y-axis (left side)
-        title: {
-          text: null,
-        },
-        labels: {
-          format: '{value:.0f} km/h',
-        },
-        opposite: false,
-        style: { color: 'red' },
-      },
-    };
-  }
-
   <template>
     <Request @request={{this.historyRequest}}>
       <:content as |historyResult state|>
