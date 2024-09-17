@@ -93,16 +93,13 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
               <div>
                 {{#if (eq this.router.currentRouteName 'map.station.summary')}}
-                  <StationSummary
-                    @station={{result.data}}
-                    @history={{historyResult.data}}
-                  />
+                  <StationSummary @stationId={{@stationId}} />
                 {{else if
                   (eq this.router.currentRouteName 'map.station.winds')
                 }}
-                  <StationWinds @history={{historyResult.data}} />
+                  <StationWinds @stationId={{@stationId}} />
                 {{else if (eq this.router.currentRouteName 'map.station.air')}}
-                  <StationAir @history={{historyResult.data}} />
+                  <StationAir @stationId={{@stationId}} />
                 {{/if}}
               </div>
             </div>

@@ -1,19 +1,32 @@
 import Component from '@glimmer/component';
 import TimeSeries from '../chart/time-series';
+import { historyQuery } from 'winds-mobi-client-web/builders/history';
+import type { History } from 'winds-mobi-client-web/services/store.js';
+import { inject as service } from '@ember/service';
+import { Request } from '@warp-drive/ember';
+import type StoreService from 'winds-mobi-client-web/services/store.js';
 
 export interface StationWindsSignature {
-  Args: {};
+  Args: {
+    stationId: string;
+  };
   Blocks: {
     default: [];
   };
   Element: null;
 }
 
-// eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationWinds extends Component<StationWindsSignature> {
-  get chartData() {
-    const speed = this.args.history.map((elm) => [elm.id * 1000, elm.speed]);
-    const gusts = this.args.history.map((elm) => [elm.id * 1000, elm.gusts]);
+  @service declare store: StoreService;
+
+  get historyRequest() {
+    const options = historyQuery<History>('history', this.args.stationId);
+    return this.store.request(options);
+  }
+
+  dataToChart(historyData: History[]) {
+    const speed = historyData.map((elm) => [elm.timestamp, elm.speed]);
+    const gusts = historyData.map((elm) => [elm.timestamp, elm.gusts]);
     return [
       {
         name: 'Wind',
@@ -53,9 +66,15 @@ export default class StationWinds extends Component<StationWindsSignature> {
   }
 
   <template>
-    <TimeSeries
-      @chartOptions={{this.chartOptions}}
-      @chartData={{this.chartData}}
-    />
+    <Request @request={{this.historyRequest}}>
+      <:content as |historyResult state|>
+        {{#let (this.dataToChart historyResult.data) as |chartData|}}
+          <TimeSeries
+            @chartOptions={{this.chartOptions}}
+            @chartData={{chartData}}
+          />
+        {{/let}}
+      </:content>
+    </Request>
   </template>
 }
