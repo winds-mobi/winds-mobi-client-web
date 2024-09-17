@@ -19,29 +19,31 @@ export interface WindDirectionSignature {
   Element: null;
 }
 
+const DURATION = 1 * 60 * 60;
+
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class WindDirection extends Component<WindDirectionSignature> {
   @service declare store: StoreService;
   @service declare intl: IntlService;
 
   get historyRequest() {
-    const options = historyQuery<History>('history', this.args.stationId);
+    const options = historyQuery<History>('history', this.args.stationId, {
+      duration: DURATION,
+    });
     return this.store.request(options);
   }
 
   // We need @action here to be able to reach this.intl
   @action
   dataToChart(historyData: History[]) {
-    console.log(this);
     const now = Date.now();
-    const nHoursInMs = 1 * 60 * 60 * 1000;
     console.log();
     return [
       {
         name: 'Wind Direction',
         data: historyData.map((elm) => ({
           x: elm.direction,
-          y: 1 - (now - elm.timestamp) / nHoursInMs,
+          y: 1 - (now - elm.timestamp) / (DURATION * 1000),
           color: windToColour(elm.speed),
           customTooltip: this.intl.formatTime(elm.timestamp, {
             hour: 'numeric',
