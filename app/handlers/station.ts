@@ -2,9 +2,7 @@ import {
   type Handler,
   type NextFn,
   type RequestContext,
-  // @ts-expect-error no TS yet
 } from '@ember-data/request';
-// import type { Pin } from 'the-mountains-are-calling/services/settings';
 
 export interface Response {
   content: StationApiPayload[];
