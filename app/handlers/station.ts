@@ -10,55 +10,13 @@ export interface Response {
 
 interface StationApiPayload {
   _id: string;
-  alt: number;
-  loc: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-  peak: boolean;
-  'pv-name': string;
-  short: string;
-  status: 'green';
-  url: string;
-  last: {
-    _id: number;
-    'w-dir': number;
-    'w-avg': number;
-    'w-max': number;
-    temp: number;
-    hum: number;
-    pres?: {
-      qfe: number;
-      qnh: number;
-      qff: number;
-    };
-    rain: number;
-  };
 }
 
-function renameFields(elm: StationApiPayload) {
-  console.log('TODO: this should not peek into all the stations:', elm.short);
+function jsonApifyFields(elm: StationApiPayload) {
   return {
     type: 'station',
     id: elm._id,
-    attributes: {
-      altitude: elm.alt,
-      latitude: elm.loc.coordinates[1],
-      longitude: elm.loc.coordinates[0],
-      isPeak: elm.peak,
-      providerName: elm['pv-name'],
-      providerUrl: elm['url'],
-      name: elm['short'],
-      last: {
-        direction: elm.last['w-dir'],
-        speed: elm.last['w-avg'],
-        gusts: elm.last['w-max'],
-        temperature: elm.last['temp'],
-        humidity: elm.last['hum'],
-        pressure: elm.last?.pres?.qfe,
-        rain: elm.last.rain,
-      },
-    },
+    attributes: elm,
   };
 }
 
@@ -78,8 +36,8 @@ const StationHandler: Handler = {
       // JSON-API requires us to have IDs
       // Timestamps should be unique-enough
       const contedWithIds = Array.isArray(content)
-        ? content.map((elm) => renameFields(elm))
-        : renameFields(content);
+        ? content.map((elm) => jsonApifyFields(elm))
+        : jsonApifyFields(content);
 
       const jsonApiLikeData = {
         links: {
