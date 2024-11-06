@@ -23,6 +23,7 @@ wind:
   minimum: Minimum
   mean: Mean
   maximum: Maximum
+  timestamp: 'Time'
 
 air:
   temperature: Temperature

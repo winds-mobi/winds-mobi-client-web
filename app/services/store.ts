@@ -48,6 +48,15 @@ const ReadingSchema = withDefaults({
     { name: 'rain', kind: 'field' },
 
     {
+      name: 'timestamp',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: '_id',
+      },
+    },
+
+    {
       name: 'direction',
       kind: 'derived',
       type: 'unwrap',
