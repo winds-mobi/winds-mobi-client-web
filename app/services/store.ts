@@ -17,21 +17,189 @@ import {
 } from '@warp-drive/schema-record/hooks';
 import { SchemaRecord } from '@warp-drive/schema-record/record';
 import type { StableRecordIdentifier } from '@warp-drive/core-types';
-import type { Type } from '@warp-drive/core-types/symbols';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
+import { Type } from '@warp-drive/core-types/symbols';
+
+const LocationSchema = withDefaults({
+  type: 'location',
+  fields: [{ name: 'coordinates', kind: 'array' }],
+});
+
+const PressureSchema = withDefaults({
+  type: 'pressure',
+  fields: [
+    { name: 'qfe', kind: 'field' },
+    { name: 'qnh', kind: 'field' },
+    { name: 'qff', kind: 'field' },
+  ],
+});
+
+const ReadingSchema = withDefaults({
+  type: 'reading',
+  fields: [
+    { name: '_id', kind: 'field' },
+    { name: 'w-dir', kind: 'field' },
+    { name: 'w-avg', kind: 'field' },
+    { name: 'w-max', kind: 'field' },
+    { name: 'temp', kind: 'field' },
+    { name: 'hum', kind: 'field' },
+    { name: 'pres', kind: 'schema-object', type: 'pressure' },
+    { name: 'rain', kind: 'field' },
+
+    {
+      name: 'timestamp',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: '_id',
+      },
+    },
+
+    {
+      name: 'direction',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'w-dir',
+      },
+    },
+
+    {
+      name: 'speed',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'w-avg',
+      },
+    },
+
+    {
+      name: 'gusts',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'w-max',
+      },
+    },
+
+    {
+      name: 'temperature',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'temp',
+      },
+    },
+
+    {
+      name: 'humidity',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'hum',
+      },
+    },
+
+    {
+      name: 'pressure',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'pres.qfe',
+      },
+    },
+  ],
+});
 
 const StationSchema = withDefaults({
   type: 'station',
   fields: [
-    { name: 'altitude', kind: 'field' },
-    { name: 'latitude', kind: 'field' },
-    { name: 'longitude', kind: 'field' },
-    { name: 'isPeak', kind: 'field' },
-    { name: 'providerName', kind: 'field' },
-    { name: 'providerUrl', kind: 'field' },
-    { name: 'name', kind: 'field' },
-    { name: 'last', kind: 'object' },
+    // Fields from the API
+    { name: '_id', kind: 'field' },
+    { name: 'alt', kind: 'field' },
+    { name: 'loc', kind: 'schema-object', type: 'location' },
+    { name: 'peak', kind: 'field' },
+    { name: 'pv-name', kind: 'field' },
+    { name: 'short', kind: 'field' },
+    { name: 'status', kind: 'field' },
+    { name: 'url', kind: 'field' }, // TODO: this does not have to be string
+    { name: 'last', kind: 'schema-object', type: 'reading' },
+
+    // Aliases so that it's not a pain to work with
+    {
+      name: 'altitude',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'alt',
+      },
+    },
+
+    {
+      name: 'location',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'loc',
+        type: 'location',
+      },
+    },
+
+    {
+      name: 'isPeak',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'peak',
+      },
+    },
+
+    {
+      name: 'providerName',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'pv-name',
+      },
+    },
+
+    // TODO: I think this can be sometimes more complicated object
+    {
+      name: 'providerUrl',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'url',
+      },
+    },
+
+    {
+      name: 'name',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'short',
+      },
+    },
+
+    {
+      name: 'latitude',
+      type: 'unwrap',
+      options: {
+        path: 'location.coordinates.1',
+      },
+      kind: 'derived',
+    },
+
+    {
+      name: 'longitude',
+      type: 'unwrap',
+      options: {
+        path: 'location.coordinates.0',
+      },
+      kind: 'derived',
+    },
   ],
 });
 
@@ -81,6 +249,28 @@ export type History = {
   [Type]: 'history';
 };
 
+// TODO: TS shenanigans
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RecordType = { [key: string]: RecordType | any } | any[];
+
+function unwrapDerivation(
+  record: RecordType,
+  options: {
+    path: string;
+  },
+) {
+  return options.path.split('.').reduce((acc, key) => {
+    if (Array.isArray(acc)) {
+      return acc[parseInt(key)];
+    }
+    if (typeof acc === 'object') {
+      return acc[key];
+    }
+    return undefined;
+  }, record);
+}
+unwrapDerivation[Type] = 'unwrap';
+
 export default class StoreService extends Store {
   constructor(args: unknown) {
     super(args);
@@ -100,8 +290,14 @@ export default class StoreService extends Store {
 
   createSchemaService() {
     const schema = new SchemaService();
+    schema.registerResource(PressureSchema);
+    schema.registerResource(ReadingSchema);
+    schema.registerResource(LocationSchema);
     schema.registerResource(StationSchema);
     schema.registerResource(HistorySchema);
+
+    schema.registerDerivation(unwrapDerivation);
+
     registerDerivations(schema);
     return schema;
   }

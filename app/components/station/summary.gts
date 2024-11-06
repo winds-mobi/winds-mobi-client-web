@@ -8,6 +8,7 @@ import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from './wind-direction';
+import RelativeTime from '../relative-time';
 
 export interface StationSummarySignature {
   Args: {
@@ -43,6 +44,14 @@ export default class StationSummary extends Component<StationSummarySignature> {
                   {{t 'station.summary.wind'}}
                 </caption>
                 <tbody>
+                  <tr>
+                    <td>
+                      {{t 'wind.timestamp'}}
+                    </td>
+                    <td class='text-right'>
+                      <RelativeTime @timestamp={{station.last.timestamp}} />
+                    </td>
+                  </tr>
                   <tr>
                     <td>
                       {{t 'wind.speed'}}
