@@ -15,6 +15,7 @@ import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { fn } from '@ember/helper';
 import YouAreHere from './you-are-here';
+import { Portal, PortalTarget } from '@frontile/overlays';
 
 export interface MapSignature {
   Args: {};
@@ -80,6 +81,7 @@ export default class Map extends Component<MapSignature> {
         </:content>
       </Request>
     </LeafletMap>
+    <PortalTarget />
   </template>
 }
 

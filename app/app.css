@@ -12,3 +12,7 @@
 .fixed.inset-0.select-none.z-10 {
   z-index: 1001;
 }
+
+[data-component="overlay"] {
+  z-index: 1001;
+}
