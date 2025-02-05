@@ -1,0 +1,31 @@
+name: Build and deploy production dist files based on main branch
+
+on:
+  push:
+    branches:
+      - main
+      - yann/*
+
+jobs:
+  build-deploy-production-docker:
+    name: Build and deploy
+    environment: v2.winds.mobi
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Write ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          ssh-keyscan -H winds.mobi > ~/.ssh/known_hosts
+      - name: Deploy dist files
+        run: rsync -avz -e "ssh -i ~/.ssh/id_ed25519" --delete dist/ winds@winds.mobi:~/winds-mobi-client-web/
