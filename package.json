@@ -25,7 +25,8 @@
     "lint:types": "glint",
     "start": "vite",
     "test": "concurrently \"pnpm:lint\" \"pnpm:test:*\" --names \"lint,test:\" --prefixColors auto",
-    "test:ember": "vite build --mode test && ember test --path dist"
+    "test:ember": "vite build --mode test && ember test --path dist",
+    "postinstall": "npm rebuild sharp"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
