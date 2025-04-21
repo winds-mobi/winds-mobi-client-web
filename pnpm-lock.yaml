@@ -185,6 +185,9 @@ importers:
       ember-page-title:
         specifier: ^9.0.1
         version: 9.0.1(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))
+      ember-phosphor-icons:
+        specifier: ^0.3.0
+        version: 0.3.0(@babel/core@7.26.10)
       ember-qunit:
         specifier: ^9.0.1
         version: 9.0.2(@ember/test-helpers@4.0.5(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0)))(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(qunit@2.24.1)
@@ -3707,6 +3710,9 @@ packages:
     engines: {node: 16.* || >= 18}
     peerDependencies:
       ember-source: '>= 4.2.0'
+
+  ember-phosphor-icons@0.3.0:
+    resolution: {integrity: sha512-wUfhgu0WEr4yszpRuQL9Yg4zmlYLVQ8FhxyTiD8Bl59ymMihzvPXFtVqIvNEeeyGO7RVJxomJiEx2Wp6fxKoGQ==}
 
   ember-qunit@9.0.2:
     resolution: {integrity: sha512-vAuumvTYgfFpP0LgK1uw2vBEnD7bv1JYh0JUwkFfBiAkCGV7HkjVWNcgQ2agwarfzxLgEaC0hWlOn9adwJmlNg==}
@@ -12219,6 +12225,15 @@ snapshots:
       '@simple-dom/document': 1.4.0
       ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0)
     transitivePeerDependencies:
+      - supports-color
+
+  ember-phosphor-icons@0.3.0(@babel/core@7.26.10):
+    dependencies:
+      '@embroider/addon-shim': 1.10.0
+      '@glimmer/component': 1.1.2(@babel/core@7.26.10)
+      decorator-transforms: 1.2.1(@babel/core@7.26.10)
+    transitivePeerDependencies:
+      - '@babel/core'
       - supports-color
 
   ember-qunit@9.0.2(@ember/test-helpers@4.0.5(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0)))(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(qunit@2.24.1):
