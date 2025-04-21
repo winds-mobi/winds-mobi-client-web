@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { t } from 'ember-intl';
 
 export interface NavbarMobileMenuSignature {
   Args: {};
@@ -19,26 +20,26 @@ export interface NavbarMobileMenuSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignature> {
   <template>
-    {{!-- Mobile menu, show/hide based on menu state. --}}
+    {{! Mobile menu, show/hide based on menu state. }}
     <div class='lg:hidden' id='mobile-menu'>
       <div class='space-y-1 pb-3 pt-2'>
-        {{!-- Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" --}}
+        {{! Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800" }}
         <a
           href='#'
           class='block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700'
-        >Dashboard</a>
+        >{{t 'Dashboard'}}</a>
         <a
           href='#'
           class='block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800'
-        >Team</a>
+        >{{t 'Team'}}</a>
         <a
           href='#'
           class='block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800'
-        >Projects</a>
+        >{{t 'Projects'}}</a>
         <a
           href='#'
           class='block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800'
-        >Calendar</a>
+        >{{t 'Calendar'}}</a>
       </div>
       <div class='border-t border-gray-200 pb-3 pt-4'>
         <div class='flex items-center px-4'>
@@ -50,15 +51,19 @@ export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignatur
             />
           </div>
           <div class='ml-3'>
-            <div class='text-base font-medium text-gray-800'>Tom Cook</div>
-            <div class='text-sm font-medium text-gray-500'>tom@example.com</div>
+            <div class='text-base font-medium text-gray-800'>{{t
+                'Tom Cook'
+              }}</div>
+            <div class='text-sm font-medium text-gray-500'>{{t
+                'tom@example.com'
+              }}</div>
           </div>
           <button
             type='button'
             class='relative ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
           >
             <span class='absolute -inset-1.5'></span>
-            <span class='sr-only'>View notifications</span>
+            <span class='sr-only'>{{t 'View notifications'}}</span>
             <svg
               class='h-6 w-6'
               fill='none'
@@ -79,15 +84,15 @@ export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignatur
           <a
             href='#'
             class='block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-          >Your Profile</a>
+          >{{t 'Your Profile'}}</a>
           <a
             href='#'
             class='block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-          >Settings</a>
+          >{{t 'Settings'}}</a>
           <a
             href='#'
             class='block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-          >Sign out</a>
+          >{{t 'Sign out'}}</a>
         </div>
       </div>
     </div>

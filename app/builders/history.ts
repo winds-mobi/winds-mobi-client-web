@@ -1,14 +1,12 @@
 import { buildBaseURL, buildQueryParams } from '@ember-data/request-utils';
-import { pluralize } from '@ember-data/request-utils/string';
 import type { QueryParamsSource } from '@warp-drive/core-types/params';
 import type { TypeFromInstance } from '@warp-drive/core-types/record';
 import type {
   FindRecordOptions,
-  FindRecordRequestOptions,
   QueryRequestOptions,
 } from '@warp-drive/core-types/request';
 import { query as jsonApiQuery } from '@ember-data/json-api/request';
-import { findRecord as jsonApiFindRecord } from '@ember-data/json-api/request';
+// import { findRecord as jsonApiFindRecord } from '@ember-data/json-api/request';
 
 const defaultQuery = {
   keys: ['w-dir', 'w-avg', 'w-max', 'temp', 'hum'],

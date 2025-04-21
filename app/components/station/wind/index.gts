@@ -26,7 +26,7 @@ export default class StationWinds extends Component<StationWindsSignature> {
 
   <template>
     <Request @request={{this.historyRequest}}>
-      <:content as |historyResult state|>
+      <:content as |historyResult|>
         <StationWindsGraph @data={{historyResult.data}} />
       </:content>
     </Request>

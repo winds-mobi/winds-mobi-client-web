@@ -103,7 +103,7 @@ export default class StationAir extends Component<StationAirSignature> {
 
   <template>
     <Request @request={{this.historyRequest}}>
-      <:content as |historyResult state|>
+      <:content as |historyResult|>
         {{#let (this.dataToChart historyResult.data) as |chartData|}}
           <TimeSeries
             @chartData={{chartData}}

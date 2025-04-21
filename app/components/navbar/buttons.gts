@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import Centering from '../centering';
 import LocationFetcher from '../location-fetcher';
 import List from './list';
 

@@ -54,10 +54,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
         ---
       </:loading>
 
-      <:content as |result state|>
+      <:content as |result|>
 
         <Request @request={{this.historyRequest}}>
-          <:content as |historyResult state2|>
+          <:content>
             <div
               class='border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between'
             >
@@ -71,7 +71,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
               class='border-l-4 border-r-4 border-slate-400 overflow-y-scroll'
             >
               <div class='border-b border-gray-200'>
-                <nav class='-mb-px flex w-full' aria-label='Tabs'>
+                <nav class='-mb-px flex w-full' aria-label={{t 'Tab'}}>
                   <LinkTo
                     @route='map.station.summary'
                     class='flex-1 border-b-2 px-1 py-4 text-center text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
