@@ -15,7 +15,9 @@ module.exports = {
   env: {
     browser: true,
   },
-  rules: {},
+  rules: {
+    'ember/no-empty-glimmer-component-classes': 'off',
+  },
   overrides: [
     // ts files
     {
@@ -24,7 +26,6 @@ module.exports = {
         'plugin:@typescript-eslint/eslint-recommended',
         'plugin:@typescript-eslint/recommended',
       ],
-      rules: {},
     },
     // node files
     {

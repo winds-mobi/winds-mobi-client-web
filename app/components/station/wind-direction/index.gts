@@ -30,7 +30,7 @@ export default class WindDirection extends Component<WindDirectionSignature> {
 
   <template>
     <Request @request={{this.historyRequest}}>
-      <:content as |historyResult state|>
+      <:content as |historyResult|>
         <WindDirectionGraph @data={{historyResult.data}} />
       </:content>
     </Request>

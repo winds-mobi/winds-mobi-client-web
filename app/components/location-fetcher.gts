@@ -1,9 +1,4 @@
-import { on } from '@ember/modifier';
-import { action } from '@ember/object';
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
-import { task } from 'ember-concurrency';
-import { Button } from '@frontile/buttons';
 import Gps from 'ember-phosphor-icons/components/ph-gps';
 import GpsFix from 'ember-phosphor-icons/components/ph-gps-fix';
 import GpsSlash from 'ember-phosphor-icons/components/ph-gps-slash';
@@ -11,13 +6,6 @@ import { ToggleButton } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type LocationService from 'winds-mobi-client-web/services/location';
 import { inject as service } from '@ember/service';
-
-interface GeolocationPosition {
-  coords: {
-    latitude: number;
-    longitude: number;
-  };
-}
 
 export interface LocationFetcherSignature {
   Args: {};

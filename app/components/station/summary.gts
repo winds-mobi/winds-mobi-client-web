@@ -37,7 +37,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
             ---
           </:loading>
 
-          <:content as |stationResult stationState|>
+          <:content as |stationResult|>
             {{#let stationResult.data as |station|}}
               <table class='w-full'>
                 <caption class='text-left font-bold'>

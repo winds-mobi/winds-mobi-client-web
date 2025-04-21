@@ -87,7 +87,7 @@ export default class Polar extends Component<PolarSignature> {
 
   <template>
     <HighCharts
-      @content={{this.args.chartData}}
+      @content={{@chartData}}
       @chartOptions={{this.mergedChartOptions}}
     />
   </template>

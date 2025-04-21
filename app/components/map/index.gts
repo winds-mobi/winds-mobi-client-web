@@ -60,7 +60,7 @@ export default class Map extends Component<MapSignature> {
           ---
         </:loading>
 
-        <:content as |result state|>
+        <:content as |result|>
           {{#each result.data as |r|}}
             <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
               <layers.rotated-marker
