@@ -1,4 +1,4 @@
-// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
+ 
 import RequestManager from '@ember-data/request';
 import Fetch from '@ember-data/request/fetch';
 import Store, { CacheHandler } from '@ember-data/store';

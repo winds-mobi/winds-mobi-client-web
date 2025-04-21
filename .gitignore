@@ -23,9 +23,3 @@
 
 # broccoli-debug
 /DEBUG/
-
-# vscode
-/.vscode
-
-# OSX
-.DS_Store

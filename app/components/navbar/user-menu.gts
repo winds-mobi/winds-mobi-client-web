@@ -10,7 +10,7 @@ export interface NavbarUserMenuSignature {
   Element: null;
 }
 
-// eslint-disable-next-line ember/no-empty-glimmer-component-classes
+ 
 export default class NavbarUserMenu extends Component<NavbarUserMenuSignature> {
   @tracked isMenuVisible = false;
 
