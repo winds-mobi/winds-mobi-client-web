@@ -55,6 +55,7 @@
     "@warp-drive/core-types": "0.0.0-alpha.94",
     "@warp-drive/ember": "0.0.0-alpha.69",
     "@warp-drive/schema-record": "0.0.0-alpha.94",
+        "ember-phosphor-icons": "^0.3.0",
 
         "@types/leaflet": "1.9.12",
             "ember-cli-image-transformer": "^7.0.0",
