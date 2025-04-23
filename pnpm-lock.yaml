@@ -188,8 +188,8 @@ importers:
         specifier: ^7.0.5
         version: 7.1.6(@ember/test-helpers@4.0.5(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0)))(@glint/template@1.4.1-unstable.d17c1f1)(typescript@5.5.4)(webpack@5.94.0)
       ember-leaflet:
-        specifier: ^5.1.3
-        version: 5.1.3(patch_hash=900e4f8e17b9d0ed55cf777a1703335ae268238efe1a366ad7ddd74d416e59d1)(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(leaflet@1.9.4)(webpack@5.94.0)
+        specifier: github:MichalBryxi/ember-leaflet#a38e47b73e0fa651552fd590c9bb2a0259062f04
+        version: https://codeload.github.com/MichalBryxi/ember-leaflet/tar.gz/a38e47b73e0fa651552fd590c9bb2a0259062f04(patch_hash=900e4f8e17b9d0ed55cf777a1703335ae268238efe1a366ad7ddd74d416e59d1)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(leaflet@1.9.4)(webpack@5.94.0)
       ember-leaflet-rotated-marker:
         specifier: ^1.0.0
         version: 1.0.0
@@ -3780,9 +3780,10 @@ packages:
     resolution: {integrity: sha512-Ajq2CQ6tv5qXej5mDO6at9TaWfuGjIXknUK4GiHYdXh2hco/A9iRqtibrQGYLpEeVww4UlvG/ocdt6iAqUivwQ==}
     engines: {node: 10.* || >= 12}
 
-  ember-leaflet@5.1.3:
-    resolution: {integrity: sha512-7rzZePUCjapMzkE1SXsgSDQ28nG1w/WIMt80wf72UG4LIMHOGHibenk3naFllu1Np9wApCHxLB6x4ig8clt2Aw==}
-    engines: {node: 14.* || 16.* || >= 18}
+  ember-leaflet@https://codeload.github.com/MichalBryxi/ember-leaflet/tar.gz/a38e47b73e0fa651552fd590c9bb2a0259062f04:
+    resolution: {tarball: https://codeload.github.com/MichalBryxi/ember-leaflet/tar.gz/a38e47b73e0fa651552fd590c9bb2a0259062f04}
+    version: 5.1.3
+    engines: {node: '>= 18'}
     peerDependencies:
       ember-source: ^4.0.0 || ^5.0.0
       leaflet: '>=0.7'
@@ -12269,15 +12270,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-leaflet@5.1.3(patch_hash=900e4f8e17b9d0ed55cf777a1703335ae268238efe1a366ad7ddd74d416e59d1)(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(leaflet@1.9.4)(webpack@5.94.0):
+  ember-leaflet@https://codeload.github.com/MichalBryxi/ember-leaflet/tar.gz/a38e47b73e0fa651552fd590c9bb2a0259062f04(patch_hash=900e4f8e17b9d0ed55cf777a1703335ae268238efe1a366ad7ddd74d416e59d1)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(leaflet@1.9.4)(webpack@5.94.0):
     dependencies:
+      '@babel/core': 7.26.10
       '@ember/string': 4.0.1
       '@glimmer/component': 1.1.2(@babel/core@7.26.10)
       '@glimmer/tracking': 1.1.2
       broccoli-funnel: 3.0.8
       broccoli-merge-trees: 4.2.0
       ember-auto-import: 2.10.0(@glint/template@1.4.1-unstable.d17c1f1)(webpack@5.94.0)
-      ember-cli-babel: 7.26.11
+      ember-cli-babel: 8.2.0(@babel/core@7.26.10)
       ember-cli-htmlbars: 6.3.0
       ember-composability-tools: 1.3.0(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(webpack@5.94.0)
       ember-in-element-polyfill: 1.0.1
@@ -12287,7 +12289,6 @@ snapshots:
       leaflet: 1.9.4
       resolve: 1.22.8
     transitivePeerDependencies:
-      - '@babel/core'
       - '@glint/template'
       - supports-color
       - webpack
