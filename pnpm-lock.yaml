@@ -185,8 +185,8 @@ importers:
         specifier: ^4.0.2
         version: 4.0.3(@babel/core@7.26.10)(@glimmer/tracking@1.1.2)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))
       ember-highcharts:
-        specifier: github:MichalBryxi/ember-highcharts#4ebc23a0685dccfe42d6391e3e3b4c6daf260715&path:ember-highcharts
-        version: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/4ebc23a0685dccfe42d6391e3e3b4c6daf260715#path:ember-highcharts(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0)
+        specifier: github:MichalBryxi/ember-highcharts#627b07e3f16a39718fd92b0246278703cc9f43a7&path:ember-highcharts
+        version: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/627b07e3f16a39718fd92b0246278703cc9f43a7#path:ember-highcharts(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0)
       ember-intl:
         specifier: ^7.0.5
         version: 7.1.6(@ember/test-helpers@4.0.5(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0)))(@glint/template@1.4.1-unstable.d17c1f1)(typescript@5.5.4)(webpack@5.94.0)
@@ -3796,12 +3796,12 @@ packages:
     peerDependencies:
       ember-source: ^3.25.0 || >=4.0.0
 
-  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/4ebc23a0685dccfe42d6391e3e3b4c6daf260715#path:ember-highcharts:
-    resolution: {path: ember-highcharts, tarball: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/4ebc23a0685dccfe42d6391e3e3b4c6daf260715}
+  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/627b07e3f16a39718fd92b0246278703cc9f43a7#path:ember-highcharts:
+    resolution: {path: ember-highcharts, tarball: https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/627b07e3f16a39718fd92b0246278703cc9f43a7}
     version: 6.2.0
     peerDependencies:
       ember-source: '>= 3.28.0'
-      highcharts: '>= 11.0.0'
+      highcharts: '>= 12.0.0'
 
   ember-in-element-polyfill@1.0.1:
     resolution: {integrity: sha512-eHs+7D7PuQr8a1DPqsJTsEyo3FZ1XuH6WEZaEBPDa9s0xLlwByCNKl8hi1EbXOgvgEZNHHi9Rh0vjxyfakrlgg==}
@@ -12239,7 +12239,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/4ebc23a0685dccfe42d6391e3e3b4c6daf260715#path:ember-highcharts(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0):
+  ember-highcharts@https://codeload.github.com/MichalBryxi/ember-highcharts/tar.gz/627b07e3f16a39718fd92b0246278703cc9f43a7#path:ember-highcharts(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0):
     dependencies:
       '@babel/core': 7.26.10
       '@ember/render-modifiers': 2.1.0(@babel/core@7.26.10)(@glint/template@1.4.1-unstable.d17c1f1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.4.1-unstable.d17c1f1)(rsvp@4.8.5)(webpack@5.94.0))

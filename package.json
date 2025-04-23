@@ -83,7 +83,7 @@
     "ember-cli-htmlbars": "^6.3.0",
     "ember-cli-image-transformer": "^7.0.0",
     "ember-concurrency": "^4.0.2",
-    "ember-highcharts": "github:MichalBryxi/ember-highcharts#4ebc23a0685dccfe42d6391e3e3b4c6daf260715&path:ember-highcharts",
+    "ember-highcharts": "github:MichalBryxi/ember-highcharts#627b07e3f16a39718fd92b0246278703cc9f43a7&path:ember-highcharts",
     "ember-intl": "^7.0.5",
     "ember-leaflet": "github:MichalBryxi/ember-leaflet#a38e47b73e0fa651552fd590c9bb2a0259062f04",
     "ember-leaflet-rotated-marker": "^1.0.0",
