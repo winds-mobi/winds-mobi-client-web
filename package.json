@@ -105,7 +105,6 @@
     "globals": "^15.15.0",
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
-    "postcss": "^8.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-ember-template-tag": "^2.0.4",
     "qunit": "^2.24.1",
