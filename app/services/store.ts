@@ -1,4 +1,3 @@
- 
 import RequestManager from '@ember-data/request';
 import Fetch from '@ember-data/request/fetch';
 import Store, { CacheHandler } from '@ember-data/store';
@@ -257,7 +256,7 @@ function unwrapDerivation(
   record: RecordType,
   options: {
     path: string;
-  },
+  }
 ) {
   return options.path.split('.').reduce((acc, key) => {
     if (Array.isArray(acc)) {
@@ -304,7 +303,7 @@ export default class StoreService extends Store {
 
   instantiateRecord(
     identifier: StableRecordIdentifier,
-    createRecordArgs: { [key: string]: unknown },
+    createRecordArgs: { [key: string]: unknown }
   ) {
     return instantiateRecord(this, identifier, createRecordArgs);
   }

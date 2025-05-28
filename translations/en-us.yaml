@@ -32,7 +32,7 @@ air:
   rain: Rain
 
 format:
-  azimuth: "{azimuth}°"
-  percent: "{value}%"
-  pressure: "{value}hPA"
-  rain: "{value}l/m²"
+  azimuth: '{azimuth}°'
+  percent: '{value}%'
+  pressure: '{value}hPA'
+  rain: '{value}l/m²'

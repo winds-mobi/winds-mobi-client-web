@@ -45,7 +45,7 @@ function findRecord<T>(
   type: TypeFromInstance<T>,
   id: string,
   query?: QueryParamsSource,
-  options?: FindRecordOptions,
+  options?: FindRecordOptions
 ): FindRecordRequestOptions {
   const baseURL = buildBaseURL({
     resourcePath: pluralize(type),
@@ -54,7 +54,7 @@ function findRecord<T>(
   });
   const qp = buildQueryParams(
     { ...defaultQuery, ...query },
-    { ...defaultOptions.urlParamsSettings, ...options?.urlParamsSettings },
+    { ...defaultOptions.urlParamsSettings, ...options?.urlParamsSettings }
   );
   const url = `${baseURL}?${qp}`;
 
@@ -70,12 +70,12 @@ function findRecord<T>(
 function query<T>(
   type: TypeFromInstance<T>,
   query?: QueryParamsSource,
-  options?: FindRecordOptions,
+  options?: FindRecordOptions
 ): QueryRequestOptions {
   return jsonApiQuery(
     type,
     { ...defaultQuery, ...query },
-    { ...defaultOptions, ...options },
+    { ...defaultOptions, ...options }
   );
 }
 

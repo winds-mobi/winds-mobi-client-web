@@ -98,7 +98,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
 
   <template>
     <HighCharts
-      @mode='StockChart'
+      @mode="StockChart"
       @content={{@chartData}}
       @chartOptions={{this.mergedChartOptions}}
     />
