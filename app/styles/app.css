@@ -1,0 +1,13 @@
+.leaflet-div-icon {
+  border: none;
+  background: none;
+}
+
+/* [data-component="overlay"], */
+[data-component='overlay'] *,
+.fixed.inset-0.select-none.z-10 {
+  z-index: 1001;
+}
+
+/* stylelint-disable-next-line import-notation, import-notation, no-invalid-position-at-import-rule */
+@import 'tailwindcss';

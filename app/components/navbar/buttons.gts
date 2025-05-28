@@ -13,13 +13,13 @@ export interface NavbarButtonsSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class NavbarButtons extends Component<NavbarButtonsSignature> {
   <template>
-    <div class='flex flex-1 lg:justify-end px-2 lg:px-0 py-2'>
+    <div class="flex flex-1 lg:justify-end px-2 lg:px-0 py-2">
 
-      <div class='lg:ml-6 flex lg:space-x-8 gap-2'>
+      <div class="lg:ml-6 flex lg:space-x-8 gap-2">
 
         <LocationFetcher />
 
-        <List />
+        {{! <List /> }}
 
       </div>
     </div>

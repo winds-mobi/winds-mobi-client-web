@@ -44,14 +44,14 @@ export default class Map extends Component<MapSignature> {
 
   <template>
     <LeafletMap
-      class='w-full h-full'
+      class="w-full h-full"
       @lat={{this.location.map.latitude}}
       @lng={{this.location.map.longitude}}
       @zoom={{this.location.map.zoom}}
       @onMoveend={{this.location.updateLocation}}
       as |layers|
     >
-      <layers.tile @url='http://{s}.tile.osm.org/{z}/{x}/{y}.png' />
+      <layers.tile @url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
 
       <YouAreHere @layers={{layers}} />
 

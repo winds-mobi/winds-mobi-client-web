@@ -1,33 +1,45 @@
 {
   "extends": "@tsconfig/ember/tsconfig.json",
-  "compilerOptions": {
-    // The combination of `baseUrl` with `paths` allows Ember's classic package
-    // layout, which is not resolvable with the Node resolution algorithm, to
-    // work with TypeScript.
-    "baseUrl": ".",
-    "paths": {
-      "winds-mobi-client-web/tests/*": ["tests/*"],
-      "winds-mobi-client-web/*": ["app/*"],
-      "*": ["types/*"]
-    },
-    "types": [
-      "ember-source/types",
-      "./node_modules/@ember-data/store/unstable-preview-types",
-      "./node_modules/@ember-data/graph/unstable-preview-types",
-      "./node_modules/@ember-data/json-api/unstable-preview-types",
-      "./node_modules/@ember-data/request/unstable-preview-types",
-      "./node_modules/@ember-data/request-utils/unstable-preview-types",
-      "./node_modules/@ember-data/tracking/unstable-preview-types",
-      "./node_modules/@warp-drive/core-types/unstable-preview-types",
-      "./node_modules/@warp-drive/ember/unstable-preview-types",
-      "./node_modules/@warp-drive/build-config/unstable-preview-types",
-      "./node_modules/@warp-drive/schema-record/unstable-preview-types"
-    ]
-  },
+  "include": [
+    "app", "tests", "types"
+  ],
   "glint": {
     "environment": [
       "ember-loose",
-      "ember-template-imports",
+      "ember-template-imports"
     ]
-  }
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    /**
+      https://www.typescriptlang.org/tsconfig#noEmitOnError
+      Do not block emit on TS errors.
+    */
+    "noEmitOnError": false,
+
+    "declaration": false,
+    "declarationMap": false,
+
+    /**
+      https://www.typescriptlang.org/tsconfig#allowImportingTsExtensions
+
+      We want our tooling to know how to resolve our custom files so the appropriate plugins
+      can do the proper transformations on those files.
+    */
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "winds-mobi-client-web/tests/*": [
+        "./tests/*"
+      ],
+      "winds-mobi-client-web/*": [
+        "./app/*"
+      ],
+      "*": [
+        "./types/*"
+      ]
+    },
+    "types": [
+      "ember-source/types"
+    ]
+  },
 }

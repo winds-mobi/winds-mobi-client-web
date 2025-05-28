@@ -1,0 +1,11 @@
+overrides:
+  "@ember/string": 4.0.1
+
+packageExtensions:
+  ember-leaflet:
+    dependencies:
+      "@ember/string": 4.0.1
+      ember-auto-import: 2.10.0
+
+patchedDependencies:
+  ember-leaflet: patches/ember-leaflet.patch
