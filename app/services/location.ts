@@ -27,7 +27,7 @@ export default class LocationService extends Service {
       const position: GeolocationPosition = await new Promise(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
-        },
+        }
       );
 
       this.gps = new TrackedObject({

@@ -30,8 +30,8 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <div class='flex flex-row px-2 py-2 sm:p-6'>
-      <div class='flex flex-col w-2/3 gap-4'>
+    <div class="flex flex-row px-2 py-2 sm:p-6">
+      <div class="flex flex-col w-2/3 gap-4">
         <Request @request={{this.stationRequest}}>
           <:loading>
             ---
@@ -39,50 +39,50 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
           <:content as |stationResult|>
             {{#let stationResult.data as |station|}}
-              <table class='w-full'>
-                <caption class='text-left font-bold'>
-                  {{t 'station.summary.wind'}}
+              <table class="w-full">
+                <caption class="text-left font-bold">
+                  {{t "station.summary.wind"}}
                 </caption>
                 <tbody>
                   <tr>
                     <td>
-                      {{t 'wind.timestamp'}}
+                      {{t "wind.timestamp"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       <RelativeTime @timestamp={{station.last.timestamp}} />
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      {{t 'wind.speed'}}
+                      {{t "wind.speed"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{formatNumber
                         station.last.speed
-                        style='unit'
-                        unit='kilometer-per-hour'
+                        style="unit"
+                        unit="kilometer-per-hour"
                       }}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      {{t 'wind.gusts'}}
+                      {{t "wind.gusts"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{formatNumber
                         station.last.gusts
-                        style='unit'
-                        unit='kilometer-per-hour'
+                        style="unit"
+                        unit="kilometer-per-hour"
                       }}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      {{t 'wind.direction'}}
+                      {{t "wind.direction"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{azimuthToCardinal station.last.direction}}
-                      ({{t 'format.azimuth' azimuth=station.last.direction}})
+                      ({{t "format.azimuth" azimuth=station.last.direction}})
                     </td>
                   </tr>
                 </tbody>
@@ -97,16 +97,16 @@ export default class StationSummary extends Component<StationSummarySignature> {
           {{formatNumber station.altitude style='unit' unit='meter'}}
         </div> --}}
 
-              <table class='w-full'>
-                <caption class='text-left font-bold'>
-                  {{t 'station.summary.wind-last-hour'}}
+              <table class="w-full">
+                <caption class="text-left font-bold">
+                  {{t "station.summary.wind-last-hour"}}
                 </caption>
                 <tbody>
                   <tr>
                     <td>
-                      {{t 'wind.minimum'}}
+                      {{t "wind.minimum"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{!-- {{formatNumber
                   station.last.speed
                   style='unit'
@@ -116,9 +116,9 @@ export default class StationSummary extends Component<StationSummarySignature> {
                   </tr>
                   <tr>
                     <td>
-                      {{t 'wind.mean'}}
+                      {{t "wind.mean"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{!-- {{formatNumber
                   station.last.speed
                   style='unit'
@@ -128,9 +128,9 @@ export default class StationSummary extends Component<StationSummarySignature> {
                   </tr>
                   <tr>
                     <td>
-                      {{t 'wind.maximum'}}
+                      {{t "wind.maximum"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{!-- {{formatNumber
                   station.last.speed
                   style='unit'
@@ -141,45 +141,45 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 </tbody>
               </table>
 
-              <table class='w-full'>
-                <caption class='text-left font-bold'>
-                  {{t 'station.summary.air'}}
+              <table class="w-full">
+                <caption class="text-left font-bold">
+                  {{t "station.summary.air"}}
                 </caption>
                 <tbody>
                   <tr>
                     <td>
-                      {{t 'air.temperature'}}
+                      {{t "air.temperature"}}
                     </td>
-                    <td class='text-right'>
+                    <td class="text-right">
                       {{formatNumber
                         station.last.temperature
-                        style='unit'
-                        unit='celsius'
+                        style="unit"
+                        unit="celsius"
                       }}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      {{t 'air.humidity'}}
+                      {{t "air.humidity"}}
                     </td>
-                    <td class='text-right'>
-                      {{t 'format.percent' value=station.last.humidity}}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {{t 'air.pressure'}}
-                    </td>
-                    <td class='text-right'>
-                      {{t 'format.pressure' value=station.last.pressure}}
+                    <td class="text-right">
+                      {{t "format.percent" value=station.last.humidity}}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      {{t 'air.rain'}}
+                      {{t "air.pressure"}}
                     </td>
-                    <td class='text-right'>
-                      {{t 'format.rain' value=station.last.rain}}
+                    <td class="text-right">
+                      {{t "format.pressure" value=station.last.pressure}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      {{t "air.rain"}}
+                    </td>
+                    <td class="text-right">
+                      {{t "format.rain" value=station.last.rain}}
                     </td>
                   </tr>
                 </tbody>
@@ -188,7 +188,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
           </:content>
         </Request>
       </div>
-      <div class='w-1/3 items-start'>
+      <div class="w-1/3 items-start">
         <WindDirection @stationId={{@stationId}} />
       </div>
     </div>

@@ -4,7 +4,7 @@ import { t } from 'ember-intl';
 
 export default Route(
   <template>
-    {{pageTitle (t 'Index')}}
+    {{pageTitle (t "Index")}}
     {{outlet}}
-  </template>,
+  </template>
 );

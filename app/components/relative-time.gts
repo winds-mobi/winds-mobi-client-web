@@ -38,7 +38,7 @@ export interface RelativeTimeSignature {
 export default class RelativeTime extends Component<RelativeTimeSignature> {
   get relativeTime() {
     return autoRelativeTimeFormat(
-      this.args.timestamp - Math.round(Date.now() / 1000),
+      this.args.timestamp - Math.round(Date.now() / 1000)
     );
   }
 

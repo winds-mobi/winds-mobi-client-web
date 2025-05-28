@@ -18,33 +18,33 @@ export interface MapPopoverSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class MapPopover extends Component<MapPopoverSignature> {
   <template>
-    <div class='flex flex-col'>
+    <div class="flex flex-col">
       <LinkTo
-        @route='map.station'
+        @route="map.station"
         @model={{@station.id}}
-        class='font-bold text-lg'
+        class="font-bold text-lg"
       >
         {{! <Heart class='inline' /> }}
         {{@station.name}}
       </LinkTo>
       <div>
-        <Mountains class='inline' />
-        {{formatNumber @station.altitude style='unit' unit='meter'}}
+        <Mountains class="inline" />
+        {{formatNumber @station.altitude style="unit" unit="meter"}}
       </div>
       <div>
-        <Wind class='inline' />
+        <Wind class="inline" />
         {{formatNumber
           @station.last.speed
-          style='unit'
-          unit='kilometer-per-hour'
+          style="unit"
+          unit="kilometer-per-hour"
         }}
       </div>
       <div>
-        <Speedometer class='inline' />
+        <Speedometer class="inline" />
         {{formatNumber
           @station.last.gusts
-          style='unit'
-          unit='kilometer-per-hour'
+          style="unit"
+          unit="kilometer-per-hour"
         }}
       </div>
       {{!-- <div>

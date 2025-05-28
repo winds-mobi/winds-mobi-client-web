@@ -5,10 +5,10 @@ import Navbar from 'winds-mobi-client-web/components/navbar';
 
 export default Route(
   <template>
-    {{pageTitle (t 'application.name')}}
+    {{pageTitle (t "application.name")}}
 
     <Navbar />
 
     {{outlet}}
-  </template>,
+  </template>
 );
