@@ -11,7 +11,7 @@ module.exports = async function (defaults) {
     'ember-cli-image-transformer': {
       images: [
         {
-          inputFilename: 'public/images/windmobile.png',
+          inputFilename: 'public/images/logo.png',
           outputFileName: 'appicon-',
           convertTo: 'png',
           destination: 'assets/icons/',

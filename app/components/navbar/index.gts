@@ -17,20 +17,20 @@ export interface NavbarSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class Navbar extends Component<NavbarSignature> {
   <template>
-    <nav class='bg-white shadow'>
-      <div class='px-2 sm:px-4 lg:px-8'>
-        <div class='flex h-16 justify-between'>
+    <nav class="bg-white shadow">
+      <div class="px-2 sm:px-4 lg:px-8">
+        <div class="flex h-16 justify-between">
           <NavbarLogo />
 
-          <NavbarSearch />
+          {{! <NavbarSearch /> }}
 
           <NavbarButtons />
 
           {{! TODO: <NavbarMobileMenu::Button /> }}
-          <div class='hidden lg:ml-4 lg:flex lg:items-center'>
+          <div class="hidden lg:ml-4 lg:flex lg:items-center">
             {{! <NavbarNotifications /> }}
 
-            <NavbarUserMenu />
+            {{! <NavbarUserMenu /> }}
           </div>
         </div>
       </div>
