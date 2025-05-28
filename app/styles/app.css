@@ -9,4 +9,5 @@
   z-index: 1001;
 }
 
+/* stylelint-disable-next-line import-notation, import-notation, no-invalid-position-at-import-rule */
 @import 'tailwindcss';
