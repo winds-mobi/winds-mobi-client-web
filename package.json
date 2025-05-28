@@ -6,6 +6,7 @@
   "repository": "",
   "license": "MIT",
   "author": "",
+  "packageManager": "pnpm@9.7.0",
   "directories": {
     "doc": "doc",
     "test": "tests"

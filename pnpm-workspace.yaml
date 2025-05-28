@@ -9,3 +9,6 @@ packageExtensions:
 
 patchedDependencies:
   ember-leaflet: patches/ember-leaflet.patch
+
+packages:
+  - '.'
