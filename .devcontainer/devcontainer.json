@@ -1,0 +1,45 @@
+{
+	"name": "winds.mobi client wbe",
+  "dockerComposeFile": "../compose.yaml",
+  "service": "ui",
+  "workspaceFolder": "/app",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "EmberTooling.emberjs",
+        "EmberTooling.vscode-ember",
+        "lifeart.vscode-glimmer-syntax",
+        "dbaeumer.vscode-eslint",
+        "stylelint.vscode-stylelint",
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig",
+        "typed-ember.glint-vscode@1.4.15",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": false,
+        "typescript.tsserver.useSeparateSyntaxServer": false,
+        "typescript.tsserver.maxTsServerMemory": 4096,
+        "eslint.validate": [
+          "javascript",
+          "typescript",
+          "glimmer-js",
+          "glimmer-ts"
+        ],
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "always",
+          "source.fixAll.eslint": "always"
+        },
+        "[glimmer-js]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[glimmer-ts]": { "editor.defaultFormatter": "esbenp.prettier-vscode" }
+      },
+      "typescript.tsserver.watchOptions": {
+        "watchFile": "useFsEvents",
+        "watchDirectory": "useFsEvents"
+      }
+    }
+  }
+}

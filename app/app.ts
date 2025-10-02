@@ -8,6 +8,7 @@ import { setBuildURLConfig } from '@ember-data/request-utils';
 
 setBuildURLConfig({
   host: 'https://winds.mobi/api',
+  // host: 'http://localhost:8001/api',
   namespace: '2.3',
 });
 
