@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import { formatNumber, t } from 'ember-intl';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';

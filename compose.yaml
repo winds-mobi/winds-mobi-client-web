@@ -1,0 +1,16 @@
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    # env_file:
+    # - ./ui/.env
+    ports:
+      - 4200:4200
+    volumes:
+      - .:/app
+      - /app/node_modules
+    labels:
+      - dev.orbstack.domains=ui.winds-mobi-client-web.orb.local
+      - dev.orbstack.http-port=4200

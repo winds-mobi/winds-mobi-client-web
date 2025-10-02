@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import { Request } from '@warp-drive/ember';
 // import { query } from '@ember-data/rest/request';

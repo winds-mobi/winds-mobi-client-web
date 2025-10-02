@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import NavbarLogo from './logo';
 // import NavbarSearch from './search';

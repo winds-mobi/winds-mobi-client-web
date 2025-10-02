@@ -1,0 +1,21 @@
+# node stuff
+node_modules
+.pnpm-store
+
+# logs
+pnpm-debug.log*
+
+# source control
+.git
+.gitignore
+
+# docker files
+Dockerfile
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ignore local env files
+.env

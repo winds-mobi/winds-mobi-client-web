@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import Application from '@ember/application';
 import compatModules from '@embroider/virtual/compat-modules';
 import Resolver from 'ember-resolver';
@@ -8,6 +9,7 @@ import { setBuildURLConfig } from '@ember-data/request-utils';
 
 setBuildURLConfig({
   host: 'https://winds.mobi/api',
+  // host: 'http://localhost:8001/api',
   namespace: '2.3',
 });
 

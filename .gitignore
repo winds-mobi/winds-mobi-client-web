@@ -24,3 +24,8 @@
 
 # broccoli-debug
 /DEBUG/
+
+/.vscode
+
+/node-compile-cache
+/dev-dist

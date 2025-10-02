@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import TimeSeries from '../chart/time-series';
 import { Request } from '@warp-drive/ember';
