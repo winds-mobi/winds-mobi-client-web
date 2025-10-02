@@ -25,7 +25,8 @@
     "start": "vite --host 0.0.0.0 --force",
     "test": "concurrently \"pnpm:lint\" \"pnpm:test:*\" --names \"lint,test:\" --prefixColors auto",
     "test:ember": "vite build --mode test && ember test --path dist",
-    "postinstall": "npm rebuild sharp"
+    "postinstall": "npm rebuild sharp",
+    "generate-pwa-assets": "pwa-assets-generator"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
@@ -47,6 +48,8 @@
     "@embroider/compat": "^4.0.3",
     "@embroider/config-meta-loader": "^1.0.0",
     "@embroider/core": "^4.0.3",
+    "@vite-pwa/assets-generator": "^1.0.1",
+    "vite-plugin-pwa": "^1.0.3",
     "@embroider/macros": "^1.16.12",
     "@embroider/util": "^1.13.2",
     "@embroider/vite": "^1.1.1",
