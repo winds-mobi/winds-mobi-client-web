@@ -48,8 +48,6 @@
     "@embroider/compat": "^4.0.3",
     "@embroider/config-meta-loader": "^1.0.0",
     "@embroider/core": "^4.0.3",
-    "@vite-pwa/assets-generator": "^1.0.1",
-    "vite-plugin-pwa": "^1.0.3",
     "@embroider/macros": "^1.16.12",
     "@embroider/util": "^1.13.2",
     "@embroider/vite": "^1.1.1",
@@ -70,6 +68,7 @@
     "@types/leaflet": "1.9.12",
     "@types/qunit": "^2.19.12",
     "@types/rsvp": "^4.0.9",
+    "@vite-pwa/assets-generator": "^1.0.1",
     "@warp-drive/build-config": "0.0.0-alpha.31",
     "@warp-drive/core-types": "0.0.0-alpha.94",
     "@warp-drive/ember": "0.0.0-alpha.69",
@@ -106,6 +105,9 @@
     "globals": "^15.15.0",
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
+    "lint-to-the-future": "^2.6.4",
+    "lint-to-the-future-ember-template": "^3.1.0",
+    "lint-to-the-future-eslint": "^3.2.0",
     "prettier": "^3.5.3",
     "prettier-plugin-ember-template-tag": "^2.0.4",
     "qunit": "^2.24.1",
@@ -116,7 +118,8 @@
     "tracked-built-ins": "^3.4.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.27.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^1.0.3"
   },
   "engines": {
     "node": ">= 18"
