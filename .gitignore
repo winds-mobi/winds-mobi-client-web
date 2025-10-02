@@ -26,3 +26,5 @@
 /DEBUG/
 
 /.vscode
+
+/node-compile-cache
