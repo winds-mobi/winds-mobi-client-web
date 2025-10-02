@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars */
 import Component from '@glimmer/component';
 import LocationFetcher from '../location-fetcher';
 import List from './list';

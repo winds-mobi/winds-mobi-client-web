@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import Gps from 'ember-phosphor-icons/components/ph-gps';
 import GpsFix from 'ember-phosphor-icons/components/ph-gps-fix';

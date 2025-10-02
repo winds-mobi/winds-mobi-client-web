@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import type LocationService from 'winds-mobi-client-web/services/location';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
 

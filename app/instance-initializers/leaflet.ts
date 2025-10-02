@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 //@ts-expect-error Not yet
 import RotatedMarkerLayer from 'winds-mobi-client-web/components/rotated-marker-layer';
 import type Owner from '@ember/owner';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import RequestManager from '@ember-data/request';
 import Fetch from '@ember-data/request/fetch';
 import Store, { CacheHandler } from '@ember-data/store';

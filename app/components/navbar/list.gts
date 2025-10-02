@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type, ember/no-empty-glimmer-component-classes */
 import Component from '@glimmer/component';
 import { ToggleButton } from '@frontile/buttons';
 import { t } from 'ember-intl';

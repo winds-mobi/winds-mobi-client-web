@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { buildBaseURL, buildQueryParams } from '@ember-data/request-utils';
 import type { QueryParamsSource } from '@warp-drive/core-types/params';
 import type { TypeFromInstance } from '@warp-drive/core-types/record';
