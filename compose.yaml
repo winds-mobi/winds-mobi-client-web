@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
       target: base
     # env_file:
-      # - ./ui/.env
+    # - ./ui/.env
     ports:
       - 4200:4200
     volumes:
