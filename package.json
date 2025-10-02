@@ -83,7 +83,6 @@
     "ember-cli-babel": "^8.2.0",
     "ember-cli-deprecation-workflow": "^3.3.0",
     "ember-cli-htmlbars": "^6.3.0",
-    "ember-cli-image-transformer": "^7.0.0",
     "ember-concurrency": "^4.0.2",
     "ember-highcharts": "^7.0.0",
     "ember-intl": "^7.0.5",

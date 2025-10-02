@@ -7,20 +7,6 @@ module.exports = async function (defaults) {
   const { setConfig } = await import('@warp-drive/build-config');
   const { buildOnce } = await import('@embroider/vite');
 
-  let options = {
-    'ember-cli-image-transformer': {
-      images: [
-        {
-          inputFilename: 'public/images/logo.png',
-          outputFileName: 'appicon-',
-          convertTo: 'png',
-          destination: 'assets/icons/',
-          sizes: [32, 192, 280, 512],
-        },
-      ],
-    },
-  };
-
   let app = new EmberApp(defaults, {
     'ember-cli-babel': { enableTypeScriptTransform: true },
     babel: {
@@ -28,7 +14,6 @@ module.exports = async function (defaults) {
         require.resolve('ember-concurrency/async-arrow-task-transform'),
       ],
     },
-    ...options,
   });
 
   setConfig(app, __dirname, {
