@@ -1,5 +1,5 @@
 {
-	"name": "winds.mobi client wbe",
+	"name": "winds.mobi client web",
   "dockerComposeFile": "../compose.yaml",
   "service": "ui",
   "workspaceFolder": "/app",
