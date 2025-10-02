@@ -64,6 +64,7 @@ export default class Map extends Component<MapSignature> {
         <:content as |result|>
           {{#each result.data as |r|}}
             <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
+              {{!<Arrow @speed="10" @gusts="20" as |icon|>}}
               <layers.rotated-marker
                 @lat={{r.latitude}}
                 @lng={{r.longitude}}
@@ -82,10 +83,4 @@ export default class Map extends Component<MapSignature> {
       </Request>
     </LeafletMap>
   </template>
-}
-
-declare module '@glint/environment-ember-loose/registry' {
-  export default interface Registry {
-    Map: typeof Map;
-  }
 }

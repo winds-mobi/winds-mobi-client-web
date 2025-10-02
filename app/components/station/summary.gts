@@ -195,9 +195,3 @@ export default class StationSummary extends Component<StationSummarySignature> {
     </div>
   </template>
 }
-
-declare module '@glint/environment-ember-loose/registry' {
-  export default interface Registry {
-    StationDetails: typeof StationSummary;
-  }
-}

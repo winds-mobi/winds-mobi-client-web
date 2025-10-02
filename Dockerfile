@@ -24,6 +24,7 @@ RUN corepack enable && \
   pnpm config set store-dir "$PNPM_HOME/store" --global
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY patches ./patches
 RUN pnpm add -g ember-cli
 RUN pnpm install
 EXPOSE 4200

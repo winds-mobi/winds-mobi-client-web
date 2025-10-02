@@ -1,14 +1,14 @@
-'use strict';
+// ember-cli-build.mjs (or keep .js if package.json has "type": "module")
+import EmberAppDefault from 'ember-cli/lib/broccoli/ember-app.js';
+import { compatBuild } from '@embroider/compat';
+import { setConfig } from '@warp-drive/core/build-config';
+import { buildOnce } from '@embroider/vite';
+import { createRequire } from 'module'; // ⬅️ this line replaces `require`
 
-const EmberApp = require('ember-cli/lib/broccoli/ember-app');
-const { compatBuild } = require('@embroider/compat');
+const require = createRequire(import.meta.url); // ⬅️ define require for ESM
 
-module.exports = async function (defaults) {
-  const { setConfig } = await import('@warp-drive/build-config');
-  const { buildOnce } = await import('@embroider/vite');
-
-  let app = new EmberApp(defaults, {
-    'ember-cli-babel': { enableTypeScriptTransform: true },
+export default function (defaults) {
+  const app = new EmberAppDefault(defaults, {
     babel: {
       plugins: [
         require.resolve('ember-concurrency/async-arrow-task-transform'),
@@ -16,9 +16,10 @@ module.exports = async function (defaults) {
     },
   });
 
-  setConfig(app, __dirname, {
-    // WarpDrive/EmberData settings go here (if any)
+  setConfig(app, new URL('.', import.meta.url).pathname, {
+    compatWith: '4.12',
+    deprecations: {},
   });
 
   return compatBuild(app, buildOnce);
-};
+}

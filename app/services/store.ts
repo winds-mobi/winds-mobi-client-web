@@ -1,209 +1,96 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
-import RequestManager from '@ember-data/request';
-import Fetch from '@ember-data/request/fetch';
-import Store, { CacheHandler } from '@ember-data/store';
-import { CachePolicy } from '@ember-data/request-utils';
-import type { CacheCapabilitiesManager } from '@ember-data/store/-types/q/cache-capabilities-manager';
-import type { Cache } from '@warp-drive/core-types/cache';
-import JSONAPICache from '@ember-data/json-api';
-import {
-  registerDerivations,
-  SchemaService,
-  withDefaults,
-} from '@warp-drive/schema-record/schema';
-import {
-  instantiateRecord,
-  teardownRecord,
-} from '@warp-drive/schema-record/hooks';
-import { SchemaRecord } from '@warp-drive/schema-record/record';
-import type { StableRecordIdentifier } from '@warp-drive/core-types';
+import { useLegacyStore } from '@warp-drive/legacy';
+import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
+import { withDefaults } from '@warp-drive/schema-record';
 import { Type } from '@warp-drive/core-types/symbols';
 
-const LocationSchema = withDefaults({
+// Embedded object schema: location (no identity, just a shape)
+export const LocationSchema = {
   type: 'location',
+  identity: null,
   fields: [{ name: 'coordinates', kind: 'array' }],
-});
+} as const;
 
-const PressureSchema = withDefaults({
+// Embedded object schema: pressure (also just a shape)
+// You can later use it from another schema as
+// { name: 'pressure', kind: 'schema-object', type: 'pressure' }
+export const PressureSchema = {
   type: 'pressure',
+  identity: null,
   fields: [
     { name: 'qfe', kind: 'field' },
     { name: 'qnh', kind: 'field' },
     { name: 'qff', kind: 'field' },
   ],
-});
+} as const;
 
-const ReadingSchema = withDefaults({
+// Embedded object schema: reading
+// NOTE: no `withDefaults` and `identity: null` so it can safely be used
+// as `kind: 'schema-object'` from StationSchema.
+export const ReadingSchema = {
   type: 'reading',
+  identity: null,
   fields: [
-    { name: '_id', kind: 'field' },
-    { name: 'w-dir', kind: 'field' },
-    { name: 'w-avg', kind: 'field' },
-    { name: 'w-max', kind: 'field' },
-    { name: 'temp', kind: 'field' },
-    { name: 'hum', kind: 'field' },
-    { name: 'pres', kind: 'schema-object', type: 'pressure' },
-    { name: 'rain', kind: 'field' },
-
-    {
-      name: 'timestamp',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: '_id',
-      },
-    },
-
-    {
-      name: 'direction',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'w-dir',
-      },
-    },
-
-    {
-      name: 'speed',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'w-avg',
-      },
-    },
-
-    {
-      name: 'gusts',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'w-max',
-      },
-    },
-
-    {
-      name: 'temperature',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'temp',
-      },
-    },
-
-    {
-      name: 'humidity',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'hum',
-      },
-    },
-
-    {
-      name: 'pressure',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'pres.qfe',
-      },
-    },
+    // `_id` is *not* unique here, we’re just reusing it as a timestamp field
+    { name: 'timestamp', sourceKey: '_id', kind: 'field' },
+    { name: 'direction', sourceKey: 'w-dir', kind: 'field' },
+    { name: 'speed', sourceKey: 'w-avg', kind: 'field' },
+    { name: 'gusts', sourceKey: 'w-max', kind: 'field' },
+    { name: 'temperature', sourceKey: 'temp', kind: 'field' },
+    { name: 'humidity', sourceKey: 'hum', kind: 'field' },
+    { name: 'rain', sourceKey: 'rain', kind: 'field' },
+    { name: 'pressure', kind: 'schema-object', type: 'pressure' },
   ],
-});
+} as const;
 
-const StationSchema = withDefaults({
+export const StationSchema = withDefaults({
   type: 'station',
   fields: [
-    // Fields from the API
     { name: '_id', kind: 'field' },
-    { name: 'alt', kind: 'field' },
-    { name: 'loc', kind: 'schema-object', type: 'location' },
-    { name: 'peak', kind: 'field' },
-    { name: 'pv-name', kind: 'field' },
-    { name: 'short', kind: 'field' },
-    { name: 'status', kind: 'field' },
-    { name: 'url', kind: 'field' }, // TODO: this does not have to be string
-    { name: 'last', kind: 'schema-object', type: 'reading' },
+    { name: 'altitude', kind: 'field', sourceKey: 'alt' },
 
-    // Aliases so that it's not a pain to work with
-    {
-      name: 'altitude',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'alt',
-      },
-    },
-
+    // Use location as an embedded object
     {
       name: 'location',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'loc',
-        type: 'location',
-      },
+      kind: 'schema-object',
+      type: 'location',
+      sourceKey: 'loc',
     },
 
-    {
-      name: 'isPeak',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'peak',
-      },
-    },
-
-    {
-      name: 'providerName',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'pv-name',
-      },
-    },
-
-    // TODO: I think this can be sometimes more complicated object
-    {
-      name: 'providerUrl',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'url',
-      },
-    },
-
-    {
-      name: 'name',
-      kind: 'derived',
-      type: 'unwrap',
-      options: {
-        path: 'short',
-      },
-    },
-
-    {
-      name: 'latitude',
-      type: 'unwrap',
-      options: {
-        path: 'location.coordinates.1',
-      },
-      kind: 'derived',
-    },
-
+    // Derived latitude + longitude from location.coordinates
     {
       name: 'longitude',
+      kind: 'derived',
       type: 'unwrap',
       options: {
         path: 'location.coordinates.0',
       },
-      kind: 'derived',
     },
+    {
+      name: 'latitude',
+      kind: 'derived',
+      type: 'unwrap',
+      options: {
+        path: 'location.coordinates.1',
+      },
+    },
+
+    { name: 'isPeak', kind: 'field', sourceKey: 'peak' },
+    { name: 'providerName', kind: 'field', sourceKey: 'pv-name' },
+    { name: 'name', kind: 'field', sourceKey: 'short' },
+    { name: 'status', kind: 'field' },
+
+    // providerUrl stays as a raw field (since the value is an object of URLs)
+    { name: 'providerUrl', kind: 'field', sourceKey: 'url' },
+
+    // last = embedded reading object
+    { name: 'last', kind: 'schema-object', type: 'reading' },
   ],
 });
 
-const HistorySchema = withDefaults({
+// This one can stay as a resource schema (if you’re fetching histories as records)
+export const HistorySchema = withDefaults({
   type: 'history',
   fields: [
     { name: 'direction', kind: 'field' },
@@ -271,45 +158,19 @@ function unwrapDerivation(
 }
 unwrapDerivation[Type] = 'unwrap';
 
-export default class StoreService extends Store {
-  constructor(args: unknown) {
-    super(args);
-    this.requestManager = new RequestManager();
-    this.requestManager.use([HistoryHandler, StationHandler, Fetch]);
-    this.requestManager.useCache(CacheHandler);
-
-    this.lifetimes = new CachePolicy({
-      apiCacheHardExpires: 60 * 60 * 1000,
-      apiCacheSoftExpires: 60 * 1000,
-    });
-  }
-
-  createCache(capabilities: CacheCapabilitiesManager): Cache {
-    return new JSONAPICache(capabilities);
-  }
-
-  createSchemaService() {
-    const schema = new SchemaService();
-    schema.registerResource(PressureSchema);
-    schema.registerResource(ReadingSchema);
-    schema.registerResource(LocationSchema);
-    schema.registerResource(StationSchema);
-    schema.registerResource(HistorySchema);
-
-    schema.registerDerivation(unwrapDerivation);
-
-    registerDerivations(schema);
-    return schema;
-  }
-
-  instantiateRecord(
-    identifier: StableRecordIdentifier,
-    createRecordArgs: { [key: string]: unknown }
-  ) {
-    return instantiateRecord(this, identifier, createRecordArgs);
-  }
-
-  teardownRecord(record: SchemaRecord): void {
-    teardownRecord(record);
-  }
-}
+export default useLegacyStore({
+  linksMode: false,
+  legacyRequests: true,
+  modelFragments: true,
+  cache: JSONAPICache,
+  schemas: [
+    PressureSchema,
+    ReadingSchema,
+    LocationSchema,
+    StationSchema,
+    HistorySchema,
+    // -- your schemas here
+  ],
+  handlers: [StationHandler, HistoryHandler],
+  derivations: [unwrapDerivation],
+});

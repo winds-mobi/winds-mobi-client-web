@@ -1,12 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-import { buildBaseURL, buildQueryParams } from '@ember-data/request-utils';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+import { buildBaseURL, buildQueryParams } from '@warp-drive/utilities';
 import type { QueryParamsSource } from '@warp-drive/core-types/params';
 import type { TypeFromInstance } from '@warp-drive/core-types/record';
 import type {
   FindRecordOptions,
   QueryRequestOptions,
 } from '@warp-drive/core-types/request';
-import { query as jsonApiQuery } from '@ember-data/json-api/request';
+
+import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 // import { findRecord as jsonApiFindRecord } from '@ember-data/json-api/request';
 
 const defaultQuery = {

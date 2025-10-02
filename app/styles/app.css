@@ -3,11 +3,13 @@
   background: none;
 }
 
-/* [data-component="overlay"], */
-[data-component='overlay'] *,
-.fixed.inset-0.select-none.z-10 {
-  z-index: 1001;
-}
-
 /* stylelint-disable-next-line import-notation, import-notation, no-invalid-position-at-import-rule */
-@import 'tailwindcss';
+
+/* @import url('tailwindcss') source('../../'); */
+@import 'tailwindcss' source('../../');
+
+@plugin "@frontile/theme/plugin/default";
+
+@source '../../node_modules/@frontile';
+
+@custom-variant dark (&:is(.dark *));

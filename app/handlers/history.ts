@@ -1,9 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
-import {
-  type Handler,
-  type NextFn,
-  type RequestContext,
-} from '@ember-data/request';
+import type { NextFn } from '@warp-drive/core/request';
+import type { RequestContext } from '@warp-drive/core/types/request';
 // import type { Pin } from 'the-mountains-are-calling/services/settings';
 
 export interface Response {

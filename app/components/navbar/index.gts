@@ -40,9 +40,3 @@ export default class Navbar extends Component<NavbarSignature> {
     </nav>
   </template>
 }
-
-declare module '@glint/environment-ember-loose/registry' {
-  export default interface Registry {
-    Navbar: typeof Navbar;
-  }
-}

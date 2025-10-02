@@ -52,6 +52,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   <template>
     <Request @request={{this.stationRequest}}>
+
       <:loading>
         ---
       </:loading>
@@ -60,7 +61,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
         <Request @request={{this.historyRequest}}>
           <:content>
-            <div
+                      <div
               class="border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between"
             >
               <span class="px-4 py-2 font-bold text-xl">
@@ -68,7 +69,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
               </span>
               <Button {{on "click" this.close}}>X</Button>
             </div>
-
             <div
               class="border-l-4 border-r-4 border-slate-400 overflow-y-scroll"
             >
@@ -104,16 +104,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
                   <StationAir @stationId={{@stationId}} />
                 {{/if}}
               </div>
+
             </div>
           </:content>
         </Request>
       </:content>
     </Request>
   </template>
-}
-
-declare module '@glint/environment-ember-loose/registry' {
-  export default interface Registry {
-    Station: typeof StationIndex;
-  }
 }
