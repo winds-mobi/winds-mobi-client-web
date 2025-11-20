@@ -62,6 +62,11 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    exclude: ['ember-leaflet', 'ember-page-title', 'object-inspect'],
+    exclude: [
+      'ember-leaflet',
+      'ember-page-title',
+      'object-inspect',
+      'embroider-util',
+    ],
   },
 });

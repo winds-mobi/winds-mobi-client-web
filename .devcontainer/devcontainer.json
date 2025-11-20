@@ -7,15 +7,10 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "typed-ember.glint2-vscode",
+        "bradlc.vscode-tailwindcss",
         "EmberTooling.emberjs",
-        "EmberTooling.vscode-ember",
-        "lifeart.vscode-glimmer-syntax",
-        "dbaeumer.vscode-eslint",
-        "stylelint.vscode-stylelint",
-        "esbenp.prettier-vscode",
-        "EditorConfig.EditorConfig",
-        "typed-ember.glint-vscode@1.4.15",
-        "bradlc.vscode-tailwindcss"
+        "lifeart.vscode-glimmer-syntax"
       ],
       "settings": {
         "typescript.tsdk": "node_modules/typescript/lib",

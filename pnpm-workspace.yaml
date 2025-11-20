@@ -1,3 +1,11 @@
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - core-js
+  - esbuild
+  - sharp
+
 overrides:
   '@ember/string': 4.0.1
 
@@ -9,6 +17,3 @@ packageExtensions:
 
 patchedDependencies:
   ember-leaflet: patches/ember-leaflet.patch
-
-packages:
-  - '.'
