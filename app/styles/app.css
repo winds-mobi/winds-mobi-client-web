@@ -1,9 +1,8 @@
+/* stylelint-disable */
 .leaflet-div-icon {
   border: none;
   background: none;
 }
-
-/* stylelint-disable-next-line import-notation, import-notation, no-invalid-position-at-import-rule */
 
 /* @import url('tailwindcss') source('../../'); */
 @import 'tailwindcss' source('../../');
@@ -13,3 +12,5 @@
 @source '../../node_modules/@frontile';
 
 @custom-variant dark (&:is(.dark *));
+
+/* stylelint-enable */

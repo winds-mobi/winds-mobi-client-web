@@ -100,7 +100,7 @@ export default ts.config(
       '.prettierrc.js',
       '.stylelintrc.js',
       '.template-lintrc.js',
-      'ember-cli-build.js',
+      // build file moved to ESM: ember-cli-build.mjs
     ],
     plugins: {
       n,

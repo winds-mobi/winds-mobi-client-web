@@ -61,7 +61,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
         <Request @request={{this.historyRequest}}>
           <:content>
-                      <div
+            <div
               class="border-t-4 border-l-4 border-r-4 border-slate-400 rounded-t-xl flex justify-between"
             >
               <span class="px-4 py-2 font-bold text-xl">

@@ -11,7 +11,11 @@ if (typeof module !== 'undefined') {
       chromium: {
         ci: [
           // --no-sandbox is needed when running chromium inside a container
-          process.env.CI ? '--no-sandbox' : null,
+          // include when running in CI or when the process is running as root
+          process.env.CI ||
+          (typeof process.getuid === 'function' && process.getuid() === 0)
+            ? '--no-sandbox'
+            : null,
           '--headless',
           '--disable-dev-shm-usage',
           '--disable-software-rasterizer',
