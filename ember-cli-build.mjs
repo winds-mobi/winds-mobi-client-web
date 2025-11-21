@@ -1,11 +1,11 @@
-// ember-cli-build.mjs (or keep .js if package.json has "type": "module")
+// ember-cli-build.mjs (ESM variant)
 import EmberAppDefault from 'ember-cli/lib/broccoli/ember-app.js';
 import { compatBuild } from '@embroider/compat';
 import { setConfig } from '@warp-drive/core/build-config';
 import { buildOnce } from '@embroider/vite';
-import { createRequire } from 'module'; // ⬅️ this line replaces `require`
+import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url); // ⬅️ define require for ESM
+const require = createRequire(import.meta.url);
 
 export default function (defaults) {
   const app = new EmberAppDefault(defaults, {
