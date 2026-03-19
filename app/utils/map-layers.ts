@@ -1,0 +1,82 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
+import { IconLayer } from '@deck.gl/layers';
+import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
+import type { Station } from 'winds-mobi-client-web/services/store';
+import type { DeckLayer } from 'winds-mobi-client-web/utils/map-runtime';
+import type { MapCoordinate } from 'winds-mobi-client-web/utils/map-view';
+
+const STATION_ICON_SIZE = 42;
+const GPS_ICON_SIZE = 16;
+
+type GpsLayerDatum = {
+  coordinates: MapCoordinate;
+};
+
+function svgToDataUrl(svg: string) {
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+export function buildStationArrowSvg(speed: number) {
+  const colour = windToColour(speed);
+
+  return `
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="-150 -70 140 340"
+      fill="${colour}"
+    >
+      <path d="M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z" />
+    </svg>
+  `;
+}
+
+export function buildStationArrowIconUrl(speed: number) {
+  return svgToDataUrl(buildStationArrowSvg(speed));
+}
+
+export function buildStationLayer(
+  stations: Station[],
+  onStationSelect: (stationId: string) => void
+): DeckLayer {
+  return new IconLayer<Station>({
+    id: 'stations',
+    data: stations,
+    pickable: true,
+    sizeUnits: 'pixels',
+    getPosition: (station) => [station.longitude, station.latitude],
+    getAngle: (station) => station.last.direction,
+    getSize: () => STATION_ICON_SIZE,
+    getIcon: (station) => ({
+      url: buildStationArrowIconUrl(station.last.speed),
+      width: STATION_ICON_SIZE,
+      height: STATION_ICON_SIZE,
+      anchorX: STATION_ICON_SIZE / 2,
+      anchorY: STATION_ICON_SIZE / 2,
+    }),
+    onClick: ({ object }) => {
+      if (object) {
+        onStationSelect(object.id);
+      }
+    },
+  }) as unknown as DeckLayer;
+}
+
+export function buildGpsLayer(coordinates: MapCoordinate): DeckLayer {
+  return new IconLayer<GpsLayerDatum>({
+    id: 'gps-location',
+    data: [{ coordinates }],
+    sizeUnits: 'pixels',
+    getPosition: ({ coordinates: [longitude, latitude] }) => [
+      longitude,
+      latitude,
+    ],
+    getSize: () => GPS_ICON_SIZE,
+    getIcon: () => ({
+      url: '/images/you-are-here.svg',
+      width: GPS_ICON_SIZE,
+      height: GPS_ICON_SIZE,
+      anchorX: GPS_ICON_SIZE / 2,
+      anchorY: GPS_ICON_SIZE / 2,
+    }),
+  }) as unknown as DeckLayer;
+}

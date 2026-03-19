@@ -17,4 +17,6 @@ export default function windToColour(speed: number) {
       return entry.color;
     }
   }
+
+  return COLORS[COLORS.length - 1]?.color ?? 'rgb(179, 0, 0)';
 }

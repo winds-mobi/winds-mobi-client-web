@@ -174,3 +174,9 @@ export default useLegacyStore({
   handlers: [StationHandler, HistoryHandler],
   derivations: [unwrapDerivation],
 });
+
+declare module '@ember/service' {
+  interface Registry {
+    store: typeof import('winds-mobi-client-web/services/store').default;
+  }
+}

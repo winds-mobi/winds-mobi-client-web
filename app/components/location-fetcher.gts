@@ -7,6 +7,14 @@ import { ToggleButton } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type LocationService from 'winds-mobi-client-web/services/location';
 import { inject as service } from '@ember/service';
+import type RouterService from '@ember/routing/router-service';
+import { action } from '@ember/object';
+import {
+  isMapRoute,
+  parseMapView,
+  serializeMapView,
+  type MapQueryParams,
+} from 'winds-mobi-client-web/utils/map-view';
 
 export interface LocationFetcherSignature {
   Args: {};
@@ -18,11 +26,32 @@ export interface LocationFetcherSignature {
 
 export default class LocationFetcher extends Component<LocationFetcherSignature> {
   @service declare location: LocationService;
+  @service declare router: RouterService;
+
+  @action async centerOnGps() {
+    await this.location.getLocationFromGps.perform();
+
+    if (!this.location.gps || !isMapRoute(this.router.currentRouteName)) {
+      return;
+    }
+
+    const currentView = parseMapView(
+      this.router.currentRoute?.queryParams as MapQueryParams | undefined
+    );
+
+    await this.router.replaceWith({
+      queryParams: serializeMapView({
+        longitude: this.location.gps.longitude,
+        latitude: this.location.gps.latitude,
+        zoom: currentView.zoom,
+      }),
+    });
+  }
 
   <template>
     <ToggleButton
       type="button"
-      @onChange={{this.location.getLocationFromGps.perform}}
+      @onChange={{this.centerOnGps}}
       @isSelected={{if this.location.getLocationFromGps.last.value true false}}
       disabled={{this.location.getLocationFromGps.isRunning}}
       class="flex align-middle items-center gap-2"
