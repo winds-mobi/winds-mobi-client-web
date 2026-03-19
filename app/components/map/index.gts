@@ -2,7 +2,7 @@
 import Component from '@glimmer/component';
 import { getRequestState } from '@warp-drive/ember';
 import { query } from 'winds-mobi-client-web/builders/station';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';

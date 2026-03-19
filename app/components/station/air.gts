@@ -2,7 +2,7 @@
 import Component from '@glimmer/component';
 import TimeSeries from '../chart/time-series';
 import { Request } from '@warp-drive/ember';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';

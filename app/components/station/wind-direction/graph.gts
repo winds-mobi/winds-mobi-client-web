@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import { type IntlService } from 'ember-intl';
 import Polar from 'winds-mobi-client-web/components/chart/polar';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';

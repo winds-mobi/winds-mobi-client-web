@@ -6,7 +6,7 @@ import GpsSlash from 'ember-phosphor-icons/components/ph-gps-slash';
 import { ToggleButton } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type LocationService from 'winds-mobi-client-web/services/location';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
 import { action } from '@ember/object';
 import {

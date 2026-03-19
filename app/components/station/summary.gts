@@ -3,7 +3,7 @@ import Component from '@glimmer/component';
 import { formatNumber, t } from 'ember-intl';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 import { type IntlService } from 'ember-intl';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';

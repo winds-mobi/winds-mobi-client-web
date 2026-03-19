@@ -81,6 +81,20 @@ export default ts.config(
       parserOptions: parserOptions.esm.ts,
     },
     extends: [...ts.configs.recommendedTypeChecked, ember.configs.gts],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@ember/service',
+              importNames: ['inject'],
+              message: 'Use service instead.',
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     files: ['tests/**/*-test.{js,gjs,ts,gts}'],

@@ -4,7 +4,7 @@ import type StoreService from 'winds-mobi-client-web/services/store.js';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { Request } from '@warp-drive/ember';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import type Owner from '@ember/owner';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';

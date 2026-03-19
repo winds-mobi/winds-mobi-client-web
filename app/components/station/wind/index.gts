@@ -2,7 +2,7 @@
 import Component from '@glimmer/component';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import type StoreService from 'winds-mobi-client-web/services/store.js';
 import StationWindsGraph from './graph';
