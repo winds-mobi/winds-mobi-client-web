@@ -22,6 +22,10 @@ import {
   type MapCoordinate,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
+import {
+  stationRouteNameForTab,
+  stationTabFromRouteName,
+} from 'winds-mobi-client-web/utils/station-route';
 
 export interface MapSignature {
   Args: {};
@@ -79,7 +83,11 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(stationId: string) {
-    this.router.transitionTo('map.station', stationId);
+    const currentTab = stationTabFromRouteName(this.router.currentRouteName);
+
+    this.router.transitionTo(stationRouteNameForTab(currentTab), stationId, {
+      queryParams: serializeMapView(this.mapView),
+    });
   }
 
   @action
@@ -96,8 +104,9 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div class="relative h-full w-full">
+    <div data-test-map-container class="relative h-full w-full">
       <div
+        data-test-map-canvas
         class="h-full w-full"
         {{MaplibreDeck
           longitude=this.mapView.longitude

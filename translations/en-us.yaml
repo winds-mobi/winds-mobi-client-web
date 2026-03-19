@@ -1,6 +1,9 @@
 application:
   name: v2.winds.mobi
 
+common:
+  close: Close
+
 location-fetcher:
   center: center
 
@@ -8,6 +11,7 @@ list:
   toggle: list
 
 station:
+  tabs: Tabs
   summary:
     title: Summary
     wind: Wind
