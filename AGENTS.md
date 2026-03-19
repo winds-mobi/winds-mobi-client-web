@@ -33,6 +33,16 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 - Update `translations/en-us.yaml` when UI text changes.
 - Do not edit generated or installed files such as `dist/` or `node_modules/`.
 
+## Services
+
+- Use services for cross-cutting, long-lived application concerns such as data access, geolocation, routing coordination, or shared session-like state.
+- Do not put route- or component-local UI state in services. Prefer component state, route models, and query params for things like open drawers, selected tabs, and map view.
+- Keep service APIs small and explicit. Consumers should call service methods or tasks instead of mutating service state ad hoc.
+- Use `@service` with `import { service } from '@ember/service'`. Do not use deprecated `inject`.
+- Use `@tracked` or tracked-built-ins for reactive service state, and prefer `ember-concurrency` tasks for async workflows when they fit.
+- Add service registry typings with `declare module '@ember/service' { interface Registry { ... } }` for every app service.
+- Do not use services as generic event buses or dumping grounds for unrelated state.
+
 ## Commits
 
 - Do not create commits or push changes unless explicitly asked.
