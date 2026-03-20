@@ -12,7 +12,7 @@ export default class MyRoute extends Component<MyRouteSignature> {
       <Map />
 
       <div
-        class="pointer-events-none absolute inset-0 z-10 flex items-end justify-end p-2 sm:items-stretch sm:p-4"
+        class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-stretch md:inset-0 md:justify-start md:p-4"
       >
         {{outlet}}
       </div>

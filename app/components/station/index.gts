@@ -76,7 +76,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
       <:content as |result|>
         <section
           data-test-station-panel
-          class="pointer-events-auto flex max-h-[calc(100%-0.5rem)] w-full flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:h-full sm:max-h-full sm:w-[32rem] sm:max-w-[calc(100%-2rem)] sm:rounded-2xl"
+          class="pointer-events-auto flex max-h-[min(75vh,calc(100vh-4rem))] w-full flex-col overflow-hidden rounded-t-3xl border-x border-t border-slate-200 bg-white shadow-2xl md:h-full md:max-h-full md:w-[32rem] md:max-w-[calc(100%-2rem)] md:rounded-2xl md:border"
         >
           <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3">
             <span
