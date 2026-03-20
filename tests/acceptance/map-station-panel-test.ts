@@ -4,13 +4,11 @@ import {
   click,
   currentURL,
   settled,
-  triggerKeyEvent,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { createFakeMapRuntime } from 'winds-mobi-client-web/tests/helpers/fake-map-runtime';
-import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media';
 import {
   resetMapRuntimeForTest,
   setMapRuntimeForTest,
@@ -100,14 +98,13 @@ function jsonResponse(body: unknown) {
   );
 }
 
-module('Acceptance | map station drawer', function (hooks) {
+module('Acceptance | map station panel', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
     const fakeRuntime = createFakeMapRuntime();
 
     this.fakeRuntime = fakeRuntime;
-    this.matchMediaRestore = stubMatchMedia(false);
     this.originalFetch = globalThis.fetch;
 
     setMapRuntimeForTest(fakeRuntime.runtime);
@@ -136,14 +133,11 @@ module('Acceptance | map station drawer', function (hooks) {
   });
 
   hooks.afterEach(function () {
-    const restoreMatchMedia = this.matchMediaRestore as () => void;
-
-    restoreMatchMedia();
     resetMapRuntimeForTest();
     globalThis.fetch = this.originalFetch;
   });
 
-  test('it deep-links the drawer and map state from the URL', async function (assert) {
+  test('it deep-links the panel and map state from the URL', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
     await visit(
@@ -158,24 +152,7 @@ module('Acceptance | map station drawer', function (hooks) {
     assert.deepEqual(fakeRuntime.maps[0]?.options.center, [7.86323, 46.67719]);
     assert.strictEqual(fakeRuntime.maps[0]?.options.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
-    assert
-      .dom('[data-test-station-drawer-panel]')
-      .hasAttribute('data-placement', 'right');
-  });
-
-  test('it uses a bottom drawer on mobile', async function (assert) {
-    const restoreMatchMedia = this.matchMediaRestore as () => void;
-
-    restoreMatchMedia();
-    this.matchMediaRestore = stubMatchMedia(true);
-
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
-
-    assert
-      .dom('[data-test-station-drawer-panel]')
-      .hasAttribute('data-placement', 'bottom');
+    assert.dom('[data-test-station-panel]').exists();
   });
 
   test('it closes from the explicit close button and preserves map query params', async function (assert) {
@@ -191,29 +168,10 @@ module('Acceptance | map station drawer', function (hooks) {
       currentURL(),
       '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
-    assert.dom('[data-test-station-drawer-panel]').doesNotExist();
+    assert.dom('[data-test-station-panel]').doesNotExist();
   });
 
-  test('it closes on escape and preserves map query params', async function (assert) {
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
-    await triggerKeyEvent(
-      '[data-test-station-drawer-panel]',
-      'keydown',
-      'Escape'
-    );
-    await waitUntil(
-      () => currentURL() === '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
-
-    assert.strictEqual(
-      currentURL(),
-      '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
-  });
-
-  test('it does not close when clicking outside the drawer', async function (assert) {
+  test('it does not close when clicking outside the panel', async function (assert) {
     await visit(
       '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
     );
@@ -223,7 +181,7 @@ module('Acceptance | map station drawer', function (hooks) {
       currentURL(),
       '/map/holfuy-1804/air?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
-    assert.dom('[data-test-station-drawer-panel]').exists();
+    assert.dom('[data-test-station-panel]').exists();
   });
 
   test('it keeps the active tab when selecting another station from the map', async function (assert) {
@@ -257,7 +215,7 @@ module('Acceptance | map station drawer', function (hooks) {
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
-  test('it updates only the map query params when the map view changes with the drawer open', async function (assert) {
+  test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
     await visit(
@@ -273,6 +231,6 @@ module('Acceptance | map station drawer', function (hooks) {
       currentURL(),
       '/map/holfuy-1804/air?mapLng=8.11111&mapLat=46.22222&mapZoom=9.68'
     );
-    assert.dom('[data-test-station-drawer-panel]').exists();
+    assert.dom('[data-test-station-panel]').exists();
   });
 });
