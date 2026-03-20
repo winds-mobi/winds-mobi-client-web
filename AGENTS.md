@@ -27,6 +27,7 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 ## Working conventions
 
 - Prefer simple, typed Ember code. Assume configuration, declared dependencies, and API payloads are correct unless there is a proven issue.
+- If a requested implementation appears to require hacks, brittle workarounds, or patterns that cut against Ember or app architecture, push back clearly and explain why it does not seem like the best practice before proceeding.
 - Keep imperative DOM or third-party library integration in modifiers.
 - For app code in `app/**`, prefer Warp Drive builders + `this.store.request(...)` + handlers over ad hoc `fetch()`.
 - Prefer existing Frontile and Tailwind patterns for shared UI.
@@ -38,7 +39,10 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 - Use services for cross-cutting, long-lived application concerns such as data access, geolocation, routing coordination, or shared session-like state.
 - Do not put route- or component-local UI state in services. Prefer component state, route models, and query params for things like open drawers, selected tabs, and map view.
 - Keep service APIs small and explicit. Consumers should call service methods or tasks instead of mutating service state ad hoc.
-- Use `@service` with `import { service } from '@ember/service'`. Do not use deprecated `inject`.
+- There are only two valid `@ember/service` import patterns in app code:
+  - `import Service from '@ember/service'` when defining a service class.
+  - `import { service } from '@ember/service'` when injecting a service into a route, component, controller, helper, or modifier.
+- Never import `inject` from `@ember/service`, including `inject as service`.
 - Use `@tracked` or tracked-built-ins for reactive service state, and prefer `ember-concurrency` tasks for async workflows when they fit.
 - Add service registry typings with `declare module '@ember/service' { interface Registry { ... } }` for every app service.
 - Do not use services as generic event buses or dumping grounds for unrelated state.
