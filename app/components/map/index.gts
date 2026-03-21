@@ -79,8 +79,22 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(stationId: string) {
+    const station = this.requestState.isSuccess
+      ? this.requestState.value.data.find(
+          (candidate) => candidate.id === stationId
+        )
+      : undefined;
+
+    const nextView = station
+      ? {
+          longitude: station.longitude,
+          latitude: station.latitude,
+          zoom: this.mapView.zoom,
+        }
+      : this.mapView;
+
     this.router.transitionTo('map.station', stationId, {
-      queryParams: serializeMapView(this.mapView),
+      queryParams: serializeMapView(nextView),
     });
   }
 

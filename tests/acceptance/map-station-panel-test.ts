@@ -201,12 +201,21 @@ module('Acceptance | map station panel', function (hooks) {
       object: stationsLayer.props.data[1],
     });
 
-    await settled();
+    await waitUntil(
+      () =>
+        currentURL() ===
+        '/map/holfuy-2222?mapLng=7.91323&mapLat=46.70719&mapZoom=13'
+    );
 
-    assert.true(currentURL().startsWith('/map/holfuy-2222?'));
-    assert.true(currentURL().includes('mapLng=7.86323'));
-    assert.true(currentURL().includes('mapLat=46.67719'));
-    assert.true(currentURL().includes('mapZoom=13'));
+    assert.strictEqual(
+      currentURL(),
+      '/map/holfuy-2222?mapLng=7.91323&mapLat=46.70719&mapZoom=13'
+    );
+    assert.deepEqual(fakeRuntime.maps[0]?.center, {
+      lng: 7.91323,
+      lat: 46.70719,
+    });
+    assert.strictEqual(fakeRuntime.maps[0]?.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
