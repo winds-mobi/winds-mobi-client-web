@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
 
@@ -21,6 +21,7 @@ export default class Polar extends Component<PolarSignature> {
       enabled: false,
     },
     chart: {
+      height: 240,
       polar: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
@@ -83,6 +84,26 @@ export default class Polar extends Component<PolarSignature> {
     return {
       ...this.defaultChartOptions,
       ...this.args.chartOptions,
+      chart: {
+        ...this.defaultChartOptions.chart,
+        ...this.args.chartOptions?.chart,
+      },
+      xAxis: {
+        ...this.defaultChartOptions.xAxis,
+        ...this.args.chartOptions?.xAxis,
+      },
+      yAxis: {
+        ...this.defaultChartOptions.yAxis,
+        ...this.args.chartOptions?.yAxis,
+      },
+      tooltip: {
+        ...this.defaultChartOptions.tooltip,
+        ...this.args.chartOptions?.tooltip,
+      },
+      plotOptions: {
+        ...this.defaultChartOptions.plotOptions,
+        ...this.args.chartOptions?.plotOptions,
+      },
     };
   }
 

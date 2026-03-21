@@ -13,14 +13,17 @@ export interface StationWindsSignature {
   Element: null;
 }
 
+// eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationWinds extends Component<StationWindsSignature> {
   <template>
-    <section data-test-station-wind-section class="px-4 py-5 sm:px-6">
-      <h2 class="text-base font-semibold text-slate-900">
+    <section data-test-station-wind-section class="px-4 py-4 sm:px-5">
+      <h2 class="text-sm font-semibold text-slate-950">
         {{t "station.wind"}}
       </h2>
 
-      <div class="mt-4">
+      <div
+        class="mt-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-2.5"
+      >
         <StationWindsGraph @data={{@history}} />
       </div>
     </section>

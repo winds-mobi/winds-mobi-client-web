@@ -44,7 +44,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   <template>
     <section
       data-test-station-panel
-      class="pointer-events-auto flex h-[50svh] w-full flex-col overflow-hidden rounded-t-3xl border-x border-t border-slate-200 bg-white shadow-2xl md:h-full md:max-h-full md:w-[32rem] md:max-w-[calc(100%-2rem)] md:rounded-2xl md:border"
+      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white md:h-full md:w-[32rem] md:border-l md:border-t-0"
     >
       <div
         class="shrink-0 flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3"

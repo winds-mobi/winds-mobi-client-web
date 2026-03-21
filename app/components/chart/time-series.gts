@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
 
@@ -19,7 +19,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       enabled: false,
     },
     chart: {
-      height: 350,
+      height: 300,
       type: 'spline', // Use 'spline' for smoother lines
       panning: {
         enabled: true, // Enable panning
@@ -94,6 +94,22 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     return {
       ...this.defaultChartOptions,
       ...this.args.chartOptions,
+      chart: {
+        ...this.defaultChartOptions.chart,
+        ...this.args.chartOptions?.chart,
+      },
+      xAxis: {
+        ...this.defaultChartOptions.xAxis,
+        ...this.args.chartOptions?.xAxis,
+      },
+      tooltip: {
+        ...this.defaultChartOptions.tooltip,
+        ...this.args.chartOptions?.tooltip,
+      },
+      plotOptions: {
+        ...this.defaultChartOptions.plotOptions,
+        ...this.args.chartOptions?.plotOptions,
+      },
     };
   }
 

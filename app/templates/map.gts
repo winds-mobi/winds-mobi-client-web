@@ -8,14 +8,14 @@ interface MyRouteSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class MyRoute extends Component<MyRouteSignature> {
   <template>
-    <div class="relative flex-1 min-h-64 overflow-hidden">
-      <Map />
-
-      <div
-        class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-stretch md:inset-0 md:justify-start md:p-4"
-      >
-        {{outlet}}
+    <div
+      class="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-200 md:flex-row-reverse"
+    >
+      <div class="min-h-[18rem] min-w-0 flex-1 bg-white md:min-h-0">
+        <Map />
       </div>
+
+      {{outlet}}
     </div>
   </template>
 }
