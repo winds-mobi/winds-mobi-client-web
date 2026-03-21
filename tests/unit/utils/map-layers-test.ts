@@ -31,7 +31,7 @@ const station = {
 module('Unit | Utility | map-layers', function () {
   test('it builds station layers with rotated arrow icons', function (assert) {
     const selected: string[] = [];
-    const layer = buildStationLayer([station], (stationId) => {
+    const layer = buildStationLayer([station], undefined, (stationId) => {
       selected.push(stationId);
     }) as unknown as { props: Record<string, (...args: unknown[]) => unknown> };
 
@@ -59,6 +59,24 @@ module('Unit | Utility | map-layers', function () {
       buildStationArrowIconUrl(station.last.speed).includes(
         'data:image/svg+xml;charset=UTF-8,'
       )
+    );
+  });
+
+  test('it adds a white outline to the selected station icon', function (assert) {
+    const layer = buildStationLayer(
+      [station],
+      'station-1',
+      () => undefined
+    ) as unknown as { props: Record<string, (...args: unknown[]) => unknown> };
+
+    const icon = layer.props.getIcon(station) as { url: string };
+    const selectedIconUrl = buildStationArrowIconUrl(station.last.speed, true);
+    const defaultIconUrl = buildStationArrowIconUrl(station.last.speed, false);
+
+    assert.strictEqual(icon.url, selectedIconUrl);
+    assert.notStrictEqual(selectedIconUrl, defaultIconUrl);
+    assert.true(
+      decodeURIComponent(selectedIconUrl).includes('stroke="#ffffff"')
     );
   });
 

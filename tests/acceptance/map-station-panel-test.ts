@@ -142,6 +142,24 @@ module('Acceptance | map station panel', function (hooks) {
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
+    const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
+      (layer) => layer.id === 'stations'
+    ) as
+      | {
+          props: {
+            data: unknown[];
+            getIcon: (datum: unknown) => { url: string };
+          };
+        }
+      | undefined;
+
+    const primaryIconUrl = stationsLayer
+      ? stationsLayer.props.getIcon(stationsLayer.props.data[0]).url
+      : undefined;
+    const secondaryIconUrl = stationsLayer
+      ? stationsLayer.props.getIcon(stationsLayer.props.data[1]).url
+      : undefined;
+
     assert.strictEqual(
       currentURL(),
       '/map/holfuy-1804?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
@@ -154,6 +172,9 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-summary-section]').exists();
     assert.dom('[data-test-station-wind-section]').exists();
     assert.dom('[data-test-station-air-section]').exists();
+    assert.ok(primaryIconUrl);
+    assert.ok(secondaryIconUrl);
+    assert.notStrictEqual(primaryIconUrl, secondaryIconUrl);
   });
 
   test('it closes from the explicit close button and preserves map query params', async function (assert) {

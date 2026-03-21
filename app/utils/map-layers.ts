@@ -16,8 +16,14 @@ function svgToDataUrl(svg: string) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-export function buildStationArrowSvg(speed: number) {
+const STATION_ARROW_PATH =
+  'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
+
+export function buildStationArrowSvg(speed: number, isSelected = false) {
   const colour = windToColour(speed);
+  const outline = isSelected
+    ? `<path d="${STATION_ARROW_PATH}" fill="none" stroke="#ffffff" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" />`
+    : '';
 
   return `
     <svg
@@ -25,17 +31,19 @@ export function buildStationArrowSvg(speed: number) {
       viewBox="-150 -70 140 340"
       fill="${colour}"
     >
-      <path d="M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z" />
+      ${outline}
+      <path d="${STATION_ARROW_PATH}" />
     </svg>
   `;
 }
 
-export function buildStationArrowIconUrl(speed: number) {
-  return svgToDataUrl(buildStationArrowSvg(speed));
+export function buildStationArrowIconUrl(speed: number, isSelected = false) {
+  return svgToDataUrl(buildStationArrowSvg(speed, isSelected));
 }
 
 export function buildStationLayer(
   stations: Station[],
+  selectedStationId: string | undefined,
   onStationSelect: (stationId: string) => void
 ): DeckLayer {
   return new IconLayer<Station>({
@@ -47,7 +55,10 @@ export function buildStationLayer(
     getAngle: (station) => station.last.direction,
     getSize: () => STATION_ICON_SIZE,
     getIcon: (station) => ({
-      url: buildStationArrowIconUrl(station.last.speed),
+      url: buildStationArrowIconUrl(
+        station.last.speed,
+        station.id === selectedStationId
+      ),
       width: STATION_ICON_SIZE,
       height: STATION_ICON_SIZE,
       anchorX: STATION_ICON_SIZE / 2,

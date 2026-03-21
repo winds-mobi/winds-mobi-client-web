@@ -36,6 +36,10 @@ export default class Map extends Component<MapSignature> {
   @service declare location: LocationService;
   @service declare router: RouterService;
 
+  get selectedStationId() {
+    return this.router.currentRoute?.params['station_id'];
+  }
+
   get mapView() {
     return parseMapView(
       this.router.currentRoute?.queryParams as MapQueryParams | undefined
@@ -68,8 +72,10 @@ export default class Map extends Component<MapSignature> {
 
     if (this.requestState.isSuccess) {
       layers.push(
-        buildStationLayer(this.requestState.value.data, (stationId) =>
-          this.stationSelected(stationId)
+        buildStationLayer(
+          this.requestState.value.data,
+          this.selectedStationId,
+          (stationId) => this.stationSelected(stationId)
         )
       );
     }
