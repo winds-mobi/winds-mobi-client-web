@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 import { IconLayer } from '@deck.gl/layers';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -22,17 +22,16 @@ const STATION_ARROW_PATH =
 export function buildStationArrowSvg(speed: number, isSelected = false) {
   const colour = windToColour(speed);
   const outline = isSelected
-    ? `<path d="${STATION_ARROW_PATH}" fill="none" stroke="#ffffff" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" />`
+    ? `<path d="${STATION_ARROW_PATH}" fill="#ffffff" stroke="#ffffff" stroke-width="32" stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill" />`
     : '';
 
   return `
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="-150 -70 140 340"
-      fill="${colour}"
     >
       ${outline}
-      <path d="${STATION_ARROW_PATH}" />
+      <path d="${STATION_ARROW_PATH}" fill="${colour}" />
     </svg>
   `;
 }

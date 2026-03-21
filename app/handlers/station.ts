@@ -33,6 +33,23 @@ interface StationApiPayload {
   };
 }
 
+function normalizePressure(
+  pressure:
+    | number
+    | {
+        qfe?: number | null;
+        qnh?: number | null;
+        qff?: number | null;
+      }
+    | undefined
+) {
+  if (typeof pressure === 'number') {
+    return pressure;
+  }
+
+  return pressure?.qfe ?? pressure?.qnh ?? pressure?.qff;
+}
+
 function jsonApifyFields(elm: StationApiPayload) {
   const last = elm.last
     ? {
@@ -43,7 +60,7 @@ function jsonApifyFields(elm: StationApiPayload) {
         temperature: elm.last.temp,
         humidity: elm.last.hum,
         rain: elm.last.rain,
-        pressure: elm.last.pres,
+        pressure: normalizePressure(elm.last.pres),
       }
     : undefined;
 

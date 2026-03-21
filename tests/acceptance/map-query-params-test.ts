@@ -55,6 +55,7 @@ module('Acceptance | map query params', function (hooks) {
     assert.strictEqual(fakeRuntime.maps.length, 1);
     assert.deepEqual(fakeRuntime.maps[0]?.options.center, [8.12345, 46.54321]);
     assert.strictEqual(fakeRuntime.maps[0]?.options.zoom, 9.5);
+    assert.dom('[data-test-map-wind-legend]').exists();
     assert.true(
       fetchCalls.some(
         (url) =>

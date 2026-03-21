@@ -9,6 +9,7 @@ import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import MaplibreDeck from 'winds-mobi-client-web/modifiers/maplibre-deck';
+import WindLegend from './wind-legend';
 import {
   buildGpsLayer,
   buildStationLayer,
@@ -130,6 +131,8 @@ export default class Map extends Component<MapSignature> {
           onViewChange=this.updateView
         }}
       ></div>
+
+      <WindLegend />
 
       {{#if this.requestState.isPending}}
         <div

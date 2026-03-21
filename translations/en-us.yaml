@@ -10,6 +10,10 @@ location-fetcher:
 list:
   toggle: list
 
+map:
+  legend:
+    windSpeed: Wind speed
+
 station:
   summary:
     title: Summary
@@ -23,6 +27,10 @@ wind:
   gusts: Gusts
   direction: Direction
   timestamp: 'Time'
+  lastHour: Wind - last hour
+  minimum: Minimum
+  mean: Mean
+  maximum: Maximum
 
 air:
   temperature: Temperature
@@ -33,5 +41,6 @@ air:
 format:
   azimuth: '{azimuth}°'
   percent: '{value}%'
-  pressure: '{value}hPA'
+  relativeHumidity: '{value}% rel'
+  pressure: '{value}hPa'
   rain: '{value}l/m²'
