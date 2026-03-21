@@ -140,25 +140,24 @@ module('Acceptance | map station panel', function (hooks) {
   test('it deep-links the panel and map state from the URL', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
     assert.strictEqual(
       currentURL(),
-      '/map/holfuy-1804/air?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
+      '/map/holfuy-1804?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
     assert.strictEqual(fakeRuntime.maps.length, 1);
     assert.deepEqual(fakeRuntime.maps[0]?.options.center, [7.86323, 46.67719]);
     assert.strictEqual(fakeRuntime.maps[0]?.options.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
     assert.dom('[data-test-station-panel]').exists();
+    assert.dom('[data-test-station-summary-section]').exists();
+    assert.dom('[data-test-station-wind-section]').exists();
+    assert.dom('[data-test-station-air-section]').exists();
   });
 
   test('it closes from the explicit close button and preserves map query params', async function (assert) {
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await click('[data-test-station-close]');
     await waitUntil(
       () => currentURL() === '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
@@ -172,24 +171,20 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it does not close when clicking outside the panel', async function (assert) {
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await click('[data-test-map-container]');
 
     assert.strictEqual(
       currentURL(),
-      '/map/holfuy-1804/air?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
+      '/map/holfuy-1804?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
     assert.dom('[data-test-station-panel]').exists();
   });
 
-  test('it keeps the active tab when selecting another station from the map', async function (assert) {
+  test('it keeps the station route when selecting another station from the map', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
     const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
       (layer) => layer.id === 'stations'
@@ -208,7 +203,7 @@ module('Acceptance | map station panel', function (hooks) {
 
     await settled();
 
-    assert.true(currentURL().startsWith('/map/holfuy-2222/air?'));
+    assert.true(currentURL().startsWith('/map/holfuy-2222?'));
     assert.true(currentURL().includes('mapLng=7.86323'));
     assert.true(currentURL().includes('mapLat=46.67719'));
     assert.true(currentURL().includes('mapZoom=13'));
@@ -218,9 +213,7 @@ module('Acceptance | map station panel', function (hooks) {
   test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
-    await visit(
-      '/map/holfuy-1804/air?mapLat=46.67719&mapLng=7.86323&mapZoom=13'
-    );
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
     fakeRuntime.maps[0]?.setView([8.111111, 46.222222], 9.678);
     fakeRuntime.maps[0]?.emit('moveend');
@@ -229,7 +222,7 @@ module('Acceptance | map station panel', function (hooks) {
 
     assert.strictEqual(
       currentURL(),
-      '/map/holfuy-1804/air?mapLng=8.11111&mapLat=46.22222&mapZoom=9.68'
+      '/map/holfuy-1804?mapLng=8.11111&mapLat=46.22222&mapZoom=9.68'
     );
     assert.dom('[data-test-station-panel]').exists();
   });

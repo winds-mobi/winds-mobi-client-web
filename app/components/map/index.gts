@@ -3,7 +3,6 @@ import Component from '@glimmer/component';
 import { getRequestState } from '@warp-drive/ember';
 import { query } from 'winds-mobi-client-web/builders/station';
 import { service } from '@ember/service';
-import type StoreService from 'winds-mobi-client-web/services/store.js';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
 import { action } from '@ember/object';
@@ -22,10 +21,6 @@ import {
   type MapCoordinate,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
-import {
-  stationRouteNameForTab,
-  stationTabFromRouteName,
-} from 'winds-mobi-client-web/utils/station-route';
 
 export interface MapSignature {
   Args: {};
@@ -36,7 +31,8 @@ export interface MapSignature {
 }
 
 export default class Map extends Component<MapSignature> {
-  @service declare store: StoreService;
+  @service
+  declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare location: LocationService;
   @service declare router: RouterService;
 
@@ -83,9 +79,7 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(stationId: string) {
-    const currentTab = stationTabFromRouteName(this.router.currentRouteName);
-
-    this.router.transitionTo(stationRouteNameForTab(currentTab), stationId, {
+    this.router.transitionTo('map.station', stationId, {
       queryParams: serializeMapView(this.mapView),
     });
   }

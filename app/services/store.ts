@@ -33,13 +33,13 @@ export const ReadingSchema = {
   identity: null,
   fields: [
     // `_id` is *not* unique here, we’re just reusing it as a timestamp field
-    { name: 'timestamp', sourceKey: '_id', kind: 'field' },
-    { name: 'direction', sourceKey: 'w-dir', kind: 'field' },
-    { name: 'speed', sourceKey: 'w-avg', kind: 'field' },
-    { name: 'gusts', sourceKey: 'w-max', kind: 'field' },
-    { name: 'temperature', sourceKey: 'temp', kind: 'field' },
-    { name: 'humidity', sourceKey: 'hum', kind: 'field' },
-    { name: 'rain', sourceKey: 'rain', kind: 'field' },
+    { name: 'timestamp', kind: 'field' },
+    { name: 'direction', kind: 'field' },
+    { name: 'speed', kind: 'field' },
+    { name: 'gusts', kind: 'field' },
+    { name: 'temperature', kind: 'field' },
+    { name: 'humidity', kind: 'field' },
+    { name: 'rain', kind: 'field' },
     { name: 'pressure', kind: 'schema-object', type: 'pressure' },
   ],
 } as const;
@@ -48,14 +48,13 @@ export const StationSchema = withDefaults({
   type: 'station',
   fields: [
     { name: '_id', kind: 'field' },
-    { name: 'altitude', kind: 'field', sourceKey: 'alt' },
+    { name: 'altitude', kind: 'field' },
 
     // Use location as an embedded object
     {
       name: 'location',
       kind: 'schema-object',
       type: 'location',
-      sourceKey: 'loc',
     },
 
     // Derived latitude + longitude from location.coordinates
@@ -76,13 +75,13 @@ export const StationSchema = withDefaults({
       },
     },
 
-    { name: 'isPeak', kind: 'field', sourceKey: 'peak' },
-    { name: 'providerName', kind: 'field', sourceKey: 'pv-name' },
-    { name: 'name', kind: 'field', sourceKey: 'short' },
+    { name: 'isPeak', kind: 'field' },
+    { name: 'providerName', kind: 'field' },
+    { name: 'name', kind: 'field' },
     { name: 'status', kind: 'field' },
 
     // providerUrl stays as a raw field (since the value is an object of URLs)
-    { name: 'providerUrl', kind: 'field', sourceKey: 'url' },
+    { name: 'providerUrl', kind: 'field' },
 
     // last = embedded reading object
     { name: 'last', kind: 'schema-object', type: 'reading' },
@@ -112,6 +111,7 @@ export type Station = {
   providerUrl: string;
   name: string;
   last: {
+    timestamp: number;
     direction: number;
     speed: number;
     gusts: number;

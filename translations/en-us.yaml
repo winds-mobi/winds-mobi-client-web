@@ -11,11 +11,9 @@ list:
   toggle: list
 
 station:
-  tabs: Tabs
   summary:
     title: Summary
     wind: Wind
-    wind-last-hour: Wind - last hour
     air: Air
   wind: Wind
   air: Air
@@ -24,9 +22,6 @@ wind:
   speed: Speed
   gusts: Gusts
   direction: Direction
-  minimum: Minimum
-  mean: Mean
-  maximum: Maximum
   timestamp: 'Time'
 
 air:

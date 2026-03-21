@@ -1,15 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import TimeSeries from '../chart/time-series';
-import { Request } from '@warp-drive/ember';
-import { service } from '@ember/service';
+import { t } from 'ember-intl';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import type StoreService from 'winds-mobi-client-web/services/store.js';
-import { historyQuery } from 'winds-mobi-client-web/builders/history';
 
 export interface StationAirSignature {
   Args: {
-    stationId: string;
+    history: History[];
   };
   Blocks: {
     default: [];
@@ -18,19 +14,15 @@ export interface StationAirSignature {
 }
 
 export default class StationAir extends Component<StationAirSignature> {
-  @service declare store: StoreService;
-
-  get historyRequest() {
-    const options = historyQuery<History>('history', this.args.stationId);
-    return this.store.request(options);
-  }
-
-  dataToChart(historyData: History[]) {
-    const temperature = historyData.map((elm) => [
+  get chartData() {
+    const temperature = this.args.history.map((elm) => [
       elm.timestamp,
       elm.temperature,
     ]);
-    const humidity = historyData.map((elm) => [elm.timestamp, elm.humidity]);
+    const humidity = this.args.history.map((elm) => [
+      elm.timestamp,
+      elm.humidity,
+    ]);
 
     return [
       {
@@ -103,15 +95,17 @@ export default class StationAir extends Component<StationAirSignature> {
   }
 
   <template>
-    <Request @request={{this.historyRequest}}>
-      <:content as |historyResult|>
-        {{#let (this.dataToChart historyResult.data) as |chartData|}}
-          <TimeSeries
-            @chartData={{chartData}}
-            @chartOptions={{this.chartOptions}}
-          />
-        {{/let}}
-      </:content>
-    </Request>
+    <section data-test-station-air-section class="px-4 py-5 sm:px-6">
+      <h2 class="text-base font-semibold text-slate-900">
+        {{t "station.air"}}
+      </h2>
+
+      <div class="mt-4">
+        <TimeSeries
+          @chartData={{this.chartData}}
+          @chartOptions={{this.chartOptions}}
+        />
+      </div>
+    </section>
   </template>
 }

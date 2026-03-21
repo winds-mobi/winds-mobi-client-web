@@ -1,15 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
-import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import { service } from '@ember/service';
-import { Request } from '@warp-drive/ember';
-import type StoreService from 'winds-mobi-client-web/services/store.js';
+import { t } from 'ember-intl';
 import StationWindsGraph from './graph';
 
 export interface StationWindsSignature {
   Args: {
-    stationId: string;
+    history: History[];
   };
   Blocks: {
     default: [];
@@ -18,18 +14,15 @@ export interface StationWindsSignature {
 }
 
 export default class StationWinds extends Component<StationWindsSignature> {
-  @service declare store: StoreService;
-
-  get historyRequest() {
-    const options = historyQuery<History>('history', this.args.stationId);
-    return this.store.request(options);
-  }
-
   <template>
-    <Request @request={{this.historyRequest}}>
-      <:content as |historyResult|>
-        <StationWindsGraph @data={{historyResult.data}} />
-      </:content>
-    </Request>
+    <section data-test-station-wind-section class="px-4 py-5 sm:px-6">
+      <h2 class="text-base font-semibold text-slate-900">
+        {{t "station.wind"}}
+      </h2>
+
+      <div class="mt-4">
+        <StationWindsGraph @data={{@history}} />
+      </div>
+    </section>
   </template>
 }

@@ -53,7 +53,7 @@ module('Unit | Utility | map-view', function () {
     );
 
     assert.true(isMapRoute('map'));
-    assert.true(isMapRoute('map.station.summary'));
+    assert.true(isMapRoute('map.station'));
     assert.false(isMapRoute('index'));
   });
 });
