@@ -29,14 +29,14 @@
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "devDependencies": {
-    "@deck.gl/core": "9.2.11",
-    "@deck.gl/layers": "9.2.11",
-    "@deck.gl/mapbox": "9.2.11",
     "@babel/core": "^7.27.1",
     "@babel/eslint-parser": "^7.27.1",
     "@babel/plugin-transform-runtime": "^7.27.1",
     "@babel/plugin-transform-typescript": "^7.28.0",
     "@babel/runtime": "^7.27.1",
+    "@deck.gl/core": "9.2.11",
+    "@deck.gl/layers": "9.2.11",
+    "@deck.gl/mapbox": "9.2.11",
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^4.0.1",
     "@ember/test-helpers": "^4.0.5",
@@ -78,6 +78,7 @@
     "ember-highcharts": "^7.0.0",
     "ember-intl": "^7.0.5",
     "ember-load-initializers": "^3.0.1",
+    "ember-maplibre-gl": "^0.3.1",
     "ember-modifier": "^4.2.0",
     "ember-page-title": "^9.0.1",
     "ember-phosphor-icons": "^0.3.0",
@@ -136,8 +137,8 @@
     "@warp-drive/experiments": "0.2.6",
     "@warp-drive/json-api": "5.8.0",
     "@warp-drive/legacy": "5.8.0",
-    "@warp-drive/utilities": "5.8.0",
     "@warp-drive/schema-record": "5.8.0",
+    "@warp-drive/utilities": "5.8.0",
     "sharp": "^0.34.1"
   }
 }
