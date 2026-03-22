@@ -79,9 +79,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       type: 'datetime',
       gridLineWidth: 1,
       crosshair: true,
-      labels: {
-        format: '{value:%a %H:%M}',
-      },
     },
     legend: {
       enabled: false,
