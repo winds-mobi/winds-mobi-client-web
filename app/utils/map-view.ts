@@ -9,6 +9,11 @@ const ZOOM_PRECISION = 2;
 
 export type MapCoordinate = [number, number];
 
+export type MapBounds = {
+  northEast: MapCoordinate;
+  southWest: MapCoordinate;
+};
+
 export type MapView = {
   longitude: number;
   latitude: number;
@@ -49,6 +54,19 @@ export function normalizeMapView(view: MapView): MapView {
   };
 }
 
+export function normalizeMapBounds(bounds: MapBounds): MapBounds {
+  return {
+    northEast: [
+      round(bounds.northEast[0], COORDINATE_PRECISION),
+      round(bounds.northEast[1], COORDINATE_PRECISION),
+    ],
+    southWest: [
+      round(bounds.southWest[0], COORDINATE_PRECISION),
+      round(bounds.southWest[1], COORDINATE_PRECISION),
+    ],
+  };
+}
+
 export function parseMapView(queryParams?: MapQueryParams): MapView {
   return normalizeMapView({
     longitude: parseNumber(queryParams?.mapLng, DEFAULT_MAP_LNG),
@@ -75,6 +93,18 @@ export function mapViewsEqual(left: MapView, right: MapView) {
     normalizedLeft.longitude === normalizedRight.longitude &&
     normalizedLeft.latitude === normalizedRight.latitude &&
     normalizedLeft.zoom === normalizedRight.zoom
+  );
+}
+
+export function mapBoundsEqual(left: MapBounds, right: MapBounds) {
+  const normalizedLeft = normalizeMapBounds(left);
+  const normalizedRight = normalizeMapBounds(right);
+
+  return (
+    normalizedLeft.northEast[0] === normalizedRight.northEast[0] &&
+    normalizedLeft.northEast[1] === normalizedRight.northEast[1] &&
+    normalizedLeft.southWest[0] === normalizedRight.southWest[0] &&
+    normalizedLeft.southWest[1] === normalizedRight.southWest[1]
   );
 }
 

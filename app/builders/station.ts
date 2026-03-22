@@ -8,6 +8,7 @@ import type {
 } from '@warp-drive/core/types/request';
 import type { QueryParamsSource } from '@warp-drive/core/types/params';
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
+import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
@@ -38,6 +39,19 @@ const defaultOptions: ConstrainedRequestOptions = {
     arrayFormat: 'repeat' as const,
   },
 };
+
+const mapStationQueryKeys = [
+  'short',
+  'loc',
+  'status',
+  'pv-name',
+  'alt',
+  'peak',
+  'last._id',
+  'last.w-dir',
+  'last.w-avg',
+  'last.w-max',
+] as const;
 
 function findRecord<T>(
   type: string,
@@ -88,4 +102,24 @@ function query<T>(
   return jsonApiQuery<T>(type, mergedQuery, mergedOptions);
 }
 
-export { findRecord, query };
+function mapQuery<T>(
+  type: string,
+  bounds: MapBounds,
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      'is-highest-duplicates-rating': true,
+      keys: [...mapStationQueryKeys],
+      limit: 470,
+      'within-pt1-lat': bounds.northEast[1],
+      'within-pt1-lon': bounds.northEast[0],
+      'within-pt2-lat': bounds.southWest[1],
+      'within-pt2-lon': bounds.southWest[0],
+    },
+    options
+  );
+}
+
+export { findRecord, mapQuery, query };

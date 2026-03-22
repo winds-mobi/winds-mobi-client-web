@@ -3,7 +3,7 @@ import { registerDestructor } from '@ember/destroyable';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
-import { query } from 'winds-mobi-client-web/builders/station';
+import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
@@ -17,11 +17,12 @@ import type { WindLegendBand } from 'winds-mobi-client-web/components/map/legend
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import {
   isMapRoute,
-  mapViewExceedsRequestThreshold,
   mapViewsEqual,
+  mapViewExceedsRequestThreshold,
+  normalizeMapBounds,
   parseMapView,
   serializeMapView,
-  type MapCoordinate,
+  type MapBounds,
   type MapQueryParams,
   type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
@@ -35,6 +36,11 @@ export interface MapSignature {
 }
 
 const STATION_REQUEST_DEBOUNCE_MS = 250;
+
+type RequestedViewport = {
+  bounds: MapBounds;
+  view: MapView;
+};
 
 type RouteDidChangeHandler = () => void;
 
@@ -54,19 +60,20 @@ export default class Map extends Component<MapSignature> {
   @service declare intl: IntlService;
   @service declare mapRefresh: MapRefreshService;
 
-  @tracked requestedMapView = parseMapView();
+  @tracked requestedViewport?: RequestedViewport;
+  @tracked latestViewport?: RequestedViewport;
 
-  updateRequestedMapView = restartableTask(async (nextView: MapView) => {
-    await timeout(STATION_REQUEST_DEBOUNCE_MS);
-    this.requestedMapView = nextView;
-  });
+  updateRequestedViewport = restartableTask(
+    async (nextViewport: RequestedViewport) => {
+      await timeout(STATION_REQUEST_DEBOUNCE_MS);
+      this.requestedViewport = nextViewport;
+    }
+  );
 
   private routeEventSource?: EventedRouterService;
 
   constructor(owner: unknown, args: MapSignature['Args']) {
     super(owner, args);
-
-    this.requestedMapView = this.mapView;
     this.routeEventSource = this.router as EventedRouterService;
     this.routeEventSource.on('routeDidChange', this.handleRouteDidChange);
 
@@ -92,16 +99,16 @@ export default class Map extends Component<MapSignature> {
   }
 
   @cached
-  get request(): Future<{ data: Station[] }> {
+  get request(): Future<{ data: Station[] }> | undefined {
+    if (!this.requestedViewport) {
+      return undefined;
+    }
+
     const refreshRevision = this.mapRefresh.refreshRevision;
 
-    const options = query<Station>(
+    const options = mapQuery<Station>(
       'station',
-      {
-        limit: 12,
-        'near-lat': this.requestedMapView.latitude,
-        'near-lon': this.requestedMapView.longitude,
-      },
+      this.requestedViewport.bounds,
       refreshRevision > 0 ? { backgroundReload: true } : undefined
     );
 
@@ -109,11 +116,11 @@ export default class Map extends Component<MapSignature> {
   }
 
   get requestState() {
-    return getRequestState(this.request);
+    return this.request ? getRequestState(this.request) : undefined;
   }
 
   get legendBands(): WindLegendBand[] {
-    return WIND_COLOUR_BANDS.map((band) => ({
+    return [...WIND_COLOUR_BANDS].reverse().map((band) => ({
       backgroundClass: band.backgroundClass,
       label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
     }));
@@ -124,7 +131,7 @@ export default class Map extends Component<MapSignature> {
   }
 
   get stations() {
-    return this.requestState.isSuccess ? this.requestState.value.data : [];
+    return this.requestState?.isSuccess ? this.requestState.value.data : [];
   }
 
   @action
@@ -135,15 +142,27 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  updateView([longitude, latitude]: MapCoordinate, zoom: number) {
-    const nextView = { longitude, latitude, zoom };
+  handleViewportChange(view: MapView, bounds: MapBounds) {
+    const nextViewport = {
+      bounds: normalizeMapBounds(bounds),
+      view,
+    };
 
-    if (mapViewsEqual(this.mapView, nextView)) {
+    this.latestViewport = nextViewport;
+
+    if (
+      !this.requestedViewport &&
+      mapViewsEqual(this.mapView, nextViewport.view)
+    ) {
+      this.requestedViewport = nextViewport;
+    }
+
+    if (mapViewsEqual(this.mapView, nextViewport.view)) {
       return;
     }
 
     this.router.replaceWith({
-      queryParams: serializeMapView(nextView),
+      queryParams: serializeMapView(nextViewport.view),
     });
   }
 
@@ -157,21 +176,33 @@ export default class Map extends Component<MapSignature> {
   };
 
   private scheduleStationRequest(nextView: MapView) {
-    if (mapViewsEqual(this.requestedMapView, nextView)) {
+    if (
+      this.requestedViewport &&
+      mapViewsEqual(this.requestedViewport.view, nextView)
+    ) {
       this.cancelPendingStationRequest();
       return;
     }
 
-    if (!mapViewExceedsRequestThreshold(this.requestedMapView, nextView)) {
+    if (
+      this.requestedViewport &&
+      !mapViewExceedsRequestThreshold(this.requestedViewport.view, nextView)
+    ) {
+      return;
+    }
+
+    const latestViewport = this.latestViewport;
+
+    if (!latestViewport || !mapViewsEqual(latestViewport.view, nextView)) {
       return;
     }
 
     this.cancelPendingStationRequest();
-    void this.updateRequestedMapView.perform(nextView);
+    void this.updateRequestedViewport.perform(latestViewport);
   }
 
   private cancelPendingStationRequest() {
-    void this.updateRequestedMapView.cancelAll();
+    void this.updateRequestedViewport.cancelAll();
   }
 
   <template>
@@ -182,13 +213,13 @@ export default class Map extends Component<MapSignature> {
         @legendBands={{this.legendBands}}
         @legendTitle={{this.legendTitle}}
         @onStationSelect={{this.stationSelected}}
-        @onViewChange={{this.updateView}}
+        @onViewportChange={{this.handleViewportChange}}
         @selectedStationId={{this.selectedStationId}}
         @stations={{this.stations}}
         @view={{this.mapView}}
       />
 
-      {{#if this.requestState.isPending}}
+      {{#if this.requestState?.isPending}}
         <div
           class="pointer-events-none absolute left-4 top-4 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
         >

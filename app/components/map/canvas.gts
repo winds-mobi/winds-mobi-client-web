@@ -13,8 +13,9 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 import config from 'winds-mobi-client-web/config/environment';
 import {
   mapViewsEqual,
+  normalizeMapBounds,
   normalizeMapView,
-  type MapCoordinate,
+  type MapBounds,
   type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
 import MapLegend, {
@@ -22,8 +23,27 @@ import MapLegend, {
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 
-const MAP_STYLE_URL =
-  'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const OSM_SWISS_STYLE: StyleSpecification = {
+  version: 8,
+  sources: {
+    osmswissstyle: {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxzoom: 19,
+      tiles: ['https://tile.osm.ch/switzerland/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      type: 'raster',
+    },
+  },
+  layers: [
+    {
+      id: 'osmswissstyle',
+      source: 'osmswissstyle',
+      type: 'raster',
+    },
+  ],
+};
+
 const TEST_MAP_STYLE: StyleSpecification = {
   version: 8,
   sources: {},
@@ -48,7 +68,7 @@ export interface MapCanvasSignature {
     mapLib?: MapConstructor;
     navigationControl?: IControl;
     onStationSelect: (stationId: string) => void;
-    onViewChange: (coords: MapCoordinate, zoom: number) => void;
+    onViewportChange: (view: MapView, bounds: MapBounds) => void;
     selectedStationId?: string;
     stations: Station[];
     view: MapView;
@@ -87,7 +107,7 @@ export default class MapCanvas extends Component<MapCanvasSignature> {
       dragRotate: false,
       maxPitch: 0,
       pitch: 0,
-      style: config.environment === 'test' ? TEST_MAP_STYLE : MAP_STYLE_URL,
+      style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
       touchPitch: false,
       zoom: this.args.view.zoom,
     };
@@ -118,6 +138,17 @@ export default class MapCanvas extends Component<MapCanvasSignature> {
       latitude: center.lat,
       longitude: center.lng,
       zoom: map.getZoom(),
+    });
+  }
+
+  private currentMapBounds(map: MaplibreMap): MapBounds {
+    const bounds = map.getBounds();
+    const northEast = bounds.getNorthEast();
+    const southWest = bounds.getSouthWest();
+
+    return normalizeMapBounds({
+      northEast: [northEast.lng, northEast.lat],
+      southWest: [southWest.lng, southWest.lat],
     });
   }
 
@@ -153,17 +184,23 @@ export default class MapCanvas extends Component<MapCanvasSignature> {
         }
       ).__maplibreMap = map;
     }
+
+    this.args.onViewportChange(
+      this.currentMapView(map),
+      this.currentMapBounds(map)
+    );
   }
 
   @action
   handleMoveEnd(event: { target: MaplibreMap }) {
     const view = this.currentMapView(event.target);
+    const bounds = this.currentMapBounds(event.target);
 
     if (this.pendingExternalViewKey === this.viewKey(view)) {
       this.pendingExternalViewKey = undefined;
     }
 
-    this.args.onViewChange([view.longitude, view.latitude], view.zoom);
+    this.args.onViewportChange(view, bounds);
   }
 
   syncMapView = (map: MaplibreMap | undefined, view: MapView) => {

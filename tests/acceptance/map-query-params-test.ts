@@ -148,7 +148,12 @@ module('Acceptance | map query params', function (hooks) {
     assert.true(
       store.calls.some(
         (url) =>
-          url.includes('near-lat=46.54321') && url.includes('near-lon=8.12345')
+          url.includes('within-pt1-lat=') &&
+          url.includes('within-pt1-lon=') &&
+          url.includes('within-pt2-lat=') &&
+          url.includes('within-pt2-lon=') &&
+          url.includes('is-highest-duplicates-rating=true') &&
+          url.includes('limit=470')
       )
     );
   });
@@ -157,6 +162,7 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
@@ -178,6 +184,7 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
@@ -196,7 +203,12 @@ module('Acceptance | map query params', function (hooks) {
     assert.true(
       store.calls.some(
         (url) =>
-          url.includes('near-lat=46.54321') && url.includes('near-lon=8.14345')
+          url.includes('within-pt1-lat=') &&
+          url.includes('within-pt1-lon=') &&
+          url.includes('within-pt2-lat=') &&
+          url.includes('within-pt2-lon=') &&
+          url.includes('is-highest-duplicates-rating=true') &&
+          url.includes('limit=470')
       )
     );
   });
