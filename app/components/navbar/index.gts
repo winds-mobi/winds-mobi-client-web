@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import NavbarLogo from './logo';
+import NavbarRefresh from './refresh';
 // import NavbarNotifications from './notifications';
 // import NavbarUserMenu from './user-menu';
 // import NavbarMobileMenu from './mobile-menu';
@@ -24,7 +25,9 @@ export default class Navbar extends Component<NavbarSignature> {
           <NavbarLogo />
 
           {{! TODO: <NavbarMobileMenu::Button /> }}
-          <div class="hidden lg:ml-4 lg:flex lg:items-center">
+          <div class="ml-4 flex items-center">
+            <NavbarRefresh />
+
             {{! <NavbarNotifications /> }}
 
             {{! <NavbarUserMenu /> }}

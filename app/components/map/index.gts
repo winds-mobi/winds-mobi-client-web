@@ -1,9 +1,9 @@
 import Component from '@glimmer/component';
 import { registerDestructor } from '@ember/destroyable';
+import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { query } from 'winds-mobi-client-web/builders/station';
-import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
@@ -14,6 +14,7 @@ import { restartableTask, timeout } from 'ember-concurrency';
 import { WIND_COLOUR_BANDS } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import MapCanvas from 'winds-mobi-client-web/components/map/canvas';
 import type { WindLegendBand } from 'winds-mobi-client-web/components/map/legend';
+import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import {
   isMapRoute,
   mapViewExceedsRequestThreshold,
@@ -51,6 +52,7 @@ export default class Map extends Component<MapSignature> {
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare intl: IntlService;
+  @service declare mapRefresh: MapRefreshService;
 
   @tracked requestedMapView = parseMapView();
 
@@ -91,11 +93,13 @@ export default class Map extends Component<MapSignature> {
 
   @cached
   get request(): Future<{ data: Station[] }> {
+    const refreshRevision = this.mapRefresh.refreshRevision;
+
     const options = query<Station>('station', {
       limit: 12,
       'near-lat': this.requestedMapView.latitude,
       'near-lon': this.requestedMapView.longitude,
-    });
+    }, refreshRevision > 0 ? { backgroundReload: true } : undefined);
 
     return this.requestStore.request<{ data: Station[] }>(options);
   }
