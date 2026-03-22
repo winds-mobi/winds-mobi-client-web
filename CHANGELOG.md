@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.8 - 2026-03-22
+
+### Changed
+
+- Documented the production deployment trigger and required GitHub Actions environment/secrets in the README.
+
 ## v0.0.7 - 2026-03-22
 
 ### Added

@@ -46,7 +46,14 @@ Make use of the many generators for code, try `ember help generate` for more det
 
 ### Deploying
 
-Specify what it takes to deploy your app.
+Production deploys are handled by
+[`build-deploy-production.yml`](./.github/workflows/build-deploy-production.yml).
+
+A new production version is deployed when all of the following are true:
+
+- a Git tag matching `v*.*.*` is pushed to GitHub, for example `v0.0.7`
+- the GitHub Actions workflow can access the `v2.winds.mobi` environment
+- the `SSH_PRIVATE_KEY` secret is available in that environment
 
 ## Further Reading / Useful Links
 
