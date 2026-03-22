@@ -1,5 +1,6 @@
 /* stylelint-disable */
 @import 'tailwindcss' source('../../');
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
 @plugin "@frontile/theme/plugin/default";
 

@@ -95,7 +95,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
       <div class="grid gap-3">
         <div class="grid min-w-0 grid-cols-2 gap-3">
           <StationSectionCard @title={{t "station.summary.wind"}}>
-            <dl class="space-y-2.5">
+            <dl class="m-0 space-y-2.5">
               <StationMetricCard @label={{t "wind.speed"}}>
                 <span style={{this.speedStyle}}>
                   {{formatNumber
@@ -124,7 +124,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
           </StationSectionCard>
 
           <StationSectionCard @title={{t "station.summary.air"}}>
-            <dl class="space-y-2.5">
+            <dl class="m-0 space-y-2.5">
               <StationMetricCard @label={{t "air.temperature"}}>
                 {{formatNumber
                   this.reading.temperature
@@ -156,7 +156,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
               <WindDirection @data={{this.recentHistory}} />
             </div>
 
-            <dl class="grid gap-2">
+            <dl class="m-0 grid gap-2">
               <StationMetricCard
                 @label={{t "wind.maximum"}}
                 @valueStyle={{this.lastHourMaximumStyle}}

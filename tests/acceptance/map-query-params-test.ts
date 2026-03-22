@@ -1,23 +1,13 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { currentURL, settled, visit } from '@ember/test-helpers';
+import type { Map as MaplibreMap } from 'ember-maplibre-gl';
+import { currentURL, settled, visit, waitUntil } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-import { createFakeMapRuntime } from 'winds-mobi-client-web/tests/helpers/fake-map-runtime';
-import {
-  resetMapRuntimeForTest,
-  setMapRuntimeForTest,
-} from 'winds-mobi-client-web/utils/map-runtime';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-type FakeRuntime = ReturnType<typeof createFakeMapRuntime>;
-
 type FakeStoreRequest = {
   url?: string;
-};
-
-type MapQueryParamsTestContext = {
-  fakeRuntime: FakeRuntime;
 };
 
 const STATION_FIXTURES: Station[] = [
@@ -87,35 +77,62 @@ function assertCurrentMapUrl(
   );
 }
 
+function currentMap(): MaplibreMap | undefined {
+  const element = document.querySelector('[data-test-map-canvas]');
+
+  return (
+    element as
+      | (Element & {
+          __maplibreMap?: MaplibreMap;
+        })
+      | null
+  )?.__maplibreMap;
+}
+
+async function mapInstance() {
+  await waitUntil(() => Boolean(currentMap()));
+
+  const map = currentMap();
+
+  if (!map) {
+    throw new Error('Expected map instance to be available');
+  }
+
+  return map;
+}
+
+async function moveMapTo(longitude: number, latitude: number, zoom: number) {
+  const map = await mapInstance();
+
+  map.jumpTo({
+    center: [longitude, latitude],
+    zoom,
+  });
+  map.fire('moveend');
+}
+
 module('Acceptance | map query params', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (this: MapQueryParamsTestContext) {
-    const fakeRuntime = createFakeMapRuntime();
-
-    this.fakeRuntime = fakeRuntime;
-
+  hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    setMapRuntimeForTest(fakeRuntime.runtime);
   });
 
-  hooks.afterEach(function () {
-    resetMapRuntimeForTest();
-  });
-
-  test('it uses the URL view for the initial map and station request', async function (this: MapQueryParamsTestContext, assert) {
-    const fakeRuntime = this.fakeRuntime;
+  test('it uses the URL view for the initial map and station request', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    const map = await mapInstance();
+    const center = map.getCenter();
 
     assertCurrentMapUrl(assert, {
       mapLat: '46.54321',
       mapLng: '8.12345',
       mapZoom: '9.5',
     });
-    assert.deepEqual(fakeRuntime.maps[0]?.options.center, [8.12345, 46.54321]);
-    assert.strictEqual(fakeRuntime.maps[0]?.options.zoom, 9.5);
+    assert.strictEqual(center.lng, 8.12345);
+    assert.strictEqual(center.lat, 46.54321);
+    assert.strictEqual(map.getZoom(), 9.5);
     assert.true(
       store.calls.some(
         (url) =>
@@ -124,17 +141,14 @@ module('Acceptance | map query params', function (hooks) {
     );
   });
 
-  test('it does not refetch stations for tiny map view changes', async function (this: MapQueryParamsTestContext, assert) {
-    const fakeRuntime = this.fakeRuntime;
+  test('it does not refetch stations for tiny map view changes', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
-    fakeRuntime.maps[0]?.setView([8.12844, 46.5482], 9.6);
-    fakeRuntime.maps[0]?.emit('moveend');
-
+    await moveMapTo(8.12844, 46.5482, 9.6);
     await settled();
 
     assertCurrentMapUrl(assert, {
@@ -148,17 +162,14 @@ module('Acceptance | map query params', function (hooks) {
     );
   });
 
-  test('it refetches stations after the request threshold is crossed', async function (this: MapQueryParamsTestContext, assert) {
-    const fakeRuntime = this.fakeRuntime;
+  test('it refetches stations after the request threshold is crossed', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
-    fakeRuntime.maps[0]?.setView([8.14345, 46.54321], 9.5);
-    fakeRuntime.maps[0]?.emit('moveend');
-
+    await moveMapTo(8.14345, 46.54321, 9.5);
     await settled();
 
     assertCurrentMapUrl(assert, {
