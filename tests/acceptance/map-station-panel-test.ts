@@ -6,6 +6,7 @@ import {
   click,
   currentURL,
   settled,
+  type TestContext,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
@@ -21,7 +22,7 @@ type FakeStoreRequest = {
   url?: string;
 };
 
-type MapStationPanelTestContext = {
+type MapStationPanelTestContext = TestContext & {
   deferredSecondaryStationRequest?: DeferredRequest;
 };
 

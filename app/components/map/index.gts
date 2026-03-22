@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { registerDestructor } from '@ember/destroyable';
-import { getRequestState } from '@warp-drive/ember';
 import type { Future } from '@warp-drive/core/request';
+import { getRequestState } from '@warp-drive/core/reactive';
 import { query } from 'winds-mobi-client-web/builders/station';
 import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -40,6 +40,10 @@ type RouteDidChangeHandler = () => void;
 type EventedRouterService = RouterService & {
   on(event: 'routeDidChange', handler: RouteDidChangeHandler): void;
   off(event: 'routeDidChange', handler: RouteDidChangeHandler): void;
+};
+
+type RequestStore = {
+  request<T>(request: unknown): Future<T>;
 };
 
 export default class Map extends Component<MapSignature> {
@@ -81,6 +85,10 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
+  private get requestStore(): RequestStore {
+    return this.store as unknown as RequestStore;
+  }
+
   @cached
   get request(): Future<{ data: Station[] }> {
     const options = query<Station>('station', {
@@ -89,7 +97,7 @@ export default class Map extends Component<MapSignature> {
       'near-lon': this.requestedMapView.longitude,
     });
 
-    return this.store.request(options);
+    return this.requestStore.request<{ data: Station[] }>(options);
   }
 
   get requestState() {
@@ -113,7 +121,7 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(stationId: string) {
-    this.router.transitionTo('map.station', stationId, {
+    void this.router.transitionTo('map.station', stationId, {
       queryParams: serializeMapView(this.mapView),
     });
   }
@@ -155,7 +163,7 @@ export default class Map extends Component<MapSignature> {
   }
 
   private cancelPendingStationRequest() {
-    this.updateRequestedMapView.cancelAll();
+    void this.updateRequestedMapView.cancelAll();
   }
 
   <template>

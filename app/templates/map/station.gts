@@ -1,6 +1,6 @@
 import { pageTitle } from 'ember-page-title';
-import { getRequestState } from '@warp-drive/ember';
 import type { Future } from '@warp-drive/core/request';
+import { getRequestState } from '@warp-drive/core/reactive';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
@@ -18,6 +18,10 @@ interface MapStationTemplateSignature {
   };
 }
 
+type RequestStore = {
+  request<T>(request: unknown): Future<T>;
+};
+
 export default class MapStationTemplate extends Component<MapStationTemplateSignature> {
   @service declare router: RouterService;
   @service
@@ -27,12 +31,16 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     return this.router.currentRoute?.params['station_id'];
   }
 
+  private get requestStore(): RequestStore {
+    return this.store as unknown as RequestStore;
+  }
+
   get stationRequest(): Future<{ data: StationModel }> | undefined {
     if (!this.stationId) {
       return undefined;
     }
 
-    return this.store.request(
+    return this.requestStore.request<{ data: StationModel }>(
       findRecord<StationModel>('station', this.stationId)
     );
   }
@@ -42,7 +50,9 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    return this.store.request(historyQuery<History>('history', this.stationId));
+    return this.requestStore.request<{ data: History[] }>(
+      historyQuery<History>('history', this.stationId)
+    );
   }
 
   get stationRequestState() {

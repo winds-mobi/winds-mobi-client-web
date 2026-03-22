@@ -19,6 +19,10 @@
 - Removed the custom map modifier, runtime abstraction, layer builder, legend control factory, location service, location button component, and the obsolete deck.gl-specific tests.
 - Removed direct deck.gl dependencies from the project.
 
+### Fixed
+
+- Tightened the migrated map request flow around typed `store.request(...)` access, explicit ignored router/task promises, and application-test owner typing so the current map path passes lint cleanly.
+
 ## v0.0.7 - 2026-03-22
 
 ### Added
