@@ -110,6 +110,9 @@ export function buildStationLayer(
       anchorX: STATION_ICON_SIZE / 2,
       anchorY: STATION_ICON_SIZE / 2,
     }),
+    updateTriggers: {
+      getIcon: selectedStationId ?? '',
+    },
     onClick: ({ object }) => {
       if (object) {
         onStationSelect(object.id);

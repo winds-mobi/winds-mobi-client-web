@@ -31,6 +31,24 @@ const station = {
   [Type]: 'station',
 } as Station;
 
+type StationLayer = {
+  props: {
+    getPosition: (station: Station) => [number, number];
+    getAngle: (station: Station) => number;
+    getIcon: (station: Station) => {
+      url: string;
+      width: number;
+      height: number;
+      anchorX: number;
+      anchorY: number;
+    };
+    onClick: (info: { object?: Station }) => void;
+    updateTriggers: {
+      getIcon: string;
+    };
+  };
+};
+
 module('Unit | Utility | map-layers', function (hooks) {
   hooks.beforeEach(function () {
     resetStationArrowIconUrlCacheForTest();
@@ -40,7 +58,7 @@ module('Unit | Utility | map-layers', function (hooks) {
     const selected: string[] = [];
     const layer = buildStationLayer([station], undefined, (stationId) => {
       selected.push(stationId);
-    }) as unknown as { props: Record<string, (...args: unknown[]) => unknown> };
+    }) as unknown as StationLayer;
 
     assert.deepEqual(layer.props.getPosition(station), [7.62, 46.77]);
     assert.strictEqual(layer.props.getAngle(station), 270);
@@ -62,6 +80,7 @@ module('Unit | Utility | map-layers', function (hooks) {
     layer.props.onClick({ object: station });
 
     assert.deepEqual(selected, ['station-1']);
+    assert.strictEqual(layer.props.updateTriggers.getIcon, '');
     assert.true(
       buildStationArrowIconUrl(
         station.last.speed,
@@ -77,9 +96,9 @@ module('Unit | Utility | map-layers', function (hooks) {
       [station],
       'station-1',
       () => undefined
-    ) as unknown as { props: Record<string, (...args: unknown[]) => unknown> };
+    ) as unknown as StationLayer;
 
-    const icon = layer.props.getIcon(station) as { url: string };
+    const icon = layer.props.getIcon(station);
     const selectedIconUrl = buildStationArrowIconUrl(
       station.last.speed,
       station.last.timestamp,
@@ -93,6 +112,7 @@ module('Unit | Utility | map-layers', function (hooks) {
 
     assert.strictEqual(icon.url, selectedIconUrl);
     assert.notStrictEqual(selectedIconUrl, defaultIconUrl);
+    assert.strictEqual(layer.props.updateTriggers.getIcon, 'station-1');
     assert.true(
       decodeURIComponent(selectedIconUrl).includes('stroke="#000000"')
     );

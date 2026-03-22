@@ -20,6 +20,7 @@
 ### Fixed
 
 - Kept the station panel shell mounted at its fixed mobile and desktop dimensions while switching between stations, so the layout no longer collapses during request transitions.
+- Made selected station-marker outlines update reliably when switching from one station to another.
 - Normalized station timestamps so freshness calculations and stale-marker rendering behave correctly.
 - Cached station marker arrow SVG data URLs by rendered state to avoid regenerating identical icons during rerenders.
 - Tightened the active map runtime, fake map runtime, and marker helpers around the new control and request flow.
