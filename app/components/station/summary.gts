@@ -91,7 +91,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
   <template>
     <section data-test-station-summary-section class="px-4 py-4 sm:px-5">
       <div class="grid gap-3">
-        <div class="grid min-w-0 gap-3 sm:grid-cols-2">
+        <div class="grid min-w-0 grid-cols-2 gap-3">
           <StationSectionCard @title={{t "station.summary.wind"}}>
             <dl class="space-y-2.5">
               <StationMetricCard @label={{t "wind.speed"}}>
@@ -164,8 +164,8 @@ export default class StationSummary extends Component<StationSummarySignature> {
           @title={{t "wind.lastHour"}}
           class="min-w-0"
         >
-          <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem] md:items-stretch">
-            <div class="min-w-0 md:h-full">
+          <div class="grid grid-cols-[minmax(0,1fr)_9rem] gap-3 items-stretch md:grid-cols-[minmax(0,1fr)_12rem]">
+            <div class="min-w-0 h-full">
               <WindDirection @data={{this.recentHistory}} />
             </div>
 
