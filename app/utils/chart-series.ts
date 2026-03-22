@@ -5,8 +5,8 @@ export function buildTimeSeriesData<T>(
   xValue: (row: T) => number,
   yValue: (row: T) => number
 ) {
-  return rows
-    .reduce<TimeSeriesPoint[]>((points, row) => {
+  const pointsByTimestamp = rows.reduce<Map<number, number | null>>(
+    (points, row) => {
       const timestamp = xValue(row);
 
       if (!Number.isFinite(timestamp)) {
@@ -15,9 +15,14 @@ export function buildTimeSeriesData<T>(
 
       const value = yValue(row);
 
-      points.push([timestamp, Number.isFinite(value) ? value : null]);
+      points.set(timestamp, Number.isFinite(value) ? value : null);
 
       return points;
-    }, [])
+    },
+    new Map<number, number | null>()
+  );
+
+  return [...pointsByTimestamp.entries()]
+    .map(([timestamp, value]) => [timestamp, value] as TimeSeriesPoint)
     .sort((left, right) => left[0] - right[0]);
 }
