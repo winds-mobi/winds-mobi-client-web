@@ -1,29 +1,30 @@
 export default {
-  time: {
-    hhmmss: {
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    },
-  },
-  date: {
-    hhmmss: {
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    },
-  },
   number: {
-    compact: {
-      notation: 'compact',
+    windSpeed: {
+      style: 'unit',
+      unit: 'kilometer-per-hour',
+      maximumFractionDigits: 0,
     },
-    EUR: {
-      style: 'currency',
-      currency: 'EUR',
+    temperature: {
+      style: 'unit',
+      unit: 'celsius',
+      maximumFractionDigits: 0,
     },
-    USD: {
-      style: 'currency',
-      currency: 'USD',
+    humidity: {
+      style: 'unit',
+      unit: 'percent',
+      maximumFractionDigits: 0,
+    },
+    litersPerSecond: {
+      style: 'unit',
+      unit: 'liter-per-second',
+      maximumFractionDigits: 1,
+    },
+    integer: {
+      maximumFractionDigits: 0,
+    },
+    rainfall: {
+      maximumFractionDigits: 1,
     },
   },
 };

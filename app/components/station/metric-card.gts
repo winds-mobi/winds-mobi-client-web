@@ -1,18 +1,28 @@
 import Component from '@glimmer/component';
-import { formatNumber } from 'ember-intl';
+import { service } from '@ember/service';
+import type { IntlService } from 'ember-intl';
+import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 
 type MetricValue = number | string | null | undefined;
+type StationMetricFormat =
+  | 'azimuth'
+  | 'humidity'
+  | 'integer'
+  | 'litersPerSecond'
+  | 'pressure'
+  | 'rainfall'
+  | 'temperature'
+  | 'windSpeed';
 
 export interface StationMetricCardSignature {
   Args: {
     compact?: boolean;
-    formattedValue?: string;
+    format?: StationMetricFormat;
     label: string;
     labelClass?: string;
-    unit?: string;
     value?: MetricValue;
+    valueColor?: string;
     valueClass?: string;
-    valueStyle?: string;
   };
   Blocks: {
     default: [];
@@ -33,16 +43,49 @@ function hasDisplayableValue(value: MetricValue) {
 }
 
 export default class StationMetricCard extends Component<StationMetricCardSignature> {
+  @service declare intl: IntlService;
+
   get hasValue() {
     return hasDisplayableValue(this.args.value);
   }
 
-  get hasFormattedValue() {
-    return hasDisplayableValue(this.args.formattedValue);
-  }
-
   get numericValue() {
     return typeof this.args.value === 'number' ? this.args.value : 0;
+  }
+
+  get valueStyle() {
+    return this.args.valueColor ? `color: ${this.args.valueColor};` : undefined;
+  }
+
+  get formattedValue() {
+    switch (this.args.format) {
+      case 'azimuth':
+        return `${azimuthToCardinal(this.numericValue)} ${this.intl.t('format.azimuth', {
+          azimuth: this.numericValue,
+        })}`;
+      case 'humidity':
+      case 'integer':
+      case 'litersPerSecond':
+      case 'temperature':
+      case 'windSpeed':
+        return this.intl.formatNumber(this.numericValue, {
+          format: this.args.format,
+        });
+      case 'pressure':
+        return this.intl.t('format.pressure', {
+          value: this.intl.formatNumber(this.numericValue, {
+            format: 'integer',
+          }),
+        });
+      case 'rainfall':
+        return this.intl.t('format.rain', {
+          value: this.intl.formatNumber(this.numericValue, {
+            format: 'rainfall',
+          }),
+        });
+      default:
+        return `${this.args.value ?? ''}`;
+    }
   }
 
 <template>
@@ -69,17 +112,9 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
             'mt-1.5'
           }}
           font-semibold {{if @valueClass @valueClass}}"
-        style={{@valueStyle}}
+        style={{this.valueStyle}}
       >
-        {{#if (has-block)}}
-          {{yield}}
-        {{else if this.hasFormattedValue}}
-          {{@formattedValue}}
-        {{else if @unit}}
-          {{formatNumber this.numericValue style="unit" unit=@unit}}
-        {{else}}
-          {{@value}}
-        {{/if}}
+        {{this.formattedValue}}
       </dd>
     </div>
   {{/if}}
