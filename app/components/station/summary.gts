@@ -116,10 +116,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 </span>
               </StationMetricCard>
 
-              <StationMetricCard
-                @label={{t "wind.direction"}}
-                @valueClass="text-sm text-slate-900"
-              >
+              <StationMetricCard @label={{t "wind.direction"}}>
                 {{this.directionCardinal}}
                 {{t "format.azimuth" azimuth=this.reading.direction}}
               </StationMetricCard>
@@ -136,24 +133,15 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 }}
               </StationMetricCard>
 
-              <StationMetricCard
-                @label={{t "air.humidity"}}
-                @valueClass="text-sm text-slate-900"
-              >
+              <StationMetricCard @label={{t "air.humidity"}}>
                 {{t "format.relativeHumidity" value=this.reading.humidity}}
               </StationMetricCard>
 
-              <StationMetricCard
-                @label={{t "air.pressure"}}
-                @valueClass="text-sm text-slate-900"
-              >
+              <StationMetricCard @label={{t "air.pressure"}}>
                 {{t "format.pressure" value=this.reading.pressure}}
               </StationMetricCard>
 
-              <StationMetricCard
-                @label={{t "air.rain"}}
-                @valueClass="text-sm text-slate-900"
-              >
+              <StationMetricCard @label={{t "air.rain"}}>
                 {{t "format.rain" value=this.reading.rain}}
               </StationMetricCard>
             </dl>
@@ -171,7 +159,6 @@ export default class StationSummary extends Component<StationSummarySignature> {
             <dl class="grid gap-2">
               <StationMetricCard
                 @label={{t "wind.maximum"}}
-                @valueClass="text-sm"
                 @valueStyle={{this.lastHourMaximumStyle}}
               >
                 {{formatNumber
@@ -183,7 +170,6 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
               <StationMetricCard
                 @label={{t "wind.mean"}}
-                @valueClass="text-sm"
                 @valueStyle={{this.lastHourMeanStyle}}
               >
                 {{formatNumber
@@ -195,7 +181,6 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
               <StationMetricCard
                 @label={{t "wind.minimum"}}
-                @valueClass="text-sm"
                 @valueStyle={{this.lastHourMinimumStyle}}
               >
                 {{formatNumber

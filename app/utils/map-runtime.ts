@@ -1,10 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import maplibregl from 'maplibre-gl';
+import {
+  buildWindLegendControlElement,
+  type WindLegendControlOptions,
+} from 'winds-mobi-client-web/utils/map-legend';
 
 export type DeckLayer = {
   id?: string;
 };
+
+export type MapControlPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right';
 
 export type MapOptions = {
   container: HTMLElement;
@@ -18,11 +27,16 @@ export type MapOptions = {
   touchPitch?: boolean;
 };
 
+export type MapControl = {
+  onAdd(map: MapInstance): HTMLElement;
+  onRemove(): void;
+};
+
 export type MapInstance = {
   on(event: string, handler: () => void): MapInstance;
   once(event: string, handler: () => void): MapInstance;
   off(event: string, handler: () => void): MapInstance;
-  addControl(control: unknown, position?: string): MapInstance;
+  addControl(control: unknown, position?: MapControlPosition): MapInstance;
   remove(): void;
   loaded(): boolean;
   getCenter(): { lng: number; lat: number };
@@ -44,8 +58,25 @@ export type MapRuntime = {
     interleaved: true;
     layers: DeckLayer[];
   }): DeckOverlayInstance;
-  createNavigationControl(): unknown;
+  createNavigationControl(): MapControl;
+  createLegendControl(options: WindLegendControlOptions): MapControl;
 };
+
+function createWindLegendControl(options: WindLegendControlOptions): MapControl {
+  let element: HTMLElement | undefined;
+
+  return {
+    onAdd(_map: MapInstance) {
+      element = buildWindLegendControlElement(options);
+      return element;
+    },
+
+    onRemove() {
+      element?.remove();
+      element = undefined;
+    },
+  };
+}
 
 const defaultRuntime: MapRuntime = {
   createMap(options) {
@@ -57,7 +88,11 @@ const defaultRuntime: MapRuntime = {
   },
 
   createNavigationControl() {
-    return new maplibregl.NavigationControl();
+    return new maplibregl.NavigationControl() as unknown as MapControl;
+  },
+
+  createLegendControl(options) {
+    return createWindLegendControl(options);
   },
 };
 

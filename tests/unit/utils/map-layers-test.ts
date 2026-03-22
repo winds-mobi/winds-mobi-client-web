@@ -2,9 +2,11 @@ import { module, test } from 'qunit';
 import { Type } from '@warp-drive/core-types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import {
+  getStationArrowIconUrlCacheSizeForTest,
   buildGpsLayer,
   buildStationArrowIconUrl,
   buildStationLayer,
+  resetStationArrowIconUrlCacheForTest,
 } from 'winds-mobi-client-web/utils/map-layers';
 
 const station = {
@@ -17,6 +19,7 @@ const station = {
   providerUrl: 'https://example.com',
   name: 'Station 1',
   last: {
+    timestamp: Date.now(),
     direction: 270,
     speed: 14,
     gusts: 22,
@@ -28,7 +31,11 @@ const station = {
   [Type]: 'station',
 } as Station;
 
-module('Unit | Utility | map-layers', function () {
+module('Unit | Utility | map-layers', function (hooks) {
+  hooks.beforeEach(function () {
+    resetStationArrowIconUrlCacheForTest();
+  });
+
   test('it builds station layers with rotated arrow icons', function (assert) {
     const selected: string[] = [];
     const layer = buildStationLayer([station], undefined, (stationId) => {
@@ -56,13 +63,16 @@ module('Unit | Utility | map-layers', function () {
 
     assert.deepEqual(selected, ['station-1']);
     assert.true(
-      buildStationArrowIconUrl(station.last.speed).includes(
+      buildStationArrowIconUrl(
+        station.last.speed,
+        station.last.timestamp
+      ).includes(
         'data:image/svg+xml;charset=UTF-8,'
       )
     );
   });
 
-  test('it adds a white outline to the selected station icon', function (assert) {
+  test('it adds a black outline to the selected station icon', function (assert) {
     const layer = buildStationLayer(
       [station],
       'station-1',
@@ -70,14 +80,42 @@ module('Unit | Utility | map-layers', function () {
     ) as unknown as { props: Record<string, (...args: unknown[]) => unknown> };
 
     const icon = layer.props.getIcon(station) as { url: string };
-    const selectedIconUrl = buildStationArrowIconUrl(station.last.speed, true);
-    const defaultIconUrl = buildStationArrowIconUrl(station.last.speed, false);
+    const selectedIconUrl = buildStationArrowIconUrl(
+      station.last.speed,
+      station.last.timestamp,
+      true
+    );
+    const defaultIconUrl = buildStationArrowIconUrl(
+      station.last.speed,
+      station.last.timestamp,
+      false
+    );
 
     assert.strictEqual(icon.url, selectedIconUrl);
     assert.notStrictEqual(selectedIconUrl, defaultIconUrl);
     assert.true(
-      decodeURIComponent(selectedIconUrl).includes('stroke="#ffffff"')
+      decodeURIComponent(selectedIconUrl).includes('stroke="#000000"')
     );
+  });
+
+  test('it renders stale stations in grey regardless of wind speed', function (assert) {
+    const staleTimestamp = Date.now() - 25 * 60 * 60 * 1000;
+    const iconUrl = buildStationArrowIconUrl(40, staleTimestamp);
+
+    assert.true(
+      decodeURIComponent(iconUrl).includes('fill="rgb(148, 163, 184)"')
+    );
+  });
+
+  test('it caches station arrow icon URLs by colour and selection state', function (assert) {
+    const freshTimestamp = Date.now();
+    const firstIconUrl = buildStationArrowIconUrl(14, freshTimestamp, false);
+    const repeatedIconUrl = buildStationArrowIconUrl(14, freshTimestamp, false);
+    const selectedIconUrl = buildStationArrowIconUrl(14, freshTimestamp, true);
+
+    assert.strictEqual(firstIconUrl, repeatedIconUrl);
+    assert.notStrictEqual(firstIconUrl, selectedIconUrl);
+    assert.strictEqual(getStationArrowIconUrlCacheSizeForTest(), 2);
   });
 
   test('it builds a gps icon layer', function (assert) {

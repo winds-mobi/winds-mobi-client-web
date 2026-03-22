@@ -5,6 +5,7 @@ import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import { createFakeMapRuntime } from 'winds-mobi-client-web/tests/helpers/fake-map-runtime';
 import type { DeckLayer } from 'winds-mobi-client-web/utils/map-runtime';
+import type { WindLegendControlOptions } from 'winds-mobi-client-web/utils/map-legend';
 import {
   resetMapRuntimeForTest,
   setMapRuntimeForTest,
@@ -33,6 +34,10 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
     this.set('longitude', 7.85);
     this.set('latitude', 46.68);
     this.set('zoom', 13);
+    this.set('legend', {
+      title: 'Wind speed',
+      bands: [{ color: 'rgb(0, 125, 179)', label: '20' }],
+    } as WindLegendControlOptions);
     this.set('onViewChange', (coords: [number, number], zoom: number) => {
       this.viewChanges.push({ coords, zoom });
     });
@@ -47,6 +52,7 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
           latitude=this.latitude
           zoom=this.zoom
           layers=this.layers
+          legend=this.legend
           onViewChange=this.onViewChange
         }}
       ></div>
@@ -60,8 +66,10 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
     fakeRuntime.maps[0]?.setLoaded(true);
     fakeRuntime.maps[0]?.emit('load');
 
-    assert.strictEqual(fakeRuntime.maps[0]?.controls.length, 2);
+    assert.strictEqual(fakeRuntime.maps[0]?.controls.length, 3);
+    assert.strictEqual(fakeRuntime.legendControls.length, 1);
     assert.strictEqual(fakeRuntime.overlays[0]?.props.layers.length, 1);
+    assert.dom('[data-test-map-wind-legend]').exists();
 
     this.set('layers', [{ id: 'updated-layer' } as DeckLayer]);
     this.set('longitude', 8.12345);
@@ -93,6 +101,10 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
     this.set('longitude', 7.85);
     this.set('latitude', 46.68);
     this.set('zoom', 13);
+    this.set('legend', {
+      title: 'Wind speed',
+      bands: [{ color: 'rgb(0, 125, 179)', label: '20' }],
+    } as WindLegendControlOptions);
     this.set('onViewChange', (coords: [number, number], zoom: number) => {
       this.viewChanges.push({ coords, zoom });
     });
@@ -107,6 +119,7 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
           latitude=this.latitude
           zoom=this.zoom
           layers=this.layers
+          legend=this.legend
           onViewChange=this.onViewChange
         }}
       ></div>

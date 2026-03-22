@@ -1,8 +1,15 @@
 import type {
   DeckLayer,
+  MapControl,
+  MapControlPosition,
+  MapInstance,
   MapOptions,
   MapRuntime,
 } from 'winds-mobi-client-web/utils/map-runtime';
+import {
+  buildWindLegendControlElement,
+  type WindLegendControlOptions,
+} from 'winds-mobi-client-web/utils/map-legend';
 
 type Handler = () => void;
 
@@ -21,11 +28,58 @@ export class FakeDeckOverlay {
   }
 }
 
-export class FakeNavigationControl {}
+export class FakeNavigationControl implements MapControl {
+  element?: HTMLElement;
+
+  onAdd(_map: MapInstance) {
+    this.element = document.createElement('div');
+    this.element.className = 'maplibregl-ctrl';
+    return this.element;
+  }
+
+  onRemove() {
+    this.element?.remove();
+    this.element = undefined;
+  }
+}
+
+export class FakeLegendControl implements MapControl {
+  element?: HTMLElement;
+  options: WindLegendControlOptions;
+
+  constructor(options: WindLegendControlOptions) {
+    this.options = options;
+  }
+
+  onAdd(_map: MapInstance) {
+    this.element = buildWindLegendControlElement(this.options);
+    return this.element;
+  }
+
+  onRemove() {
+    this.element?.remove();
+    this.element = undefined;
+  }
+}
+
+function isMapControl(control: unknown): control is MapControl {
+  return (
+    typeof control === 'object' &&
+    control !== null &&
+    'onAdd' in control &&
+    typeof control.onAdd === 'function' &&
+    'onRemove' in control &&
+    typeof control.onRemove === 'function'
+  );
+}
 
 export class FakeMap {
   options: MapOptions;
-  controls: Array<{ control: unknown; position?: string }> = [];
+  controls: Array<{
+    control: unknown;
+    element?: HTMLElement;
+    position?: MapControlPosition;
+  }> = [];
   easeToCalls: Array<{
     center: [number, number];
     zoom: number;
@@ -92,8 +146,19 @@ export class FakeMap {
     this.onceHandlers.delete(event);
   }
 
-  addControl(control: unknown, position?: string) {
-    this.controls.push({ control, position });
+  addControl(control: unknown, position?: MapControlPosition) {
+    const record: {
+      control: unknown;
+      element?: HTMLElement;
+      position?: MapControlPosition;
+    } = { control, position };
+
+    if (isMapControl(control)) {
+      record.element = control.onAdd(this as unknown as MapInstance);
+      this.options.container.append(record.element);
+    }
+
+    this.controls.push(record);
     return this;
   }
 
@@ -128,6 +193,12 @@ export class FakeMap {
   }
 
   remove() {
+    for (const { control } of this.controls) {
+      if (isMapControl(control)) {
+        control.onRemove();
+      }
+    }
+
     this.removed = true;
   }
 }
@@ -135,6 +206,8 @@ export class FakeMap {
 export function createFakeMapRuntime() {
   const maps: FakeMap[] = [];
   const overlays: FakeDeckOverlay[] = [];
+  const legendControls: FakeLegendControl[] = [];
+  const navigationControls: FakeNavigationControl[] = [];
 
   const runtime: MapRuntime = {
     createMap(options) {
@@ -150,9 +223,17 @@ export function createFakeMapRuntime() {
     },
 
     createNavigationControl() {
-      return new FakeNavigationControl() as never;
+      const control = new FakeNavigationControl();
+      navigationControls.push(control);
+      return control;
+    },
+
+    createLegendControl(options) {
+      const control = new FakeLegendControl(options);
+      legendControls.push(control);
+      return control;
     },
   };
 
-  return { runtime, maps, overlays };
+  return { runtime, maps, overlays, legendControls, navigationControls };
 }

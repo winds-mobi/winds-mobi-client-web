@@ -1,13 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
 
 import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
+import {
+  mergeChartOptions,
+  type ChartOptions,
+} from 'winds-mobi-client-web/utils/highcharts-options';
+
+interface PolarChartOptions extends ChartOptions {
+  chart?: ChartOptions;
+  pane?: ChartOptions;
+  plotOptions?: ChartOptions;
+  tooltip?: ChartOptions;
+  xAxis?: ChartOptions;
+  yAxis?: ChartOptions;
+}
 
 export interface PolarSignature {
   Args: {
-    chartOptions: any;
-    chartData?: any;
+    chartOptions?: PolarChartOptions;
+    chartData?: unknown;
   };
   Blocks: {
     default: [];
@@ -16,7 +28,7 @@ export interface PolarSignature {
 }
 
 export default class Polar extends Component<PolarSignature> {
-  defaultChartOptions = {
+  defaultChartOptions: PolarChartOptions = {
     credits: {
       enabled: false,
     },
@@ -30,7 +42,7 @@ export default class Polar extends Component<PolarSignature> {
       text: undefined,
     },
     legend: {
-      enabled: false, // Disable the legend
+      enabled: false,
     },
     pane: {
       size: '82%',
@@ -52,66 +64,36 @@ export default class Polar extends Component<PolarSignature> {
     },
     yAxis: {
       min: 0,
-      max: 1, // Normalized radial distance (0 to 1)
+      max: 1,
       labels: {
         enabled: false,
       },
-      // gridLineInterpolation: 'polygon',
       showLastLabel: false,
     },
     tooltip: {
-      formatter: function (): string {
+      formatter: function (this: { point: { customTooltip: string } }) {
         return this.point.customTooltip;
       },
     },
     plotOptions: {
       series: {
         animation: {
-          duration: 0, // Set duration to 0 to disable the initial animation
+          duration: 0,
         },
         color: '#aaa',
-        // marker: {
-        //   enabled: false, // Disables markers for all series in this chart
-        // },
-        // states: {
-        //   hover: {
-        //     enabled: false, // Disables hover effect for all series in this chart
-        //   },
-        // },
-        // colorByPoint: true, // Ensure each point gets its own color
       },
     },
   };
 
   get mergedChartOptions() {
-    return {
-      ...this.defaultChartOptions,
-      ...this.args.chartOptions,
-      chart: {
-        ...this.defaultChartOptions.chart,
-        ...this.args.chartOptions?.chart,
-      },
-      xAxis: {
-        ...this.defaultChartOptions.xAxis,
-        ...this.args.chartOptions?.xAxis,
-      },
-      yAxis: {
-        ...this.defaultChartOptions.yAxis,
-        ...this.args.chartOptions?.yAxis,
-      },
-      tooltip: {
-        ...this.defaultChartOptions.tooltip,
-        ...this.args.chartOptions?.tooltip,
-      },
-      pane: {
-        ...this.defaultChartOptions.pane,
-        ...this.args.chartOptions?.pane,
-      },
-      plotOptions: {
-        ...this.defaultChartOptions.plotOptions,
-        ...this.args.chartOptions?.plotOptions,
-      },
-    };
+    return mergeChartOptions(this.defaultChartOptions, this.args.chartOptions, [
+      'chart',
+      'xAxis',
+      'yAxis',
+      'tooltip',
+      'pane',
+      'plotOptions',
+    ]);
   }
 
   <template>

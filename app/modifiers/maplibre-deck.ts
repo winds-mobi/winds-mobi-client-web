@@ -7,6 +7,7 @@ import {
   type DeckOverlayInstance,
   type MapInstance,
 } from 'winds-mobi-client-web/utils/map-runtime';
+import type { WindLegendControlOptions } from 'winds-mobi-client-web/utils/map-legend';
 import {
   mapViewsEqual,
   normalizeMapView,
@@ -22,6 +23,7 @@ type NamedArgs = {
   latitude: number;
   zoom: number;
   layers: DeckLayer[];
+  legend: WindLegendControlOptions;
   onViewChange: (coords: MapCoordinate, zoom: number) => void;
 };
 
@@ -68,12 +70,13 @@ export default class MaplibreDeckModifier extends Modifier<Signature> {
         touchPitch: false,
       });
 
-      this.map.on('load', () => {
+      this.map.once('load', () => {
         if (this.overlay) {
           this.map?.addControl(this.overlay);
         }
 
         this.map?.addControl(runtime.createNavigationControl(), 'bottom-right');
+        this.map?.addControl(runtime.createLegendControl(named.legend), 'top-right');
       });
 
       this.moveEndHandler = () => {

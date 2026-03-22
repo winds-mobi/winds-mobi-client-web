@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.0.8 - 2026-03-22
+
+### Added
+
+- Added a native-style MapLibre wind legend control instead of rendering the legend as a floating map overlay.
+- Added request-threshold handling and broader tests for debounced station refreshes, legend controls, and marker icon caching.
+
+### Changed
+
+- Decoupled nearby-station fetching from every visible map-view update so map movement stays lighter while the URL remains the source of truth for the visible view.
+- Kept station selection focused on opening the station route and sidebar without recentering the map.
+- Consolidated the shared Highcharts option-merging path used by the polar and time-series chart wrappers.
+- Removed remaining one-off metric-tile styling in the active station summary path so shared card defaults apply more consistently.
+
+### Fixed
+
+- Cached station marker arrow SVG data URLs by rendered state to avoid regenerating identical icons during rerenders.
+- Tightened the active map runtime, fake map runtime, and marker helpers around the new control and request flow.
+
 ## v0.0.7 - 2026-03-22
 
 ### Added

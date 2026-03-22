@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 import { IconLayer } from '@deck.gl/layers';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -9,6 +8,7 @@ const STATION_ICON_SIZE = 42;
 const GPS_ICON_SIZE = 16;
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
+const stationArrowIconUrlCache = new Map<string, string>();
 
 type GpsLayerDatum = {
   coordinates: MapCoordinate;
@@ -22,17 +22,16 @@ const STATION_ARROW_PATH =
   'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
 
 function stationArrowColour(speed: number, timestamp: number) {
+  if (!Number.isFinite(timestamp)) {
+    return windToColour(speed);
+  }
+
   const isStale = Date.now() - timestamp > STALE_READING_THRESHOLD;
 
   return isStale ? STALE_STATION_COLOUR : windToColour(speed);
 }
 
-export function buildStationArrowSvg(
-  speed: number,
-  timestamp: number,
-  isSelected = false
-) {
-  const colour = stationArrowColour(speed, timestamp);
+function buildStationArrowSvgForColour(colour: string, isSelected = false) {
   const selectedStroke = isSelected
     ? 'stroke="#000000" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill"'
     : '';
@@ -47,12 +46,44 @@ export function buildStationArrowSvg(
   `;
 }
 
+export function buildStationArrowSvg(
+  speed: number,
+  timestamp: number,
+  isSelected = false
+) {
+  return buildStationArrowSvgForColour(
+    stationArrowColour(speed, timestamp),
+    isSelected
+  );
+}
+
 export function buildStationArrowIconUrl(
   speed: number,
   timestamp: number,
   isSelected = false
 ) {
-  return svgToDataUrl(buildStationArrowSvg(speed, timestamp, isSelected));
+  const colour = stationArrowColour(speed, timestamp);
+  const cacheKey = `${colour}:${isSelected ? 'selected' : 'default'}`;
+  const cachedIconUrl = stationArrowIconUrlCache.get(cacheKey);
+
+  if (cachedIconUrl) {
+    return cachedIconUrl;
+  }
+
+  const iconUrl = svgToDataUrl(
+    buildStationArrowSvgForColour(colour, isSelected)
+  );
+  stationArrowIconUrlCache.set(cacheKey, iconUrl);
+
+  return iconUrl;
+}
+
+export function resetStationArrowIconUrlCacheForTest() {
+  stationArrowIconUrlCache.clear();
+}
+
+export function getStationArrowIconUrlCacheSizeForTest() {
+  return stationArrowIconUrlCache.size;
 }
 
 export function buildStationLayer(

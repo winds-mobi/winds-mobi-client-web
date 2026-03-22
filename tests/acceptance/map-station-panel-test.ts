@@ -202,7 +202,7 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel]').exists();
   });
 
-  test('it keeps the station route when selecting another station from the map', async function (assert) {
+  test('it keeps the current map view when selecting another station from the map', async function (assert) {
     const fakeRuntime = this.fakeRuntime as FakeRuntime;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
@@ -225,16 +225,16 @@ module('Acceptance | map station panel', function (hooks) {
     await waitUntil(
       () =>
         currentURL() ===
-        '/map/holfuy-2222?mapLng=7.91323&mapLat=46.70719&mapZoom=13'
+        '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
 
     assert.strictEqual(
       currentURL(),
-      '/map/holfuy-2222?mapLng=7.91323&mapLat=46.70719&mapZoom=13'
+      '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
     );
     assert.deepEqual(fakeRuntime.maps[0]?.center, {
-      lng: 7.91323,
-      lat: 46.70719,
+      lng: 7.86323,
+      lat: 46.67719,
     });
     assert.strictEqual(fakeRuntime.maps[0]?.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
