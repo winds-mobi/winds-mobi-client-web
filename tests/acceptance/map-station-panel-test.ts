@@ -212,9 +212,8 @@ function countStationDetailRequests(calls: string[], stationId: string) {
 }
 
 function countHistoryRequests(calls: string[], stationId: string) {
-  return calls.filter((url) =>
-    url.includes(`/stations/${stationId}/historic/`)
-  ).length;
+  return calls.filter((url) => url.includes(`/stations/${stationId}/historic/`))
+    .length;
 }
 
 function currentMap(): MaplibreMap | undefined {
