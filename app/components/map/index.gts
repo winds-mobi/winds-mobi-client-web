@@ -114,7 +114,7 @@ export default class Map extends Component<MapSignature> {
 
   get legendBands(): WindLegendBand[] {
     return WIND_COLOUR_BANDS.map((band) => ({
-      color: band.color,
+      backgroundClass: band.backgroundClass,
       label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
     }));
   }

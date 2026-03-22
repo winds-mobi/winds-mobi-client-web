@@ -9,7 +9,7 @@ list:
 
 map:
   legend:
-    windSpeed: Wind speed
+    windSpeed: wind [km/h]
   refresh:
     label: Refresh
     ariaLabel: Refresh map and station data

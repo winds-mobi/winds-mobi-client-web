@@ -15,8 +15,8 @@ export interface StationSectionCardSignature {
   <section
     class="{{if
         @compact
-        'rounded-lg border border-slate-200 bg-white p-2.5 md:rounded-2xl md:p-3.5'
-        'rounded-2xl border border-slate-200 bg-white p-3.5'
+        'flex h-full flex-col rounded-lg border border-slate-200 bg-white p-2.5 md:rounded-2xl md:p-3.5'
+        'flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-3.5'
       }}"
     ...attributes
   >
@@ -33,7 +33,7 @@ export interface StationSectionCardSignature {
     </p>
 
     <div
-      class="{{if @compact 'mt-2 md:mt-3' 'mt-3'}}
+      class="{{if @compact 'mt-2 flex-1 md:mt-3' 'mt-3 flex-1'}}
         {{if @contentClass @contentClass}}"
     >
       {{yield}}

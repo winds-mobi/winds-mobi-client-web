@@ -21,7 +21,6 @@ export interface StationMetricCardSignature {
     label: string;
     labelClass?: string;
     value?: MetricValue;
-    valueColor?: string;
     valueClass?: string;
   };
   Blocks: {
@@ -51,10 +50,6 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
 
   get numericValue() {
     return typeof this.args.value === 'number' ? this.args.value : 0;
-  }
-
-  get valueStyle() {
-    return this.args.valueColor ? `color: ${this.args.valueColor};` : undefined;
   }
 
   get formattedValue() {
@@ -120,7 +115,6 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
             }}
             font-semibold
             {{if @valueClass @valueClass}}"
-          style={{this.valueStyle}}
         >
           {{this.formattedValue}}
         </dd>

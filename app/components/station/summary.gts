@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { t } from 'ember-intl';
-import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
+import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import StationMetricCard from './metric-card';
 import type { History, Station } from 'winds-mobi-client-web/services/store.js';
 import StationSectionCard from './section-card';
@@ -75,28 +75,28 @@ export default class StationSummary extends Component<StationSummarySignature> {
       : undefined;
   }
 
-  colourForWindSpeed(speed: number | undefined) {
-    return isFiniteNumber(speed) ? windToColour(speed) : undefined;
+  valueClassForWindSpeed(speed: number | undefined) {
+    return isFiniteNumber(speed) ? windToTextClass(speed) : undefined;
   }
 
-  get speedColor() {
-    return this.colourForWindSpeed(this.reading.speed);
+  get speedValueClass() {
+    return this.valueClassForWindSpeed(this.reading.speed);
   }
 
-  get gustsColor() {
-    return this.colourForWindSpeed(this.reading.gusts);
+  get gustsValueClass() {
+    return this.valueClassForWindSpeed(this.reading.gusts);
   }
 
-  get lastHourMaximumColor() {
-    return this.colourForWindSpeed(this.lastHourMaximumSpeed);
+  get lastHourMaximumValueClass() {
+    return this.valueClassForWindSpeed(this.lastHourMaximumSpeed);
   }
 
-  get lastHourMeanColor() {
-    return this.colourForWindSpeed(this.lastHourMeanSpeed);
+  get lastHourMeanValueClass() {
+    return this.valueClassForWindSpeed(this.lastHourMeanSpeed);
   }
 
-  get lastHourMinimumColor() {
-    return this.colourForWindSpeed(this.lastHourMinimumSpeed);
+  get lastHourMinimumValueClass() {
+    return this.valueClassForWindSpeed(this.lastHourMinimumSpeed);
   }
 
   <template>
@@ -105,12 +105,12 @@ export default class StationSummary extends Component<StationSummarySignature> {
       class="px-2.5 py-2 md:px-5 md:py-4"
     >
       <div
-        class="grid grid-cols-[minmax(0,0.95fr)_minmax(0,0.95fr)_minmax(0,1.1fr)] items-start gap-1.5 md:gap-3"
+        class="grid grid-cols-[minmax(0,0.95fr)_minmax(0,0.95fr)_minmax(0,1.1fr)] items-stretch gap-1.5 md:gap-3"
       >
         <StationSectionCard
           @title={{t "station.summary.wind"}}
           @compact={{true}}
-          class="min-w-0"
+          class="min-w-0 h-full"
         >
           <dl class="m-0 space-y-1.5 md:space-y-2.5">
             <StationMetricCard
@@ -118,7 +118,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
               @format="windSpeed"
               @label={{t "wind.speed"}}
               @value={{this.reading.speed}}
-              @valueColor={{this.speedColor}}
+              @valueClass={{this.speedValueClass}}
             />
 
             <StationMetricCard
@@ -126,7 +126,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
               @format="windSpeed"
               @label={{t "wind.gusts"}}
               @value={{this.reading.gusts}}
-              @valueColor={{this.gustsColor}}
+              @valueClass={{this.gustsValueClass}}
             />
 
             <StationMetricCard
@@ -141,7 +141,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
         <StationSectionCard
           @title={{t "station.summary.air"}}
           @compact={{true}}
-          class="min-w-0"
+          class="min-w-0 h-full"
         >
           <dl class="m-0 space-y-1.5 md:space-y-2.5">
             <StationMetricCard
@@ -177,7 +177,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
         <StationSectionCard
           @title={{t "wind.lastHour"}}
           @compact={{true}}
-          class="min-w-0"
+          class="min-w-0 h-full"
         >
           <div class="grid gap-2 md:gap-3">
             <div class="min-w-0 w-full aspect-square">
@@ -190,7 +190,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 @format="windSpeed"
                 @label={{t "wind.maximum"}}
                 @value={{this.lastHourMaximumSpeed}}
-                @valueColor={{this.lastHourMaximumColor}}
+                @valueClass={{this.lastHourMaximumValueClass}}
               />
 
               <StationMetricCard
@@ -198,7 +198,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 @format="windSpeed"
                 @label={{t "wind.mean"}}
                 @value={{this.lastHourMeanSpeed}}
-                @valueColor={{this.lastHourMeanColor}}
+                @valueClass={{this.lastHourMeanValueClass}}
               />
 
               <StationMetricCard
@@ -206,7 +206,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
                 @format="windSpeed"
                 @label={{t "wind.minimum"}}
                 @value={{this.lastHourMinimumSpeed}}
-                @valueColor={{this.lastHourMinimumColor}}
+                @valueClass={{this.lastHourMinimumValueClass}}
               />
             </dl>
           </div>

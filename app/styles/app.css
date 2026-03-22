@@ -8,4 +8,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-wind-05: rgb(9 179 0);
+  --color-wind-10: rgb(0 179 71);
+  --color-wind-15: rgb(0 179 152);
+  --color-wind-20: rgb(0 125 179);
+  --color-wind-25: rgb(0 45 179);
+  --color-wind-30: rgb(36 0 179);
+  --color-wind-35: rgb(116 0 179);
+  --color-wind-40: rgb(179 0 161);
+  --color-wind-45: rgb(179 0 80);
+  --color-wind-50: rgb(179 0 0);
+}
+
 /* stylelint-enable */
