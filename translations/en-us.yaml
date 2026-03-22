@@ -9,10 +9,14 @@ list:
 
 map:
   legend:
-    windSpeed: Wind speed
+    windSpeed: wind [km/h]
+  refresh:
+    label: Refresh
+    ariaLabel: Refresh map and station data
 
 station:
   summary:
+    now: Now
     wind: Wind
     air: Air
   wind: Wind
@@ -23,7 +27,7 @@ wind:
   gusts: Gusts
   direction: Direction
   timestamp: 'Time'
-  lastHour: Wind - last hour
+  lastHour: Last hour
   minimum: Minimum
   mean: Mean
   maximum: Maximum

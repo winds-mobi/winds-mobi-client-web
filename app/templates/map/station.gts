@@ -3,10 +3,12 @@ import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
+import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
+import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type {
   History,
   Station as StationModel,
@@ -26,6 +28,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
   @service declare router: RouterService;
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare mapRefresh: MapRefreshService;
 
   get stationId() {
     return this.router.currentRoute?.params['station_id'];
@@ -35,23 +38,39 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     return this.store as unknown as RequestStore;
   }
 
+  @cached
   get stationRequest(): Future<{ data: StationModel }> | undefined {
     if (!this.stationId) {
       return undefined;
     }
 
+    const refreshRevision = this.mapRefresh.refreshRevision;
+
     return this.requestStore.request<{ data: StationModel }>(
-      findRecord<StationModel>('station', this.stationId)
+      findRecord<StationModel>(
+        'station',
+        this.stationId,
+        undefined,
+        refreshRevision > 0 ? { backgroundReload: true } : undefined
+      )
     );
   }
 
+  @cached
   get historyRequest(): Future<{ data: History[] }> | undefined {
     if (!this.stationId) {
       return undefined;
     }
 
+    const refreshRevision = this.mapRefresh.refreshRevision;
+
     return this.requestStore.request<{ data: History[] }>(
-      historyQuery<History>('history', this.stationId)
+      historyQuery<History>(
+        'history',
+        this.stationId,
+        undefined,
+        refreshRevision > 0 ? { backgroundReload: true } : undefined
+      )
     );
   }
 

@@ -1,9 +1,16 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
-import { currentURL, settled, visit, waitUntil } from '@ember/test-helpers';
+import {
+  click,
+  currentURL,
+  settled,
+  visit,
+  waitUntil,
+} from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
+import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 type FakeStoreRequest = {
@@ -58,6 +65,11 @@ class FakeStoreService extends Service {
 
     return cachedRequest;
   }
+}
+
+class ShortIntervalMapRefreshService extends MapRefreshService {
+  refreshIntervalMs = 75;
+  countdownTickMs = 10;
 }
 
 function countStationRequests(calls: string[]) {
@@ -186,6 +198,43 @@ module('Acceptance | map query params', function (hooks) {
         (url) =>
           url.includes('near-lat=46.54321') && url.includes('near-lon=8.14345')
       )
+    );
+  });
+
+  test('it force refreshes stations from the navbar button', async function (assert) {
+    const store = this.owner.lookup('service:store') as FakeStoreService;
+
+    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+
+    const initialStationRequestCount = countStationRequests(store.calls);
+
+    assert.dom('[data-test-navbar-refresh]').exists();
+    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+
+    await click('[data-test-navbar-refresh]');
+
+    assert.strictEqual(
+      countStationRequests(store.calls),
+      initialStationRequestCount + 1
+    );
+    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+  });
+
+  test('it auto refreshes stations after the refresh interval', async function (assert) {
+    this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
+
+    const store = this.owner.lookup('service:store') as FakeStoreService;
+
+    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+
+    const initialStationRequestCount = countStationRequests(store.calls);
+
+    await waitUntil(
+      () => countStationRequests(store.calls) > initialStationRequestCount
+    );
+
+    assert.true(
+      countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
   });
 });

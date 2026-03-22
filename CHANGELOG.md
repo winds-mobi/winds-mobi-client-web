@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.0.9 - 2026-03-22
+
+### Added
+
+- Added a shared map refresh control in the navbar that can manually reload nearby-station and station-detail data, resets the shared refresh cycle, and shows the remaining auto-refresh countdown as an icon-first control.
+
+### Changed
+
+- Added automatic map-data and station-detail refreshes on a 10-minute cycle while the map route is active, with the refresh countdown updating in the navbar at a lower 15-second cadence.
+- Reworked the refresh control from a text button into a compact icon-only control with a countdown ring, and tied its lifecycle to the rendered map-navbar control instead of route event listeners.
+- Refined the station summary layout with denser spacing, more compact cards, a unified single-column `Now` card for current conditions, and equal-height outer cards in the summary row.
+- Tightened the wind legend presentation by replacing per-row swatches with full-row wind-colour backgrounds, shrinking the control footprint, and moving it closer to the map corner.
+- Refined selected-station highlighting and marker polish after the `ember-maplibre-gl` migration, including a thicker semi-transparent grey outline and other small navbar and legend presentation adjustments.
+- Unified station metric rendering around shared number formats so summary cards now receive raw values plus named formats instead of preformatted strings.
+- Migrated `ember-intl` from v7 to v8, moved shared formats into app-owned `ember-intl` setup, and renamed `formatRelative` to `formatRelativeTime`.
+- Wired `@ember-intl/vite` into the Vite app so translations are loaded through virtual translation modules in both the application route and test setup.
+- Moved the wind-speed palette into Tailwind theme tokens and reused those named colors across summary metrics, the map legend, SVG markers, and the polar wind chart.
+
+### Removed
+
+- Removed the old v7-era `config/ember-intl.js` configuration file and the obsolete `app/formats.js` file as part of the `ember-intl` v8 migration.
+
+### Fixed
+
+- Hid summary metric cards automatically when their values are missing instead of rendering empty boxes.
+- Consolidated station metric formatting for wind speed, temperature, humidity, rainfall, pressure, and azimuth into the shared metric-card component so formatting and visibility rules are applied consistently.
+- Kept the active `ember-intl` integration aligned with the installed v8 package while preserving the app’s shared number-format usage and translation loading under Vite.
+- Made the `Last hour` wind graph stack vertically above its metric boxes at every breakpoint and fit the available card width without extra internal inset.
+- Simplified the last-hour card title from `Wind - last hour` to `Last hour`.
+- Replaced Ember template `style=` bindings for wind-driven colors with safe finite Tailwind utility classes so the map legend and summary metrics no longer trigger style-binding warnings.
+- Reduced unnecessary top and bottom whitespace around the wind and air history charts by tightening shared chart spacing, label layout, and section padding.
+- Removed the station-panel loading skeleton placeholders while keeping the panel shell mounted during station-to-station loading transitions.
+- Stabilized shared refresh behavior across map and station routes by keeping the navbar refresh service active through overlapping control lifecycles and aligning the acceptance tests with the current history-request URLs.
+- Unified the outer spacing of the `Now`, `Last hour`, `Wind`, and `Air` sections by moving shared panel insets up to the station container instead of letting each section pad itself differently.
+
 ## v0.0.8 - 2026-03-22
 
 ### Added

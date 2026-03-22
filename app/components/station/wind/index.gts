@@ -17,8 +17,8 @@ export interface StationWindsSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class StationWinds extends Component<StationWindsSignature> {
   <template>
-    <section data-test-station-wind-section class="px-4 py-4 sm:px-5">
-      <StationSectionCard @title={{t "station.wind"}}>
+    <section data-test-station-wind-section>
+      <StationSectionCard @title={{t "station.wind"}} @contentClass="mt-2">
         <StationWindsGraph @data={{@history}} />
       </StationSectionCard>
     </section>

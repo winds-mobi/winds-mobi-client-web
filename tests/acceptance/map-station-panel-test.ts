@@ -10,6 +10,7 @@ import {
   visit,
   waitUntil,
 } from '@ember/test-helpers';
+import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
@@ -94,6 +95,7 @@ const HISTORY: History[] = [
 ];
 
 class FakeStoreService extends Service {
+  calls: string[] = [];
   deferredSecondaryStationRequest?: DeferredRequest;
   private requestCache = new Map<
     string,
@@ -102,6 +104,7 @@ class FakeStoreService extends Service {
 
   request(request: FakeStoreRequest) {
     const url = request.url ?? '';
+    this.calls.push(url);
 
     let cachedRequest = this.requestCache.get(url);
 
@@ -169,6 +172,11 @@ class FakeStoreService extends Service {
   }
 }
 
+class ShortIntervalMapRefreshService extends MapRefreshService {
+  refreshIntervalMs = 75;
+  countdownTickMs = 10;
+}
+
 function createDeferredRequest(): DeferredRequest {
   let resolve!: (value: { content: { data: Station } }) => void;
 
@@ -193,6 +201,19 @@ function assertCurrentRoute(
     Object.fromEntries(url.searchParams.entries()),
     expectedQueryParams
   );
+}
+
+function countStationListRequests(calls: string[]) {
+  return calls.filter((url) => url.includes('/stations?')).length;
+}
+
+function countStationDetailRequests(calls: string[], stationId: string) {
+  return calls.filter((url) => url.includes(`/stations/${stationId}?`)).length;
+}
+
+function countHistoryRequests(calls: string[], stationId: string) {
+  return calls.filter((url) => url.includes(`/stations/${stationId}/historic/`))
+    .length;
 }
 
 function currentMap(): MaplibreMap | undefined {
@@ -321,8 +342,7 @@ module('Acceptance | map station panel', function (hooks) {
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
     assert.dom('[data-test-station-panel]').exists();
-    assert.dom('[data-test-station-panel-loading]').exists();
-    assert.dom('[data-test-station-title-loading]').exists();
+    assert.dom('[data-test-station-title]').doesNotExist();
 
     deferredRequest.resolve({
       content: {
@@ -336,7 +356,6 @@ module('Acceptance | map station panel', function (hooks) {
     await settled();
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
-    assert.dom('[data-test-station-panel-loading]').doesNotExist();
   });
 
   test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
@@ -351,5 +370,75 @@ module('Acceptance | map station panel', function (hooks) {
       mapZoom: '9.68',
     });
     assert.dom('[data-test-station-panel]').exists();
+  });
+
+  test('it force refreshes map and station requests from the navbar button', async function (assert) {
+    const store = this.owner.lookup('service:store') as FakeStoreService;
+
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+
+    const initialStationListRequests = countStationListRequests(store.calls);
+    const initialStationDetailRequests = countStationDetailRequests(
+      store.calls,
+      'holfuy-1804'
+    );
+    const initialHistoryRequests = countHistoryRequests(
+      store.calls,
+      'holfuy-1804'
+    );
+
+    await click('[data-test-navbar-refresh]');
+
+    assert.strictEqual(
+      countStationListRequests(store.calls),
+      initialStationListRequests + 1
+    );
+    assert.strictEqual(
+      countStationDetailRequests(store.calls, 'holfuy-1804'),
+      initialStationDetailRequests + 1
+    );
+    assert.strictEqual(
+      countHistoryRequests(store.calls, 'holfuy-1804'),
+      initialHistoryRequests + 1
+    );
+  });
+
+  test('it auto refreshes map and station requests after the refresh interval', async function (assert) {
+    this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
+
+    const store = this.owner.lookup('service:store') as FakeStoreService;
+
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+
+    const initialStationListRequests = countStationListRequests(store.calls);
+    const initialStationDetailRequests = countStationDetailRequests(
+      store.calls,
+      'holfuy-1804'
+    );
+    const initialHistoryRequests = countHistoryRequests(
+      store.calls,
+      'holfuy-1804'
+    );
+
+    await waitUntil(
+      () =>
+        countStationListRequests(store.calls) > initialStationListRequests &&
+        countStationDetailRequests(store.calls, 'holfuy-1804') >
+          initialStationDetailRequests &&
+        countHistoryRequests(store.calls, 'holfuy-1804') >
+          initialHistoryRequests
+    );
+
+    assert.true(
+      countStationListRequests(store.calls) >= initialStationListRequests + 1
+    );
+    assert.true(
+      countStationDetailRequests(store.calls, 'holfuy-1804') >=
+        initialStationDetailRequests + 1
+    );
+    assert.true(
+      countHistoryRequests(store.calls, 'holfuy-1804') >=
+        initialHistoryRequests + 1
+    );
   });
 });

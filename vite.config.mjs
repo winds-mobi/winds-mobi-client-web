@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { extensions, classicEmberSupport, ember } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
+import { loadTranslations } from '@ember-intl/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
@@ -15,6 +16,7 @@ export default defineConfig({
       babelHelpers: 'runtime',
       extensions,
     }),
+    loadTranslations(),
     tailwindcss(),
     VitePWA({
       devOptions: {
