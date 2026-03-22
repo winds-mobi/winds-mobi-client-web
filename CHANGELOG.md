@@ -33,6 +33,7 @@
 - Reduced unnecessary top and bottom whitespace around the wind and air history charts by tightening shared chart spacing, label layout, and section padding.
 - Removed the station-panel loading skeleton placeholders while keeping the panel shell mounted during station-to-station loading transitions.
 - Stabilized shared refresh behavior across map and station routes by keeping the navbar refresh service active through overlapping control lifecycles and aligning the acceptance tests with the current history-request URLs.
+- Unified the outer spacing of the `Now`, `Last hour`, `Wind`, and `Air` sections by moving shared panel insets up to the station container instead of letting each section pad itself differently.
 
 ## v0.0.8 - 2026-03-22
 

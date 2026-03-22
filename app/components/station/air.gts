@@ -96,7 +96,7 @@ export default class StationAir extends Component<StationAirSignature> {
   }
 
   <template>
-    <section data-test-station-air-section class="px-4 py-3 sm:px-5 md:py-4">
+    <section data-test-station-air-section>
       <StationSectionCard @title={{t "station.air"}} @contentClass="mt-2">
         <TimeSeries
           @chartData={{this.chartData}}

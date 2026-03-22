@@ -100,10 +100,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <section
-      data-test-station-summary-section
-      class="px-2.5 py-2 md:px-5 md:py-4"
-    >
+    <section data-test-station-summary-section>
       <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
         <StationSectionCard
           @title={{t "station.summary.now"}}
