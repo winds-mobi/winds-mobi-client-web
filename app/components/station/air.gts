@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { cached } from '@glimmer/tracking';
 import TimeSeries from '../chart/time-series';
 import { t } from 'ember-intl';
 import StationSectionCard from './section-card';
@@ -15,6 +16,7 @@ export interface StationAirSignature {
 }
 
 export default class StationAir extends Component<StationAirSignature> {
+  @cached
   get chartData() {
     const temperature = this.args.history.map((elm) => [
       elm.timestamp,
@@ -66,6 +68,7 @@ export default class StationAir extends Component<StationAirSignature> {
     ];
   }
 
+  @cached
   get chartOptions() {
     return {
       yAxis: [

@@ -7,6 +7,11 @@ export interface WindColourBand {
   textClass: string;
 }
 
+export interface WindColourZone {
+  color: string;
+  value?: number;
+}
+
 const COLORS = [
   {
     backgroundClass: 'bg-wind-05',
@@ -116,6 +121,21 @@ export function windToBackgroundClass(speed: number) {
 
 export function windToTextClass(speed: number) {
   return windBandForSpeed(speed).textClass;
+}
+
+export function windColourZones() {
+  return WIND_COLOUR_BANDS.map((band) => {
+    if (Number.isFinite(band.max)) {
+      return {
+        color: band.color,
+        value: band.max,
+      };
+    }
+
+    return {
+      color: band.color,
+    };
+  }) as WindColourZone[];
 }
 
 export default function windToColour(speed: number) {

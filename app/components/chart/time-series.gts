@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { cached } from '@glimmer/tracking';
 import HighCharts from 'ember-highcharts/components/high-charts';
 import {
   mergeChartOptions,
@@ -102,6 +103,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     },
   };
 
+  @cached
   get mergedChartOptions() {
     return mergeChartOptions(this.defaultChartOptions, this.args.chartOptions, [
       'chart',

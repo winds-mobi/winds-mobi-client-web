@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.10 - 2026-03-22
+
+### Changed
+
+- Updated the wind history chart to reuse the shared wind-speed palette so its colors now follow the same banding scheme as map markers and summary indicators.
+
+### Fixed
+
+- Stabilized the shared stock-chart inputs for the wind and air history charts so range-selector zoom controls no longer get reset by incidental rerenders.
+- Tightened the wind history y-axis padding and tick behavior so the chart follows the actual data more closely instead of reserving unnecessary vertical headroom.
+
 ## v0.0.9 - 2026-03-22
 
 ### Added
