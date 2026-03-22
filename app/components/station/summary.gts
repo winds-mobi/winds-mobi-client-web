@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { formatNumber, t } from 'ember-intl';
+import { t } from 'ember-intl';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import StationMetricCard from './metric-card';
@@ -19,6 +19,10 @@ export interface StationSummarySignature {
 }
 
 const DURATION = 1 * 60 * 60;
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
 
 export default class StationSummary extends Component<StationSummarySignature> {
   get reading() {
@@ -46,28 +50,38 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   get lastHourSpeeds() {
-    const speeds = this.recentHistory.map((record) => record.speed);
+    const speeds = this.recentHistory
+      .map((record) => record.speed)
+      .filter(isFiniteNumber);
 
-    return speeds.length > 0 ? speeds : [this.reading.speed];
+    if (speeds.length > 0) {
+      return speeds;
+    }
+
+    return isFiniteNumber(this.reading.speed) ? [this.reading.speed] : [];
   }
 
   get lastHourMinimumSpeed() {
-    return Math.min(...this.lastHourSpeeds);
+    return this.lastHourSpeeds.length > 0
+      ? Math.min(...this.lastHourSpeeds)
+      : undefined;
   }
 
   get lastHourMeanSpeed() {
-    return (
-      this.lastHourSpeeds.reduce((sum, speed) => sum + speed, 0) /
-      this.lastHourSpeeds.length
-    );
+    return this.lastHourSpeeds.length > 0
+      ? this.lastHourSpeeds.reduce((sum, speed) => sum + speed, 0) /
+          this.lastHourSpeeds.length
+      : undefined;
   }
 
   get lastHourMaximumSpeed() {
-    return Math.max(...this.lastHourSpeeds);
+    return this.lastHourSpeeds.length > 0
+      ? Math.max(...this.lastHourSpeeds)
+      : undefined;
   }
 
-  styleForWindSpeed(speed: number) {
-    return `color: ${windToColour(speed)};`;
+  styleForWindSpeed(speed: number | undefined) {
+    return isFiniteNumber(speed) ? `color: ${windToColour(speed)};` : undefined;
   }
 
   get speedStyle() {
@@ -91,32 +105,32 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <section data-test-station-summary-section class="px-3 py-3 md:px-5 md:py-4">
-      <div class="grid grid-cols-2 items-start gap-2.5 md:grid-cols-1 md:gap-3">
-        <div class="grid min-w-0 gap-2.5 md:grid-cols-2 md:gap-3">
+    <section data-test-station-summary-section class="px-2.5 py-2 md:px-5 md:py-4">
+      <div class="grid grid-cols-2 items-start gap-2 md:grid-cols-1 md:gap-3">
+        <div class="grid min-w-0 gap-2 md:grid-cols-2 md:gap-3">
           <StationSectionCard @title={{t "station.summary.wind"}} @compact={{true}}>
-            <dl class="m-0 space-y-2 md:space-y-2.5">
-              <StationMetricCard @label={{t "wind.speed"}} @compact={{true}}>
-                <span style={{this.speedStyle}}>
-                  {{formatNumber
-                    this.reading.speed
-                    style="unit"
-                    unit="kilometer-per-hour"
-                  }}
-                </span>
-              </StationMetricCard>
+            <dl class="m-0 space-y-1.5 md:space-y-2.5">
+              <StationMetricCard
+                @compact={{true}}
+                @label={{t "wind.speed"}}
+                @unit="kilometer-per-hour"
+                @value={{this.reading.speed}}
+                @valueStyle={{this.speedStyle}}
+              />
 
-              <StationMetricCard @label={{t "wind.gusts"}} @compact={{true}}>
-                <span style={{this.gustsStyle}}>
-                  {{formatNumber
-                    this.reading.gusts
-                    style="unit"
-                    unit="kilometer-per-hour"
-                  }}
-                </span>
-              </StationMetricCard>
+              <StationMetricCard
+                @compact={{true}}
+                @label={{t "wind.gusts"}}
+                @unit="kilometer-per-hour"
+                @value={{this.reading.gusts}}
+                @valueStyle={{this.gustsStyle}}
+              />
 
-              <StationMetricCard @label={{t "wind.direction"}} @compact={{true}}>
+              <StationMetricCard
+                @compact={{true}}
+                @label={{t "wind.direction"}}
+                @value={{this.reading.direction}}
+              >
                 {{this.directionCardinal}}
                 {{t "format.azimuth" azimuth=this.reading.direction}}
               </StationMetricCard>
@@ -124,26 +138,37 @@ export default class StationSummary extends Component<StationSummarySignature> {
           </StationSectionCard>
 
           <StationSectionCard @title={{t "station.summary.air"}} @compact={{true}}>
-            <dl class="m-0 space-y-2 md:space-y-2.5">
-              <StationMetricCard @label={{t "air.temperature"}} @compact={{true}}>
-                {{formatNumber
-                  this.reading.temperature
-                  style="unit"
-                  unit="celsius"
+            <dl class="m-0 space-y-1.5 md:space-y-2.5">
+              <StationMetricCard
+                @compact={{true}}
+                @label={{t "air.temperature"}}
+                @unit="celsius"
+                @value={{this.reading.temperature}}
+              />
+
+              <StationMetricCard
+                @compact={{true}}
+                @formattedValue={{t
+                  "format.relativeHumidity"
+                  value=this.reading.humidity
                 }}
-              </StationMetricCard>
+                @label={{t "air.humidity"}}
+                @value={{this.reading.humidity}}
+              />
 
-              <StationMetricCard @label={{t "air.humidity"}} @compact={{true}}>
-                {{t "format.relativeHumidity" value=this.reading.humidity}}
-              </StationMetricCard>
+              <StationMetricCard
+                @compact={{true}}
+                @formattedValue={{t "format.pressure" value=this.reading.pressure}}
+                @label={{t "air.pressure"}}
+                @value={{this.reading.pressure}}
+              />
 
-              <StationMetricCard @label={{t "air.pressure"}} @compact={{true}}>
-                {{t "format.pressure" value=this.reading.pressure}}
-              </StationMetricCard>
-
-              <StationMetricCard @label={{t "air.rain"}} @compact={{true}}>
-                {{t "format.rain" value=this.reading.rain}}
-              </StationMetricCard>
+              <StationMetricCard
+                @compact={{true}}
+                @formattedValue={{t "format.rain" value=this.reading.rain}}
+                @label={{t "air.rain"}}
+                @value={{this.reading.rain}}
+              />
             </dl>
           </StationSectionCard>
         </div>
@@ -154,48 +179,36 @@ export default class StationSummary extends Component<StationSummarySignature> {
           class="min-w-0"
         >
           <div
-            class="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-stretch md:gap-3"
+            class="grid gap-2 md:grid-cols-[minmax(0,1fr)_12rem] md:items-stretch md:gap-3"
           >
-            <div class="min-w-0 h-32 md:h-full">
+            <div class="min-w-0 h-28 md:h-full">
               <WindDirection @data={{this.recentHistory}} />
             </div>
 
-            <dl class="m-0 grid gap-1.5 md:gap-2">
+            <dl class="m-0 grid gap-1 md:gap-2">
               <StationMetricCard
                 @compact={{true}}
                 @label={{t "wind.maximum"}}
+                @unit="kilometer-per-hour"
+                @value={{this.lastHourMaximumSpeed}}
                 @valueStyle={{this.lastHourMaximumStyle}}
-              >
-                {{formatNumber
-                  this.lastHourMaximumSpeed
-                  style="unit"
-                  unit="kilometer-per-hour"
-                }}
-              </StationMetricCard>
+              />
 
               <StationMetricCard
                 @compact={{true}}
                 @label={{t "wind.mean"}}
+                @unit="kilometer-per-hour"
+                @value={{this.lastHourMeanSpeed}}
                 @valueStyle={{this.lastHourMeanStyle}}
-              >
-                {{formatNumber
-                  this.lastHourMeanSpeed
-                  style="unit"
-                  unit="kilometer-per-hour"
-                }}
-              </StationMetricCard>
+              />
 
               <StationMetricCard
                 @compact={{true}}
                 @label={{t "wind.minimum"}}
+                @unit="kilometer-per-hour"
+                @value={{this.lastHourMinimumSpeed}}
                 @valueStyle={{this.lastHourMinimumStyle}}
-              >
-                {{formatNumber
-                  this.lastHourMinimumSpeed
-                  style="unit"
-                  unit="kilometer-per-hour"
-                }}
-              </StationMetricCard>
+              />
             </dl>
           </div>
         </StationSectionCard>
