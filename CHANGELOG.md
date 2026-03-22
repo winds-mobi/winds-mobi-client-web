@@ -10,7 +10,7 @@
 
 - Added automatic map-data and station-detail refreshes on a 10-minute cycle while the map route is active, with the refresh countdown updating in the navbar at a lower 15-second cadence.
 - Reworked the refresh control from a text button into a compact icon-only control with a countdown ring, and tied its lifecycle to the rendered map-navbar control instead of route event listeners.
-- Refined the station summary layout for narrow screens with denser spacing, more compact cards, aligned breakpoint behavior, and a two-column mobile arrangement that keeps wind and air together while moving the last-hour panel into its own column.
+- Refined the station summary layout with denser spacing, more compact cards, and a consistent three-card layout that keeps `Wind`, `Air`, and `Last hour` next to each other across mobile and desktop.
 - Tightened the wind legend presentation by replacing per-row swatches with full-row wind-colour backgrounds, shrinking the control footprint, and moving it closer to the map corner.
 - Refined selected-station highlighting and marker polish after the `ember-maplibre-gl` migration, including a thicker semi-transparent grey outline and other small navbar and legend presentation adjustments.
 - Unified station metric rendering around shared number formats so summary cards now receive raw values plus named formats instead of preformatted strings.
@@ -26,6 +26,8 @@
 - Hid summary metric cards automatically when their values are missing instead of rendering empty boxes.
 - Consolidated station metric formatting for wind speed, temperature, humidity, rainfall, pressure, and azimuth into the shared metric-card component so formatting and visibility rules are applied consistently.
 - Kept the active `ember-intl` integration aligned with the installed v8 package while preserving the app’s shared number-format usage and translation loading under Vite.
+- Made the `Last hour` wind graph stack vertically above its metric boxes at every breakpoint and fit the available card width without extra internal inset.
+- Simplified the last-hour card title from `Wind - last hour` to `Last hour`.
 
 ## v0.0.8 - 2026-03-22
 

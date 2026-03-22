@@ -23,6 +23,10 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   chartOptions = {
     chart: {
       height: null,
+      margin: [0, 0, 0, 0],
+    },
+    pane: {
+      size: '100%',
     },
   };
 
@@ -49,7 +53,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
 
   <template>
     <Polar
-      class="h-full [&_.chart-container]:h-full"
+      class="h-full w-full [&_.chart-container]:h-full [&_.chart-container]:w-full"
       @chartData={{this.chartData}}
       @chartOptions={{this.chartOptions}}
     />
