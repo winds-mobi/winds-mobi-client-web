@@ -1,42 +1,28 @@
 # Changelog
 
-## v0.0.8 - 2026-03-22
-
-### Added
-
-- Added a native-style MapLibre wind legend control instead of rendering the legend as a floating map overlay.
-- Added request-threshold handling and broader tests for debounced station refreshes, legend controls, and marker icon caching.
-
-### Changed
-
-- Decoupled nearby-station fetching from every visible map-view update so map movement stays lighter while the URL remains the source of truth for the visible view.
-- Kept station selection focused on opening the station route and sidebar without recentering the map.
-- Consolidated the shared Highcharts option-merging path used by the polar and time-series chart wrappers.
-- Removed remaining one-off metric-tile styling in the active station summary path so shared card defaults apply more consistently.
-
-### Fixed
-
-- Cached station marker arrow SVG data URLs by rendered state to avoid regenerating identical icons during rerenders.
-- Tightened the active map runtime, fake map runtime, and marker helpers around the new control and request flow.
-
 ## v0.0.7 - 2026-03-22
 
 ### Added
 
-- Added a routed station-detail experience on top of the map, including direct station selection, map recentering, and a responsive station sidebar.
-- Added richer station summary content with wind and air metrics, compact shared metric cards, and improved chart presentation.
-- Added a compact wind-speed legend and clearer map marker states, including selected-marker outlines and grey markers for stale readings older than 24 hours.
-- Added broader test coverage for map query params, station-panel behavior, map runtime integration, and marker logic.
+- Added a routed station-detail experience on top of the map, including direct station selection, a responsive station sidebar, richer station summary cards, and improved chart presentation.
+- Added a native-style wind-speed legend control and clearer map marker states, including selected-marker outlines and grey markers for stale readings older than 24 hours.
+- Added broader test coverage for map query params, station-panel behavior, debounced station refreshes, legend controls, map runtime integration, and marker logic.
 
 ### Changed
 
 - Migrated the interactive map stack away from the previous Leaflet-based approach to a MapLibre + deck.gl setup with shared map runtime utilities.
 - Reworked station details from a tabbed drawer flow into a stacked, card-based sidebar that works across desktop and mobile layouts.
+- Decoupled nearby-station fetching from every visible map-view update so the URL remains the source of truth for the visible view while request refreshes are debounced and thresholded.
+- Kept station selection focused on opening the station route and sidebar without recentering the map.
+- Consolidated the shared Highcharts option-merging path and removed remaining one-off metric-tile styling in the active station summary path.
 - Refined chart sizing, polar wind-chart labels, marker rendering, sidebar separators, and the map centering control for a more coherent UI.
 
 ### Fixed
 
+- Kept the station panel shell mounted at its fixed mobile and desktop dimensions while switching between stations, so the layout no longer collapses during request transitions.
 - Normalized station timestamps so freshness calculations and stale-marker rendering behave correctly.
+- Cached station marker arrow SVG data URLs by rendered state to avoid regenerating identical icons during rerenders.
+- Tightened the active map runtime, fake map runtime, and marker helpers around the new control and request flow.
 - Replaced deprecated Ember service injection imports and tightened project guidance around service usage.
 - Cleaned up lint-related issues that surfaced during the map and station-panel work.
 

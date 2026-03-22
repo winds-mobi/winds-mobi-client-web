@@ -16,6 +16,11 @@ import {
 
 type FakeRuntime = ReturnType<typeof createFakeMapRuntime>;
 
+type DeferredResponse = {
+  promise: Promise<Response>;
+  resolve: (value: Response) => void;
+};
+
 const PRIMARY_STATION = {
   _id: 'holfuy-1804',
   'pv-name': 'Holfuy',
@@ -98,6 +103,16 @@ function jsonResponse(body: unknown) {
   );
 }
 
+function createDeferredResponse(): DeferredResponse {
+  let resolve!: (value: Response) => void;
+
+  const promise = new Promise<Response>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 module('Acceptance | map station panel', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -106,6 +121,9 @@ module('Acceptance | map station panel', function (hooks) {
 
     this.fakeRuntime = fakeRuntime;
     this.originalFetch = globalThis.fetch;
+    this.deferredSecondaryStationResponse = undefined as
+      | DeferredResponse
+      | undefined;
 
     setMapRuntimeForTest(fakeRuntime.runtime);
 
@@ -121,6 +139,10 @@ module('Acceptance | map station panel', function (hooks) {
       }
 
       if (url.includes('/stations/holfuy-2222?')) {
+        if (this.deferredSecondaryStationResponse) {
+          return this.deferredSecondaryStationResponse.promise;
+        }
+
         return jsonResponse({ content: SECONDARY_STATION });
       }
 
@@ -238,6 +260,56 @@ module('Acceptance | map station panel', function (hooks) {
     });
     assert.strictEqual(fakeRuntime.maps[0]?.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
+  });
+
+  test('it keeps the panel shell mounted while the next station loads', async function (assert) {
+    const fakeRuntime = this.fakeRuntime as FakeRuntime;
+    const deferredResponse = createDeferredResponse();
+
+    this.deferredSecondaryStationResponse = deferredResponse;
+
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+
+    const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
+      (layer) => layer.id === 'stations'
+    ) as
+      | {
+          props: {
+            data: unknown[];
+            onClick: (info: { object?: unknown }) => void;
+          };
+        }
+      | undefined;
+
+    stationsLayer?.props.onClick({
+      object: stationsLayer.props.data[1],
+    });
+
+    await waitUntil(
+      () =>
+        currentURL() ===
+        '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
+    );
+
+    assert.dom('[data-test-station-panel]').exists();
+    assert.dom('[data-test-station-panel-loading]').exists();
+    assert.dom('[data-test-station-title-loading]').exists();
+
+    deferredResponse.resolve(
+      new Response(JSON.stringify({ content: SECONDARY_STATION }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+
+    this.deferredSecondaryStationResponse = undefined;
+
+    await settled();
+
+    assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
+    assert.dom('[data-test-station-panel-loading]').doesNotExist();
   });
 
   test('it updates only the map query params when the map view changes with the panel open', async function (assert) {

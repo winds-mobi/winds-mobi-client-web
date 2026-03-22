@@ -1,5 +1,5 @@
 import { pageTitle } from 'ember-page-title';
-import { Request } from '@warp-drive/ember';
+import { getRequestState } from '@warp-drive/ember';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
@@ -42,22 +42,33 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     }>;
   }
 
+  get stationRequestState() {
+    return getRequestState(this.stationRequest);
+  }
+
+  get historyRequestState() {
+    return getRequestState(this.historyRequest);
+  }
+
+  get station() {
+    return this.stationRequestState.isSuccess
+      ? this.stationRequestState.value.data
+      : undefined;
+  }
+
+  get history() {
+    return this.historyRequestState.isSuccess
+      ? this.historyRequestState.value.data
+      : [];
+  }
+
   <template>
     {{#if this.stationId}}
-      <Request @request={{this.stationRequest}}>
-        <:content as |stationResult|>
-          {{pageTitle stationResult.data.name}}
+      {{#if this.station}}
+        {{pageTitle this.station.name}}
+      {{/if}}
 
-          <Request @request={{this.historyRequest}}>
-            <:content as |historyResult|>
-              <Station
-                @station={{stationResult.data}}
-                @history={{historyResult.data}}
-              />
-            </:content>
-          </Request>
-        </:content>
-      </Request>
+      <Station @station={{this.station}} @history={{this.history}} />
     {{/if}}
   </template>
 }
