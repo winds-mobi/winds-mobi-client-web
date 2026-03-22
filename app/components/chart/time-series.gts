@@ -26,6 +26,9 @@ export interface TimeSeriesSignature {
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
   defaultChartOptions: TimeSeriesChartOptions = {
+    accessibility: {
+      enabled: false,
+    },
     credits: {
       enabled: false,
     },

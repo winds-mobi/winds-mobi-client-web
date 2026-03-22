@@ -5,11 +5,16 @@
 ### Changed
 
 - Updated the wind history chart to reuse the shared wind-speed palette so its colors now follow the same banding scheme as map markers and summary indicators.
+- Updated the air temperature chart to use explicit temperature bands from light purple through red, matching the intended cold-to-hot visual scale.
+- Reversed the map wind legend so the strongest wind band now appears at the top and the weakest band at the bottom.
 
 ### Fixed
 
 - Stabilized the shared stock-chart inputs for the wind and air history charts so range-selector zoom controls no longer get reset by incidental rerenders.
 - Tightened the wind history y-axis padding and tick behavior so the chart follows the actual data more closely instead of reserving unnecessary vertical headroom.
+- Increased y-axis label density for the wind and air history charts so both graphs now show a clearer five-tick scale.
+- Hardened shared chart-series generation by filtering invalid timestamps, coercing invalid values to `null`, and sorting points by timestamp before handing them to Highcharts.
+- Disabled Highcharts accessibility on the stock-style history charts to avoid invalid `NaN` accessibility overlay geometry during redraws.
 
 ## v0.0.9 - 2026-03-22
 

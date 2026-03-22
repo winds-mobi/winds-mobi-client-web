@@ -3,6 +3,7 @@ import { cached } from '@glimmer/tracking';
 import TimeSeries from 'winds-mobi-client-web/components/chart/time-series';
 import { windColourZones } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { History } from 'winds-mobi-client-web/services/store.js';
+import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
 
 export interface StationWindsGraphSignature {
   Args: {
@@ -19,8 +20,16 @@ export default class StationWindsGraph extends Component<StationWindsGraphSignat
 
   @cached
   get chartData() {
-    const speed = this.args.data.map((elm) => [elm.timestamp, elm.speed]);
-    const gusts = this.args.data.map((elm) => [elm.timestamp, elm.gusts]);
+    const speed = buildTimeSeriesData(
+      this.args.data,
+      (elm) => elm.timestamp,
+      (elm) => elm.speed
+    );
+    const gusts = buildTimeSeriesData(
+      this.args.data,
+      (elm) => elm.timestamp,
+      (elm) => elm.gusts
+    );
 
     return [
       {
@@ -64,6 +73,7 @@ export default class StationWindsGraph extends Component<StationWindsGraphSignat
         opposite: false,
         softMin: 0,
         startOnTick: false,
+        tickAmount: 5,
       },
     };
   }
