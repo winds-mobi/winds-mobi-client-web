@@ -6,7 +6,7 @@
 
 - Switched map station discovery from center-based `near-*` queries to viewport-based `within-*` rectangle queries, using the live MapLibre bounds while keeping center and zoom as the routed URL state.
 - Trimmed the station-list payload used by the map and enabled duplicate filtering plus a much larger viewport limit so station discovery behaves more like the original app.
-- Switched the production basemap to the OSM Swiss Style raster tiles for a quieter overview map.
+- Switched the production basemap to the OSM Switzerland raster tiles for a quieter overview map.
 - Updated the wind history chart to reuse the shared wind-speed palette so its colors now follow the same banding scheme as map markers and summary indicators.
 - Updated the air temperature chart to use explicit temperature bands from light purple through red, matching the intended cold-to-hot visual scale.
 - Reversed the map wind legend so the strongest wind band now appears at the top and the weakest band at the bottom.
