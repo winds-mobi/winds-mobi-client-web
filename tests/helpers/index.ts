@@ -5,6 +5,8 @@ import {
   type SetupTestOptions,
 } from 'ember-qunit';
 import { setupIntl } from 'ember-intl/test-support';
+import { formats } from 'winds-mobi-client-web/ember-intl';
+import translationsForEnUs from 'virtual:ember-intl/translations/en-us';
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is
@@ -13,6 +15,13 @@ import { setupIntl } from 'ember-intl/test-support';
 function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupApplicationTest(hooks, options);
   setupIntl(hooks, 'en-us');
+
+  hooks.beforeEach(function () {
+    const intl = this.owner.lookup('service:intl');
+
+    intl.addTranslations('en-us', translationsForEnUs);
+    intl.setFormats(formats);
+  });
 
   // Additional setup for application tests can be done here.
   //
@@ -34,11 +43,26 @@ function setupRenderingTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupRenderingTest(hooks, options);
   setupIntl(hooks, 'en-us');
 
+  hooks.beforeEach(function () {
+    const intl = this.owner.lookup('service:intl');
+
+    intl.addTranslations('en-us', translationsForEnUs);
+    intl.setFormats(formats);
+  });
+
   // Additional setup for rendering tests can be done here.
 }
 
 function setupTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupTest(hooks, options);
+  setupIntl(hooks, 'en-us');
+
+  hooks.beforeEach(function () {
+    const intl = this.owner.lookup('service:intl');
+
+    intl.addTranslations('en-us', translationsForEnUs);
+    intl.setFormats(formats);
+  });
 
   // Additional setup for unit tests can be done here.
 }

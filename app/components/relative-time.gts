@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { formatRelative } from 'ember-intl';
+import { formatRelativeTime } from 'ember-intl';
 
 type RelativeTimeUnit = Intl.RelativeTimeFormatUnit;
 
@@ -64,7 +64,7 @@ export default class RelativeTime extends Component<RelativeTimeSignature> {
 
   <template>
     {{#if this.relativeTime}}
-      {{formatRelative this.relativeTime.value unit=this.relativeTime.unit}}
+      {{formatRelativeTime this.relativeTime.value unit=this.relativeTime.unit}}
     {{else}}
       -
     {{/if}}

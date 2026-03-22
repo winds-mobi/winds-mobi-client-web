@@ -50,7 +50,9 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   }
 
   get title() {
-    return `${String(this.intl.t('map.refresh.ariaLabel'))} (${this.mapRefresh.countdownLabel})`;
+    return `${String(this.intl.t('map.refresh.ariaLabel'))} (${
+      this.mapRefresh.countdownLabel
+    })`;
   }
 
   @action
@@ -104,18 +106,10 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
         stroke-width="1.8"
         viewBox="0 0 24 24"
       >
-        <path
-          d="M16.023 9.348h4.992V4.356"
-        />
-        <path
-          d="M2.985 19.644v-4.992h4.992"
-        />
-        <path
-          d="m4.031 9.865 3.181-3.182a8.25 8.25 0 0 1 13.803 3.7"
-        />
-        <path
-          d="m19.969 14.135-3.181 3.182a8.25 8.25 0 0 1-13.803-3.7"
-        />
+        <path d="M16.023 9.348h4.992V4.356" />
+        <path d="M2.985 19.644v-4.992h4.992" />
+        <path d="m4.031 9.865 3.181-3.182a8.25 8.25 0 0 1 13.803 3.7" />
+        <path d="m19.969 14.135-3.181 3.182a8.25 8.25 0 0 1-13.803-3.7" />
       </svg>
 
       <span data-test-navbar-refresh-countdown class="sr-only">

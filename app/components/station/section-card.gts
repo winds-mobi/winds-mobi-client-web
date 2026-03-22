@@ -32,7 +32,10 @@ export interface StationSectionCardSignature {
       {{@title}}
     </p>
 
-    <div class="{{if @compact 'mt-2 md:mt-3' 'mt-3'}} {{if @contentClass @contentClass}}">
+    <div
+      class="{{if @compact 'mt-2 md:mt-3' 'mt-3'}}
+        {{if @contentClass @contentClass}}"
+    >
       {{yield}}
     </div>
   </section>

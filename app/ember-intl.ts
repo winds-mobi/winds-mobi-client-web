@@ -1,5 +1,7 @@
-export default {
-  number: {
+import type { Formats } from 'ember-intl';
+
+export const formats: Formats = {
+  formatNumber: {
     windSpeed: {
       style: 'unit',
       unit: 'kilometer-per-hour',

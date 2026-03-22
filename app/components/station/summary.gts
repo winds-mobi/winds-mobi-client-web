@@ -100,10 +100,16 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   <template>
-    <section data-test-station-summary-section class="px-2.5 py-2 md:px-5 md:py-4">
+    <section
+      data-test-station-summary-section
+      class="px-2.5 py-2 md:px-5 md:py-4"
+    >
       <div class="grid grid-cols-2 items-start gap-2 md:grid-cols-1 md:gap-3">
         <div class="grid min-w-0 gap-2 md:grid-cols-2 md:gap-3">
-          <StationSectionCard @title={{t "station.summary.wind"}} @compact={{true}}>
+          <StationSectionCard
+            @title={{t "station.summary.wind"}}
+            @compact={{true}}
+          >
             <dl class="m-0 space-y-1.5 md:space-y-2.5">
               <StationMetricCard
                 @compact={{true}}
@@ -130,7 +136,10 @@ export default class StationSummary extends Component<StationSummarySignature> {
             </dl>
           </StationSectionCard>
 
-          <StationSectionCard @title={{t "station.summary.air"}} @compact={{true}}>
+          <StationSectionCard
+            @title={{t "station.summary.air"}}
+            @compact={{true}}
+          >
             <dl class="m-0 space-y-1.5 md:space-y-2.5">
               <StationMetricCard
                 @compact={{true}}

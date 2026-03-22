@@ -60,9 +60,12 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
   get formattedValue() {
     switch (this.args.format) {
       case 'azimuth':
-        return `${azimuthToCardinal(this.numericValue)} ${this.intl.t('format.azimuth', {
-          azimuth: this.numericValue,
-        })}`;
+        return `${azimuthToCardinal(this.numericValue)} ${this.intl.t(
+          'format.azimuth',
+          {
+            azimuth: this.numericValue,
+          }
+        )}`;
       case 'humidity':
       case 'integer':
       case 'litersPerSecond':
@@ -88,35 +91,40 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
     }
   }
 
-<template>
-  {{#if this.hasValue}}
-    <div
-      class="{{if
-          @compact
-          'rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5'
-          'rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80'
-        }}"
-      ...attributes
-    >
-      <dt
-        class="{{if @compact 'text-[9px] leading-tight md:text-[11px]' 'text-[11px]'}}
-          font-medium text-slate-500
-          {{if @labelClass @labelClass}}"
-      >
-        {{@label}}
-      </dt>
-      <dd
+  <template>
+    {{#if this.hasValue}}
+      <div
         class="{{if
             @compact
-            'mt-0.5 text-[13px] leading-tight md:mt-1.5 md:text-base'
-            'mt-1.5'
-          }}
-          font-semibold {{if @valueClass @valueClass}}"
-        style={{this.valueStyle}}
+            'rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5'
+            'rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80'
+          }}"
+        ...attributes
       >
-        {{this.formattedValue}}
-      </dd>
-    </div>
-  {{/if}}
-</template>
+        <dt
+          class="{{if
+              @compact
+              'text-[9px] leading-tight md:text-[11px]'
+              'text-[11px]'
+            }}
+            font-medium text-slate-500
+            {{if @labelClass @labelClass}}"
+        >
+          {{@label}}
+        </dt>
+        <dd
+          class="{{if
+              @compact
+              'mt-0.5 text-[13px] leading-tight md:mt-1.5 md:text-base'
+              'mt-1.5'
+            }}
+            font-semibold
+            {{if @valueClass @valueClass}}"
+          style={{this.valueStyle}}
+        >
+          {{this.formattedValue}}
+        </dd>
+      </div>
+    {{/if}}
+  </template>
 }

@@ -95,11 +95,15 @@ export default class Map extends Component<MapSignature> {
   get request(): Future<{ data: Station[] }> {
     const refreshRevision = this.mapRefresh.refreshRevision;
 
-    const options = query<Station>('station', {
-      limit: 12,
-      'near-lat': this.requestedMapView.latitude,
-      'near-lon': this.requestedMapView.longitude,
-    }, refreshRevision > 0 ? { backgroundReload: true } : undefined);
+    const options = query<Station>(
+      'station',
+      {
+        limit: 12,
+        'near-lat': this.requestedMapView.latitude,
+        'near-lon': this.requestedMapView.longitude,
+      },
+      refreshRevision > 0 ? { backgroundReload: true } : undefined
+    );
 
     return this.requestStore.request<{ data: Station[] }>(options);
   }
