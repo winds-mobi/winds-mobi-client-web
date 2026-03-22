@@ -57,16 +57,11 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
-        maximumFileSizeToCacheInBytes: 7000000,
+        maximumFileSizeToCacheInBytes: 8000000,
       },
     }),
   ],
   optimizeDeps: {
-    exclude: [
-      'ember-leaflet',
-      'ember-page-title',
-      'object-inspect',
-      'embroider-util',
-    ],
+    exclude: ['ember-page-title', 'object-inspect', 'embroider-util'],
   },
 });

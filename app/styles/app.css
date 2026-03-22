@@ -1,10 +1,4 @@
 /* stylelint-disable */
-.leaflet-div-icon {
-  border: none;
-  background: none;
-}
-
-/* @import url('tailwindcss') source('../../'); */
 @import 'tailwindcss' source('../../');
 
 @plugin "@frontile/theme/plugin/default";

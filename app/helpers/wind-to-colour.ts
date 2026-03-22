@@ -1,3 +1,9 @@
+export interface WindColourBand {
+  color: string;
+  min: number;
+  max: number;
+}
+
 const COLORS = [
   { color: 'rgb(9, 179, 0)', max: 5 }, // Green for <5 km/h
   { color: 'rgb(0, 179, 71)', max: 10 }, // Light Green for 5-10 km/h
@@ -11,10 +17,22 @@ const COLORS = [
   { color: 'rgb(179, 0, 0)', max: Infinity }, // Dark Red for >50 km/h
 ];
 
+export const WIND_COLOUR_BANDS: WindColourBand[] = COLORS.map(
+  ({ color, max }, index) => ({
+    color,
+    min: index === 0 ? 0 : (COLORS[index - 1]?.max ?? 0),
+    max,
+  })
+);
+
 export default function windToColour(speed: number) {
-  for (const entry of COLORS) {
+  for (const entry of WIND_COLOUR_BANDS) {
     if (speed < entry.max) {
       return entry.color;
     }
   }
+
+  return (
+    WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1]?.color ?? 'rgb(179, 0, 0)'
+  );
 }

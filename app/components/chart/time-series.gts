@@ -1,11 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
+import {
+  mergeChartOptions,
+  type ChartOptions,
+} from 'winds-mobi-client-web/utils/highcharts-options';
+
+interface TimeSeriesChartOptions extends ChartOptions {
+  chart?: ChartOptions;
+  plotOptions?: ChartOptions;
+  tooltip?: ChartOptions;
+  xAxis?: ChartOptions;
+}
 
 export interface TimeSeriesSignature {
   Args: {
-    chartOptions: any;
-    chartData?: any;
+    chartOptions?: TimeSeriesChartOptions;
+    chartData?: unknown;
   };
   Blocks: {
     default: [];
@@ -14,22 +24,22 @@ export interface TimeSeriesSignature {
 }
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
-  defaultChartOptions = {
+  defaultChartOptions: TimeSeriesChartOptions = {
     credits: {
       enabled: false,
     },
     chart: {
-      height: 350,
-      type: 'spline', // Use 'spline' for smoother lines
+      height: 300,
+      type: 'spline',
       panning: {
-        enabled: true, // Enable panning
-        type: 'x', // Allow panning on the x-axis (or set to 'y' or 'xy')
+        enabled: true,
+        type: 'x',
       },
-      zoomType: 'x', // Allow zooming on x-axis (needed for panning)
+      zoomType: 'x',
     },
     rangeSelector: {
-      enabled: true, // Enable the range selector
-      inputEnabled: false, // Disable the date span input boxes
+      enabled: true,
+      inputEnabled: false,
       buttons: [
         {
           type: 'day',
@@ -57,21 +67,21 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
           text: '6h',
         },
       ],
-      selected: 4, // Default selected button index (e.g., 0 for '6h')
+      selected: 4,
     },
     title: {
       text: undefined,
     },
     xAxis: {
       type: 'datetime',
-      gridLineWidth: 1, // Enable grid lines
-      crosshair: true, // Adds the vertical line on hover
+      gridLineWidth: 1,
+      crosshair: true,
       labels: {
-        format: '{value:%H:%M}<br>{value:%a}', // Format to show hour:minute, day of week
+        format: '{value:%H:%M}<br>{value:%a}',
       },
     },
     legend: {
-      enabled: false, // Disable the legend
+      enabled: false,
     },
     navigator: {
       enabled: false,
@@ -79,22 +89,24 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     plotOptions: {
       series: {
         animation: {
-          duration: 0, // Set duration to 0 to disable the initial animation
+          duration: 0,
         },
       },
     },
     tooltip: {
-      xDateFormat: '%e %b %H:%M', // Custom format: "24 Dec 21:20"
-      shared: true, // Shows the values for all series on hover
-      crosshairs: true, // Draws a vertical line across the chart
+      xDateFormat: '%e %b %H:%M',
+      shared: true,
+      crosshairs: true,
     },
   };
 
   get mergedChartOptions() {
-    return {
-      ...this.defaultChartOptions,
-      ...this.args.chartOptions,
-    };
+    return mergeChartOptions(this.defaultChartOptions, this.args.chartOptions, [
+      'chart',
+      'xAxis',
+      'tooltip',
+      'plotOptions',
+    ]);
   }
 
   <template>

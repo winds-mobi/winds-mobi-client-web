@@ -7,13 +7,81 @@ export interface Response {
 
 interface StationApiPayload {
   _id: string;
+  alt?: number;
+  loc?: {
+    coordinates?: [number, number];
+  };
+  peak?: boolean;
+  'pv-name'?: string;
+  short?: string;
+  name?: string;
+  status?: string;
+  url?: Record<string, string>;
+  last?: {
+    _id?: number;
+    'w-dir'?: number;
+    'w-avg'?: number;
+    'w-max'?: number;
+    temp?: number;
+    hum?: number;
+    rain?: number;
+    pres?: {
+      qfe?: number | null;
+      qnh?: number | null;
+      qff?: number | null;
+    };
+  };
+}
+
+function normalizePressure(
+  pressure:
+    | number
+    | {
+        qfe?: number | null;
+        qnh?: number | null;
+        qff?: number | null;
+      }
+    | undefined
+) {
+  if (typeof pressure === 'number') {
+    return pressure;
+  }
+
+  return pressure?.qfe ?? pressure?.qnh ?? pressure?.qff;
 }
 
 function jsonApifyFields(elm: StationApiPayload) {
+  const last = elm.last
+    ? {
+        timestamp: elm.last._id ? elm.last._id * 1000 : undefined,
+        direction: elm.last['w-dir'],
+        speed: elm.last['w-avg'],
+        gusts: elm.last['w-max'],
+        temperature: elm.last.temp,
+        humidity: elm.last.hum,
+        rain: elm.last.rain,
+        pressure: normalizePressure(elm.last.pres),
+      }
+    : undefined;
+
   return {
     type: 'station',
     id: elm._id,
-    attributes: elm,
+    attributes: {
+      _id: elm._id,
+      altitude: elm.alt,
+      location: elm.loc
+        ? {
+            coordinates: elm.loc.coordinates,
+          }
+        : undefined,
+      isPeak: elm.peak,
+      providerName: elm['pv-name'],
+      name: elm.short ?? elm.name,
+      status: elm.status,
+      providerUrl: elm.url,
+      last,
+    },
   };
 }
 

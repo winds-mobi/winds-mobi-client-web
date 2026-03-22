@@ -1,17 +1,22 @@
 application:
   name: v2.winds.mobi
 
+common:
+  close: Close
+
 location-fetcher:
   center: center
 
 list:
   toggle: list
 
+map:
+  legend:
+    windSpeed: Wind speed
+
 station:
   summary:
-    title: Summary
     wind: Wind
-    wind-last-hour: Wind - last hour
     air: Air
   wind: Wind
   air: Air
@@ -20,10 +25,11 @@ wind:
   speed: Speed
   gusts: Gusts
   direction: Direction
+  timestamp: 'Time'
+  lastHour: Wind - last hour
   minimum: Minimum
   mean: Mean
   maximum: Maximum
-  timestamp: 'Time'
 
 air:
   temperature: Temperature
@@ -34,5 +40,6 @@ air:
 format:
   azimuth: '{azimuth}°'
   percent: '{value}%'
-  pressure: '{value}hPA'
+  relativeHumidity: '{value}% rel'
+  pressure: '{value}hPa'
   rain: '{value}l/m²'

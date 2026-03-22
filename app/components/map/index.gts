@@ -1,86 +1,206 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import Component from '@glimmer/component';
-import { Request } from '@warp-drive/ember';
-// import { query } from '@ember-data/rest/request';
-// import { query } from '@ember-data/json-api/request';
+import { registerDestructor } from '@ember/destroyable';
+import { getRequestState } from '@warp-drive/ember';
+import type { Future } from '@warp-drive/core/request';
 import { query } from 'winds-mobi-client-web/builders/station';
-// @ts-expect-error No TS stuff yet
-import LeafletMap from 'ember-leaflet/components/leaflet-map';
-import { inject as service } from '@ember/service';
-import Arrow from './arrow';
-import type StoreService from 'winds-mobi-client-web/services/store.js';
+import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type LocationService from 'winds-mobi-client-web/services/location.js';
-import Popover from './popover';
 import { action } from '@ember/object';
+import { cached } from '@glimmer/tracking';
+import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
-import { fn } from '@ember/helper';
-import YouAreHere from './you-are-here';
+import { type IntlService } from 'ember-intl';
+import { restartableTask, timeout } from 'ember-concurrency';
+import MaplibreDeck from 'winds-mobi-client-web/modifiers/maplibre-deck';
+import {
+  buildGpsLayer,
+  buildStationLayer,
+} from 'winds-mobi-client-web/utils/map-layers';
+import type { DeckLayer } from 'winds-mobi-client-web/utils/map-runtime';
+import { buildWindLegendBands } from 'winds-mobi-client-web/utils/map-legend';
+import {
+  isMapRoute,
+  mapViewExceedsRequestThreshold,
+  mapViewsEqual,
+  parseMapView,
+  serializeMapView,
+  type MapCoordinate,
+  type MapQueryParams,
+  type MapView,
+} from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
-  Args: {};
+  Args: Record<string, never>;
   Blocks: {
     default: [];
   };
   Element: null;
 }
 
+const STATION_REQUEST_DEBOUNCE_MS = 250;
+
+type RouteDidChangeHandler = () => void;
+
+type EventedRouterService = RouterService & {
+  on(event: 'routeDidChange', handler: RouteDidChangeHandler): void;
+  off(event: 'routeDidChange', handler: RouteDidChangeHandler): void;
+};
+
 export default class Map extends Component<MapSignature> {
-  @service declare store: StoreService;
+  @service
+  declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare location: LocationService;
   @service declare router: RouterService;
+  @service declare intl: IntlService;
 
-  get request() {
+  @tracked requestedMapView = parseMapView();
+
+  updateRequestedMapView = restartableTask(async (nextView: MapView) => {
+    await timeout(STATION_REQUEST_DEBOUNCE_MS);
+    this.requestedMapView = nextView;
+  });
+
+  legendBands = buildWindLegendBands();
+  private routeEventSource?: EventedRouterService;
+
+  constructor(owner: unknown, args: MapSignature['Args']) {
+    super(owner, args);
+
+    this.requestedMapView = this.mapView;
+    this.routeEventSource = this.router as EventedRouterService;
+    this.routeEventSource.on('routeDidChange', this.handleRouteDidChange);
+
+    registerDestructor(this, () => {
+      this.cancelPendingStationRequest();
+      this.routeEventSource?.off('routeDidChange', this.handleRouteDidChange);
+      this.routeEventSource = undefined;
+    });
+  }
+
+  get selectedStationId() {
+    return this.router.currentRoute?.params['station_id'];
+  }
+
+  get mapView() {
+    return parseMapView(
+      this.router.currentRoute?.queryParams as MapQueryParams | undefined
+    );
+  }
+
+  @cached
+  get request(): Future<{ data: Station[] }> {
     const options = query<Station>('station', {
       limit: 12,
-      'near-lat': this.location.map.latitude,
-      'near-lon': this.location.map.longitude,
+      'near-lat': this.requestedMapView.latitude,
+      'near-lon': this.requestedMapView.longitude,
     });
+
     return this.store.request(options);
   }
 
-  @action stationSelected(stationId: string) {
-    this.router.transitionTo('map.station', stationId);
+  get requestState() {
+    return getRequestState(this.request);
+  }
+
+  get legend() {
+    return {
+      bands: this.legendBands,
+      title: String(this.intl.t('map.legend.windSpeed')),
+    };
+  }
+
+  get layers() {
+    const layers: DeckLayer[] = [];
+
+    if (this.location.gps) {
+      layers.push(
+        buildGpsLayer([this.location.gps.longitude, this.location.gps.latitude])
+      );
+    }
+
+    if (this.requestState.isSuccess) {
+      layers.push(
+        buildStationLayer(
+          this.requestState.value.data,
+          this.selectedStationId,
+          (stationId) => this.stationSelected(stationId)
+        )
+      );
+    }
+
+    return layers;
+  }
+
+  @action
+  stationSelected(stationId: string) {
+    this.router.transitionTo('map.station', stationId, {
+      queryParams: serializeMapView(this.mapView),
+    });
+  }
+
+  @action
+  updateView([longitude, latitude]: MapCoordinate, zoom: number) {
+    const nextView = { longitude, latitude, zoom };
+
+    if (mapViewsEqual(this.mapView, nextView)) {
+      return;
+    }
+
+    this.router.replaceWith({
+      queryParams: serializeMapView(nextView),
+    });
+  }
+
+  private handleRouteDidChange = () => {
+    if (!isMapRoute(this.router.currentRouteName)) {
+      this.cancelPendingStationRequest();
+      return;
+    }
+
+    this.scheduleStationRequest(this.mapView);
+  };
+
+  private scheduleStationRequest(nextView: MapView) {
+    if (mapViewsEqual(this.requestedMapView, nextView)) {
+      this.cancelPendingStationRequest();
+      return;
+    }
+
+    if (!mapViewExceedsRequestThreshold(this.requestedMapView, nextView)) {
+      return;
+    }
+
+    this.cancelPendingStationRequest();
+    void this.updateRequestedMapView.perform(nextView);
+  }
+
+  private cancelPendingStationRequest() {
+    this.updateRequestedMapView.cancelAll();
   }
 
   <template>
-    <LeafletMap
-      class="w-full h-full"
-      @lat={{this.location.map.latitude}}
-      @lng={{this.location.map.longitude}}
-      @zoom={{this.location.map.zoom}}
-      @onMoveend={{this.location.updateLocation}}
-      as |layers|
-    >
-      <layers.tile @url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+    <div data-test-map-container class="relative h-full w-full">
+      <div
+        data-test-map-canvas
+        class="h-full w-full"
+        {{MaplibreDeck
+          longitude=this.mapView.longitude
+          latitude=this.mapView.latitude
+          zoom=this.mapView.zoom
+          layers=this.layers
+          legend=this.legend
+          onViewChange=this.updateView
+        }}
+      ></div>
 
-      <YouAreHere @layers={{layers}} />
-
-      <Request @request={{this.request}}>
-        <:loading>
-          ---
-        </:loading>
-
-        <:content as |result|>
-          {{#each result.data as |r|}}
-            <Arrow @speed={{r.last.speed}} @gusts={{r.last.gusts}} as |icon|>
-              {{!<Arrow @speed="10" @gusts="20" as |icon|>}}
-              <layers.rotated-marker
-                @lat={{r.latitude}}
-                @lng={{r.longitude}}
-                @icon={{icon}}
-                @rotationAngle={{r.last.direction}}
-                @onClick={{fn this.stationSelected r.id}}
-                as |marker|
-              >
-                <marker.popup @popupOpen={{false}}>
-                  <Popover @station={{r}} />
-                </marker.popup>
-              </layers.rotated-marker>
-            </Arrow>
-          {{/each}}
-        </:content>
-      </Request>
-    </LeafletMap>
+      {{#if this.requestState.isPending}}
+        <div
+          class="pointer-events-none absolute left-4 top-4 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
+        >
+          Loading stations…
+        </div>
+      {{/if}}
+    </div>
   </template>
 }
