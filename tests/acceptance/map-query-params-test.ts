@@ -162,6 +162,7 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
@@ -183,6 +184,7 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
