@@ -7,6 +7,8 @@ import type { MapCoordinate } from 'winds-mobi-client-web/utils/map-view';
 
 const STATION_ICON_SIZE = 42;
 const GPS_ICON_SIZE = 16;
+const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
+const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 
 type GpsLayerDatum = {
   coordinates: MapCoordinate;
@@ -19,10 +21,20 @@ function svgToDataUrl(svg: string) {
 const STATION_ARROW_PATH =
   'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
 
-export function buildStationArrowSvg(speed: number, isSelected = false) {
-  const colour = windToColour(speed);
-  const outline = isSelected
-    ? `<path d="${STATION_ARROW_PATH}" fill="#ffffff" stroke="#ffffff" stroke-width="32" stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill" />`
+function stationArrowColour(speed: number, timestamp: number) {
+  const isStale = Date.now() - timestamp > STALE_READING_THRESHOLD;
+
+  return isStale ? STALE_STATION_COLOUR : windToColour(speed);
+}
+
+export function buildStationArrowSvg(
+  speed: number,
+  timestamp: number,
+  isSelected = false
+) {
+  const colour = stationArrowColour(speed, timestamp);
+  const selectedStroke = isSelected
+    ? 'stroke="#000000" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill"'
     : '';
 
   return `
@@ -30,14 +42,17 @@ export function buildStationArrowSvg(speed: number, isSelected = false) {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="-150 -70 140 340"
     >
-      ${outline}
-      <path d="${STATION_ARROW_PATH}" fill="${colour}" />
+      <path d="${STATION_ARROW_PATH}" fill="${colour}" ${selectedStroke} />
     </svg>
   `;
 }
 
-export function buildStationArrowIconUrl(speed: number, isSelected = false) {
-  return svgToDataUrl(buildStationArrowSvg(speed, isSelected));
+export function buildStationArrowIconUrl(
+  speed: number,
+  timestamp: number,
+  isSelected = false
+) {
+  return svgToDataUrl(buildStationArrowSvg(speed, timestamp, isSelected));
 }
 
 export function buildStationLayer(
@@ -56,6 +71,7 @@ export function buildStationLayer(
     getIcon: (station) => ({
       url: buildStationArrowIconUrl(
         station.last.speed,
+        station.last.timestamp,
         station.id === selectedStationId
       ),
       width: STATION_ICON_SIZE,

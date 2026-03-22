@@ -18,7 +18,7 @@ export interface NavbarSignature {
 // eslint-disable-next-line ember/no-empty-glimmer-component-classes
 export default class Navbar extends Component<NavbarSignature> {
   <template>
-    <nav class="bg-white shadow">
+    <nav class="border-b border-slate-200 bg-white shadow-md shadow-slate-900/12">
       <div class="px-2 sm:px-4 lg:px-8">
         <div class="flex h-16 justify-between">
           <NavbarLogo />

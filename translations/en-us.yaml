@@ -16,7 +16,6 @@ map:
 
 station:
   summary:
-    title: Summary
     wind: Wind
     air: Air
   wind: Wind

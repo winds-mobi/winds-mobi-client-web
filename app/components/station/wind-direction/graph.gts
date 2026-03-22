@@ -20,6 +20,12 @@ const DURATION = 1 * 60 * 60;
 export default class WindDirectionGraph extends Component<WindDirectionGraphSignature> {
   @service declare intl: IntlService;
 
+  chartOptions = {
+    chart: {
+      height: null,
+    },
+  };
+
   get chartData() {
     const now = Date.now();
 
@@ -42,6 +48,10 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   }
 
   <template>
-    <Polar @chartData={{this.chartData}} @chartOptions={{undefined}} />
+    <Polar
+      class="h-full [&_.chart-container]:h-full"
+      @chartData={{this.chartData}}
+      @chartOptions={{this.chartOptions}}
+    />
   </template>
 }

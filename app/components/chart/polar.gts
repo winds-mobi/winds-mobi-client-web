@@ -32,6 +32,9 @@ export default class Polar extends Component<PolarSignature> {
     legend: {
       enabled: false, // Disable the legend
     },
+    pane: {
+      size: '82%',
+    },
     xAxis: {
       tickInterval: 45,
       gridLineWidth: 0,
@@ -41,7 +44,7 @@ export default class Polar extends Component<PolarSignature> {
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
         },
-        distance: 0,
+        distance: -14,
         style: {
           fontSize: '9px',
         },
@@ -100,6 +103,10 @@ export default class Polar extends Component<PolarSignature> {
         ...this.defaultChartOptions.tooltip,
         ...this.args.chartOptions?.tooltip,
       },
+      pane: {
+        ...this.defaultChartOptions.pane,
+        ...this.args.chartOptions?.pane,
+      },
       plotOptions: {
         ...this.defaultChartOptions.plotOptions,
         ...this.args.chartOptions?.plotOptions,
@@ -109,6 +116,7 @@ export default class Polar extends Component<PolarSignature> {
 
   <template>
     <HighCharts
+      ...attributes
       @content={{@chartData}}
       @chartOptions={{this.mergedChartOptions}}
     />

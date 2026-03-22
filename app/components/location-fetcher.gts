@@ -54,24 +54,24 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
       @onChange={{this.centerOnGps}}
       @isSelected={{if this.location.getLocationFromGps.last.value true false}}
       disabled={{this.location.getLocationFromGps.isRunning}}
-      class="flex align-middle items-center gap-2"
+      class="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm shadow-slate-900/5 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 disabled:cursor-wait disabled:opacity-70 aria-[pressed=true]:border-slate-900 aria-[pressed=true]:bg-slate-900 aria-[pressed=true]:text-white"
     >
       {{#if this.location.getLocationFromGps.last.value}}
-        <GpsFix />
+        <GpsFix class="shrink-0" />
       {{else}}
         {{#if this.location.getLocationFromGps.last.isError}}
-          <GpsSlash />
+          <GpsSlash class="shrink-0" />
         {{else}}
           <Gps
-            class={{if
+            class="shrink-0 {{if
               this.location.getLocationFromGps.isRunning
-              "animate-pulse"
-            }}
+              'animate-pulse'
+            }}"
           />
         {{/if}}
       {{/if}}
 
-      <span class="hidden lg:inline">
+      <span class="hidden whitespace-nowrap lg:inline">
         {{t "location-fetcher.center"}}
       </span>
     </ToggleButton>

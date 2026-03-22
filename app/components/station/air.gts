@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import TimeSeries from '../chart/time-series';
 import { t } from 'ember-intl';
+import StationSectionCard from './section-card';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationAirSignature {
@@ -96,18 +97,12 @@ export default class StationAir extends Component<StationAirSignature> {
 
   <template>
     <section data-test-station-air-section class="px-4 py-4 sm:px-5">
-      <h2 class="text-sm font-semibold text-slate-950">
-        {{t "station.air"}}
-      </h2>
-
-      <div
-        class="mt-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-2.5"
-      >
+      <StationSectionCard @title={{t "station.air"}}>
         <TimeSeries
           @chartData={{this.chartData}}
           @chartOptions={{this.chartOptions}}
         />
-      </div>
+      </StationSectionCard>
     </section>
   </template>
 }

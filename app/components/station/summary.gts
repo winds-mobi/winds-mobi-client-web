@@ -1,9 +1,11 @@
 import Component from '@glimmer/component';
 import { formatNumber, t } from 'ember-intl';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
+import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
+import StationMetricCard from './metric-card';
 import type { History, Station } from 'winds-mobi-client-web/services/store.js';
+import StationSectionCard from './section-card';
 import WindDirection from './wind-direction';
-import RelativeTime from '../relative-time';
 
 export interface StationSummarySignature {
   Args: {
@@ -62,201 +64,150 @@ export default class StationSummary extends Component<StationSummarySignature> {
     return Math.max(...this.lastHourSpeeds);
   }
 
+  styleForWindSpeed(speed: number) {
+    return `color: ${windToColour(speed)};`;
+  }
+
+  get speedStyle() {
+    return this.styleForWindSpeed(this.reading.speed);
+  }
+
+  get gustsStyle() {
+    return this.styleForWindSpeed(this.reading.gusts);
+  }
+
+  get lastHourMaximumStyle() {
+    return this.styleForWindSpeed(this.lastHourMaximumSpeed);
+  }
+
+  get lastHourMeanStyle() {
+    return this.styleForWindSpeed(this.lastHourMeanSpeed);
+  }
+
+  get lastHourMinimumStyle() {
+    return this.styleForWindSpeed(this.lastHourMinimumSpeed);
+  }
+
   <template>
     <section data-test-station-summary-section class="px-4 py-4 sm:px-5">
-      <div class="flex items-center justify-between gap-4">
-        <p
-          class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
-        >
-          {{t "station.summary.title"}}
-        </p>
-
-        <div
-          class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600"
-        >
-          <RelativeTime @timestamp={{this.reading.timestamp}} />
-        </div>
-      </div>
-
-      <div class="mt-3 grid gap-3">
+      <div class="grid gap-3">
         <div class="grid min-w-0 gap-3 sm:grid-cols-2">
-          <section
-            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <p
-              class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-            >
-              {{t "station.summary.wind"}}
-            </p>
-
-            <dl class="mt-3 space-y-2.5">
-              <div class="grid grid-cols-2 gap-2">
-                <div
-                  class="rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200/80"
-                >
-                  <dt class="text-[11px] font-medium text-slate-500">
-                    {{t "wind.speed"}}
-                  </dt>
-                  <dd
-                    class="mt-1.5 text-lg font-semibold tracking-tight text-slate-950"
-                  >
-                    {{formatNumber
-                      this.reading.speed
-                      style="unit"
-                      unit="kilometer-per-hour"
-                    }}
-                  </dd>
-                </div>
-
-                <div
-                  class="rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200/80"
-                >
-                  <dt class="text-[11px] font-medium text-slate-500">
-                    {{t "wind.gusts"}}
-                  </dt>
-                  <dd
-                    class="mt-1.5 text-lg font-semibold tracking-tight text-slate-950"
-                  >
-                    {{formatNumber
-                      this.reading.gusts
-                      style="unit"
-                      unit="kilometer-per-hour"
-                    }}
-                  </dd>
-                </div>
-              </div>
-
-              <div
-                class="space-y-2.5 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200/80"
-              >
-                <div class="flex items-baseline justify-between gap-4">
-                  <dt class="text-sm text-slate-500">
-                    {{t "wind.direction"}}
-                  </dt>
-                  <dd class="text-right text-sm font-medium text-slate-900">
-                    {{this.directionCardinal}}
-                    <span class="text-slate-500">
-                      {{t "format.azimuth" azimuth=this.reading.direction}}
-                    </span>
-                  </dd>
-                </div>
-              </div>
-            </dl>
-          </section>
-
-          <section
-            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <p
-              class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-            >
-              {{t "station.summary.air"}}
-            </p>
-
-            <dl class="mt-3 space-y-2.5">
-              <div
-                class="rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200/80"
-              >
-                <dt class="text-[11px] font-medium text-slate-500">
-                  {{t "air.temperature"}}
-                </dt>
-                <dd
-                  class="mt-1.5 text-lg font-semibold tracking-tight text-slate-950"
-                >
+          <StationSectionCard @title={{t "station.summary.wind"}}>
+            <dl class="space-y-2.5">
+              <StationMetricCard @label={{t "wind.speed"}}>
+                <span style={{this.speedStyle}}>
                   {{formatNumber
-                    this.reading.temperature
+                    this.reading.speed
                     style="unit"
-                    unit="celsius"
+                    unit="kilometer-per-hour"
                   }}
-                </dd>
-              </div>
+                </span>
+              </StationMetricCard>
 
-              <div
-                class="space-y-2.5 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200/80"
+              <StationMetricCard @label={{t "wind.gusts"}}>
+                <span style={{this.gustsStyle}}>
+                  {{formatNumber
+                    this.reading.gusts
+                    style="unit"
+                    unit="kilometer-per-hour"
+                  }}
+                </span>
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "wind.direction"}}
+                @valueClass="text-sm text-slate-900"
               >
-                <div class="flex items-baseline justify-between gap-4">
-                  <dt class="text-sm text-slate-500">
-                    {{t "air.humidity"}}
-                  </dt>
-                  <dd class="text-right text-sm font-medium text-slate-900">
-                    {{t "format.relativeHumidity" value=this.reading.humidity}}
-                  </dd>
-                </div>
-
-                <div class="flex items-baseline justify-between gap-4">
-                  <dt class="text-sm text-slate-500">
-                    {{t "air.pressure"}}
-                  </dt>
-                  <dd class="text-right text-sm font-medium text-slate-900">
-                    {{t "format.pressure" value=this.reading.pressure}}
-                  </dd>
-                </div>
-
-                <div class="flex items-baseline justify-between gap-4">
-                  <dt class="text-sm text-slate-500">
-                    {{t "air.rain"}}
-                  </dt>
-                  <dd class="text-right text-sm font-medium text-slate-900">
-                    {{t "format.rain" value=this.reading.rain}}
-                  </dd>
-                </div>
-              </div>
+                {{this.directionCardinal}}
+                {{t "format.azimuth" azimuth=this.reading.direction}}
+              </StationMetricCard>
             </dl>
-          </section>
+          </StationSectionCard>
+
+          <StationSectionCard @title={{t "station.summary.air"}}>
+            <dl class="space-y-2.5">
+              <StationMetricCard
+                @label={{t "air.temperature"}}
+              >
+                {{formatNumber
+                  this.reading.temperature
+                  style="unit"
+                  unit="celsius"
+                }}
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "air.humidity"}}
+                @valueClass="text-sm text-slate-900"
+              >
+                {{t "format.relativeHumidity" value=this.reading.humidity}}
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "air.pressure"}}
+                @valueClass="text-sm text-slate-900"
+              >
+                {{t "format.pressure" value=this.reading.pressure}}
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "air.rain"}}
+                @valueClass="text-sm text-slate-900"
+              >
+                {{t "format.rain" value=this.reading.rain}}
+              </StationMetricCard>
+            </dl>
+          </StationSectionCard>
         </div>
 
-        <div class="min-w-0 rounded-2xl border border-slate-200 bg-white/90 p-3">
-          <p
-            class="px-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
-          >
-            {{t "wind.lastHour"}}
-          </p>
-
-          <div class="mt-2">
-            <WindDirection @data={{this.recentHistory}} />
-          </div>
-
-          <dl class="mt-3 grid gap-2 sm:grid-cols-3">
-            <div class="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80">
-              <dt class="text-[11px] font-medium text-slate-500">
-                {{t "wind.minimum"}}
-              </dt>
-              <dd class="mt-1.5 text-sm font-semibold text-slate-950">
-                {{formatNumber
-                  this.lastHourMinimumSpeed
-                  style="unit"
-                  unit="kilometer-per-hour"
-                }}
-              </dd>
+        <StationSectionCard
+          @title={{t "wind.lastHour"}}
+          class="min-w-0"
+        >
+          <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem] md:items-stretch">
+            <div class="min-w-0 md:h-full">
+              <WindDirection @data={{this.recentHistory}} />
             </div>
 
-            <div class="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80">
-              <dt class="text-[11px] font-medium text-slate-500">
-                {{t "wind.mean"}}
-              </dt>
-              <dd class="mt-1.5 text-sm font-semibold text-slate-950">
-                {{formatNumber
-                  this.lastHourMeanSpeed
-                  style="unit"
-                  unit="kilometer-per-hour"
-                }}
-              </dd>
-            </div>
-
-            <div class="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80">
-              <dt class="text-[11px] font-medium text-slate-500">
-                {{t "wind.maximum"}}
-              </dt>
-              <dd class="mt-1.5 text-sm font-semibold text-slate-950">
+            <dl class="grid gap-2">
+              <StationMetricCard
+                @label={{t "wind.maximum"}}
+                @valueClass="text-sm"
+                @valueStyle={{this.lastHourMaximumStyle}}
+              >
                 {{formatNumber
                   this.lastHourMaximumSpeed
                   style="unit"
                   unit="kilometer-per-hour"
                 }}
-              </dd>
-            </div>
-          </dl>
-        </div>
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "wind.mean"}}
+                @valueClass="text-sm"
+                @valueStyle={{this.lastHourMeanStyle}}
+              >
+                {{formatNumber
+                  this.lastHourMeanSpeed
+                  style="unit"
+                  unit="kilometer-per-hour"
+                }}
+              </StationMetricCard>
+
+              <StationMetricCard
+                @label={{t "wind.minimum"}}
+                @valueClass="text-sm"
+                @valueStyle={{this.lastHourMinimumStyle}}
+              >
+                {{formatNumber
+                  this.lastHourMinimumSpeed
+                  style="unit"
+                  unit="kilometer-per-hour"
+                }}
+              </StationMetricCard>
+            </dl>
+          </div>
+        </StationSectionCard>
       </div>
     </section>
   </template>

@@ -53,7 +53,7 @@ function normalizePressure(
 function jsonApifyFields(elm: StationApiPayload) {
   const last = elm.last
     ? {
-        timestamp: elm.last._id,
+        timestamp: elm.last._id ? elm.last._id * 1000 : undefined,
         direction: elm.last['w-dir'],
         speed: elm.last['w-avg'],
         gusts: elm.last['w-max'],

@@ -6,6 +6,7 @@ import { on } from '@ember/modifier';
 import StationSummary from './summary';
 import StationWinds from './wind';
 import StationAir from './air';
+import RelativeTime from '../relative-time';
 import { t } from 'ember-intl';
 import {
   parseMapView,
@@ -44,14 +45,19 @@ export default class StationIndex extends Component<StationIndexSignature> {
   <template>
     <section
       data-test-station-panel
-      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white md:h-full md:w-[32rem] md:border-l md:border-t-0"
+      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 md:h-full md:w-[32rem] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
     >
       <div
-        class="shrink-0 flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3"
+        class="shrink-0 flex items-center justify-between gap-4 px-4 py-3"
       >
-        <h1 data-test-station-title class="min-w-0 truncate text-xl font-bold">
-          {{@station.name}}
-        </h1>
+        <div class="min-w-0 flex items-baseline gap-3">
+          <h1 data-test-station-title class="min-w-0 truncate text-xl font-bold">
+            {{@station.name}}
+          </h1>
+          <div class="shrink-0 text-xs font-medium text-slate-500">
+            <RelativeTime @timestamp={{@station.last.timestamp}} />
+          </div>
+        </div>
         <button
           data-test-station-close
           type="button"
@@ -64,7 +70,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
         </button>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto divide-y divide-slate-200">
+      <div class="min-h-0 flex-1 overflow-y-auto">
         <StationSummary @station={{@station}} @history={{@history}} />
         <StationWinds @history={{@history}} />
         <StationAir @history={{@history}} />
