@@ -40,7 +40,9 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
     const minTimestamp = latestTimestamp - DURATION * 1000;
 
-    return this.args.history.filter((record) => record.timestamp >= minTimestamp);
+    return this.args.history.filter(
+      (record) => record.timestamp >= minTimestamp
+    );
   }
 
   get lastHourSpeeds() {
@@ -126,9 +128,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
           <StationSectionCard @title={{t "station.summary.air"}}>
             <dl class="space-y-2.5">
-              <StationMetricCard
-                @label={{t "air.temperature"}}
-              >
+              <StationMetricCard @label={{t "air.temperature"}}>
                 {{formatNumber
                   this.reading.temperature
                   style="unit"
@@ -160,11 +160,10 @@ export default class StationSummary extends Component<StationSummarySignature> {
           </StationSectionCard>
         </div>
 
-        <StationSectionCard
-          @title={{t "wind.lastHour"}}
-          class="min-w-0"
-        >
-          <div class="grid grid-cols-[minmax(0,1fr)_9rem] gap-3 items-stretch md:grid-cols-[minmax(0,1fr)_12rem]">
+        <StationSectionCard @title={{t "wind.lastHour"}} class="min-w-0">
+          <div
+            class="grid grid-cols-[minmax(0,1fr)_9rem] gap-3 items-stretch md:grid-cols-[minmax(0,1fr)_12rem]"
+          >
             <div class="min-w-0 h-full">
               <WindDirection @data={{this.recentHistory}} />
             </div>

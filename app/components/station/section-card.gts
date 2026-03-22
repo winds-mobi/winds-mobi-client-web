@@ -14,9 +14,13 @@ export interface StationSectionCardSignature {
 
 export default class StationSectionCard extends Component<StationSectionCardSignature> {
   <template>
-    <section class="rounded-2xl border border-slate-200 bg-white p-3.5" ...attributes>
+    <section
+      class="rounded-2xl border border-slate-200 bg-white p-3.5"
+      ...attributes
+    >
       <p
-        class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 {{if @titleClass @titleClass}}"
+        class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500
+          {{if @titleClass @titleClass}}"
       >
         {{@title}}
       </p>

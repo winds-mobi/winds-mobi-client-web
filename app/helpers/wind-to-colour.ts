@@ -32,5 +32,7 @@ export default function windToColour(speed: number) {
     }
   }
 
-  return WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1]?.color ?? 'rgb(179, 0, 0)';
+  return (
+    WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1]?.color ?? 'rgb(179, 0, 0)'
+  );
 }

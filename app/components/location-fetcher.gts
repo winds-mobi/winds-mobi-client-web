@@ -63,10 +63,8 @@ export default class LocationFetcher extends Component<LocationFetcherSignature>
           <GpsSlash class="shrink-0" />
         {{else}}
           <Gps
-            class="shrink-0 {{if
-              this.location.getLocationFromGps.isRunning
-              'animate-pulse'
-            }}"
+            class="shrink-0
+              {{if this.location.getLocationFromGps.isRunning 'animate-pulse'}}"
           />
         {{/if}}
       {{/if}}
