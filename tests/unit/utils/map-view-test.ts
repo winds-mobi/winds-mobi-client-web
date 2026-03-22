@@ -4,6 +4,9 @@ import {
   DEFAULT_MAP_LNG,
   DEFAULT_MAP_ZOOM,
   isMapRoute,
+  MAP_REQUEST_COORDINATE_THRESHOLD,
+  MAP_REQUEST_ZOOM_THRESHOLD,
+  mapViewExceedsRequestThreshold,
   mapViewsEqual,
   parseMapView,
   serializeMapView,
@@ -55,5 +58,40 @@ module('Unit | Utility | map-view', function () {
     assert.true(isMapRoute('map'));
     assert.true(isMapRoute('map.station'));
     assert.false(isMapRoute('index'));
+  });
+
+  test('it applies the station-request threshold to map view changes', function (assert) {
+    assert.false(
+      mapViewExceedsRequestThreshold(
+        { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
+        {
+          longitude: 8.12345 + MAP_REQUEST_COORDINATE_THRESHOLD / 2,
+          latitude: 46.54321,
+          zoom: 9.5,
+        }
+      )
+    );
+
+    assert.true(
+      mapViewExceedsRequestThreshold(
+        { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
+        {
+          longitude: 8.12345 + MAP_REQUEST_COORDINATE_THRESHOLD + 0.00001,
+          latitude: 46.54321,
+          zoom: 9.5,
+        }
+      )
+    );
+
+    assert.true(
+      mapViewExceedsRequestThreshold(
+        { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
+        {
+          longitude: 8.12345,
+          latitude: 46.54321,
+          zoom: 9.5 + MAP_REQUEST_ZOOM_THRESHOLD,
+        }
+      )
+    );
   });
 });

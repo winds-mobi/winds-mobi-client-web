@@ -1,24 +1,19 @@
 import Component from '@glimmer/component';
 import { registerDestructor } from '@ember/destroyable';
-import { getRequestState } from '@warp-drive/ember';
 import type { Future } from '@warp-drive/core/request';
+import { getRequestState } from '@warp-drive/core/reactive';
 import { query } from 'winds-mobi-client-web/builders/station';
 import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import type LocationService from 'winds-mobi-client-web/services/location.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { type IntlService } from 'ember-intl';
 import { restartableTask, timeout } from 'ember-concurrency';
-import MaplibreDeck from 'winds-mobi-client-web/modifiers/maplibre-deck';
-import {
-  buildGpsLayer,
-  buildStationLayer,
-} from 'winds-mobi-client-web/utils/map-layers';
-import type { DeckLayer } from 'winds-mobi-client-web/utils/map-runtime';
-import { buildWindLegendBands } from 'winds-mobi-client-web/utils/map-legend';
+import { WIND_COLOUR_BANDS } from 'winds-mobi-client-web/helpers/wind-to-colour';
+import MapCanvas from 'winds-mobi-client-web/components/map/canvas';
+import type { WindLegendBand } from 'winds-mobi-client-web/components/map/legend';
 import {
   isMapRoute,
   mapViewExceedsRequestThreshold,
@@ -47,10 +42,13 @@ type EventedRouterService = RouterService & {
   off(event: 'routeDidChange', handler: RouteDidChangeHandler): void;
 };
 
+type RequestStore = {
+  request<T>(request: unknown): Future<T>;
+};
+
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
-  @service declare location: LocationService;
   @service declare router: RouterService;
   @service declare intl: IntlService;
 
@@ -61,7 +59,6 @@ export default class Map extends Component<MapSignature> {
     this.requestedMapView = nextView;
   });
 
-  legendBands = buildWindLegendBands();
   private routeEventSource?: EventedRouterService;
 
   constructor(owner: unknown, args: MapSignature['Args']) {
@@ -88,6 +85,10 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
+  private get requestStore(): RequestStore {
+    return this.store as unknown as RequestStore;
+  }
+
   @cached
   get request(): Future<{ data: Station[] }> {
     const options = query<Station>('station', {
@@ -96,45 +97,31 @@ export default class Map extends Component<MapSignature> {
       'near-lon': this.requestedMapView.longitude,
     });
 
-    return this.store.request(options);
+    return this.requestStore.request<{ data: Station[] }>(options);
   }
 
   get requestState() {
     return getRequestState(this.request);
   }
 
-  get legend() {
-    return {
-      bands: this.legendBands,
-      title: String(this.intl.t('map.legend.windSpeed')),
-    };
+  get legendBands(): WindLegendBand[] {
+    return WIND_COLOUR_BANDS.map((band) => ({
+      color: band.color,
+      label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
+    }));
   }
 
-  get layers() {
-    const layers: DeckLayer[] = [];
+  get legendTitle() {
+    return String(this.intl.t('map.legend.windSpeed'));
+  }
 
-    if (this.location.gps) {
-      layers.push(
-        buildGpsLayer([this.location.gps.longitude, this.location.gps.latitude])
-      );
-    }
-
-    if (this.requestState.isSuccess) {
-      layers.push(
-        buildStationLayer(
-          this.requestState.value.data,
-          this.selectedStationId,
-          (stationId) => this.stationSelected(stationId)
-        )
-      );
-    }
-
-    return layers;
+  get stations() {
+    return this.requestState.isSuccess ? this.requestState.value.data : [];
   }
 
   @action
   stationSelected(stationId: string) {
-    this.router.transitionTo('map.station', stationId, {
+    void this.router.transitionTo('map.station', stationId, {
       queryParams: serializeMapView(this.mapView),
     });
   }
@@ -176,23 +163,22 @@ export default class Map extends Component<MapSignature> {
   }
 
   private cancelPendingStationRequest() {
-    this.updateRequestedMapView.cancelAll();
+    void this.updateRequestedMapView.cancelAll();
   }
 
   <template>
     <div data-test-map-container class="relative h-full w-full">
-      <div
+      <MapCanvas
         data-test-map-canvas
         class="h-full w-full"
-        {{MaplibreDeck
-          longitude=this.mapView.longitude
-          latitude=this.mapView.latitude
-          zoom=this.mapView.zoom
-          layers=this.layers
-          legend=this.legend
-          onViewChange=this.updateView
-        }}
-      ></div>
+        @legendBands={{this.legendBands}}
+        @legendTitle={{this.legendTitle}}
+        @onStationSelect={{this.stationSelected}}
+        @onViewChange={{this.updateView}}
+        @selectedStationId={{this.selectedStationId}}
+        @stations={{this.stations}}
+        @view={{this.mapView}}
+      />
 
       {{#if this.requestState.isPending}}
         <div

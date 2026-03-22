@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.0.8 - 2026-03-22
+
+### Added
+
+- Added an app-owned `MapCanvas` wrapper around `ember-maplibre-gl`, along with dedicated station-marker and legend components for the active map route.
+
+### Changed
+
+- Replaced the custom MapLibre + deck.gl rendering stack with `ember-maplibre-gl` while keeping the existing route-driven map state, debounced nearby-station refreshes, and station-panel behavior.
+- Switched station rendering from generated icon layers to declarative DOM/SVG markers that preserve wind colouring, stale-station greying, selection outlines, and directional rotation.
+- Moved geolocation back into the map itself by relying on the native geolocate control instead of the previous navbar-centered GPS flow.
+- Reworked the active map acceptance tests to exercise the migrated wrapper through real map instances and marker clicks rather than fake runtime plumbing.
+- Tightened the in-map wind legend, restored the app name in the mobile navbar, removed stray top spacing from the wind summary card, and refined the selected-station highlight to use a thicker semi-transparent grey outline.
+
+### Removed
+
+- Removed the custom map modifier, runtime abstraction, layer builder, legend control factory, location service, location button component, and the obsolete deck.gl-specific tests.
+- Removed direct deck.gl dependencies from the project.
+
+### Fixed
+
+- Tightened the migrated map request flow around typed `store.request(...)` access, explicit ignored router/task promises, and application-test owner typing so the current map path passes lint cleanly.
+
 ## v0.0.7 - 2026-03-22
 
 ### Added

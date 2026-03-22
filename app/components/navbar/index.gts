@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import NavbarLogo from './logo';
-// import NavbarSearch from './search';
-import NavbarButtons from './buttons';
 // import NavbarNotifications from './notifications';
 // import NavbarUserMenu from './user-menu';
 // import NavbarMobileMenu from './mobile-menu';
@@ -22,12 +20,8 @@ export default class Navbar extends Component<NavbarSignature> {
       class="border-b border-slate-200 bg-white shadow-md shadow-slate-900/12"
     >
       <div class="px-2 sm:px-4 lg:px-8">
-        <div class="flex h-16 justify-between">
+        <div class="flex h-16 items-center justify-between">
           <NavbarLogo />
-
-          {{! <NavbarSearch /> }}
-
-          <NavbarButtons />
 
           {{! TODO: <NavbarMobileMenu::Button /> }}
           <div class="hidden lg:ml-4 lg:flex lg:items-center">

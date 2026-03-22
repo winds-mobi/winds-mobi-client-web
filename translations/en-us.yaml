@@ -4,9 +4,6 @@ application:
 common:
   close: Close
 
-location-fetcher:
-  center: center
-
 list:
   toggle: list
 
