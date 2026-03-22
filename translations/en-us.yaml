@@ -16,6 +16,7 @@ map:
 
 station:
   summary:
+    now: Now
     wind: Wind
     air: Air
   wind: Wind

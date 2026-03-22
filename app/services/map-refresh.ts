@@ -21,7 +21,7 @@ export default class MapRefreshService extends Service {
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
-  private isActive = false;
+  private activeConsumers = 0;
   private countdownTimerId?: ReturnType<typeof globalThis.setInterval>;
   private refreshTimerId?: ReturnType<typeof globalThis.setTimeout>;
 
@@ -41,22 +41,32 @@ export default class MapRefreshService extends Service {
     return formatCountdown(this.secondsRemaining);
   }
 
+  get isActive() {
+    return this.activeConsumers > 0;
+  }
+
   activate() {
-    if (this.isActive) {
+    this.activeConsumers++;
+
+    if (this.activeConsumers > 1) {
       return;
     }
 
-    this.isActive = true;
     this.resetSchedule();
     this.startCountdown();
   }
 
   deactivate() {
-    if (!this.isActive) {
+    if (this.activeConsumers === 0) {
       return;
     }
 
-    this.isActive = false;
+    this.activeConsumers--;
+
+    if (this.activeConsumers > 0) {
+      return;
+    }
+
     this.stopTimers();
     this.resetCountdown();
   }

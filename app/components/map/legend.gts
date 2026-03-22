@@ -28,7 +28,8 @@ export interface MapLegendSignature {
     <ul class="mt-0.5 space-y-0.5">
       {{#each @bands as |band|}}
         <li
-          class="rounded-sm px-1 py-px text-[9px] font-semibold leading-tight text-white shadow-inner shadow-black/10 {{band.backgroundClass}}"
+          class="rounded-sm px-1 py-px text-[9px] font-semibold leading-tight text-white shadow-inner shadow-black/10
+            {{band.backgroundClass}}"
         >
           {{band.label}}
         </li>

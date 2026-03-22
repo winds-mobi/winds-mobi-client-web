@@ -10,7 +10,7 @@
 
 - Added automatic map-data and station-detail refreshes on a 10-minute cycle while the map route is active, with the refresh countdown updating in the navbar at a lower 15-second cadence.
 - Reworked the refresh control from a text button into a compact icon-only control with a countdown ring, and tied its lifecycle to the rendered map-navbar control instead of route event listeners.
-- Refined the station summary layout with denser spacing, more compact cards, a consistent three-card layout that keeps `Wind`, `Air`, and `Last hour` next to each other across mobile and desktop, and equal-height outer cards in the summary row.
+- Refined the station summary layout with denser spacing, more compact cards, a unified single-column `Now` card for current conditions, and equal-height outer cards in the summary row.
 - Tightened the wind legend presentation by replacing per-row swatches with full-row wind-colour backgrounds, shrinking the control footprint, and moving it closer to the map corner.
 - Refined selected-station highlighting and marker polish after the `ember-maplibre-gl` migration, including a thicker semi-transparent grey outline and other small navbar and legend presentation adjustments.
 - Unified station metric rendering around shared number formats so summary cards now receive raw values plus named formats instead of preformatted strings.
@@ -30,6 +30,9 @@
 - Made the `Last hour` wind graph stack vertically above its metric boxes at every breakpoint and fit the available card width without extra internal inset.
 - Simplified the last-hour card title from `Wind - last hour` to `Last hour`.
 - Replaced Ember template `style=` bindings for wind-driven colors with safe finite Tailwind utility classes so the map legend and summary metrics no longer trigger style-binding warnings.
+- Reduced unnecessary top and bottom whitespace around the wind and air history charts by tightening shared chart spacing, label layout, and section padding.
+- Removed the station-panel loading skeleton placeholders while keeping the panel shell mounted during station-to-station loading transitions.
+- Stabilized shared refresh behavior across map and station routes by keeping the navbar refresh service active through overlapping control lifecycles and aligning the acceptance tests with the current history-request URLs.
 
 ## v0.0.8 - 2026-03-22
 

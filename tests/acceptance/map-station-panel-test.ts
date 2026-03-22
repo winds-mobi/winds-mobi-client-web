@@ -212,7 +212,9 @@ function countStationDetailRequests(calls: string[], stationId: string) {
 }
 
 function countHistoryRequests(calls: string[], stationId: string) {
-  return calls.filter((url) => url.includes(`/historic/${stationId}`)).length;
+  return calls.filter((url) =>
+    url.includes(`/stations/${stationId}/historic/`)
+  ).length;
 }
 
 function currentMap(): MaplibreMap | undefined {
@@ -341,8 +343,7 @@ module('Acceptance | map station panel', function (hooks) {
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
     assert.dom('[data-test-station-panel]').exists();
-    assert.dom('[data-test-station-panel-loading]').exists();
-    assert.dom('[data-test-station-title-loading]').exists();
+    assert.dom('[data-test-station-title]').doesNotExist();
 
     deferredRequest.resolve({
       content: {
@@ -356,7 +357,6 @@ module('Acceptance | map station panel', function (hooks) {
     await settled();
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
-    assert.dom('[data-test-station-panel-loading]').doesNotExist();
   });
 
   test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
@@ -389,7 +389,6 @@ module('Acceptance | map station panel', function (hooks) {
     );
 
     await click('[data-test-navbar-refresh]');
-    await settled();
 
     assert.strictEqual(
       countStationListRequests(store.calls),

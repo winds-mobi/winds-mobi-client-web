@@ -104,21 +104,26 @@ export default class StationSummary extends Component<StationSummarySignature> {
       data-test-station-summary-section
       class="px-2.5 py-2 md:px-5 md:py-4"
     >
-      <div
-        class="grid grid-cols-[minmax(0,0.95fr)_minmax(0,0.95fr)_minmax(0,1.1fr)] items-stretch gap-1.5 md:gap-3"
-      >
+      <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
         <StationSectionCard
-          @title={{t "station.summary.wind"}}
+          @title={{t "station.summary.now"}}
           @compact={{true}}
           class="min-w-0 h-full"
         >
-          <dl class="m-0 space-y-1.5 md:space-y-2.5">
+          <dl class="m-0 grid gap-2 md:gap-3">
             <StationMetricCard
               @compact={{true}}
               @format="windSpeed"
               @label={{t "wind.speed"}}
               @value={{this.reading.speed}}
               @valueClass={{this.speedValueClass}}
+            />
+
+            <StationMetricCard
+              @compact={{true}}
+              @format="temperature"
+              @label={{t "air.temperature"}}
+              @value={{this.reading.temperature}}
             />
 
             <StationMetricCard
@@ -131,31 +136,16 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
             <StationMetricCard
               @compact={{true}}
-              @format="azimuth"
-              @label={{t "wind.direction"}}
-              @value={{this.reading.direction}}
-            />
-          </dl>
-        </StationSectionCard>
-
-        <StationSectionCard
-          @title={{t "station.summary.air"}}
-          @compact={{true}}
-          class="min-w-0 h-full"
-        >
-          <dl class="m-0 space-y-1.5 md:space-y-2.5">
-            <StationMetricCard
-              @compact={{true}}
-              @format="temperature"
-              @label={{t "air.temperature"}}
-              @value={{this.reading.temperature}}
-            />
-
-            <StationMetricCard
-              @compact={{true}}
               @format="humidity"
               @label={{t "air.humidity"}}
               @value={{this.reading.humidity}}
+            />
+
+            <StationMetricCard
+              @compact={{true}}
+              @format="azimuth"
+              @label={{t "wind.direction"}}
+              @value={{this.reading.direction}}
             />
 
             <StationMetricCard

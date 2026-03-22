@@ -29,12 +29,14 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       enabled: false,
     },
     chart: {
-      height: 300,
+      height: 272,
       type: 'spline',
       panning: {
         enabled: true,
         type: 'x',
       },
+      spacingBottom: 6,
+      spacingTop: 6,
       zoomType: 'x',
     },
     rangeSelector: {
@@ -77,7 +79,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       gridLineWidth: 1,
       crosshair: true,
       labels: {
-        format: '{value:%H:%M}<br>{value:%a}',
+        format: '{value:%a %H:%M}',
       },
     },
     legend: {
