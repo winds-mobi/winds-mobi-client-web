@@ -76,7 +76,10 @@ export default class MaplibreDeckModifier extends Modifier<Signature> {
         }
 
         this.map?.addControl(runtime.createNavigationControl(), 'bottom-right');
-        this.map?.addControl(runtime.createLegendControl(named.legend), 'top-right');
+        this.map?.addControl(
+          runtime.createLegendControl(named.legend),
+          'top-right'
+        );
       });
 
       this.moveEndHandler = () => {

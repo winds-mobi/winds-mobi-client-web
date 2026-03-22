@@ -42,8 +42,7 @@ export function buildWindLegendControlElement(
       'flex items-center gap-1.5 text-[11px] font-medium text-slate-700';
 
     const swatch = document.createElement('span');
-    swatch.className =
-      'h-2 w-2 shrink-0 rounded-full ring-1 ring-slate-300/80';
+    swatch.className = 'h-2 w-2 shrink-0 rounded-full ring-1 ring-slate-300/80';
     swatch.style.backgroundColor = band.color;
 
     const label = document.createElement('span');

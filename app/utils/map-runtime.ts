@@ -62,11 +62,13 @@ export type MapRuntime = {
   createLegendControl(options: WindLegendControlOptions): MapControl;
 };
 
-function createWindLegendControl(options: WindLegendControlOptions): MapControl {
+function createWindLegendControl(
+  options: WindLegendControlOptions
+): MapControl {
   let element: HTMLElement | undefined;
 
   return {
-    onAdd(_map: MapInstance) {
+    onAdd() {
       element = buildWindLegendControlElement(options);
       return element;
     },

@@ -31,7 +31,7 @@ export class FakeDeckOverlay {
 export class FakeNavigationControl implements MapControl {
   element?: HTMLElement;
 
-  onAdd(_map: MapInstance) {
+  onAdd() {
     this.element = document.createElement('div');
     this.element.className = 'maplibregl-ctrl';
     return this.element;
@@ -51,7 +51,7 @@ export class FakeLegendControl implements MapControl {
     this.options = options;
   }
 
-  onAdd(_map: MapInstance) {
+  onAdd() {
     this.element = buildWindLegendControlElement(this.options);
     return this.element;
   }
@@ -206,8 +206,6 @@ export class FakeMap {
 export function createFakeMapRuntime() {
   const maps: FakeMap[] = [];
   const overlays: FakeDeckOverlay[] = [];
-  const legendControls: FakeLegendControl[] = [];
-  const navigationControls: FakeNavigationControl[] = [];
 
   const runtime: MapRuntime = {
     createMap(options) {
@@ -223,17 +221,13 @@ export function createFakeMapRuntime() {
     },
 
     createNavigationControl() {
-      const control = new FakeNavigationControl();
-      navigationControls.push(control);
-      return control;
+      return new FakeNavigationControl();
     },
 
     createLegendControl(options) {
-      const control = new FakeLegendControl(options);
-      legendControls.push(control);
-      return control;
+      return new FakeLegendControl(options);
     },
   };
 
-  return { runtime, maps, overlays, legendControls, navigationControls };
+  return { runtime, maps, overlays };
 }

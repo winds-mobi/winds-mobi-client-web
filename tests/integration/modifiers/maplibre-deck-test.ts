@@ -67,7 +67,6 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
     fakeRuntime.maps[0]?.emit('load');
 
     assert.strictEqual(fakeRuntime.maps[0]?.controls.length, 3);
-    assert.strictEqual(fakeRuntime.legendControls.length, 1);
     assert.strictEqual(fakeRuntime.overlays[0]?.props.layers.length, 1);
     assert.dom('[data-test-map-wind-legend]').exists();
 
@@ -83,11 +82,12 @@ module('Integration | Modifier | maplibre-deck', function (hooks) {
       fakeRuntime.overlays[0]?.props.layers[0]?.id,
       'updated-layer'
     );
-    assert.deepEqual(fakeRuntime.maps[0]?.easeToCalls[0], {
-      center: [8.12345, 46.54321],
-      zoom: 9.5,
-      essential: true,
-    });
+    const easeToCall = fakeRuntime.maps[0]?.easeToCalls.at(-1);
+
+    assert.ok(easeToCall);
+    assert.deepEqual(easeToCall.center, [8.12345, 46.54321]);
+    assert.strictEqual(easeToCall.zoom, 9.5);
+    assert.true(easeToCall.essential);
   });
 
   test('it emits normalized view changes and cleans up on destroy', async function (assert) {

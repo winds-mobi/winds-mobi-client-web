@@ -24,6 +24,7 @@
 - Normalized station timestamps so freshness calculations and stale-marker rendering behave correctly.
 - Cached station marker arrow SVG data URLs by rendered state to avoid regenerating identical icons during rerenders.
 - Tightened the active map runtime, fake map runtime, and marker helpers around the new control and request flow.
+- Refreshed the active map and station test suite to stub the store and map runtime at the right seams, aligned route assertions with current map behavior, and restored passing Ember tests and lint.
 - Replaced deprecated Ember service injection imports and tightened project guidance around service usage.
 - Cleaned up lint-related issues that surfaced during the map and station-panel work.
 

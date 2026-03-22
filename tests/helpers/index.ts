@@ -4,6 +4,7 @@ import {
   setupTest as upstreamSetupTest,
   type SetupTestOptions,
 } from 'ember-qunit';
+import { setupIntl } from 'ember-intl/test-support';
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is
@@ -11,6 +12,7 @@ import {
 
 function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupApplicationTest(hooks, options);
+  setupIntl(hooks, 'en-us');
 
   // Additional setup for application tests can be done here.
   //
@@ -30,6 +32,7 @@ function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
 
 function setupRenderingTest(hooks: NestedHooks, options?: SetupTestOptions) {
   upstreamSetupRenderingTest(hooks, options);
+  setupIntl(hooks, 'en-us');
 
   // Additional setup for rendering tests can be done here.
 }

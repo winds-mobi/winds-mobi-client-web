@@ -113,7 +113,7 @@ export function buildStationLayer(
     updateTriggers: {
       getIcon: selectedStationId ?? '',
     },
-    onClick: ({ object }) => {
+    onClick: ({ object }: { object?: Station }) => {
       if (object) {
         onStationSelect(object.id);
       }

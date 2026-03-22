@@ -1,5 +1,3 @@
-import Component from '@glimmer/component';
-
 export interface StationSectionCardSignature {
   Args: {
     contentClass?: string;
@@ -12,22 +10,20 @@ export interface StationSectionCardSignature {
   Element: HTMLElement;
 }
 
-export default class StationSectionCard extends Component<StationSectionCardSignature> {
-  <template>
-    <section
-      class="rounded-2xl border border-slate-200 bg-white p-3.5"
-      ...attributes
+<template>
+  <section
+    class="rounded-2xl border border-slate-200 bg-white p-3.5"
+    ...attributes
+  >
+    <p
+      class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500
+        {{if @titleClass @titleClass}}"
     >
-      <p
-        class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500
-          {{if @titleClass @titleClass}}"
-      >
-        {{@title}}
-      </p>
+      {{@title}}
+    </p>
 
-      <div class="mt-3 {{if @contentClass @contentClass}}">
-        {{yield}}
-      </div>
-    </section>
-  </template>
-}
+    <div class="mt-3 {{if @contentClass @contentClass}}">
+      {{yield}}
+    </div>
+  </section>
+</template>

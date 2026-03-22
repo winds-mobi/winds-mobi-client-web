@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { registerDestructor } from '@ember/destroyable';
 import { getRequestState } from '@warp-drive/ember';
+import type { Future } from '@warp-drive/core/request';
 import { query } from 'winds-mobi-client-web/builders/station';
 import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -10,7 +11,7 @@ import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { type IntlService } from 'ember-intl';
-import { cancel, later } from '@ember/runloop';
+import { restartableTask, timeout } from 'ember-concurrency';
 import MaplibreDeck from 'winds-mobi-client-web/modifiers/maplibre-deck';
 import {
   buildGpsLayer,
@@ -30,7 +31,7 @@ import {
 } from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
-  Args: {};
+  Args: Record<string, never>;
   Blocks: {
     default: [];
   };
@@ -55,9 +56,13 @@ export default class Map extends Component<MapSignature> {
 
   @tracked requestedMapView = parseMapView();
 
+  updateRequestedMapView = restartableTask(async (nextView: MapView) => {
+    await timeout(STATION_REQUEST_DEBOUNCE_MS);
+    this.requestedMapView = nextView;
+  });
+
   legendBands = buildWindLegendBands();
   private routeEventSource?: EventedRouterService;
-  private stationRequestTimer?: ReturnType<typeof later>;
 
   constructor(owner: unknown, args: MapSignature['Args']) {
     super(owner, args);
@@ -84,14 +89,14 @@ export default class Map extends Component<MapSignature> {
   }
 
   @cached
-  get request() {
+  get request(): Future<{ data: Station[] }> {
     const options = query<Station>('station', {
       limit: 12,
       'near-lat': this.requestedMapView.latitude,
       'near-lon': this.requestedMapView.longitude,
     });
 
-    return this.store.request(options) as Promise<{ data: Station[] }>;
+    return this.store.request(options);
   }
 
   get requestState() {
@@ -167,26 +172,11 @@ export default class Map extends Component<MapSignature> {
     }
 
     this.cancelPendingStationRequest();
-    this.stationRequestTimer = later(
-      this,
-      this.commitRequestedMapView,
-      nextView,
-      STATION_REQUEST_DEBOUNCE_MS
-    );
-  }
-
-  private commitRequestedMapView(nextView: MapView) {
-    this.stationRequestTimer = undefined;
-    this.requestedMapView = nextView;
+    void this.updateRequestedMapView.perform(nextView);
   }
 
   private cancelPendingStationRequest() {
-    if (!this.stationRequestTimer) {
-      return;
-    }
-
-    cancel(this.stationRequestTimer);
-    this.stationRequestTimer = undefined;
+    this.updateRequestedMapView.cancelAll();
   }
 
   <template>

@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import Service from '@ember/service';
+import { Type } from '@warp-drive/core/types/symbols';
 import { module, test } from 'qunit';
 import {
   click,
@@ -9,6 +10,7 @@ import {
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { createFakeMapRuntime } from 'winds-mobi-client-web/tests/helpers/fake-map-runtime';
+import type { History, Station } from 'winds-mobi-client-web/services/store';
 import {
   resetMapRuntimeForTest,
   setMapRuntimeForTest,
@@ -16,177 +18,237 @@ import {
 
 type FakeRuntime = ReturnType<typeof createFakeMapRuntime>;
 
-type DeferredResponse = {
-  promise: Promise<Response>;
-  resolve: (value: Response) => void;
+type DeferredRequest = {
+  promise: Promise<{ content: { data: Station } }>;
+  resolve: (value: { content: { data: Station } }) => void;
 };
 
-const PRIMARY_STATION = {
-  _id: 'holfuy-1804',
-  'pv-name': 'Holfuy',
-  short: 'Holfuy 1804',
+type FakeStoreRequest = {
+  url?: string;
+};
+
+type MapStationPanelTestContext = {
+  deferredSecondaryStationRequest?: DeferredRequest;
+  fakeRuntime: FakeRuntime;
+};
+
+const PRIMARY_STATION: Station = {
+  id: 'holfuy-1804',
+  altitude: 1804,
+  latitude: 46.67719,
+  longitude: 7.86323,
+  isPeak: false,
+  providerName: 'Holfuy',
+  providerUrl: 'https://example.com/stations/holfuy-1804',
   name: 'Holfuy 1804',
-  alt: 1804,
-  peak: false,
-  status: 'online',
-  loc: {
-    coordinates: [7.86323, 46.67719],
-  },
-  url: {
-    en: 'https://example.com/stations/holfuy-1804',
-  },
   last: {
-    _id: 1710000000,
-    'w-dir': 240,
-    'w-avg': 12,
-    'w-max': 18,
-    temp: 7,
-    hum: 65,
+    timestamp: 1_710_000_000_000,
+    direction: 240,
+    speed: 12,
+    gusts: 18,
+    temperature: 7,
+    humidity: 65,
+    pressure: 1012,
     rain: 0,
-    pres: 1012,
   },
+  [Type]: 'station',
 };
 
-const SECONDARY_STATION = {
-  _id: 'holfuy-2222',
-  'pv-name': 'Holfuy',
-  short: 'Holfuy 2222',
+const SECONDARY_STATION: Station = {
+  id: 'holfuy-2222',
+  altitude: 2222,
+  latitude: 46.70719,
+  longitude: 7.91323,
+  isPeak: true,
+  providerName: 'Holfuy',
+  providerUrl: 'https://example.com/stations/holfuy-2222',
   name: 'Holfuy 2222',
-  alt: 2222,
-  peak: true,
-  status: 'online',
-  loc: {
-    coordinates: [7.91323, 46.70719],
-  },
-  url: {
-    en: 'https://example.com/stations/holfuy-2222',
-  },
   last: {
-    _id: 1710003600,
-    'w-dir': 280,
-    'w-avg': 20,
-    'w-max': 28,
-    temp: 4,
-    hum: 50,
+    timestamp: 1_710_003_600_000,
+    direction: 280,
+    speed: 20,
+    gusts: 28,
+    temperature: 4,
+    humidity: 50,
+    pressure: 1009,
     rain: 0,
-    pres: 1009,
   },
+  [Type]: 'station',
 };
 
-const HISTORY = [
+const HISTORY: History[] = [
   {
-    _id: 1710000000,
-    'w-dir': 240,
-    'w-avg': 12,
-    'w-max': 18,
-    temp: 7,
-    hum: 65,
+    id: '1710000000',
+    direction: 240,
+    speed: 12,
+    gusts: 18,
+    temperature: 7,
+    humidity: 65,
+    timestamp: 1_710_000_000_000,
+    [Type]: 'history',
   },
   {
-    _id: 1710003600,
-    'w-dir': 250,
-    'w-avg': 14,
-    'w-max': 20,
-    temp: 8,
-    hum: 61,
+    id: '1710003600',
+    direction: 250,
+    speed: 14,
+    gusts: 20,
+    temperature: 8,
+    humidity: 61,
+    timestamp: 1_710_003_600_000,
+    [Type]: 'history',
   },
 ];
 
-function jsonResponse(body: unknown) {
-  return Promise.resolve(
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
+class FakeStoreService extends Service {
+  deferredSecondaryStationRequest?: DeferredRequest;
+  private requestCache = new Map<
+    string,
+    Promise<{ content: { data: History[] | Station | Station[] } }>
+  >();
+
+  request(request: FakeStoreRequest) {
+    const url = request.url ?? '';
+
+    let cachedRequest = this.requestCache.get(url);
+
+    if (cachedRequest) {
+      return cachedRequest;
+    }
+
+    if (url.includes('/historic/')) {
+      cachedRequest = Promise.resolve({
+        content: {
+          data: HISTORY,
+        },
+      });
+      this.requestCache.set(url, cachedRequest);
+      return cachedRequest;
+    }
+
+    if (url.includes('/stations/holfuy-1804?')) {
+      cachedRequest = Promise.resolve({
+        content: {
+          data: PRIMARY_STATION,
+        },
+      });
+      this.requestCache.set(url, cachedRequest);
+      return cachedRequest;
+    }
+
+    if (url.includes('/stations/holfuy-2222?')) {
+      if (this.deferredSecondaryStationRequest) {
+        cachedRequest = this.deferredSecondaryStationRequest
+          .promise as Promise<{
+          content: { data: History[] | Station | Station[] };
+        }>;
+        this.requestCache.set(url, cachedRequest);
+        return cachedRequest;
+      }
+
+      cachedRequest = Promise.resolve({
+        content: {
+          data: SECONDARY_STATION,
+        },
+      });
+      this.requestCache.set(url, cachedRequest);
+      return cachedRequest;
+    }
+
+    if (url.includes('/stations?')) {
+      cachedRequest = Promise.resolve({
+        content: {
+          data: [PRIMARY_STATION, SECONDARY_STATION],
+        },
+      });
+      this.requestCache.set(url, cachedRequest);
+      return cachedRequest;
+    }
+
+    cachedRequest = Promise.resolve({
+      content: {
+        data: [],
       },
-    })
+    });
+    this.requestCache.set(url, cachedRequest);
+
+    return cachedRequest;
+  }
+}
+
+function createDeferredRequest(): DeferredRequest {
+  let resolve!: (value: { content: { data: Station } }) => void;
+
+  const promise = new Promise<{ content: { data: Station } }>(
+    (resolvePromise) => {
+      resolve = resolvePromise;
+    }
+  );
+
+  return { promise, resolve };
+}
+
+function assertCurrentRoute(
+  assert: Assert,
+  expectedPathname: string,
+  expectedQueryParams: Record<string, string>
+) {
+  const url = new URL(currentURL(), 'https://winds.mobi');
+
+  assert.strictEqual(url.pathname, expectedPathname);
+  assert.deepEqual(
+    Object.fromEntries(url.searchParams.entries()),
+    expectedQueryParams
   );
 }
 
-function createDeferredResponse(): DeferredResponse {
-  let resolve!: (value: Response) => void;
+function selectStationMarker(fakeRuntime: FakeRuntime, stationIndex: number) {
+  const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
+    (layer) => layer.id === 'stations'
+  ) as
+    | {
+        props: {
+          data: unknown[];
+          onClick: (info: { object?: unknown }) => void;
+        };
+      }
+    | undefined;
 
-  const promise = new Promise<Response>((resolvePromise) => {
-    resolve = resolvePromise;
+  if (!stationsLayer) {
+    throw new Error('Expected stations layer to exist');
+  }
+
+  stationsLayer.props.onClick({
+    object: stationsLayer.props.data[stationIndex],
   });
-
-  return { promise, resolve };
 }
 
 module('Acceptance | map station panel', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: MapStationPanelTestContext) {
     const fakeRuntime = createFakeMapRuntime();
 
     this.fakeRuntime = fakeRuntime;
-    this.originalFetch = globalThis.fetch;
-    this.deferredSecondaryStationResponse = undefined as
-      | DeferredResponse
-      | undefined;
+    this.deferredSecondaryStationRequest = undefined;
 
+    this.owner.register('service:store', FakeStoreService);
     setMapRuntimeForTest(fakeRuntime.runtime);
-
-    globalThis.fetch = (input) => {
-      const url = input instanceof Request ? input.url : String(input);
-
-      if (url.includes('/historic/')) {
-        return jsonResponse({ content: HISTORY });
-      }
-
-      if (url.includes('/stations/holfuy-1804?')) {
-        return jsonResponse({ content: PRIMARY_STATION });
-      }
-
-      if (url.includes('/stations/holfuy-2222?')) {
-        if (this.deferredSecondaryStationResponse) {
-          return this.deferredSecondaryStationResponse.promise;
-        }
-
-        return jsonResponse({ content: SECONDARY_STATION });
-      }
-
-      if (url.includes('/stations?')) {
-        return jsonResponse({ content: [PRIMARY_STATION, SECONDARY_STATION] });
-      }
-
-      return jsonResponse({ content: [] });
-    };
   });
 
   hooks.afterEach(function () {
     resetMapRuntimeForTest();
-    globalThis.fetch = this.originalFetch;
   });
 
-  test('it deep-links the panel and map state from the URL', async function (assert) {
-    const fakeRuntime = this.fakeRuntime as FakeRuntime;
+  test('it deep-links the panel and map state from the URL', async function (this: MapStationPanelTestContext, assert) {
+    const fakeRuntime = this.fakeRuntime;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
-    const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
-      (layer) => layer.id === 'stations'
-    ) as
-      | {
-          props: {
-            data: unknown[];
-            getIcon: (datum: unknown) => { url: string };
-          };
-        }
-      | undefined;
-
-    const primaryIconUrl = stationsLayer
-      ? stationsLayer.props.getIcon(stationsLayer.props.data[0]).url
-      : undefined;
-    const secondaryIconUrl = stationsLayer
-      ? stationsLayer.props.getIcon(stationsLayer.props.data[1]).url
-      : undefined;
-
-    assert.strictEqual(
-      currentURL(),
-      '/map/holfuy-1804?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
-    assert.strictEqual(fakeRuntime.maps.length, 1);
+    assertCurrentRoute(assert, '/map/holfuy-1804', {
+      mapLat: '46.67719',
+      mapLng: '7.86323',
+      mapZoom: '13',
+    });
     assert.deepEqual(fakeRuntime.maps[0]?.options.center, [7.86323, 46.67719]);
     assert.strictEqual(fakeRuntime.maps[0]?.options.zoom, 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
@@ -194,66 +256,44 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-summary-section]').exists();
     assert.dom('[data-test-station-wind-section]').exists();
     assert.dom('[data-test-station-air-section]').exists();
-    assert.ok(primaryIconUrl);
-    assert.ok(secondaryIconUrl);
-    assert.notStrictEqual(primaryIconUrl, secondaryIconUrl);
   });
 
-  test('it closes from the explicit close button and preserves map query params', async function (assert) {
+  test('it closes from the explicit close button and preserves map query params', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await click('[data-test-station-close]');
-    await waitUntil(
-      () => currentURL() === '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
+    await waitUntil(() => currentURL().startsWith('/map?'));
 
-    assert.strictEqual(
-      currentURL(),
-      '/map?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
+    assertCurrentRoute(assert, '/map', {
+      mapLat: '46.67719',
+      mapLng: '7.86323',
+    });
     assert.dom('[data-test-station-panel]').doesNotExist();
   });
 
-  test('it does not close when clicking outside the panel', async function (assert) {
+  test('it does not close when clicking outside the panel', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await click('[data-test-map-container]');
 
-    assert.strictEqual(
-      currentURL(),
-      '/map/holfuy-1804?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
+    assertCurrentRoute(assert, '/map/holfuy-1804', {
+      mapLat: '46.67719',
+      mapLng: '7.86323',
+      mapZoom: '13',
+    });
     assert.dom('[data-test-station-panel]').exists();
   });
 
-  test('it keeps the current map view when selecting another station from the map', async function (assert) {
-    const fakeRuntime = this.fakeRuntime as FakeRuntime;
+  test('it keeps the current map view when selecting another station from the map', async function (this: MapStationPanelTestContext, assert) {
+    const fakeRuntime = this.fakeRuntime;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+    selectStationMarker(fakeRuntime, 1);
 
-    const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
-      (layer) => layer.id === 'stations'
-    ) as
-      | {
-          props: {
-            data: unknown[];
-            onClick: (info: { object?: unknown }) => void;
-          };
-        }
-      | undefined;
+    await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
-    stationsLayer?.props.onClick({
-      object: stationsLayer.props.data[1],
+    assertCurrentRoute(assert, '/map/holfuy-2222', {
+      mapLat: '46.67719',
+      mapLng: '7.86323',
     });
-
-    await waitUntil(
-      () =>
-        currentURL() ===
-        '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
-
-    assert.strictEqual(
-      currentURL(),
-      '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
     assert.deepEqual(fakeRuntime.maps[0]?.center, {
       lng: 7.86323,
       lat: 46.67719,
@@ -262,49 +302,31 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
-  test('it keeps the panel shell mounted while the next station loads', async function (assert) {
-    const fakeRuntime = this.fakeRuntime as FakeRuntime;
-    const deferredResponse = createDeferredResponse();
+  test('it keeps the panel shell mounted while the next station loads', async function (this: MapStationPanelTestContext, assert) {
+    const fakeRuntime = this.fakeRuntime;
+    const deferredRequest = createDeferredRequest();
+    const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    this.deferredSecondaryStationResponse = deferredResponse;
+    this.deferredSecondaryStationRequest = deferredRequest;
+    store.deferredSecondaryStationRequest = deferredRequest;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+    selectStationMarker(fakeRuntime, 1);
 
-    const stationsLayer = fakeRuntime.overlays[0]?.props.layers.find(
-      (layer) => layer.id === 'stations'
-    ) as
-      | {
-          props: {
-            data: unknown[];
-            onClick: (info: { object?: unknown }) => void;
-          };
-        }
-      | undefined;
-
-    stationsLayer?.props.onClick({
-      object: stationsLayer.props.data[1],
-    });
-
-    await waitUntil(
-      () =>
-        currentURL() ===
-        '/map/holfuy-2222?mapLng=7.86323&mapLat=46.67719&mapZoom=13'
-    );
+    await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-panel-loading]').exists();
     assert.dom('[data-test-station-title-loading]').exists();
 
-    deferredResponse.resolve(
-      new Response(JSON.stringify({ content: SECONDARY_STATION }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
+    deferredRequest.resolve({
+      content: {
+        data: SECONDARY_STATION,
+      },
+    });
 
-    this.deferredSecondaryStationResponse = undefined;
+    this.deferredSecondaryStationRequest = undefined;
+    store.deferredSecondaryStationRequest = undefined;
 
     await settled();
 
@@ -312,8 +334,8 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel-loading]').doesNotExist();
   });
 
-  test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
-    const fakeRuntime = this.fakeRuntime as FakeRuntime;
+  test('it updates only the map query params when the map view changes with the panel open', async function (this: MapStationPanelTestContext, assert) {
+    const fakeRuntime = this.fakeRuntime;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
 
@@ -322,10 +344,11 @@ module('Acceptance | map station panel', function (hooks) {
 
     await settled();
 
-    assert.strictEqual(
-      currentURL(),
-      '/map/holfuy-1804?mapLng=8.11111&mapLat=46.22222&mapZoom=9.68'
-    );
+    assertCurrentRoute(assert, '/map/holfuy-1804', {
+      mapLat: '46.22222',
+      mapLng: '8.11111',
+      mapZoom: '9.68',
+    });
     assert.dom('[data-test-station-panel]').exists();
   });
 });

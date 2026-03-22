@@ -1,5 +1,3 @@
-import Component from '@glimmer/component';
-
 export interface StationMetricCardSignature {
   Args: {
     label: string;
@@ -13,24 +11,22 @@ export interface StationMetricCardSignature {
   Element: HTMLElement;
 }
 
-export default class StationMetricCard extends Component<StationMetricCardSignature> {
-  <template>
-    <div
-      class="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80"
-      ...attributes
+<template>
+  <div
+    class="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80"
+    ...attributes
+  >
+    <dt
+      class="text-[11px] font-medium text-slate-500
+        {{if @labelClass @labelClass}}"
     >
-      <dt
-        class="text-[11px] font-medium text-slate-500
-          {{if @labelClass @labelClass}}"
-      >
-        {{@label}}
-      </dt>
-      <dd
-        class="mt-1.5 font-semibold {{if @valueClass @valueClass}}"
-        style={{@valueStyle}}
-      >
-        {{yield}}
-      </dd>
-    </div>
-  </template>
-}
+      {{@label}}
+    </dt>
+    <dd
+      class="mt-1.5 font-semibold {{if @valueClass @valueClass}}"
+      style={{@valueStyle}}
+    >
+      {{yield}}
+    </dd>
+  </div>
+</template>

@@ -2,8 +2,8 @@ import { useLegacyStore } from '@warp-drive/legacy';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
-import { withDefaults } from '@warp-drive/schema-record';
-import { Type } from '@warp-drive/core-types/symbols';
+import { withDefaults } from '@warp-drive/core/reactive';
+import { Type } from '@warp-drive/core/types/symbols';
 
 // Embedded object schema: location (no identity, just a shape)
 export const LocationSchema = {
@@ -136,21 +136,25 @@ export type History = {
   [Type]: 'history';
 };
 
-// TODO: TS shenanigans
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RecordType = { [key: string]: RecordType | any } | any[];
+type RecordType = Record<string, unknown> | unknown[];
+
+function isRecordType(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 function unwrapDerivation(
   record: RecordType,
   options: {
     path: string;
   }
-) {
-  return options.path.split('.').reduce((acc, key) => {
+): unknown {
+  return options.path.split('.').reduce<unknown>((acc, key) => {
     if (Array.isArray(acc)) {
-      return acc[parseInt(key)];
+      const index = Number.parseInt(key, 10);
+
+      return Number.isNaN(index) ? undefined : acc[index];
     }
-    if (typeof acc === 'object') {
+    if (isRecordType(acc)) {
       return acc[key];
     }
     return undefined;
@@ -169,7 +173,6 @@ export default useLegacyStore({
     LocationSchema,
     StationSchema,
     HistorySchema,
-    // -- your schemas here
   ],
   handlers: [StationHandler, HistoryHandler],
   derivations: [unwrapDerivation],

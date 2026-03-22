@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { Type } from '@warp-drive/core-types/symbols';
+import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import {
   getStationArrowIconUrlCacheSizeForTest,
@@ -85,9 +85,7 @@ module('Unit | Utility | map-layers', function (hooks) {
       buildStationArrowIconUrl(
         station.last.speed,
         station.last.timestamp
-      ).includes(
-        'data:image/svg+xml;charset=UTF-8,'
-      )
+      ).includes('data:image/svg+xml;charset=UTF-8,')
     );
   });
 

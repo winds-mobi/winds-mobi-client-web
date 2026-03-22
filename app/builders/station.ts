@@ -1,18 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import { buildBaseURL, buildQueryParams } from '@warp-drive/utilities';
 import { pluralize } from '@warp-drive/utilities/string';
-import type { QueryParamsSource } from '@warp-drive/core-types/params';
-import type { TypeFromInstance } from '@warp-drive/core-types/record';
 import type {
+  ConstrainedRequestOptions,
   FindRecordOptions,
   FindRecordRequestOptions,
   QueryRequestOptions,
-} from '@warp-drive/core-types/request';
+} from '@warp-drive/core/types/request';
+import type { QueryParamsSource } from '@warp-drive/core/types/params';
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
-const defaultQuery = {
+const defaultQuery: QueryParamsSource = {
   keys: [
     'pv-name',
     'short',
@@ -34,51 +33,59 @@ const defaultQuery = {
   ],
 };
 
-const defaultOptions = {
+const defaultOptions: ConstrainedRequestOptions = {
   urlParamsSettings: {
     arrayFormat: 'repeat' as const,
   },
 };
 
-// Uses standard JSON-API buidler findRecord() and
-// enhances it on our own need for query(params)
-// and default values
 function findRecord<T>(
-  type: TypeFromInstance<T>,
+  type: string,
   id: string,
   query?: QueryParamsSource,
   options?: FindRecordOptions
-): FindRecordRequestOptions {
+): FindRecordRequestOptions<{ data: T }, T> {
+  const mergedQuery: QueryParamsSource = {
+    ...defaultQuery,
+    ...query,
+  };
+  const mergedOptions: FindRecordOptions = {
+    ...defaultOptions,
+    ...options,
+  };
   const baseURL = buildBaseURL({
     resourcePath: pluralize(type),
     op: 'findRecord',
     identifier: { type, id },
   });
-  const qp = buildQueryParams(
-    { ...defaultQuery, ...query },
-    { ...defaultOptions.urlParamsSettings, ...options?.urlParamsSettings }
-  );
+  const qp = buildQueryParams(mergedQuery, {
+    ...defaultOptions.urlParamsSettings,
+    ...options?.urlParamsSettings,
+  });
   const url = `${baseURL}?${qp}`;
 
-  const jsonApiObject = jsonApiFindRecord(type, id, options);
+  const jsonApiObject = jsonApiFindRecord<T>(type, id, mergedOptions);
   return {
     ...jsonApiObject,
     url,
   };
 }
 
-// Uses standard JSON-API buidler query() and
-// and enhances it by default values
 function query<T>(
-  type: TypeFromInstance<T>,
+  type: string,
   query?: QueryParamsSource,
-  options?: FindRecordOptions
-): QueryRequestOptions {
-  return jsonApiQuery(
-    type,
-    { ...defaultQuery, ...query },
-    { ...defaultOptions, ...options }
-  );
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  const mergedQuery: QueryParamsSource = {
+    ...defaultQuery,
+    ...query,
+  };
+  const mergedOptions: ConstrainedRequestOptions = {
+    ...defaultOptions,
+    ...options,
+  };
+
+  return jsonApiQuery<T>(type, mergedQuery, mergedOptions);
 }
 
 export { findRecord, query };
