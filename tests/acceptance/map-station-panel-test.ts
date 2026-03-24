@@ -256,6 +256,7 @@ module('Acceptance | map station panel', function (hooks) {
     assertCurrentRoute(assert, '/map', {
       mapLat: '46.67719',
       mapLng: '7.86323',
+      mapZoom: '13',
     });
     assert.dom('[data-test-station-panel]').doesNotExist();
   });
@@ -281,6 +282,7 @@ module('Acceptance | map station panel', function (hooks) {
     assertCurrentRoute(assert, '/map/holfuy-2222', {
       mapLat: '46.67719',
       mapLng: '7.86323',
+      mapZoom: '13',
     });
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });

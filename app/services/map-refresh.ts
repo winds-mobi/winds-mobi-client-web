@@ -46,7 +46,10 @@ export default class MapRefreshService extends Service {
   }
 
   get remainingMs() {
-    return Math.max(0, this.nextRefreshAt.getTime() - this.currentTime.getTime());
+    return Math.max(
+      0,
+      this.nextRefreshAt.getTime() - this.currentTime.getTime()
+    );
   }
 
   get secondsRemaining() {

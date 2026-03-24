@@ -35,7 +35,8 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       return [];
     }
 
-    const latestTimestamp = this.args.data[this.args.data.length - 1]!.timestamp;
+    const latestTimestamp =
+      this.args.data[this.args.data.length - 1]!.timestamp;
 
     return this.args.data.map((elm) => ({
       x: elm.direction,

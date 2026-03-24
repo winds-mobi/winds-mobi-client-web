@@ -1,7 +1,10 @@
 import { module, test } from 'qunit';
 import type { TestContext } from '@ember/test-helpers';
 import { setupTest } from 'winds-mobi-client-web/tests/helpers';
-import { renderTimeAgoText, timeAgoParts } from 'winds-mobi-client-web/helpers/time-ago';
+import {
+  renderTimeAgoText,
+  timeAgoParts,
+} from 'winds-mobi-client-web/helpers/time-ago';
 import type IntlService from 'ember-intl/services/intl';
 
 module('Unit | Helper | time-ago', function (hooks) {

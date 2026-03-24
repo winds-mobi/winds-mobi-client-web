@@ -43,7 +43,10 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   get title() {
     const ariaLabel = String(this.intl.t('map.refresh.ariaLabel'));
 
-    return `${ariaLabel} (${renderTimeAgoText(this.intl, this.refreshRelativeTime)})`;
+    return `${ariaLabel} (${renderTimeAgoText(
+      this.intl,
+      this.refreshRelativeTime
+    )})`;
   }
 
   @action

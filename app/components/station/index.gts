@@ -38,7 +38,9 @@ export default class StationIndex extends Component<StationIndexSignature> {
   }
 
   get lastReadingRelativeSeconds() {
-    return Math.round(this.args.station!.last.timestamp / 1000 - Date.now() / 1000);
+    return Math.round(
+      this.args.station!.last.timestamp / 1000 - Date.now() / 1000
+    );
   }
 
   get mapView() {
@@ -69,7 +71,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
               {{this.station.name}}
             </h1>
             <div class="shrink-0 text-xs font-medium text-slate-500">
-              <span>{{formatNumber this.station.altitude maximumFractionDigits=0}} m</span>
+              <span>{{formatNumber
+                  this.station.altitude
+                  maximumFractionDigits=0
+                }}
+                m</span>
               <span class="mx-1.5 text-slate-300">&middot;</span>
               {{timeAgo this.lastReadingRelativeSeconds}}
             </div>

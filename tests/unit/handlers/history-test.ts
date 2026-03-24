@@ -16,7 +16,9 @@ module('Unit | Handler | history', function () {
       ],
     };
 
-    const holfuyResponse = await HistoryHandler.request<{ data: { id: string }[] }>(
+    const holfuyResponse = await HistoryHandler.request<{
+      data: { id: string }[];
+    }>(
       {
         request: {
           url: 'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600',
@@ -37,7 +39,10 @@ module('Unit | Handler | history', function () {
     );
 
     assert.strictEqual(holfuyResponse.data[0]?.id, 'holfuy-1804:1774341507');
-    assert.strictEqual(otherStationResponse.data[0]?.id, 'holfuy-2222:1774341507');
+    assert.strictEqual(
+      otherStationResponse.data[0]?.id,
+      'holfuy-2222:1774341507'
+    );
     assert.notStrictEqual(
       holfuyResponse.data[0]?.id,
       otherStationResponse.data[0]?.id

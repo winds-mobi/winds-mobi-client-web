@@ -151,7 +151,10 @@ export default class Map extends Component<MapSignature> {
   get initOptions() {
     return {
       bearing: 0,
-      center: [this.mapView.longitude, this.mapView.latitude] as [number, number],
+      center: [this.mapView.longitude, this.mapView.latitude] as [
+        number,
+        number,
+      ],
       dragRotate: false,
       maxPitch: 0,
       pitch: 0,
@@ -250,7 +253,10 @@ export default class Map extends Component<MapSignature> {
           </map.marker>
         {{/each}}
 
-        <MapLegend @bands={{this.legendBands}} @title={{t "map.legend.windSpeed"}} />
+        <MapLegend
+          @bands={{this.legendBands}}
+          @title={{t "map.legend.windSpeed"}}
+        />
       </MapLibreGL>
 
       {{#if this.requestState?.isPending}}

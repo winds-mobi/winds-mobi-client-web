@@ -47,12 +47,9 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     this.mapRefresh.lastRefresh;
 
     return this.requestStore.request<{ data: StationModel }>(
-      findRecord<StationModel>(
-        'station',
-        this.stationId,
-        undefined,
-        { backgroundReload: true }
-      )
+      findRecord<StationModel>('station', this.stationId, undefined, {
+        backgroundReload: true,
+      })
     );
   }
 
@@ -65,12 +62,9 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     this.mapRefresh.lastRefresh;
 
     return this.requestStore.request<{ data: History[] }>(
-      historyQuery<History>(
-        'history',
-        this.stationId,
-        undefined,
-        { backgroundReload: true }
-      )
+      historyQuery<History>('history', this.stationId, undefined, {
+        backgroundReload: true,
+      })
     );
   }
 
