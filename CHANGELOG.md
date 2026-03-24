@@ -4,12 +4,13 @@
 
 ### Added
 
-- Added a clearer refresh control in the navbar with a standard refresh icon and a visual countdown for the next automatic refresh.
+- Added a clearer refresh control in the navbar with a standard refresh icon and a countdown that says when the next automatic refresh will happen.
 
 ### Changed
 
 - Simplified map behavior so the shared URL remains the source of truth for the initial map view while the app avoids unnecessary station reloads for tiny map changes.
 - Simplified the refresh-control presentation so it now looks like a standard button instead of a custom-drawn control.
+- Updated the refresh countdown text to use plain language like “in 10 minutes” instead of a timer-style display.
 
 ### Removed
 

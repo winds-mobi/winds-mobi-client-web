@@ -127,7 +127,9 @@ module('Acceptance | map query params', function (hooks) {
     const initialStationRequestCount = countStationRequests(store.calls);
 
     assert.dom('[data-test-navbar-refresh]').exists();
-    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+    assert
+      .dom('[data-test-navbar-refresh]')
+      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
 
     await click('[data-test-navbar-refresh]');
 
@@ -135,7 +137,9 @@ module('Acceptance | map query params', function (hooks) {
       countStationRequests(store.calls),
       initialStationRequestCount + 1
     );
-    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+    assert
+      .dom('[data-test-navbar-refresh]')
+      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {

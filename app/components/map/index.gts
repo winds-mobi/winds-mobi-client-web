@@ -126,12 +126,12 @@ export default class Map extends Component<MapSignature> {
       return undefined;
     }
 
-    const refreshRevision = this.mapRefresh.refreshRevision;
+    this.mapRefresh.lastRefresh;
 
     const options = mapQuery<Station>(
       'station',
       this.requestedViewport.bounds,
-      refreshRevision > 0 ? { backgroundReload: true } : undefined
+      { backgroundReload: true }
     );
 
     return this.requestStore.request<{ data: Station[] }>(options);
