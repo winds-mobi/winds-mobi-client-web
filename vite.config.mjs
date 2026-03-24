@@ -5,7 +5,7 @@ import { babel } from '@rollup/plugin-babel';
 import { loadTranslations } from '@ember-intl/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     allowedHosts: ['ui.winds-mobi-client-web.orb.local'],
   },
@@ -18,52 +18,51 @@ export default defineConfig({
     }),
     loadTranslations(),
     tailwindcss(),
-    VitePWA({
-      devOptions: {
-        enabled: true,
-      },
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/pwa-*/**/*.png'], // include generated icons
-      manifest: {
-        name: 'winds.mobi',
-        short_name: 'winds.mobi',
-        start_url: '/',
-        scope: '/',
-        display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#4E9805',
-        icons: [
-          {
-            src: 'pwa-64x64.png',
-            sizes: '64x64',
-            type: 'image/png',
+    mode === 'production'
+      ? VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['favicon.ico', 'icons/pwa-*/**/*.png'], // include generated icons
+          manifest: {
+            name: 'winds.mobi',
+            short_name: 'winds.mobi',
+            start_url: '/',
+            scope: '/',
+            display: 'standalone',
+            background_color: '#ffffff',
+            theme_color: '#4E9805',
+            icons: [
+              {
+                src: 'pwa-64x64.png',
+                sizes: '64x64',
+                type: 'image/png',
+              },
+              {
+                src: 'pwa-192x192.png',
+                sizes: '192x192',
+                type: 'image/png',
+              },
+              {
+                src: 'pwa-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'any',
+              },
+              {
+                src: 'maskable-icon-512x512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable',
+              },
+            ],
           },
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
+          workbox: {
+            navigateFallback: '/index.html',
+            maximumFileSizeToCacheInBytes: 8000000,
           },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: 'maskable-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-      },
-      workbox: {
-        navigateFallback: '/index.html',
-        maximumFileSizeToCacheInBytes: 8000000,
-      },
-    }),
-  ],
+        })
+      : null,
+  ].filter(Boolean),
   optimizeDeps: {
     exclude: ['ember-page-title', 'object-inspect', 'embroider-util'],
   },
-});
+}));
