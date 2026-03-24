@@ -25,14 +25,6 @@ export interface StationIndexSignature {
   Element: null;
 }
 
-function normalizeTimestamp(timestamp: number) {
-  if (timestamp > 1_000_000_000_000) {
-    return timestamp / 1000;
-  }
-
-  return timestamp;
-}
-
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
 
@@ -45,17 +37,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   }
 
   get lastReadingRelativeSeconds() {
-    const timestamp = this.station?.last.timestamp;
-
-    if (!Number.isFinite(timestamp)) {
-      return null;
-    }
-
-    return Math.round(normalizeTimestamp(timestamp) - Date.now() / 1000);
-  }
-
-  get hasLastReadingRelativeSeconds() {
-    return this.lastReadingRelativeSeconds !== null;
+    return Math.round(this.args.station!.last.timestamp / 1000 - Date.now() / 1000);
   }
 
   get mapView() {
@@ -88,11 +70,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <div class="shrink-0 text-xs font-medium text-slate-500">
               <span>{{formatNumber this.station.altitude maximumFractionDigits=0}} m</span>
               <span class="mx-1.5 text-slate-300">&middot;</span>
-              {{#if this.hasLastReadingRelativeSeconds}}
-                {{formatRelativeTime this.lastReadingRelativeSeconds unit="second"}}
-              {{else}}
-                -
-              {{/if}}
+              {{formatRelativeTime this.lastReadingRelativeSeconds unit="second"}}
             </div>
           {{/if}}
         </div>

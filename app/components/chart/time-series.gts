@@ -41,6 +41,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       zoomType: 'x',
     },
     rangeSelector: {
+      allButtonsEnabled: true,
       enabled: true,
       inputEnabled: false,
       buttons: [
@@ -80,8 +81,9 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       gridLineWidth: 1,
       crosshair: true,
       labels: {
+        useHTML: true,
         formatter: function (this: { chart: { time: { dateFormat: (format: string, timestamp: number) => string } }; value: number }) {
-          return `${this.chart.time.dateFormat('%H:%M', this.value)}\n${this.chart.time.dateFormat('%a', this.value)}`;
+          return `${this.chart.time.dateFormat('%H:%M', this.value)}<br/>${this.chart.time.dateFormat('%a', this.value)}`;
         },
       },
     },
