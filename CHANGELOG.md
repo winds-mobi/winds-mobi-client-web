@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.0.11 - 2026-03-24
+
+### Added
+
+- Added a clearer refresh control in the navbar with a standard refresh icon and a countdown that says when the next automatic refresh will happen.
+
+### Changed
+
+- Simplified map behavior so the shared URL remains the source of truth for the initial map view while the app avoids unnecessary station reloads for tiny map changes.
+- Simplified the refresh-control presentation so it now looks like a standard button instead of a custom-drawn control.
+- Updated relative-time wording across the refresh countdown and station sidebar to use clearer units such as seconds, minutes, and hours automatically instead of a timer-style display.
+- Added the station altitude next to the latest reading time in the station sidebar header.
+- Simplified the station sidebar timestamp text to use plain relative wording such as “x seconds ago”.
+- Updated the wind and air history charts to show 24-hour time plus the short weekday on two-line x-axis labels, and restored the default selected range to 6 hours.
+- Changed the default map opening position to a wider overview around `46.69299, 7.82667` at zoom `10.94`.
+
+### Removed
+
+- Removed automatic map recentering on startup, so reopening the app no longer tries to move the map on its own.
+
+### Fixed
+
+- Kept shared map links, station-panel deep links, manual refreshes, and automatic refreshes working consistently while the map and navbar controls were simplified.
+- Fixed station-history caching so last-hour and historic readings stay isolated to the correct station even when different stations report the same timestamp.
+- Fixed the last-hour wind-direction chart so it no longer breaks on initial load or when recent samples are stale or malformed.
+- Fixed the navbar logo so clicking it resets the map back to the default overview instead of preserving the previous custom map URL state.
+
 ## v0.0.10 - 2026-03-22
 
 ### Changed

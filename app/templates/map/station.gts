@@ -44,15 +44,12 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    const refreshRevision = this.mapRefresh.refreshRevision;
+    this.mapRefresh.lastRefresh;
 
     return this.requestStore.request<{ data: StationModel }>(
-      findRecord<StationModel>(
-        'station',
-        this.stationId,
-        undefined,
-        refreshRevision > 0 ? { backgroundReload: true } : undefined
-      )
+      findRecord<StationModel>('station', this.stationId, undefined, {
+        backgroundReload: true,
+      })
     );
   }
 
@@ -62,15 +59,12 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    const refreshRevision = this.mapRefresh.refreshRevision;
+    this.mapRefresh.lastRefresh;
 
     return this.requestStore.request<{ data: History[] }>(
-      historyQuery<History>(
-        'history',
-        this.stationId,
-        undefined,
-        refreshRevision > 0 ? { backgroundReload: true } : undefined
-      )
+      historyQuery<History>('history', this.stationId, undefined, {
+        backgroundReload: true,
+      })
     );
   }
 

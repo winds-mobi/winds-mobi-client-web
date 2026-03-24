@@ -1,44 +1,59 @@
-import { registerDestructor } from '@ember/destroyable';
 import { action } from '@ember/object';
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { rawTimeout, task } from 'ember-concurrency';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 const DEFAULT_COUNTDOWN_TICK_MS = 15 * 1000;
 
-function formatCountdown(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
-}
-
 export default class MapRefreshService extends Service {
-  @tracked refreshRevision = 0;
-  @tracked now = Date.now();
-  @tracked nextRefreshAt = this.now + DEFAULT_REFRESH_INTERVAL_MS;
+  @tracked lastRefresh?: Date;
+  @tracked scheduleStartedAt = new Date();
+  @tracked currentTime = this.scheduleStartedAt;
 
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
   private activeConsumers = 0;
-  private countdownTimerId?: ReturnType<typeof globalThis.setInterval>;
-  private refreshTimerId?: ReturnType<typeof globalThis.setTimeout>;
 
-  constructor(owner: unknown, args: object) {
-    super(owner, args);
+  refreshLoop = task({ restartable: true }, async () => {
+    while (this.isActive) {
+      const remainingMs = Math.max(
+        0,
+        this.nextRefreshAt.getTime() - Date.now()
+      );
+      const sleepMs = Math.min(this.countdownTickMs, remainingMs);
 
-    registerDestructor(this, () => {
-      this.stopTimers();
-    });
+      if (sleepMs > 0) {
+        await rawTimeout(sleepMs);
+      }
+
+      if (!this.isActive) {
+        return;
+      }
+
+      this.currentTime = new Date();
+
+      if (this.currentTime >= this.nextRefreshAt) {
+        this.noteRefresh();
+        this.resetCountdown();
+      }
+    }
+  });
+
+  get nextRefreshAt() {
+    return new Date(this.scheduleStartedAt.getTime() + this.refreshIntervalMs);
+  }
+
+  get remainingMs() {
+    return Math.max(
+      0,
+      this.nextRefreshAt.getTime() - this.currentTime.getTime()
+    );
   }
 
   get secondsRemaining() {
-    return Math.max(0, Math.ceil((this.nextRefreshAt - this.now) / 1000));
-  }
-
-  get countdownLabel() {
-    return formatCountdown(this.secondsRemaining);
+    return Math.ceil(this.remainingMs / 1000);
   }
 
   get isActive() {
@@ -53,7 +68,7 @@ export default class MapRefreshService extends Service {
     }
 
     this.resetSchedule();
-    this.startCountdown();
+    void this.refreshLoop.perform();
   }
 
   deactivate() {
@@ -67,7 +82,7 @@ export default class MapRefreshService extends Service {
       return;
     }
 
-    this.stopTimers();
+    void this.refreshLoop.cancelAll();
     this.resetCountdown();
   }
 
@@ -77,58 +92,24 @@ export default class MapRefreshService extends Service {
       return;
     }
 
-    this.refreshRevision++;
+    this.noteRefresh();
     this.resetSchedule();
-  }
-
-  private startCountdown() {
-    this.clearCountdownTimer();
-    this.countdownTimerId = globalThis.setInterval(() => {
-      this.now = Date.now();
-    }, this.countdownTickMs);
-  }
-
-  private scheduleAutoRefresh() {
-    this.clearRefreshTimer();
-    this.refreshTimerId = globalThis.setTimeout(() => {
-      if (!this.isActive) {
-        return;
-      }
-
-      this.refreshRevision++;
-      this.resetSchedule();
-    }, this.refreshIntervalMs);
+    void this.refreshLoop.perform();
   }
 
   private resetSchedule() {
     this.resetCountdown();
-    this.scheduleAutoRefresh();
   }
 
   private resetCountdown() {
-    const currentTimestamp = Date.now();
+    const currentTime = new Date();
 
-    this.now = currentTimestamp;
-    this.nextRefreshAt = currentTimestamp + this.refreshIntervalMs;
+    this.scheduleStartedAt = currentTime;
+    this.currentTime = currentTime;
   }
 
-  private stopTimers() {
-    this.clearCountdownTimer();
-    this.clearRefreshTimer();
-  }
-
-  private clearCountdownTimer() {
-    if (this.countdownTimerId) {
-      globalThis.clearInterval(this.countdownTimerId);
-      this.countdownTimerId = undefined;
-    }
-  }
-
-  private clearRefreshTimer() {
-    if (this.refreshTimerId) {
-      globalThis.clearTimeout(this.refreshTimerId);
-      this.refreshTimerId = undefined;
-    }
+  private noteRefresh() {
+    this.lastRefresh = new Date();
   }
 }
 

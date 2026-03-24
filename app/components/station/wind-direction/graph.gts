@@ -30,32 +30,47 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     },
   };
 
-  get chartData() {
-    const now = Date.now();
+  get points() {
+    if (this.args.data.length === 0) {
+      return [];
+    }
 
+    const latestTimestamp =
+      this.args.data[this.args.data.length - 1]!.timestamp;
+
+    return this.args.data.map((elm) => ({
+      x: elm.direction,
+      y: 1 - (latestTimestamp - elm.timestamp) / (DURATION * 1000),
+      color: windToColour(elm.speed),
+      customTooltip: this.intl.formatTime(elm.timestamp, {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false,
+      }),
+    }));
+  }
+
+  get chartData() {
     return [
       {
         name: 'Wind Direction',
-        data: this.args.data.map((elm) => ({
-          x: elm.direction,
-          y: 1 - (now - elm.timestamp) / (DURATION * 1000),
-          color: windToColour(elm.speed),
-          customTooltip: this.intl.formatTime(elm.timestamp, {
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: false,
-          }),
-        })),
+        data: this.points,
         connectEnds: false,
       },
     ];
   }
 
+  get hasChartData() {
+    return this.points.length > 0;
+  }
+
   <template>
-    <Polar
-      class="h-full w-full [&_.chart-container]:h-full [&_.chart-container]:w-full"
-      @chartData={{this.chartData}}
-      @chartOptions={{this.chartOptions}}
-    />
+    {{#if this.hasChartData}}
+      <Polar
+        class="h-full w-full [&_.chart-container]:h-full [&_.chart-container]:w-full"
+        @chartData={{this.chartData}}
+        @chartOptions={{this.chartOptions}}
+      />
+    {{/if}}
   </template>
 }

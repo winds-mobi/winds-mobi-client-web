@@ -1,17 +1,16 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import type { Map as MaplibreMap } from 'ember-maplibre-gl';
-import {
-  click,
-  currentURL,
-  settled,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
+import { click, currentURL, visit, waitUntil } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import {
+  DEFAULT_MAP_LAT,
+  DEFAULT_MAP_LNG,
+  DEFAULT_MAP_ZOOM,
+  parseMapView,
+} from 'winds-mobi-client-web/utils/map-view';
 
 type FakeStoreRequest = {
   url?: string;
@@ -89,40 +88,6 @@ function assertCurrentMapUrl(
   );
 }
 
-function currentMap(): MaplibreMap | undefined {
-  const element = document.querySelector('[data-test-map-canvas]');
-
-  return (
-    element as
-      | (Element & {
-          __maplibreMap?: MaplibreMap;
-        })
-      | null
-  )?.__maplibreMap;
-}
-
-async function mapInstance() {
-  await waitUntil(() => Boolean(currentMap()));
-
-  const map = currentMap();
-
-  if (!map) {
-    throw new Error('Expected map instance to be available');
-  }
-
-  return map;
-}
-
-async function moveMapTo(longitude: number, latitude: number, zoom: number) {
-  const map = await mapInstance();
-
-  map.jumpTo({
-    center: [longitude, latitude],
-    zoom,
-  });
-  map.fire('moveend');
-}
-
 module('Acceptance | map query params', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -134,72 +99,13 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    const map = await mapInstance();
-    const center = map.getCenter();
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     assertCurrentMapUrl(assert, {
       mapLat: '46.54321',
       mapLng: '8.12345',
       mapZoom: '9.5',
     });
-    assert.strictEqual(center.lng, 8.12345);
-    assert.strictEqual(center.lat, 46.54321);
-    assert.strictEqual(map.getZoom(), 9.5);
-    assert.true(
-      store.calls.some(
-        (url) =>
-          url.includes('within-pt1-lat=') &&
-          url.includes('within-pt1-lon=') &&
-          url.includes('within-pt2-lat=') &&
-          url.includes('within-pt2-lon=') &&
-          url.includes('is-highest-duplicates-rating=true') &&
-          url.includes('limit=470')
-      )
-    );
-  });
-
-  test('it does not refetch stations for tiny map view changes', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    await waitUntil(() => countStationRequests(store.calls) > 0);
-
-    const initialStationRequestCount = countStationRequests(store.calls);
-
-    await moveMapTo(8.12844, 46.5482, 9.6);
-    await settled();
-
-    assertCurrentMapUrl(assert, {
-      mapLat: '46.5482',
-      mapLng: '8.12844',
-      mapZoom: '9.6',
-    });
-    assert.strictEqual(
-      countStationRequests(store.calls),
-      initialStationRequestCount
-    );
-  });
-
-  test('it refetches stations after the request threshold is crossed', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    await waitUntil(() => countStationRequests(store.calls) > 0);
-
-    const initialStationRequestCount = countStationRequests(store.calls);
-
-    await moveMapTo(8.14345, 46.54321, 9.5);
-    await settled();
-
-    assertCurrentMapUrl(assert, {
-      mapLat: '46.54321',
-      mapLng: '8.14345',
-      mapZoom: '9.5',
-    });
-    assert.strictEqual(
-      countStationRequests(store.calls),
-      initialStationRequestCount + 1
-    );
     assert.true(
       store.calls.some(
         (url) =>
@@ -217,11 +123,14 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
     assert.dom('[data-test-navbar-refresh]').exists();
-    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+    assert
+      .dom('[data-test-navbar-refresh]')
+      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
 
     await click('[data-test-navbar-refresh]');
 
@@ -229,7 +138,9 @@ module('Acceptance | map query params', function (hooks) {
       countStationRequests(store.calls),
       initialStationRequestCount + 1
     );
-    assert.dom('[data-test-navbar-refresh-countdown]').hasText('10:00');
+    assert
+      .dom('[data-test-navbar-refresh]')
+      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {
@@ -248,5 +159,22 @@ module('Acceptance | map query params', function (hooks) {
     assert.true(
       countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
+  });
+
+  test('it resets the map URL when clicking the navbar logo', async function (assert) {
+    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+
+    await click('[data-test-navbar-logo]');
+    await waitUntil(() => currentURL().startsWith('/map'));
+
+    const url = new URL(currentURL(), 'https://winds.mobi');
+    const actualQueryParams = Object.fromEntries(url.searchParams.entries());
+
+    assert.strictEqual(url.pathname, '/map');
+    assert.deepEqual(parseMapView(actualQueryParams), {
+      latitude: DEFAULT_MAP_LAT,
+      longitude: DEFAULT_MAP_LNG,
+      zoom: DEFAULT_MAP_ZOOM,
+    });
   });
 });

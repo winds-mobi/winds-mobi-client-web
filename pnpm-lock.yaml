@@ -50,6 +50,9 @@ importers:
       '@warp-drive/utilities':
         specifier: 5.8.0
         version: 5.8.0(@glint/template@1.6.1)(@warp-drive/core@5.8.0(@babel/core@7.28.4)(@glint/template@1.6.1))
+      highcharts:
+        specifier: 12.5.0
+        version: 12.5.0
       sharp:
         specifier: ^0.34.1
         version: 0.34.1
@@ -188,7 +191,7 @@ importers:
         version: 4.0.3(@babel/core@7.28.4)(@glimmer/tracking@1.1.2)(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))
       ember-highcharts:
         specifier: ^7.0.0
-        version: 7.0.0(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0)
+        version: 7.0.0(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.5.0)
       ember-intl:
         specifier: ^8.2.1
         version: 8.2.1(@babel/core@7.28.4)(@ember/test-helpers@4.0.5(@babel/core@7.28.4)(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0)))(typescript@5.9.3)
@@ -5552,8 +5555,16 @@ packages:
   heimdalljs@0.2.6:
     resolution: {integrity: sha512-o9bd30+5vLBvBtzCPwwGqpry2+n0Hi6H1+qwt6y+0kwRHGGF8TFIhJPmnuM0xO97zaKrDZMwO/V56fAnn8m/tA==}
 
-  highcharts@12.2.0:
-    resolution: {integrity: sha512-UUN+osTP3aeGc4KmoMuWAjzpKif8GYHFozzYI4O8h1ILGof25M/ZGBpXLvgqf1z0LVh7N9eG7i0HnzMfjcR4nA==}
+  highcharts@12.5.0:
+    resolution: {integrity: sha512-uNSSv1KqRLNvkyXlf1FbeGWB1mJ/8/IYpVeqYiTIop5Wo8peUvNyzUfLa58vILsmXyz+XrETtgKIEOcSgBBKuQ==}
+    peerDependencies:
+      jspdf: ^3.0.0
+      svg2pdf.js: ^2.6.0
+    peerDependenciesMeta:
+      jspdf:
+        optional: true
+      svg2pdf.js:
+        optional: true
 
   homedir-polyfill@1.0.3:
     resolution: {integrity: sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==}
@@ -14361,7 +14372,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-highcharts@7.0.0(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.2.0):
+  ember-highcharts@7.0.0(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))(highcharts@12.5.0):
     dependencies:
       '@babel/core': 7.28.4
       '@ember/render-modifiers': 2.1.0(@babel/core@7.28.4)(@glint/template@1.6.1)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0))
@@ -14370,7 +14381,7 @@ snapshots:
       decorator-transforms: 2.3.0(@babel/core@7.28.4)
       deepmerge: 4.3.1
       ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.6.1)(rsvp@4.8.5)(webpack@5.94.0)
-      highcharts: 12.2.0
+      highcharts: 12.5.0
     transitivePeerDependencies:
       - '@glint/template'
       - supports-color
@@ -15871,7 +15882,7 @@ snapshots:
     dependencies:
       rsvp: 3.2.1
 
-  highcharts@12.2.0: {}
+  highcharts@12.5.0: {}
 
   homedir-polyfill@1.0.3:
     dependencies:

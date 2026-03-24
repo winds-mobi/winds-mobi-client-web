@@ -6,8 +6,8 @@ import { on } from '@ember/modifier';
 import StationSummary from './summary';
 import StationWinds from './wind';
 import StationAir from './air';
-import RelativeTime from '../relative-time';
-import { t } from 'ember-intl';
+import { formatNumber, t } from 'ember-intl';
+import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import {
   parseMapView,
   serializeMapView,
@@ -35,6 +35,12 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   get history() {
     return this.args.history ?? [];
+  }
+
+  get lastReadingRelativeSeconds() {
+    return Math.round(
+      this.args.station!.last.timestamp / 1000 - Date.now() / 1000
+    );
   }
 
   get mapView() {
@@ -65,7 +71,13 @@ export default class StationIndex extends Component<StationIndexSignature> {
               {{this.station.name}}
             </h1>
             <div class="shrink-0 text-xs font-medium text-slate-500">
-              <RelativeTime @timestamp={{this.station.last.timestamp}} />
+              <span>{{formatNumber
+                  this.station.altitude
+                  maximumFractionDigits=0
+                }}
+                m</span>
+              <span class="mx-1.5 text-slate-300">&middot;</span>
+              {{timeAgo this.lastReadingRelativeSeconds}}
             </div>
           {{/if}}
         </div>

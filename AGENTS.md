@@ -29,6 +29,16 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 - Prefer simple, typed Ember code. Assume configuration, declared dependencies, and API payloads are correct unless there is a proven issue.
 - If a requested implementation appears to require hacks, brittle workarounds, or patterns that cut against Ember or app architecture, push back clearly and explain why it does not seem like the best practice before proceeding.
 - Keep imperative DOM or third-party library integration in modifiers.
+- Do not add app initializers, bundler alias tricks, or other startup-time hacks just to force third-party libraries into a working state. Prefer normal package upgrades or supported integration points, and stop to discuss before adding that kind of workaround.
+- For `ember-highcharts`, treat `highcharts` as a real app dependency and keep it current instead of relying on a transitive peer version. If wind/air stock-chart range selector buttons break, suspect Highcharts module/version mismatches first and prefer upgrading `highcharts` and `ember-highcharts` before adding app-side loading workarounds.
+- Do not add component arguments as speculative override points when the app has no real call sites for them.
+- If a component has an internal default and no actual external callers pass an override, remove the argument instead of keeping a "future-proof" escape hatch.
+- Do not add trivial passthrough getters just to feed translated strings or other direct template values into child components. Prefer helpers like `{{t ...}}` directly in the template when no class logic is needed.
+- Do not add test-only override seams to app components just to make them easier to unit or integration test. Prefer smaller real tests, and skip a test rather than complicating the production API.
+- Do not add DOM hacks, exposed instance handles, or other special production code just so tests can reach inside a component or third-party library. DOM selectors in tests are fine; production test hooks and escape hatches are not. If a test would require that kind of seam, skip or replace the test instead.
+- Do not call `ember-intl` `formatRelativeTime` directly in app UI code. Use the shared `time-ago` helper, or `renderTimeAgoText` in TypeScript, so relative-time wording stays consistent and automatically switches between seconds, minutes, hours, and larger units.
+- Keep `CHANGELOG.md` user-facing. Document shipped behavior, visible improvements, and notable fixes. Do not list internal refactors, test-only changes, or implementation details unless they directly affect users.
+- When async state coordination fits `ember-concurrency`, prefer it over manual timer or promise bookkeeping. If newer `ember-concurrency` syntax or APIs would require installing or upgrading the package, stop and tell the user first. When using `ember-concurrency`, prefer the latest package version and its current syntax over legacy patterns.
 - For app code in `app/**`, prefer Warp Drive builders + `this.store.request(...)` + handlers over ad hoc `fetch()`.
 - Prefer existing Frontile and Tailwind patterns for shared UI.
 - Update `translations/en-us.yaml` when UI text changes.
