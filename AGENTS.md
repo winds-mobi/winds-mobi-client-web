@@ -29,6 +29,8 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 - Prefer simple, typed Ember code. Assume configuration, declared dependencies, and API payloads are correct unless there is a proven issue.
 - If a requested implementation appears to require hacks, brittle workarounds, or patterns that cut against Ember or app architecture, push back clearly and explain why it does not seem like the best practice before proceeding.
 - Keep imperative DOM or third-party library integration in modifiers.
+- Do not add app initializers, bundler alias tricks, or other startup-time hacks just to force third-party libraries into a working state. Prefer normal package upgrades or supported integration points, and stop to discuss before adding that kind of workaround.
+- For `ember-highcharts`, treat `highcharts` as a real app dependency and keep it current instead of relying on a transitive peer version. If wind/air stock-chart range selector buttons break, suspect Highcharts module/version mismatches first and prefer upgrading `highcharts` and `ember-highcharts` before adding app-side loading workarounds.
 - Do not add component arguments as speculative override points when the app has no real call sites for them.
 - If a component has an internal default and no actual external callers pass an override, remove the argument instead of keeping a "future-proof" escape hatch.
 - Do not add trivial passthrough getters just to feed translated strings or other direct template values into child components. Prefer helpers like `{{t ...}}` directly in the template when no class logic is needed.

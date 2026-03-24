@@ -4,32 +4,8 @@ import { extensions, classicEmberSupport, ember } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
 import { loadTranslations } from '@ember-intl/vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import fs from 'node:fs';
-import path from 'node:path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-const emberHighchartsPackage = fs.realpathSync(
-  path.join(process.cwd(), 'node_modules/ember-highcharts/package.json')
-);
-const highchartsRequire = createRequire(emberHighchartsPackage);
-const highchartsRoot = path.dirname(
-  highchartsRequire.resolve('highcharts/package.json')
-);
 
 export default defineConfig(({ mode }) => ({
-  resolve: {
-    alias: [
-      {
-        find: /^highcharts$/,
-        replacement: path.join(highchartsRoot, 'highcharts.js'),
-      },
-      {
-        find: /^highcharts\/(.*)$/,
-        replacement: `${highchartsRoot}/$1.js`,
-      },
-    ],
-  },
   server: {
     allowedHosts: ['ui.winds-mobi-client-web.orb.local'],
   },
