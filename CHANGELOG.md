@@ -14,6 +14,7 @@
 - Added the station altitude next to the latest reading time in the station sidebar header.
 - Simplified the station sidebar timestamp text to use plain relative wording such as “x seconds ago”.
 - Updated the wind and air history charts to show 24-hour time plus the short weekday on two-line x-axis labels, and restored the default selected range to 6 hours.
+- Changed the default map opening position to a wider overview around `46.69299, 7.82667` at zoom `10.94`.
 
 ### Removed
 
@@ -24,6 +25,7 @@
 - Kept shared map links, station-panel deep links, manual refreshes, and automatic refreshes working consistently while the map and navbar controls were simplified.
 - Fixed station-history caching so last-hour and historic readings stay isolated to the correct station even when different stations report the same timestamp.
 - Fixed the last-hour wind-direction chart so it no longer breaks on initial load or when recent samples are stale or malformed.
+- Fixed the navbar logo so clicking it resets the map back to the default overview instead of preserving the previous custom map URL state.
 
 ## v0.0.10 - 2026-03-22
 

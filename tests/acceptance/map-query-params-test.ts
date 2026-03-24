@@ -159,4 +159,13 @@ module('Acceptance | map query params', function (hooks) {
       countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
   });
+
+  test('it resets the map URL when clicking the navbar logo', async function (assert) {
+    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+
+    await click('[data-test-navbar-logo]');
+    await waitUntil(() => currentURL() === '/map');
+
+    assertCurrentMapUrl(assert, {});
+  });
 });

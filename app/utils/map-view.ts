@@ -1,8 +1,8 @@
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 
-export const DEFAULT_MAP_LNG = 7.85;
-export const DEFAULT_MAP_LAT = 46.68;
-export const DEFAULT_MAP_ZOOM = 13;
+export const DEFAULT_MAP_LNG = 7.82667;
+export const DEFAULT_MAP_LAT = 46.69299;
+export const DEFAULT_MAP_ZOOM = 10.94;
 export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 
