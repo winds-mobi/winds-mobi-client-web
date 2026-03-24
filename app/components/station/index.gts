@@ -6,7 +6,8 @@ import { on } from '@ember/modifier';
 import StationSummary from './summary';
 import StationWinds from './wind';
 import StationAir from './air';
-import { formatNumber, formatRelativeTime, t } from 'ember-intl';
+import { formatNumber, t } from 'ember-intl';
+import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import {
   parseMapView,
   serializeMapView,
@@ -70,7 +71,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <div class="shrink-0 text-xs font-medium text-slate-500">
               <span>{{formatNumber this.station.altitude maximumFractionDigits=0}} m</span>
               <span class="mx-1.5 text-slate-300">&middot;</span>
-              {{formatRelativeTime this.lastReadingRelativeSeconds unit="second"}}
+              {{timeAgo this.lastReadingRelativeSeconds}}
             </div>
           {{/if}}
         </div>

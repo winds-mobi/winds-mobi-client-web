@@ -5,6 +5,7 @@ import { htmlSafe } from '@ember/template';
 import { Button } from '@frontile/buttons';
 import type { IntlService } from 'ember-intl';
 import ArrowsClockwise from 'ember-phosphor-icons/components/ph-arrows-clockwise';
+import { renderTimeAgoText } from 'winds-mobi-client-web/helpers/time-ago';
 import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
@@ -42,12 +43,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   get title() {
     const ariaLabel = String(this.intl.t('map.refresh.ariaLabel'));
 
-    return `${ariaLabel} (${this.intl.formatRelativeTime(
-      this.refreshRelativeTime,
-      {
-        unit: 'second',
-      }
-    )})`;
+    return `${ariaLabel} (${renderTimeAgoText(this.intl, this.refreshRelativeTime)})`;
   }
 
   @action
