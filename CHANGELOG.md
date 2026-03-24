@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.0.12 - 2026-03-24
+
+### Added
+
+- Added an optional 3D terrain mode on the map, with a built-in terrain toggle, steeper default pitch, and direct rotate/pitch interactions while keeping the existing Swiss base map.
+
+### Changed
+
+- Changed map station arrows so their fill still shows wind speed while the outline now uses the wind-gust colour scale.
+- Refined station time displays across the app so refresh countdowns and station timestamps use clearer relative wording with automatic seconds, minutes, and hours.
+- Updated the wind and air history charts to restore the quick time-range buttons, keep 6 hours as the default view, remove the date-entry fields, and show cleaner whole-number tooltip values.
+- Updated the wind and air history charts to use 24-hour time with a short weekday on a second x-axis line for easier reading.
+
+### Fixed
+
+- Fixed chart interactions so the wind and air history range buttons work more reliably without getting stuck in a stale selected state.
+- Fixed the station history cache so readings from different stations no longer overwrite each other when they share the same timestamp.
+- Fixed the last-hour wind-direction chart so it now behaves as a proper polar time view, with clearer quarter-hour rings, a more stable layout, and cleaner connected points.
+
 ## v0.0.11 - 2026-03-24
 
 ### Added

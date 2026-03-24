@@ -9,10 +9,13 @@ import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
-import eq from 'ember-truth-helpers/helpers/eq';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, StyleSpecification } from 'ember-maplibre-gl';
-import { GeolocateControl, NavigationControl } from 'maplibre-gl';
+import {
+  GeolocateControl,
+  NavigationControl,
+  TerrainControl,
+} from 'maplibre-gl';
 import { WIND_COLOUR_BANDS } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
@@ -52,6 +55,16 @@ const OSM_SWISS_STYLE: StyleSpecification = {
       tileSize: 256,
       type: 'raster',
     },
+    terrainSource: {
+      type: 'raster-dem',
+      attribution: '© Mapzen terrain tiles',
+      encoding: 'terrarium',
+      maxzoom: 15,
+      tiles: [
+        'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+    },
   },
   layers: [
     {
@@ -60,6 +73,7 @@ const OSM_SWISS_STYLE: StyleSpecification = {
       type: 'raster',
     },
   ],
+  sky: {},
 };
 
 const TEST_MAP_STYLE: StyleSpecification = {
@@ -94,7 +108,8 @@ export default class Map extends Component<MapSignature> {
   @tracked requestedViewport?: RequestedViewport;
 
   private navigationControl = new NavigationControl({
-    showCompass: false,
+    showCompass: true,
+    visualizePitch: true,
   });
 
   private geolocateControl = new GeolocateControl({
@@ -106,9 +121,13 @@ export default class Map extends Component<MapSignature> {
     trackUserLocation: false,
   });
 
-  get selectedStationId() {
-    return this.router.currentRoute?.params['station_id'];
-  }
+  private terrainControl =
+    config.environment === 'test'
+      ? undefined
+      : new TerrainControl({
+          source: 'terrainSource',
+          exaggeration: 1,
+        });
 
   get mapView() {
     return parseMapView(
@@ -155,11 +174,11 @@ export default class Map extends Component<MapSignature> {
         number,
         number,
       ],
-      dragRotate: false,
-      maxPitch: 0,
+      dragRotate: true,
+      maxPitch: 85,
       pitch: 0,
       style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
-      touchPitch: false,
+      touchPitch: true,
       zoom: this.mapView.zoom,
     };
   }
@@ -198,6 +217,17 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
+  @action
+  handleTerrainChange(event: { target: MaplibreMap }) {
+    if (!event.target.getTerrain() || event.target.getPitch() >= 70) {
+      return;
+    }
+
+    event.target.easeTo({
+      pitch: 70,
+    });
+  }
+
   private handleViewportChange(view: MapView, bounds: MapBounds) {
     const nextViewport = {
       bounds: normalizeMapBounds(bounds),
@@ -234,11 +264,15 @@ export default class Map extends Component<MapSignature> {
         as |map|
       >
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
+        <map.on @event="terrain" @action={{this.handleTerrainChange}} />
         <map.control
           @control={{this.navigationControl}}
           @position="bottom-right"
         />
         <map.control @control={{this.geolocateControl}} @position="top-right" />
+        {{#if this.terrainControl}}
+          <map.control @control={{this.terrainControl}} @position="top-right" />
+        {{/if}}
 
         {{#each this.stations as |station|}}
           <map.marker
@@ -246,7 +280,6 @@ export default class Map extends Component<MapSignature> {
             @lngLat={{this.markerPosition station}}
           >
             <MapStationMarker
-              @isSelected={{eq station.id this.selectedStationId}}
               @onSelect={{this.stationSelected}}
               @station={{station}}
             />
