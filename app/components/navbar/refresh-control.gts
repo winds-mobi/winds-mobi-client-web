@@ -17,38 +17,6 @@ export interface NavbarRefreshControlSignature {
 }
 
 const COUNTDOWN_ARC_COLOR = 'rgb(148 163 184 / 0.5)';
-const RELATIVE_TIME_THRESHOLDS: Array<{
-  limit: number;
-  unit: Intl.RelativeTimeFormatUnit;
-  divisor: number;
-}> = [
-  { limit: 60, unit: 'second', divisor: 1 },
-  { limit: 3600, unit: 'minute', divisor: 60 },
-  { limit: 86400, unit: 'hour', divisor: 3600 },
-  { limit: 604800, unit: 'day', divisor: 86400 },
-  { limit: 2629800, unit: 'week', divisor: 604800 },
-  { limit: 31557600, unit: 'month', divisor: 2629800 },
-  { limit: Infinity, unit: 'year', divisor: 31557600 },
-];
-
-function countdownRelativeTime(seconds: number) {
-  if (!Number.isFinite(seconds)) {
-    return null;
-  }
-
-  const absSeconds = Math.abs(seconds);
-
-  for (const { limit, unit, divisor } of RELATIVE_TIME_THRESHOLDS) {
-    if (absSeconds < limit) {
-      return {
-        value: Math.round(seconds / divisor),
-        unit,
-      };
-    }
-  }
-
-  return null;
-}
 
 export default class NavbarRefreshControl extends Component<NavbarRefreshControlSignature> {
   @service declare mapRefresh: MapRefreshService;
@@ -68,21 +36,16 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   }
 
   get refreshRelativeTime() {
-    return countdownRelativeTime(this.mapRefresh.secondsRemaining);
+    return Math.round(this.mapRefresh.secondsRemaining);
   }
 
   get title() {
     const ariaLabel = String(this.intl.t('map.refresh.ariaLabel'));
-    const refreshRelativeTime = this.refreshRelativeTime;
-
-    if (!refreshRelativeTime) {
-      return ariaLabel;
-    }
 
     return `${ariaLabel} (${this.intl.formatRelativeTime(
-      refreshRelativeTime.value,
+      this.refreshRelativeTime,
       {
-        unit: refreshRelativeTime.unit,
+        unit: 'second',
       }
     )})`;
   }

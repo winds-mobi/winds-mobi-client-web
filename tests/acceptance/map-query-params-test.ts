@@ -129,7 +129,7 @@ module('Acceptance | map query params', function (hooks) {
     assert.dom('[data-test-navbar-refresh]').exists();
     assert
       .dom('[data-test-navbar-refresh]')
-      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
+      .hasAttribute('title', 'Refresh map and station data (in 600 seconds)');
 
     await click('[data-test-navbar-refresh]');
 
@@ -139,7 +139,7 @@ module('Acceptance | map query params', function (hooks) {
     );
     assert
       .dom('[data-test-navbar-refresh]')
-      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
+      .hasAttribute('title', 'Refresh map and station data (in 600 seconds)');
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {
