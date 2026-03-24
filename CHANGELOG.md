@@ -9,6 +9,7 @@
 ### Changed
 
 - Changed map station arrows so their fill still shows wind speed while the outline now uses the wind-gust colour scale.
+- Shortened the automatic map and station refresh cycle to 2 minutes and made the refresh countdown update every second.
 - Refined station time displays across the app so refresh countdowns and station timestamps use clearer relative wording with automatic seconds, minutes, and hours.
 - Updated the wind and air history charts to restore the quick time-range buttons, keep 6 hours as the default view, remove the date-entry fields, and show cleaner whole-number tooltip values.
 - Updated the wind and air history charts to use 24-hour time with a short weekday on a second x-axis line for easier reading.
