@@ -49,6 +49,34 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       zoomType: 'x',
     },
     rangeSelector: {
+      inputEnabled: false,
+      buttons: [
+        {
+          type: 'day',
+          count: 5,
+          text: '5d',
+        },
+        {
+          type: 'day',
+          count: 2,
+          text: '2d',
+        },
+        {
+          type: 'day',
+          count: 1,
+          text: '1d',
+        },
+        {
+          type: 'hour',
+          count: 12,
+          text: '12h',
+        },
+        {
+          type: 'hour',
+          count: 6,
+          text: '6h',
+        },
+      ],
       selected: 4,
     },
     title: {
@@ -90,6 +118,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       xDateFormat: '%e %b %H:%M',
       shared: true,
       crosshairs: true,
+      outside: true,
+      valueDecimals: 0,
     },
   };
 
