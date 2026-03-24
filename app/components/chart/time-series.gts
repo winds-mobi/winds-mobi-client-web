@@ -5,6 +5,10 @@ import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
+import {
+  sortByNumericValue,
+  type TimeSeriesPoint,
+} from 'winds-mobi-client-web/utils/chart-series';
 
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
@@ -16,12 +20,16 @@ interface TimeSeriesChartOptions extends ChartOptions {
 export interface TimeSeriesSignature {
   Args: {
     chartOptions?: TimeSeriesChartOptions;
-    chartData?: unknown;
+    chartData?: TimeSeriesSeries[];
   };
   Blocks: {
     default: [];
   };
   Element: null;
+}
+
+interface TimeSeriesSeries extends ChartOptions {
+  data: TimeSeriesPoint[];
 }
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
@@ -41,8 +49,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       zoomType: 'x',
     },
     rangeSelector: {
-      allButtonsEnabled: true,
-      enabled: true,
       inputEnabled: false,
       buttons: [
         {
@@ -112,6 +118,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       xDateFormat: '%e %b %H:%M',
       shared: true,
       crosshairs: true,
+      outside: true,
+      valueDecimals: 0,
     },
   };
 
@@ -125,10 +133,18 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     ]);
   }
 
+  @cached
+  get sortedChartData() {
+    return this.args.chartData?.map((series) => ({
+      ...series,
+      data: sortByNumericValue(series.data, (point) => point[0]),
+    }));
+  }
+
   <template>
     <HighCharts
       @mode="StockChart"
-      @content={{@chartData}}
+      @content={{this.sortedChartData}}
       @chartOptions={{this.mergedChartOptions}}
     />
   </template>

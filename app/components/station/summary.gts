@@ -118,13 +118,6 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
             <StationMetricCard
               @compact={{true}}
-              @format="temperature"
-              @label={{t "air.temperature"}}
-              @value={{this.reading.temperature}}
-            />
-
-            <StationMetricCard
-              @compact={{true}}
               @format="windSpeed"
               @label={{t "wind.gusts"}}
               @value={{this.reading.gusts}}
@@ -133,16 +126,23 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
             <StationMetricCard
               @compact={{true}}
-              @format="humidity"
-              @label={{t "air.humidity"}}
-              @value={{this.reading.humidity}}
+              @format="azimuth"
+              @label={{t "wind.direction"}}
+              @value={{this.reading.direction}}
             />
 
             <StationMetricCard
               @compact={{true}}
-              @format="azimuth"
-              @label={{t "wind.direction"}}
-              @value={{this.reading.direction}}
+              @format="temperature"
+              @label={{t "air.temperature"}}
+              @value={{this.reading.temperature}}
+            />
+
+            <StationMetricCard
+              @compact={{true}}
+              @format="humidity"
+              @label={{t "air.humidity"}}
+              @value={{this.reading.humidity}}
             />
 
             <StationMetricCard

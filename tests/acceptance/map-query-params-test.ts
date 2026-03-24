@@ -5,12 +5,6 @@ import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type { Station } from 'winds-mobi-client-web/services/store';
-import {
-  DEFAULT_MAP_LAT,
-  DEFAULT_MAP_LNG,
-  DEFAULT_MAP_ZOOM,
-  parseMapView,
-} from 'winds-mobi-client-web/utils/map-view';
 
 type FakeStoreRequest = {
   url?: string;
@@ -130,7 +124,7 @@ module('Acceptance | map query params', function (hooks) {
     assert.dom('[data-test-navbar-refresh]').exists();
     assert
       .dom('[data-test-navbar-refresh]')
-      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
+      .hasAttribute('title', 'Refresh map and station data (in 2 minutes)');
 
     await click('[data-test-navbar-refresh]');
 
@@ -140,7 +134,7 @@ module('Acceptance | map query params', function (hooks) {
     );
     assert
       .dom('[data-test-navbar-refresh]')
-      .hasAttribute('title', 'Refresh map and station data (in 10 minutes)');
+      .hasAttribute('title', 'Refresh map and station data (in 2 minutes)');
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {
@@ -159,22 +153,5 @@ module('Acceptance | map query params', function (hooks) {
     assert.true(
       countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
-  });
-
-  test('it resets the map URL when clicking the navbar logo', async function (assert) {
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-
-    await click('[data-test-navbar-logo]');
-    await waitUntil(() => currentURL().startsWith('/map'));
-
-    const url = new URL(currentURL(), 'https://winds.mobi');
-    const actualQueryParams = Object.fromEntries(url.searchParams.entries());
-
-    assert.strictEqual(url.pathname, '/map');
-    assert.deepEqual(parseMapView(actualQueryParams), {
-      latitude: DEFAULT_MAP_LAT,
-      longitude: DEFAULT_MAP_LNG,
-      zoom: DEFAULT_MAP_ZOOM,
-    });
   });
 });

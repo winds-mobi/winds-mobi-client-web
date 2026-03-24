@@ -33,7 +33,6 @@ export default class Polar extends Component<PolarSignature> {
       enabled: false,
     },
     chart: {
-      height: 240,
       polar: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
@@ -44,9 +43,6 @@ export default class Polar extends Component<PolarSignature> {
     legend: {
       enabled: false,
     },
-    pane: {
-      size: '82%',
-    },
     xAxis: {
       tickInterval: 45,
       gridLineWidth: 0,
@@ -56,9 +52,9 @@ export default class Polar extends Component<PolarSignature> {
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
         },
-        distance: -14,
+        distance: '80%',
         style: {
-          fontSize: '9px',
+          fontSize: '10px',
         },
       },
     },

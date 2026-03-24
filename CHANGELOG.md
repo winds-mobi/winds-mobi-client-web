@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.0.12 - 2026-03-24
+
+### Added
+
+- Added an optional 3D terrain mode on the map, with a built-in terrain toggle, steeper default pitch, and direct rotate/pitch interactions while keeping the existing Swiss base map.
+
+### Changed
+
+- Changed map station arrows so their fill still shows wind speed while the outline now uses the wind-gust colour scale.
+- Shortened the automatic map and station refresh cycle to 2 minutes and made the refresh countdown update every second.
+- Refined station time displays across the app so refresh countdowns and station timestamps use clearer relative wording with automatic seconds, minutes, and hours.
+- Updated the wind and air history charts to restore the quick time-range buttons, keep 6 hours as the default view, remove the date-entry fields, and show cleaner whole-number tooltip values.
+- Updated the wind and air history charts to use 24-hour time with a short weekday on a second x-axis line for easier reading.
+
+### Fixed
+
+- Fixed chart interactions so the wind and air history range buttons work more reliably without getting stuck in a stale selected state.
+- Fixed the station history cache so readings from different stations no longer overwrite each other when they share the same timestamp.
+- Fixed the last-hour wind-direction chart so it now behaves as a proper polar time view, with clearer quarter-hour rings, a more stable layout, and cleaner connected points.
+
 ## v0.0.11 - 2026-03-24
 
 ### Added
@@ -14,6 +34,7 @@
 - Added the station altitude next to the latest reading time in the station sidebar header.
 - Simplified the station sidebar timestamp text to use plain relative wording such as “x seconds ago”.
 - Updated the wind and air history charts to show 24-hour time plus the short weekday on two-line x-axis labels, and restored the default selected range to 6 hours.
+- Restored the quick range buttons on the wind and air history charts, removed the date input fields, and rounded tooltip values to cleaner whole numbers.
 - Changed the default map opening position to a wider overview around `46.69299, 7.82667` at zoom `10.94`.
 
 ### Removed
@@ -25,6 +46,7 @@
 - Kept shared map links, station-panel deep links, manual refreshes, and automatic refreshes working consistently while the map and navbar controls were simplified.
 - Fixed station-history caching so last-hour and historic readings stay isolated to the correct station even when different stations report the same timestamp.
 - Fixed the last-hour wind-direction chart so it no longer breaks on initial load or when recent samples are stale or malformed.
+- Fixed the last-hour wind-direction chart layout so it keeps a square shape, uses clearer quarter-hour rings, and avoids cropped compass labels.
 - Fixed the navbar logo so clicking it resets the map back to the default overview instead of preserving the previous custom map URL state.
 
 ## v0.0.10 - 2026-03-22

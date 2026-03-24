@@ -3,8 +3,8 @@ import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { rawTimeout, task } from 'ember-concurrency';
 
-const DEFAULT_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
-const DEFAULT_COUNTDOWN_TICK_MS = 15 * 1000;
+const DEFAULT_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
+const DEFAULT_COUNTDOWN_TICK_MS = 1 * 1000;
 
 export default class MapRefreshService extends Service {
   @tracked lastRefresh?: Date;
