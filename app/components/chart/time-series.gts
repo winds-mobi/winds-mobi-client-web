@@ -79,6 +79,11 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       type: 'datetime',
       gridLineWidth: 1,
       crosshair: true,
+      labels: {
+        formatter: function (this: { chart: { time: { dateFormat: (format: string, timestamp: number) => string } }; value: number }) {
+          return `${this.chart.time.dateFormat('%H:%M', this.value)}\n${this.chart.time.dateFormat('%a', this.value)}`;
+        },
+      },
     },
     legend: {
       enabled: false,

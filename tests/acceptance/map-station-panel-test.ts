@@ -241,6 +241,7 @@ module('Acceptance | map station panel', function (hooks) {
       mapZoom: '13',
     });
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
+    assert.dom('[data-test-station-panel]').includesText('1,804 m');
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-summary-section]').exists();
     assert.dom('[data-test-station-wind-section]').exists();

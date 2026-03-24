@@ -6,8 +6,7 @@ import { on } from '@ember/modifier';
 import StationSummary from './summary';
 import StationWinds from './wind';
 import StationAir from './air';
-import RelativeTime from '../relative-time';
-import { t } from 'ember-intl';
+import { formatNumber, formatRelativeTime, t } from 'ember-intl';
 import {
   parseMapView,
   serializeMapView,
@@ -26,6 +25,14 @@ export interface StationIndexSignature {
   Element: null;
 }
 
+function normalizeTimestamp(timestamp: number) {
+  if (timestamp > 1_000_000_000_000) {
+    return timestamp / 1000;
+  }
+
+  return timestamp;
+}
+
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
 
@@ -35,6 +42,20 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   get history() {
     return this.args.history ?? [];
+  }
+
+  get lastReadingRelativeSeconds() {
+    const timestamp = this.station?.last.timestamp;
+
+    if (!Number.isFinite(timestamp)) {
+      return null;
+    }
+
+    return Math.round(normalizeTimestamp(timestamp) - Date.now() / 1000);
+  }
+
+  get hasLastReadingRelativeSeconds() {
+    return this.lastReadingRelativeSeconds !== null;
   }
 
   get mapView() {
@@ -65,7 +86,13 @@ export default class StationIndex extends Component<StationIndexSignature> {
               {{this.station.name}}
             </h1>
             <div class="shrink-0 text-xs font-medium text-slate-500">
-              <RelativeTime @timestamp={{this.station.last.timestamp}} />
+              <span>{{formatNumber this.station.altitude maximumFractionDigits=0}} m</span>
+              <span class="mx-1.5 text-slate-300">&middot;</span>
+              {{#if this.hasLastReadingRelativeSeconds}}
+                {{formatRelativeTime this.lastReadingRelativeSeconds unit="second"}}
+              {{else}}
+                -
+              {{/if}}
             </div>
           {{/if}}
         </div>

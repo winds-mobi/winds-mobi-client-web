@@ -11,6 +11,9 @@
 - Simplified map behavior so the shared URL remains the source of truth for the initial map view while the app avoids unnecessary station reloads for tiny map changes.
 - Simplified the refresh-control presentation so it now looks like a standard button instead of a custom-drawn control.
 - Updated the refresh countdown text to use plain language like “in 10 minutes” instead of a timer-style display.
+- Added the station altitude next to the latest reading time in the station sidebar header.
+- Simplified the station sidebar timestamp text to use plain relative wording such as “x seconds ago”.
+- Updated the wind and air history charts to show 24-hour time plus the short weekday on the x-axis labels.
 
 ### Removed
 
