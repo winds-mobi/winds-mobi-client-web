@@ -18,6 +18,7 @@
 ### Fixed
 
 - Kept shared map links, station-panel deep links, manual refreshes, and automatic refreshes working consistently while the map and navbar controls were simplified.
+- Fixed station-history caching so last-hour and historic readings stay isolated to the correct station even when different stations report the same timestamp.
 
 ## v0.0.10 - 2026-03-22
 

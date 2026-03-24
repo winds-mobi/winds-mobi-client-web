@@ -15,13 +15,23 @@ interface HistoryApiPayload {
   hum: number;
 }
 
-function renameFields(elm: HistoryApiPayload) {
+function extractHistoricStationId(url: string | undefined) {
+  if (!url) {
+    return undefined;
+  }
+
+  const match = url.match(/\/stations\/([^/]+)\/historic\//);
+
+  return match?.[1];
+}
+
+function renameFields(elm: HistoryApiPayload, stationId?: string) {
   // TODO: We should add `timestamp` field
   // It is timestamp = id, but to not shoot
   // ourselves in the foot in the end
   return {
     type: 'history',
-    id: elm._id.toString(),
+    id: stationId ? `${stationId}:${elm._id}` : elm._id.toString(),
     attributes: {
       direction: elm['w-dir'],
       speed: elm['w-avg'],
@@ -43,15 +53,17 @@ const HistoryHandler: Handler = {
 
     try {
       const { content } = (await next(context.request)) as Response;
+      const stationId = extractHistoricStationId(context.request.url);
 
       // JSON-API requires us to have IDs
-      // Timestamps should be unique-enough
+      // Historic timestamps are only unique within a station,
+      // so cache identity must include the station id.
 
       const contedWithIds = Array.isArray(content)
         ? content
-            .map((elm) => renameFields(elm))
+            .map((elm) => renameFields(elm, stationId))
             .sort((a, b) => a.attributes.timestamp - b.attributes.timestamp)
-        : renameFields(content);
+        : renameFields(content, stationId);
 
       const jsonApiLikeData = {
         links: {
