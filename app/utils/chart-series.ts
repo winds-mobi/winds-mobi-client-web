@@ -1,5 +1,14 @@
 export type TimeSeriesPoint = [number, number | null];
 
+export function sortByNumericValue<T>(
+  values: T[],
+  numericValue: (value: T) => number
+) {
+  return [...values].sort(
+    (left, right) => numericValue(left) - numericValue(right)
+  );
+}
+
 export function buildTimeSeriesData<T>(
   rows: T[],
   xValue: (row: T) => number,
@@ -22,7 +31,7 @@ export function buildTimeSeriesData<T>(
     new Map<number, number | null>()
   );
 
-  return [...pointsByTimestamp.entries()]
-    .map(([timestamp, value]) => [timestamp, value] as TimeSeriesPoint)
-    .sort((left, right) => left[0] - right[0]);
+  return [...pointsByTimestamp.entries()].map(
+    ([timestamp, value]) => [timestamp, value] as TimeSeriesPoint
+  );
 }

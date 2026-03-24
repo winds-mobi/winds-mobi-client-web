@@ -79,5 +79,6 @@ Notes: Leaflet-specific state was removed from the location service.
 
 - Install dependencies with `pnpm install`.
 - Use the smallest relevant checks while working.
+- Do not run lint or tests after every small change. Batch work, then run the relevant verification before commit or final handoff.
 - Run `pnpm test` before finishing a substantial change when dependencies are available.
 - Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember`.

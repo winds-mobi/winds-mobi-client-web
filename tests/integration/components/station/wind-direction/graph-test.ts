@@ -14,16 +14,18 @@ module(
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test('it skips rendering the chart when there is no history', async function (this: WindDirectionGraphTestContext, assert) {
+    test('it renders the chart when there is no history', async function (this: WindDirectionGraphTestContext, assert) {
       this.data = [];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
       await settled();
 
-      assert.dom('.highcharts-container').doesNotExist();
+      assert.dom('.highcharts-container').exists();
     });
 
-    test('it renders the chart for older history using the latest sample as the reference point', async function (this: WindDirectionGraphTestContext, assert) {
+    test('it renders the chart for recent history', async function (this: WindDirectionGraphTestContext, assert) {
+      const now = Date.now();
+
       this.data = [
         {
           id: 'old-1',
@@ -32,7 +34,7 @@ module(
           gusts: 14,
           temperature: 6,
           humidity: 60,
-          timestamp: 1_710_000_000_000,
+          timestamp: now - 30 * 60 * 1000,
           [Type]: 'history',
         },
         {
@@ -42,7 +44,7 @@ module(
           gusts: 22,
           temperature: 7,
           humidity: 58,
-          timestamp: 1_710_003_600_000,
+          timestamp: now - 5 * 60 * 1000,
           [Type]: 'history',
         },
       ];

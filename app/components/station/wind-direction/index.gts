@@ -16,15 +16,7 @@ const DURATION = 1 * 60 * 60;
 
 export default class WindDirection extends Component<WindDirectionSignature> {
   get recentHistory() {
-    const latestTimestamp = Math.max(
-      ...this.args.data.map((record) => record.timestamp)
-    );
-
-    if (!Number.isFinite(latestTimestamp)) {
-      return [];
-    }
-
-    const minTimestamp = latestTimestamp - DURATION * 1000;
+    const minTimestamp = Date.now() - DURATION * 1000;
 
     return this.args.data.filter((record) => record.timestamp >= minTimestamp);
   }
