@@ -1,3 +1,5 @@
+import type { Map as MaplibreMap } from 'ember-maplibre-gl';
+
 export const DEFAULT_MAP_LNG = 7.85;
 export const DEFAULT_MAP_LAT = 46.68;
 export const DEFAULT_MAP_ZOOM = 13;
@@ -85,6 +87,27 @@ export function serializeMapView(view: MapView): Required<MapQueryParams> {
   };
 }
 
+export function mapViewFromMap(map: MaplibreMap): MapView {
+  const center = map.getCenter();
+
+  return normalizeMapView({
+    latitude: center.lat,
+    longitude: center.lng,
+    zoom: map.getZoom(),
+  });
+}
+
+export function mapBoundsFromMap(map: MaplibreMap): MapBounds {
+  const bounds = map.getBounds();
+  const northEast = bounds.getNorthEast();
+  const southWest = bounds.getSouthWest();
+
+  return normalizeMapBounds({
+    northEast: [northEast.lng, northEast.lat],
+    southWest: [southWest.lng, southWest.lat],
+  });
+}
+
 export function mapViewsEqual(left: MapView, right: MapView) {
   const normalizedLeft = normalizeMapView(left);
   const normalizedRight = normalizeMapView(right);
@@ -108,7 +131,10 @@ export function mapBoundsEqual(left: MapBounds, right: MapBounds) {
   );
 }
 
-export function mapViewExceedsRequestThreshold(left: MapView, right: MapView) {
+export function mapViewChangeRequiresStationRefetch(
+  left: MapView,
+  right: MapView
+) {
   const normalizedLeft = normalizeMapView(left);
   const normalizedRight = normalizeMapView(right);
 

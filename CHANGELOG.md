@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.0.11 - 2026-03-24
+
+### Added
+
+- Added a clearer refresh control in the navbar with a standard refresh icon and a visual countdown for the next automatic refresh.
+
+### Changed
+
+- Simplified map behavior so the shared URL remains the source of truth for the initial map view while the app avoids unnecessary station reloads for tiny map changes.
+- Simplified the refresh-control presentation so it now looks like a standard button instead of a custom-drawn control.
+
+### Removed
+
+- Removed automatic map recentering on startup, so reopening the app no longer tries to move the map on its own.
+
+### Fixed
+
+- Kept shared map links, station-panel deep links, manual refreshes, and automatic refreshes working consistently while the map and navbar controls were simplified.
+
 ## v0.0.10 - 2026-03-22
 
 ### Changed

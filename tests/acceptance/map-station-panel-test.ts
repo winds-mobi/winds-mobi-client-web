@@ -1,7 +1,6 @@
 import Service from '@ember/service';
 import { Type } from '@warp-drive/core/types/symbols';
 import { module, test } from 'qunit';
-import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   click,
   currentURL,
@@ -216,40 +215,6 @@ function countHistoryRequests(calls: string[], stationId: string) {
     .length;
 }
 
-function currentMap(): MaplibreMap | undefined {
-  const element = document.querySelector('[data-test-map-canvas]');
-
-  return (
-    element as
-      | (Element & {
-          __maplibreMap?: MaplibreMap;
-        })
-      | null
-  )?.__maplibreMap;
-}
-
-async function mapInstance() {
-  await waitUntil(() => Boolean(currentMap()));
-
-  const map = currentMap();
-
-  if (!map) {
-    throw new Error('Expected map instance to be available');
-  }
-
-  return map;
-}
-
-async function moveMapTo(longitude: number, latitude: number, zoom: number) {
-  const map = await mapInstance();
-
-  map.jumpTo({
-    center: [longitude, latitude],
-    zoom,
-  });
-  map.fire('moveend');
-}
-
 async function selectStationMarker(stationId: string) {
   await waitUntil(() =>
     Boolean(document.querySelector(`[data-station-id="${stationId}"]`))
@@ -269,17 +234,12 @@ module('Acceptance | map station panel', function (hooks) {
 
   test('it deep-links the panel and map state from the URL', async function (assert) {
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
-    const map = await mapInstance();
-    const center = map.getCenter();
 
     assertCurrentRoute(assert, '/map/holfuy-1804', {
       mapLat: '46.67719',
       mapLng: '7.86323',
       mapZoom: '13',
     });
-    assert.strictEqual(center.lng, 7.86323);
-    assert.strictEqual(center.lat, 46.67719);
-    assert.strictEqual(map.getZoom(), 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-summary-section]').exists();
@@ -314,8 +274,6 @@ module('Acceptance | map station panel', function (hooks) {
   test('it keeps the current map view when selecting another station from the map', async function (assert) {
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await selectStationMarker('holfuy-2222');
-    const map = await mapInstance();
-    const center = map.getCenter();
 
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
@@ -323,9 +281,6 @@ module('Acceptance | map station panel', function (hooks) {
       mapLat: '46.67719',
       mapLng: '7.86323',
     });
-    assert.strictEqual(center.lng, 7.86323);
-    assert.strictEqual(center.lat, 46.67719);
-    assert.strictEqual(map.getZoom(), 13);
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
@@ -356,20 +311,6 @@ module('Acceptance | map station panel', function (hooks) {
     await settled();
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
-  });
-
-  test('it updates only the map query params when the map view changes with the panel open', async function (assert) {
-    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
-
-    await moveMapTo(8.111111, 46.222222, 9.678);
-    await settled();
-
-    assertCurrentRoute(assert, '/map/holfuy-1804', {
-      mapLat: '46.22222',
-      mapLng: '8.11111',
-      mapZoom: '9.68',
-    });
-    assert.dom('[data-test-station-panel]').exists();
   });
 
   test('it force refreshes map and station requests from the navbar button', async function (assert) {

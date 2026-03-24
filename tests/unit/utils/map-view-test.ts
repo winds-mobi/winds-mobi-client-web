@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   DEFAULT_MAP_LAT,
   DEFAULT_MAP_LNG,
@@ -6,7 +7,9 @@ import {
   isMapRoute,
   MAP_REQUEST_COORDINATE_THRESHOLD,
   MAP_REQUEST_ZOOM_THRESHOLD,
-  mapViewExceedsRequestThreshold,
+  mapBoundsFromMap,
+  mapViewChangeRequiresStationRefetch,
+  mapViewFromMap,
   mapViewsEqual,
   parseMapView,
   serializeMapView,
@@ -60,9 +63,50 @@ module('Unit | Utility | map-view', function () {
     assert.false(isMapRoute('index'));
   });
 
+  test('it reads and normalizes the current view and bounds from a map instance', function (assert) {
+    const map = {
+      getCenter() {
+        return {
+          lat: 46.7654321,
+          lng: 8.1234567,
+        };
+      },
+      getZoom() {
+        return 9.876;
+      },
+      getBounds() {
+        return {
+          getNorthEast() {
+            return {
+              lat: 46.8888888,
+              lng: 8.9999999,
+            };
+          },
+          getSouthWest() {
+            return {
+              lat: 46.1111111,
+              lng: 8.0000001,
+            };
+          },
+        };
+      },
+    } as unknown as MaplibreMap;
+
+    assert.deepEqual(mapViewFromMap(map), {
+      longitude: 8.12346,
+      latitude: 46.76543,
+      zoom: 9.88,
+    });
+
+    assert.deepEqual(mapBoundsFromMap(map), {
+      northEast: [9, 46.88889],
+      southWest: [8, 46.11111],
+    });
+  });
+
   test('it applies the station-request threshold to map view changes', function (assert) {
     assert.false(
-      mapViewExceedsRequestThreshold(
+      mapViewChangeRequiresStationRefetch(
         { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
         {
           longitude: 8.12345 + MAP_REQUEST_COORDINATE_THRESHOLD / 2,
@@ -73,7 +117,7 @@ module('Unit | Utility | map-view', function () {
     );
 
     assert.true(
-      mapViewExceedsRequestThreshold(
+      mapViewChangeRequiresStationRefetch(
         { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
         {
           longitude: 8.12345 + MAP_REQUEST_COORDINATE_THRESHOLD + 0.00001,
@@ -84,7 +128,7 @@ module('Unit | Utility | map-view', function () {
     );
 
     assert.true(
-      mapViewExceedsRequestThreshold(
+      mapViewChangeRequiresStationRefetch(
         { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
         {
           longitude: 8.12345,

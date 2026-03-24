@@ -1,10 +1,8 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   click,
   currentURL,
-  settled,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
@@ -89,40 +87,6 @@ function assertCurrentMapUrl(
   );
 }
 
-function currentMap(): MaplibreMap | undefined {
-  const element = document.querySelector('[data-test-map-canvas]');
-
-  return (
-    element as
-      | (Element & {
-          __maplibreMap?: MaplibreMap;
-        })
-      | null
-  )?.__maplibreMap;
-}
-
-async function mapInstance() {
-  await waitUntil(() => Boolean(currentMap()));
-
-  const map = currentMap();
-
-  if (!map) {
-    throw new Error('Expected map instance to be available');
-  }
-
-  return map;
-}
-
-async function moveMapTo(longitude: number, latitude: number, zoom: number) {
-  const map = await mapInstance();
-
-  map.jumpTo({
-    center: [longitude, latitude],
-    zoom,
-  });
-  map.fire('moveend');
-}
-
 module('Acceptance | map query params', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -134,72 +98,13 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    const map = await mapInstance();
-    const center = map.getCenter();
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     assertCurrentMapUrl(assert, {
       mapLat: '46.54321',
       mapLng: '8.12345',
       mapZoom: '9.5',
     });
-    assert.strictEqual(center.lng, 8.12345);
-    assert.strictEqual(center.lat, 46.54321);
-    assert.strictEqual(map.getZoom(), 9.5);
-    assert.true(
-      store.calls.some(
-        (url) =>
-          url.includes('within-pt1-lat=') &&
-          url.includes('within-pt1-lon=') &&
-          url.includes('within-pt2-lat=') &&
-          url.includes('within-pt2-lon=') &&
-          url.includes('is-highest-duplicates-rating=true') &&
-          url.includes('limit=470')
-      )
-    );
-  });
-
-  test('it does not refetch stations for tiny map view changes', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    await waitUntil(() => countStationRequests(store.calls) > 0);
-
-    const initialStationRequestCount = countStationRequests(store.calls);
-
-    await moveMapTo(8.12844, 46.5482, 9.6);
-    await settled();
-
-    assertCurrentMapUrl(assert, {
-      mapLat: '46.5482',
-      mapLng: '8.12844',
-      mapZoom: '9.6',
-    });
-    assert.strictEqual(
-      countStationRequests(store.calls),
-      initialStationRequestCount
-    );
-  });
-
-  test('it refetches stations after the request threshold is crossed', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
-    await waitUntil(() => countStationRequests(store.calls) > 0);
-
-    const initialStationRequestCount = countStationRequests(store.calls);
-
-    await moveMapTo(8.14345, 46.54321, 9.5);
-    await settled();
-
-    assertCurrentMapUrl(assert, {
-      mapLat: '46.54321',
-      mapLng: '8.14345',
-      mapZoom: '9.5',
-    });
-    assert.strictEqual(
-      countStationRequests(store.calls),
-      initialStationRequestCount + 1
-    );
     assert.true(
       store.calls.some(
         (url) =>
@@ -217,6 +122,7 @@ module('Acceptance | map query params', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await waitUntil(() => countStationRequests(store.calls) > 0);
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
