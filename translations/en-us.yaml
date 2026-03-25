@@ -19,6 +19,9 @@ station:
     now: Now
     wind: Wind
     air: Air
+  timeSeries:
+    sync: Sync
+    syncToggle: Toggle shared chart zoom sync
   wind: Wind
   air: Air
 

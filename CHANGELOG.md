@@ -7,6 +7,7 @@
 - Refined the station sidebar’s `Last hour` card so it now requests only the last hour of history directly, keeps the same layout while loading, and presents the wind-direction view and summary metrics more consistently.
 - Updated the `Wind` and `Air` station sections so they each load only the historical range and fields they need, which keeps those charts more focused and efficient.
 - Simplified the station sidebar cards so the `Now`, `Last hour`, `Wind`, and `Air` sections now share a single leaner card style without extra layout-specific variants.
+- Refined the station history charts so each graph keeps its own time controls and bottom timeline slider, while an optional lock lets the wind and air charts stay zoomed and panned together when you want to compare them side by side.
 
 ### Fixed
 

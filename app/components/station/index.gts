@@ -3,6 +3,7 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
+import { Switch } from '@frontile/forms';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
@@ -14,6 +15,7 @@ import {
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
 
 export interface StationIndexSignature {
   Args: {
@@ -27,6 +29,7 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
+  @service declare timeSeriesSync: TimeSeriesSyncService;
 
   get station() {
     return this.args.station;
@@ -44,11 +47,20 @@ export default class StationIndex extends Component<StationIndexSignature> {
     );
   }
 
+  get isTimeSeriesSyncEnabled() {
+    return this.timeSeriesSync.isSyncEnabled;
+  }
+
   @action
   close() {
     this.router.transitionTo('map', {
       queryParams: serializeMapView(this.mapView),
     });
+  }
+
+  @action
+  toggleTimeSeriesSync(isSelected: boolean) {
+    this.timeSeriesSync.setSyncEnabled(isSelected);
   }
 
   <template>
@@ -94,6 +106,15 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <StationSummary @station={{this.station}} />
             <StationWind @stationId={{this.station.id}} />
             <StationAir @stationId={{this.station.id}} />
+            <div class="flex justify-end">
+              <Switch
+                @isSelected={{this.isTimeSeriesSyncEnabled}}
+                @onChange={{this.toggleTimeSeriesSync}}
+                @intent="success"
+                @label={{t "station.timeSeries.sync"}}
+                aria-label={{t "station.timeSeries.syncToggle"}}
+              />
+            </div>
           </div>
         {{/if}}
       </div>
