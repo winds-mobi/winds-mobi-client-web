@@ -100,6 +100,7 @@ class ShortIntervalMapRefreshService extends MapRefreshService {
 }
 
 const NEARBY_STATION_CARD_SELECTOR = '[data-test-nearby-station-card]';
+const NAVBAR_LOCATION_SELECTOR = '[data-test-navbar-location]';
 const DEFAULT_COORDINATES = {
   accuracy: 20,
   latitude: 46.521,
@@ -146,7 +147,7 @@ module('Acceptance | nearby route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the explainer and waits for the location button when access is not granted yet', async function (assert) {
+  test('it shows the explainer and waits for the navbar location button when access is not granted yet', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
     const nearbyLocation = this.owner.lookup(
       'service:nearby-location'
@@ -157,11 +158,12 @@ module('Acceptance | nearby route', function (hooks) {
     await visit('/nearby');
 
     assert.dom('[data-test-nearby-location-prompt]').exists();
-    assert.dom('[data-test-nearby-enable-location]').hasText('Use my location');
+    assert.dom(NAVBAR_LOCATION_SELECTOR).exists();
+    assert.dom('[data-test-nearby-enable-location]').doesNotExist();
     assert.strictEqual(countStationRequests(store.calls), 0);
   });
 
-  test('it requests location after the user enables it and then loads nearby stations', async function (assert) {
+  test('it requests location after the user uses the navbar location button and then loads nearby stations', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
     const nearbyLocation = this.owner.lookup(
       'service:nearby-location'
@@ -176,7 +178,7 @@ module('Acceptance | nearby route', function (hooks) {
     };
 
     await visit('/nearby');
-    await click('[data-test-nearby-enable-location]');
+    await click(NAVBAR_LOCATION_SELECTOR);
 
     await waitForNearbyStations();
 
@@ -218,6 +220,7 @@ module('Acceptance | nearby route', function (hooks) {
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
+    assert.dom(NAVBAR_LOCATION_SELECTOR).exists();
     assert.dom('[data-test-navbar-refresh]').exists();
 
     await click('[data-test-navbar-refresh]');

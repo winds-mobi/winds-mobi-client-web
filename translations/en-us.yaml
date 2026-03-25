@@ -8,6 +8,16 @@ navigation:
   map: Map
   nearby: Nearby
 
+location:
+  locate: Locate me
+  locating: Locating you…
+  ready: Your location is ready
+  permissionDenied: Location access is blocked in the browser
+  positionUnavailable: Your location is temporarily unavailable
+  timeout: Location lookup timed out
+  unsupported: This browser cannot provide your location
+  unknownError: Your location could not be determined
+
 list:
   toggle: list
 
@@ -21,14 +31,12 @@ map:
 
 nearby:
   title: Nearby stations
-  description: Find the closest stations around your current position and compare the live reading with the last hour at a glance. This view needs your location.
+  description: Use the location button in the menu to find the closest stations around your current position and compare the live reading with the last hour at a glance.
   loading: Looking up the closest stations…
   requestError: Nearby stations could not be loaded right now.
   location:
     checking: Checking location access…
-    enable: Use my location
-    locating: Locating…
-    retry: Try again
+    locatingDescription: Trying to determine your current location…
     permissionDenied: This view needs your location to find nearby stations. Location access is currently blocked in the browser.
     positionUnavailable: This view needs your location to find nearby stations, but the device could not determine it right now.
     timeout: This view needs your location to find nearby stations, but the request timed out.

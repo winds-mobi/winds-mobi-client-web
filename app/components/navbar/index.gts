@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
+import NavbarLocation from './location';
 import NavbarLogo from './logo';
 import NavbarRefresh from './refresh';
 import NavbarRouteSwitch from './route-switch';
@@ -27,7 +28,8 @@ export default class Navbar extends Component<NavbarSignature> {
           <NavbarRouteSwitch />
 
           {{! TODO: <NavbarMobileMenu::Button /> }}
-          <div class="ml-4 flex items-center">
+          <div class="ml-4 flex items-center gap-2">
+            <NavbarLocation />
             <NavbarRefresh />
 
             {{! <NavbarNotifications /> }}

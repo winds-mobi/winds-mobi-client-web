@@ -1,19 +1,18 @@
 import Component from '@glimmer/component';
-import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { Request } from '@warp-drive/ember';
-import { Button } from '@frontile/buttons';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import type { IntlService } from 'ember-intl';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
-import type { IntlService } from 'ember-intl';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
+import { locationErrorTranslationKey } from 'winds-mobi-client-web/utils/location-error-translation-key';
 
 interface NearbyTemplateSignature {
   Args: {
@@ -26,8 +25,8 @@ type RequestStore = {
 };
 
 export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
-  @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare intl: IntlService;
+  @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare mapRefresh: MapRefreshService;
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -59,33 +58,21 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     );
   }
 
-  get buttonLabel() {
-    if (this.nearbyLocation.isRequestingLocation) {
-      return String(this.intl.t('nearby.location.locating'));
-    }
-
-    if (this.nearbyLocation.errorCode) {
-      return String(this.intl.t('nearby.location.retry'));
-    }
-
-    return String(this.intl.t('nearby.location.enable'));
-  }
-
   get locationMessage() {
-    switch (this.nearbyLocation.errorCode) {
-      case 'permission-denied':
-        return String(this.intl.t('nearby.location.permissionDenied'));
-      case 'position-unavailable':
-        return String(this.intl.t('nearby.location.positionUnavailable'));
-      case 'timeout':
-        return String(this.intl.t('nearby.location.timeout'));
-      case 'unsupported':
-        return String(this.intl.t('nearby.location.unsupported'));
-      case 'unknown':
-        return String(this.intl.t('nearby.location.unknownError'));
-      default:
-        return String(this.intl.t('nearby.description'));
+    if (this.nearbyLocation.isRequestingLocation) {
+      return String(this.intl.t('nearby.location.locatingDescription'));
     }
+
+    const errorKey = locationErrorTranslationKey(
+      'nearby.location',
+      this.nearbyLocation.errorCode
+    );
+
+    if (errorKey) {
+      return String(this.intl.t(errorKey));
+    }
+
+    return String(this.intl.t('nearby.description'));
   }
 
   get shouldShowLocationPrompt() {
@@ -93,15 +80,6 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
       !this.nearbyLocation.hasCoordinates &&
       !this.nearbyLocation.isCheckingPermission
     );
-  }
-
-  get isLocationButtonDisabled() {
-    return !this.nearbyLocation.canRequestLocation;
-  }
-
-  @action
-  enableLocation() {
-    void this.nearbyLocation.requestCurrentPosition();
   }
 
   <template>
@@ -154,16 +132,6 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
               <p class="text-sm leading-6 text-slate-600">
                 {{this.locationMessage}}
               </p>
-              <div class="mt-4 flex flex-wrap items-center gap-3">
-                <Button
-                  @appearance="outlined"
-                  @onPress={{this.enableLocation}}
-                  disabled={{this.isLocationButtonDisabled}}
-                  data-test-nearby-enable-location
-                >
-                  {{this.buttonLabel}}
-                </Button>
-              </div>
             </div>
           </StationSectionCard>
         {{else}}

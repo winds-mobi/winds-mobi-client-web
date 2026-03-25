@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
+import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
@@ -11,11 +12,7 @@ import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, StyleSpecification } from 'ember-maplibre-gl';
-import {
-  GeolocateControl,
-  NavigationControl,
-  TerrainControl,
-} from 'maplibre-gl';
+import { NavigationControl, TerrainControl } from 'maplibre-gl';
 import { WIND_COLOUR_BANDS } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
@@ -24,6 +21,8 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import {
+  approximateMapBoundsFromView,
+  mapBoundsEqual,
   mapBoundsFromMap,
   mapViewsEqual,
   mapViewChangeRequiresStationRefetch,
@@ -99,26 +98,25 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
+type RequestResponse<T> = { data: T } | { content: { data: T } };
+
+function responseData<T>(response: RequestResponse<T>): T {
+  return 'data' in response ? response.data : response.content.data;
+}
+
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
 
+  @tracked stations: Station[] = [];
   @tracked requestedViewport?: RequestedViewport;
+  #requestVersion = 0;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
     visualizePitch: true,
-  });
-
-  private geolocateControl = new GeolocateControl({
-    positionOptions: {
-      enableHighAccuracy: true,
-    },
-    showAccuracyCircle: false,
-    showUserLocation: true,
-    trackUserLocation: false,
   });
 
   private terrainControl =
@@ -140,20 +138,31 @@ export default class Map extends Component<MapSignature> {
   }
 
   @cached
-  get request(): Future<{ data: Station[] }> | undefined {
-    if (!this.requestedViewport) {
-      return undefined;
-    }
+  get request(): Future<RequestResponse<Station[]>> | undefined {
+    const requestedViewport = this.requestedViewport ?? {
+      bounds: approximateMapBoundsFromView(this.mapView),
+      view: this.mapView,
+    };
 
     this.mapRefresh.lastRefresh;
 
-    const options = mapQuery<Station>(
-      'station',
-      this.requestedViewport.bounds,
-      { backgroundReload: true }
-    );
+    const options = mapQuery<Station>('station', requestedViewport.bounds, {
+      backgroundReload: true,
+    });
 
-    return this.requestStore.request<{ data: Station[] }>(options);
+    const request =
+      this.requestStore.request<RequestResponse<Station[]>>(options);
+    const requestVersion = ++this.#requestVersion;
+
+    void request.then((result) => {
+      if (this.#requestVersion !== requestVersion) {
+        return;
+      }
+
+      this.stations = responseData(result);
+    });
+
+    return request;
   }
 
   get requestState() {
@@ -187,10 +196,6 @@ export default class Map extends Component<MapSignature> {
     return {
       anchor: 'center' as const,
     };
-  }
-
-  get stations() {
-    return this.requestState?.isSuccess ? this.requestState.value.data : [];
   }
 
   markerPosition(station: Station): [number, number] {
@@ -236,6 +241,7 @@ export default class Map extends Component<MapSignature> {
 
     if (
       !this.requestedViewport ||
+      !mapBoundsEqual(this.requestedViewport.bounds, nextViewport.bounds) ||
       mapViewChangeRequiresStationRefetch(
         this.requestedViewport.view,
         nextViewport.view
@@ -255,6 +261,10 @@ export default class Map extends Component<MapSignature> {
 
   <template>
     <div data-test-map-container class="relative h-full w-full">
+      <Request @request={{this.request}}>
+        <:content></:content>
+      </Request>
+
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"
@@ -269,7 +279,6 @@ export default class Map extends Component<MapSignature> {
           @control={{this.navigationControl}}
           @position="bottom-right"
         />
-        <map.control @control={{this.geolocateControl}} @position="top-right" />
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
         {{/if}}

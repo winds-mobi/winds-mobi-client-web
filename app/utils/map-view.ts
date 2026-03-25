@@ -8,6 +8,8 @@ export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 
 const COORDINATE_PRECISION = 5;
 const ZOOM_PRECISION = 2;
+const WORLD_LONGITUDE_SPAN = 360;
+const WORLD_LATITUDE_SPAN = 170;
 
 export type MapCoordinate = [number, number];
 
@@ -67,6 +69,16 @@ export function normalizeMapBounds(bounds: MapBounds): MapBounds {
       round(bounds.southWest[1], COORDINATE_PRECISION),
     ],
   };
+}
+
+export function approximateMapBoundsFromView(view: MapView): MapBounds {
+  const longitudeSpan = WORLD_LONGITUDE_SPAN / 2 ** view.zoom;
+  const latitudeSpan = WORLD_LATITUDE_SPAN / 2 ** view.zoom;
+
+  return normalizeMapBounds({
+    northEast: [view.longitude + longitudeSpan, view.latitude + latitudeSpan],
+    southWest: [view.longitude - longitudeSpan, view.latitude - latitudeSpan],
+  });
 }
 
 export function parseMapView(queryParams?: MapQueryParams): MapView {
