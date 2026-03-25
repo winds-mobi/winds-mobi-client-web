@@ -4,8 +4,8 @@ import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
 import StationSummary from './summary';
-import StationWinds from './wind';
 import StationAir from './air';
+import StationWind from './wind';
 import { formatNumber, t } from 'ember-intl';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import {
@@ -13,11 +13,10 @@ import {
   serializeMapView,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
-import type { History, Station } from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationIndexSignature {
   Args: {
-    history?: History[];
     station?: Station;
   };
   Blocks: {
@@ -31,10 +30,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
   get station() {
     return this.args.station;
-  }
-
-  get history() {
-    return this.args.history ?? [];
   }
 
   get lastReadingRelativeSeconds() {
@@ -97,8 +92,8 @@ export default class StationIndex extends Component<StationIndexSignature> {
         {{#if this.station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
             <StationSummary @station={{this.station}} />
-            <StationWinds @history={{this.history}} />
-            <StationAir @history={{this.history}} />
+            <StationWind @stationId={{this.station.id}} />
+            <StationAir @stationId={{this.station.id}} />
           </div>
         {{/if}}
       </div>
