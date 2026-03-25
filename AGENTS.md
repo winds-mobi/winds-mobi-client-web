@@ -47,6 +47,11 @@ https://warp-drive.io/llms-full.txt
 - Keep `CHANGELOG.md` user-facing. Document shipped behavior, visible improvements, and notable fixes. Do not list internal refactors, test-only changes, or implementation details unless they directly affect users.
 - When async state coordination fits `ember-concurrency`, prefer it over manual timer or promise bookkeeping. If newer `ember-concurrency` syntax or APIs would require installing or upgrading the package, stop and tell the user first. When using `ember-concurrency`, prefer the latest package version and its current syntax over legacy patterns.
 - For app code in `app/**`, prefer Warp Drive builders + `this.store.request(...)` + handlers over ad hoc `fetch()`.
+- When narrowing historical station requests with `keys`, keep the section-specific field needs aligned with the current UI:
+  - `app/components/station/last-hour.gts`: `w-dir`, `w-avg`, `w-max`
+  - `app/components/station/wind.gts`: `w-dir`, `w-avg`, `w-max`
+  - `app/components/station/air.gts`: `temp`, `hum`, `rain`
+- Warp Drive supports partial resource payloads via upsert, but only one level deep. Reusing the same `history` identity with different top-level primitive fields is fine; do not rely on partial deep merges for object-valued fields.
 - Prefer existing Frontile and Tailwind patterns for shared UI.
 - Update `translations/en-us.yaml` when UI text changes.
 - Do not edit generated or installed files such as `dist/` or `node_modules/`.

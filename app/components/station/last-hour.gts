@@ -21,6 +21,7 @@ export interface StationLastHourSignature {
 
 const DURATION = 1 * 60 * 60;
 const EMPTY_HISTORY: History[] = [];
+const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
 
 export default class StationLastHour extends Component<StationLastHourSignature> {
   @service
@@ -37,6 +38,7 @@ export default class StationLastHour extends Component<StationLastHourSignature>
         this.args.stationId,
         {
           duration: DURATION,
+          keys: HISTORY_KEYS,
         },
         {
           backgroundReload: true,
@@ -46,9 +48,7 @@ export default class StationLastHour extends Component<StationLastHourSignature>
   }
 
   <template>
-    <StationSectionCard
-      @title={{t "wind.lastHour"}}
-    >
+    <StationSectionCard @title={{t "wind.lastHour"}}>
       <Request @request={{this.historyRequest}}>
         <:content as |result|>
           <StationLastHourContent @history={{result.data}} />

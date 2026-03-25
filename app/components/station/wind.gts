@@ -21,6 +21,7 @@ export interface StationWindSignature {
 
 const DURATION = 435600;
 const EMPTY_HISTORY: History[] = [];
+const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
 
 export default class StationWind extends Component<StationWindSignature> {
   @service
@@ -37,6 +38,7 @@ export default class StationWind extends Component<StationWindSignature> {
         this.args.stationId,
         {
           duration: DURATION,
+          keys: HISTORY_KEYS,
         },
         {
           backgroundReload: true,

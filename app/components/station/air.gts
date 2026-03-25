@@ -21,9 +21,9 @@ export interface StationAirSignature {
 
 const DURATION = 435600;
 const EMPTY_HISTORY: History[] = [];
+const HISTORY_KEYS = ['temp', 'hum', 'rain'];
 
 export default class StationAir extends Component<StationAirSignature> {
-  @cached
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare mapRefresh: MapRefreshService;
@@ -38,6 +38,7 @@ export default class StationAir extends Component<StationAirSignature> {
         this.args.stationId,
         {
           duration: DURATION,
+          keys: HISTORY_KEYS,
         },
         {
           backgroundReload: true,
