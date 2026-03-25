@@ -19,7 +19,7 @@ import {
     data-test-navbar-logo
   >
     <img class="h-8 w-auto" src="/logo.png" alt={{t "application.name"}} />
-    <span class="pl-2 whitespace-nowrap">
+    <span class="hidden whitespace-nowrap pl-2 sm:inline">
       {{t "application.name"}}
     </span>
   </LinkTo>

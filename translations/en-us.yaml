@@ -4,6 +4,10 @@ application:
 common:
   close: Close
 
+navigation:
+  map: Map
+  nearby: Nearby
+
 list:
   toggle: list
 
@@ -15,7 +19,24 @@ map:
     ariaLabel: Refresh map and station data
     sinceLast: '{value} since last refresh'
 
+nearby:
+  title: Nearby stations
+  description: Find the closest stations around your current position and compare the live reading with the last hour at a glance. This view needs your location.
+  loading: Looking up the closest stations…
+  requestError: Nearby stations could not be loaded right now.
+  location:
+    checking: Checking location access…
+    enable: Use my location
+    locating: Locating…
+    retry: Try again
+    permissionDenied: This view needs your location to find nearby stations. Location access is currently blocked in the browser.
+    positionUnavailable: This view needs your location to find nearby stations, but the device could not determine it right now.
+    timeout: This view needs your location to find nearby stations, but the request timed out.
+    unsupported: This browser cannot provide location access for the nearby stations view.
+    unknownError: This view needs your location to find nearby stations, but the browser did not return it.
+
 station:
+  lastPickup: Last pickup
   summary:
     now: Now
     wind: Wind

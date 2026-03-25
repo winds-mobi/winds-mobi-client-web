@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.0.14 - 2026-03-25
+
+### Added
+
+- Added a new `Nearby` view that can use your current location to show the closest weather stations in a responsive card layout.
+
+### Changed
+
+- Added direct `Map` and `Nearby` navigation links to the navbar so switching between the two views is faster and clearer.
+- Updated the new `Nearby` view to request location only when needed, show a simpler permission prompt, and hide the introductory copy once nearby stations are available.
+- Kept the shared refresh control available in the `Nearby` view so nearby station results can be refreshed manually and through the same automatic refresh cycle as the map.
+- Unified station header details across the map sidebar and nearby cards so station name, altitude, relative update time, and provider link are presented consistently.
+- Updated nearby station cards so the provider name is always visible and opens the provider page in a new browser tab.
+
 ## v0.0.13 - 2026-03-25
 
 ### Changed

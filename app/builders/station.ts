@@ -122,4 +122,23 @@ function mapQuery<T>(
   );
 }
 
-export { findRecord, mapQuery, query };
+function nearbyQuery<T>(
+  type: string,
+  latitude: number,
+  longitude: number,
+  limit = 10,
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      'is-highest-duplicates-rating': true,
+      limit,
+      'near-lat': latitude,
+      'near-lon': longitude,
+    },
+    options
+  );
+}
+
+export { findRecord, mapQuery, nearbyQuery, query };

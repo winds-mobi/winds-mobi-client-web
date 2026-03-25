@@ -16,7 +16,10 @@ export default class NavbarRefresh extends Component<NavbarRefreshSignature> {
   @service declare router: RouterService;
 
   get isVisible() {
-    return isMapRoute(this.router.currentRouteName);
+    return (
+      isMapRoute(this.router.currentRouteName) ||
+      this.router.currentRouteName === 'nearby'
+    );
   }
 
   <template>
