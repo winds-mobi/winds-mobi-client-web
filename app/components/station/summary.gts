@@ -29,15 +29,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
   }
 
   get recentHistory() {
-    const latestTimestamp = Math.max(
-      ...this.args.history.map((record) => record.timestamp)
-    );
-
-    if (!Number.isFinite(latestTimestamp)) {
-      return [];
-    }
-
-    const minTimestamp = latestTimestamp - DURATION * 1000;
+    const minTimestamp = Date.now() - DURATION * 1000;
 
     return this.args.history.filter(
       (record) => record.timestamp >= minTimestamp
