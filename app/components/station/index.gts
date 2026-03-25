@@ -8,6 +8,8 @@ import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
 import { formatNumber, t } from 'ember-intl';
+import LockSimple from 'ember-phosphor-icons/components/ph-lock-simple';
+import LockSimpleOpen from 'ember-phosphor-icons/components/ph-lock-simple-open';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import {
   parseMapView,
@@ -106,14 +108,22 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <StationSummary @station={{this.station}} />
             <StationWind @stationId={{this.station.id}} />
             <StationAir @stationId={{this.station.id}} />
-            <div class="flex justify-end">
+            <div class="flex">
               <Switch
                 @isSelected={{this.isTimeSeriesSyncEnabled}}
                 @onChange={{this.toggleTimeSeriesSync}}
                 @intent="success"
                 @label={{t "station.timeSeries.sync"}}
                 aria-label={{t "station.timeSeries.syncToggle"}}
-              />
+              >
+                <:startContent>
+                  <LockSimple @size={{14}} />
+                </:startContent>
+
+                <:endContent>
+                  <LockSimpleOpen @size={{14}} />
+                </:endContent>
+              </Switch>
             </div>
           </div>
         {{/if}}
