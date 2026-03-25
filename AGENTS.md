@@ -11,6 +11,12 @@
 https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instructions.md?plain=1
 ```
 
+- Use the WarpDrive LLM docs for request/state patterns and `<Request>` usage:
+
+```text
+https://warp-drive.io/llms-full.txt
+```
+
 ## Project overview
 
 - This repository is a single Ember application at the repo root.
