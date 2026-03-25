@@ -11,15 +11,6 @@ export interface WindDirectionSignature {
   };
   Element: null;
 }
-
-const DURATION = 1 * 60 * 60;
-
 export default class WindDirection extends Component<WindDirectionSignature> {
-  get recentHistory() {
-    const minTimestamp = Date.now() - DURATION * 1000;
-
-    return this.args.data.filter((record) => record.timestamp >= minTimestamp);
-  }
-
-  <template><WindDirectionGraph @data={{this.recentHistory}} /></template>
+  <template><WindDirectionGraph @data={{@data}} /></template>
 }

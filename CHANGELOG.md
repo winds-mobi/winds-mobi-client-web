@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.13 - 2026-03-25
+
+### Changed
+
+- Refined the station sidebar’s `Last hour` card so it now requests only the last hour of history directly, keeps the same compact layout while loading, and presents the wind-direction view and summary metrics more consistently.
+
+### Fixed
+
+- Fixed the `Last hour` wind summary so its average wind speed is based on the timing of real samples instead of a simple sample-count average.
+
 ## v0.0.12 - 2026-03-24
 
 ### Added

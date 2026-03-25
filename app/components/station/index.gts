@@ -96,10 +96,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
       <div class="min-h-0 flex-1 overflow-y-auto">
         {{#if this.station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
-            <StationSummary
-              @station={{this.station}}
-              @history={{this.history}}
-            />
+            <StationSummary @station={{this.station}} />
             <StationWinds @history={{this.history}} />
             <StationAir @history={{this.history}} />
           </div>
