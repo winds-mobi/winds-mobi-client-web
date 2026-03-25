@@ -37,6 +37,11 @@ nearby:
 
 station:
   lastPickup: Last pickup
+  meta:
+    altitude: Altitude
+    updated: Updated
+    distance: Distance
+    provider: Provider
   summary:
     now: Now
     wind: Wind

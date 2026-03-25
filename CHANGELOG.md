@@ -11,8 +11,8 @@
 - Added direct `Map` and `Nearby` navigation links to the navbar so switching between the two views is faster and clearer.
 - Updated the new `Nearby` view to request location only when needed, show a simpler permission prompt, and hide the introductory copy once nearby stations are available.
 - Kept the shared refresh control available in the `Nearby` view so nearby station results can be refreshed manually and through the same automatic refresh cycle as the map.
-- Unified station header details across the map sidebar and nearby cards so station name, altitude, relative update time, and provider link are presented consistently.
-- Updated nearby station cards so the provider name is always visible and opens the provider page in a new browser tab.
+- Unified station header details across the map sidebar and nearby cards so station name, altitude, relative update time, distance from you, and provider link are presented consistently.
+- Updated station metadata to use clearer inline icons and proper external provider links that open in a new browser tab.
 
 ## v0.0.13 - 2026-03-25
 

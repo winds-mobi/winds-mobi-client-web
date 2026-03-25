@@ -33,6 +33,14 @@ interface StationApiPayload {
   };
 }
 
+function normalizeProviderUrl(urls?: Record<string, string>) {
+  if (!urls) {
+    return undefined;
+  }
+
+  return urls.default ?? urls.en ?? Object.values(urls)[0];
+}
+
 function normalizePressure(
   pressure:
     | number
@@ -79,7 +87,7 @@ function jsonApifyFields(elm: StationApiPayload) {
       providerName: elm['pv-name'],
       name: elm.short ?? elm.name,
       status: elm.status,
-      providerUrl: elm.url,
+      providerUrl: normalizeProviderUrl(elm.url),
       last,
     },
   };

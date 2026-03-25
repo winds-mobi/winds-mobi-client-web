@@ -156,6 +156,7 @@ module('Acceptance | nearby route', function (hooks) {
 
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
     assert.dom('[data-test-nearby-station-card]').exists({ count: 2 });
+    assert.dom('[data-test-station-distance]').exists({ count: 2 });
     assert.true(countStationRequests(store.calls) > 0);
   });
 
