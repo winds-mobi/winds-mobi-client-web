@@ -16,7 +16,6 @@ type StationMetricFormat =
 
 export interface StationMetricCardSignature {
   Args: {
-    compact?: boolean;
     format?: StationMetricFormat;
     label: string;
     labelClass?: string;
@@ -89,31 +88,17 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
   <template>
     {{#if this.hasValue}}
       <div
-        class="{{if
-            @compact
-            'rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5'
-            'rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200/80'
-          }}"
+        class="rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5"
         ...attributes
       >
         <dt
-          class="{{if
-              @compact
-              'text-[9px] leading-tight md:text-[11px]'
-              'text-[11px]'
-            }}
-            font-medium text-slate-500
+          class="text-[9px] font-medium leading-tight text-slate-500 md:text-[11px]
             {{if @labelClass @labelClass}}"
         >
           {{@label}}
         </dt>
         <dd
-          class="{{if
-              @compact
-              'mt-0.5 text-[13px] leading-tight md:mt-1.5 md:text-base'
-              'mt-1.5'
-            }}
-            font-semibold
+          class="mt-0.5 text-[13px] font-semibold leading-tight md:mt-1.5 md:text-base
             {{if @valueClass @valueClass}}"
         >
           {{this.formattedValue}}

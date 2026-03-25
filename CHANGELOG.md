@@ -4,11 +4,13 @@
 
 ### Changed
 
-- Refined the station sidebar’s `Last hour` card so it now requests only the last hour of history directly, keeps the same compact layout while loading, and presents the wind-direction view and summary metrics more consistently.
+- Refined the station sidebar’s `Last hour` card so it now requests only the last hour of history directly, keeps the same layout while loading, and presents the wind-direction view and summary metrics more consistently.
+- Simplified the station sidebar cards so the `Now`, `Last hour`, `Wind`, and `Air` sections now share a single leaner card style without extra layout-specific variants.
 
 ### Fixed
 
-- Fixed the `Last hour` wind summary so its average wind speed is based on the timing of real samples instead of a simple sample-count average.
+- Fixed the `Last hour` wind summary so its middle wind value is calculated from the actual last-hour readings instead of using a simple sample average.
+- Fixed the `Last hour` wind-direction chart so it now leaves a small inset around the polar graph instead of clipping the outer line against the card edge.
 
 ## v0.0.12 - 2026-03-24
 

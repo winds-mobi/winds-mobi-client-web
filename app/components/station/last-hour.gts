@@ -48,8 +48,6 @@ export default class StationLastHour extends Component<StationLastHourSignature>
   <template>
     <StationSectionCard
       @title={{t "wind.lastHour"}}
-      @compact={{true}}
-      class="min-w-0 h-full"
     >
       <Request @request={{this.historyRequest}}>
         <:content as |result|>

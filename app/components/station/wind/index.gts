@@ -18,7 +18,7 @@ export interface StationWindsSignature {
 export default class StationWinds extends Component<StationWindsSignature> {
   <template>
     <section data-test-station-wind-section>
-      <StationSectionCard @title={{t "station.wind"}} @contentClass="mt-2">
+      <StationSectionCard @title={{t "station.wind"}}>
         <StationWindsGraph @data={{@history}} />
       </StationSectionCard>
     </section>

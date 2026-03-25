@@ -41,30 +41,11 @@ export default class StationLastHourContent extends Component<StationLastHourCon
       return undefined;
     }
 
-    if (this.lastHourHistory.length === 1) {
-      return this.lastHourHistory[0]?.speed;
-    }
+    const sortedSpeeds = [...this.lastHourSpeeds].sort((left, right) => {
+      return left - right;
+    });
 
-    let weightedSpeedSum = 0;
-    let totalDuration = 0;
-
-    for (let index = 0; index < this.lastHourHistory.length - 1; index++) {
-      const currentRecord = this.lastHourHistory[index];
-      const nextRecord = this.lastHourHistory[index + 1];
-
-      if (!currentRecord || !nextRecord) {
-        continue;
-      }
-
-      const duration = nextRecord.timestamp - currentRecord.timestamp;
-
-      weightedSpeedSum += currentRecord.speed * duration;
-      totalDuration += duration;
-    }
-
-    return totalDuration > 0
-      ? weightedSpeedSum / totalDuration
-      : this.lastHourHistory[this.lastHourHistory.length - 1]?.speed;
+    return sortedSpeeds[Math.floor(sortedSpeeds.length / 2)];
   }
 
   get lastHourMaximumSpeed() {
@@ -97,7 +78,6 @@ export default class StationLastHourContent extends Component<StationLastHourCon
 
       <dl class="m-0 grid gap-1 md:gap-2">
         <StationMetricCard
-          @compact={{true}}
           @format="windSpeed"
           @label={{t "wind.maximum"}}
           @value={{this.lastHourMaximumSpeed}}
@@ -105,7 +85,6 @@ export default class StationLastHourContent extends Component<StationLastHourCon
         />
 
         <StationMetricCard
-          @compact={{true}}
           @format="windSpeed"
           @label={{t "wind.mean"}}
           @value={{this.lastHourMeanSpeed}}
@@ -113,7 +92,6 @@ export default class StationLastHourContent extends Component<StationLastHourCon
         />
 
         <StationMetricCard
-          @compact={{true}}
           @format="windSpeed"
           @label={{t "wind.minimum"}}
           @value={{this.lastHourMinimumSpeed}}

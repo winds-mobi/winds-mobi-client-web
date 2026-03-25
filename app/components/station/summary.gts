@@ -34,12 +34,9 @@ export default class StationSummary extends Component<StationSummarySignature> {
       <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
         <StationSectionCard
           @title={{t "station.summary.now"}}
-          @compact={{true}}
-          class="min-w-0 h-full"
         >
           <dl class="m-0 grid gap-2 md:gap-3">
             <StationMetricCard
-              @compact={{true}}
               @format="windSpeed"
               @label={{t "wind.speed"}}
               @value={{this.reading.speed}}
@@ -47,7 +44,6 @@ export default class StationSummary extends Component<StationSummarySignature> {
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="windSpeed"
               @label={{t "wind.gusts"}}
               @value={{this.reading.gusts}}
@@ -55,35 +51,30 @@ export default class StationSummary extends Component<StationSummarySignature> {
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="azimuth"
               @label={{t "wind.direction"}}
               @value={{this.reading.direction}}
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="temperature"
               @label={{t "air.temperature"}}
               @value={{this.reading.temperature}}
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="humidity"
               @label={{t "air.humidity"}}
               @value={{this.reading.humidity}}
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="pressure"
               @label={{t "air.pressure"}}
               @value={{this.reading.pressure}}
             />
 
             <StationMetricCard
-              @compact={{true}}
               @format="rainfall"
               @label={{t "air.rain"}}
               @value={{this.reading.rain}}

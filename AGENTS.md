@@ -40,6 +40,7 @@ https://warp-drive.io/llms-full.txt
 - Do not add component arguments as speculative override points when the app has no real call sites for them.
 - If a component has an internal default and no actual external callers pass an override, remove the argument instead of keeping a "future-proof" escape hatch.
 - Do not add trivial passthrough getters just to feed translated strings or other direct template values into child components. Prefer helpers like `{{t ...}}` directly in the template when no class logic is needed.
+- Prefer Tailwind responsive classes for layout changes. Do not add component arguments or class logic just to switch layout variants across breakpoints.
 - Do not add test-only override seams to app components just to make them easier to unit or integration test. Prefer smaller real tests, and skip a test rather than complicating the production API.
 - Do not add DOM hacks, exposed instance handles, or other special production code just so tests can reach inside a component or third-party library. DOM selectors in tests are fine; production test hooks and escape hatches are not. If a test would require that kind of seam, skip or replace the test instead.
 - Do not call `ember-intl` `formatRelativeTime` directly in app UI code. Use the shared `time-ago` helper, or `renderTimeAgoText` in TypeScript, so relative-time wording stays consistent and automatically switches between seconds, minutes, hours, and larger units.
@@ -85,6 +86,6 @@ Notes: Leaflet-specific state was removed from the location service.
 
 - Install dependencies with `pnpm install`.
 - Use the smallest relevant checks while working.
-- Do not run lint or tests after every small change. Batch work, then run the relevant verification before commit or final handoff.
-- Run `pnpm test` before finishing a substantial change when dependencies are available.
+- Do not run lint or tests after every small change. Batch work, then run the relevant verification before push.
+- Before pushing, run lint and the relevant tests for the changes being shipped.
 - Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember`.

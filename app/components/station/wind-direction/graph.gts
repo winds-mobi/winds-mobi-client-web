@@ -40,10 +40,11 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     return {
       chart: {
         height: '100%',
+        spacing: [4, 4, 4, 4],
         type: 'scatter',
       },
       pane: {
-        size: '100%',
+        size: '96%',
       },
       yAxis: {
         min: minTimestamp,
