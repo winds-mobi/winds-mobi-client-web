@@ -21,9 +21,7 @@ export interface StationSectionCardSignature {
       {{@title}}
     </p>
 
-    <div
-      class="mt-2 flex-1 md:mt-3"
-    >
+    <div class="mt-2 flex-1 md:mt-3">
       {{yield}}
     </div>
   </section>

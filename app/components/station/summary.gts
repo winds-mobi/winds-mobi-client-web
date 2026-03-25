@@ -32,9 +32,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
   <template>
     <section data-test-station-summary-section>
       <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
-        <StationSectionCard
-          @title={{t "station.summary.now"}}
-        >
+        <StationSectionCard @title={{t "station.summary.now"}}>
           <dl class="m-0 grid gap-2 md:gap-3">
             <StationMetricCard
               @format="windSpeed"

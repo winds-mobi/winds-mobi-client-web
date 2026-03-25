@@ -8,11 +8,12 @@ export interface Response {
 
 interface HistoryApiPayload {
   _id: number;
-  'w-dir': number;
-  'w-avg': number;
-  'w-max': number;
-  temp: number;
-  hum: number;
+  'w-dir'?: number;
+  'w-avg'?: number;
+  'w-max'?: number;
+  temp?: number;
+  hum?: number;
+  rain?: number;
 }
 
 function extractHistoricStationId(url: string | undefined) {
@@ -26,20 +27,38 @@ function extractHistoricStationId(url: string | undefined) {
 }
 
 function renameFields(elm: HistoryApiPayload, stationId?: string) {
-  // TODO: We should add `timestamp` field
-  // It is timestamp = id, but to not shoot
-  // ourselves in the foot in the end
+  const attributes: Record<string, number> = {
+    timestamp: elm._id * 1000,
+  };
+
+  if ('w-dir' in elm) {
+    attributes['direction'] = elm['w-dir']!;
+  }
+
+  if ('w-avg' in elm) {
+    attributes['speed'] = elm['w-avg']!;
+  }
+
+  if ('w-max' in elm) {
+    attributes['gusts'] = elm['w-max']!;
+  }
+
+  if ('temp' in elm) {
+    attributes['temperature'] = elm['temp']!;
+  }
+
+  if ('hum' in elm) {
+    attributes['humidity'] = elm['hum']!;
+  }
+
+  if ('rain' in elm) {
+    attributes['rain'] = elm['rain']!;
+  }
+
   return {
     type: 'history',
     id: stationId ? `${stationId}:${elm._id}` : elm._id.toString(),
-    attributes: {
-      direction: elm['w-dir'],
-      speed: elm['w-avg'],
-      gusts: elm['w-max'],
-      temperature: elm['temp'],
-      humidity: elm['hum'],
-      timestamp: elm._id * 1000,
-    },
+    attributes,
   };
 }
 

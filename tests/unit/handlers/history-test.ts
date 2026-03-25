@@ -90,4 +90,40 @@ module('Unit | Handler | history', function () {
       [1_774_341_507_000, 1_774_342_468_000]
     );
   });
+
+  test('it only serializes history attributes present in the payload', async function (assert) {
+    const response = await HistoryHandler.request<{
+      data: {
+        id: string;
+        attributes: Record<string, number>;
+      }[];
+    }>(
+      {
+        request: {
+          url: 'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600&keys=temp&keys=hum&keys=rain',
+        },
+      } as never,
+      async () =>
+        ({
+          content: [
+            {
+              _id: 1_774_341_507,
+              temp: 7.5,
+              hum: 70,
+              rain: 1.2,
+            },
+          ],
+        }) as never
+    );
+
+    assert.deepEqual(response.data[0]?.attributes, {
+      humidity: 70,
+      rain: 1.2,
+      temperature: 7.5,
+      timestamp: 1_774_341_507_000,
+    });
+    assert.false('direction' in (response.data[0]?.attributes ?? {}));
+    assert.false('speed' in (response.data[0]?.attributes ?? {}));
+    assert.false('gusts' in (response.data[0]?.attributes ?? {}));
+  });
 });
