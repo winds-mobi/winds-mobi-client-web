@@ -95,3 +95,4 @@ Notes: Leaflet-specific state was removed from the location service.
 - Do not run lint or tests after every small change. Batch work, then run the relevant verification before push.
 - Before pushing, run lint and the relevant tests for the changes being shipped.
 - Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember`.
+- If a local Vite dev server is already running and the goal is local verification without disrupting it, prefer `pnpm test:ember:dev` over `pnpm test:ember`. Keep `pnpm test:ember` for isolated build-based verification and CI-style checks.

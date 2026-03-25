@@ -33,6 +33,9 @@ Make use of the many generators for code, try `ember help generate` for more det
 
 - `pnpm test`
 - `pnpm test:ember --server`
+- `pnpm test:ember`
+- `pnpm test:ember:dev` against an already running `pnpm start` dev server
+- `pnpm test:ember:dev:server` to open Testem against an already running `pnpm start` dev server
 
 ### Linting
 

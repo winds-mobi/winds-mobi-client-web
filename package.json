@@ -25,6 +25,8 @@
     "start": "vite --host 0.0.0.0 --force",
     "test": "concurrently \"pnpm:lint\" \"pnpm:test:*\" --names \"lint,test:\" --prefixColors auto",
     "test:ember": "vite build --mode test && ember test --path dist",
+    "test:ember:dev": "node scripts/run-testem-dev.cjs ci",
+    "test:ember:dev:server": "node scripts/run-testem-dev.cjs",
     "postinstall": "npm rebuild sharp",
     "generate-pwa-assets": "pwa-assets-generator"
   },
