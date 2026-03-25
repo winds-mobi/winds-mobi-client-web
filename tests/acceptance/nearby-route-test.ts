@@ -99,8 +99,44 @@ class ShortIntervalMapRefreshService extends MapRefreshService {
   countdownTickMs = 10;
 }
 
+const NEARBY_STATION_CARD_SELECTOR = '[data-test-nearby-station-card]';
+const DEFAULT_COORDINATES = {
+  accuracy: 20,
+  latitude: 46.521,
+  longitude: 6.632,
+};
+
 function countStationRequests(calls: string[]) {
   return calls.filter((url) => !url.includes('/historic/')).length;
+}
+
+function stubPromptPermission(nearbyLocation: NearbyLocationService) {
+  nearbyLocation.syncPermissionState = async () => {
+    nearbyLocation.permissionState = 'prompt';
+  };
+}
+
+function setGrantedCoordinates(
+  nearbyLocation: NearbyLocationService,
+  coordinates = DEFAULT_COORDINATES
+) {
+  nearbyLocation.permissionState = 'granted';
+  nearbyLocation.requestState = 'ready';
+  nearbyLocation.coordinates = coordinates;
+}
+
+function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
+  nearbyLocation.syncPermissionState = async () => {
+    setGrantedCoordinates(nearbyLocation);
+  };
+}
+
+async function waitForNearbyStations() {
+  await waitUntil(
+    () =>
+      document.querySelectorAll(NEARBY_STATION_CARD_SELECTOR).length ===
+      STATION_FIXTURES.length
+  );
 }
 
 module('Acceptance | nearby route', function (hooks) {
@@ -116,9 +152,7 @@ module('Acceptance | nearby route', function (hooks) {
       'service:nearby-location'
     ) as NearbyLocationService;
 
-    nearbyLocation.syncPermissionState = async () => {
-      nearbyLocation.permissionState = 'prompt';
-    };
+    stubPromptPermission(nearbyLocation);
 
     await visit('/nearby');
 
@@ -133,29 +167,21 @@ module('Acceptance | nearby route', function (hooks) {
       'service:nearby-location'
     ) as NearbyLocationService;
 
-    nearbyLocation.syncPermissionState = async () => {
-      nearbyLocation.permissionState = 'prompt';
-    };
+    stubPromptPermission(nearbyLocation);
     nearbyLocation.requestCurrentPosition = async () => {
-      nearbyLocation.permissionState = 'granted';
-      nearbyLocation.requestState = 'ready';
-      nearbyLocation.coordinates = {
+      setGrantedCoordinates(nearbyLocation, {
+        ...DEFAULT_COORDINATES,
         accuracy: 25,
-        latitude: 46.521,
-        longitude: 6.632,
-      };
+      });
     };
 
     await visit('/nearby');
     await click('[data-test-nearby-enable-location]');
 
-    await waitUntil(
-      () =>
-        document.querySelectorAll('[data-test-nearby-station-card]').length === 2
-    );
+    await waitForNearbyStations();
 
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
-    assert.dom('[data-test-nearby-station-card]').exists({ count: 2 });
+    assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.dom('[data-test-station-distance]').exists({ count: 2 });
     assert.true(countStationRequests(store.calls) > 0);
   });
@@ -166,25 +192,14 @@ module('Acceptance | nearby route', function (hooks) {
       'service:nearby-location'
     ) as NearbyLocationService;
 
-    nearbyLocation.syncPermissionState = async () => {
-      nearbyLocation.permissionState = 'granted';
-      nearbyLocation.requestState = 'ready';
-      nearbyLocation.coordinates = {
-        accuracy: 20,
-        latitude: 46.521,
-        longitude: 6.632,
-      };
-    };
+    stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitUntil(
-      () =>
-        document.querySelectorAll('[data-test-nearby-station-card]').length === 2
-    );
+    await waitForNearbyStations();
 
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
     assert.dom('[data-test-nearby-enable-location]').doesNotExist();
-    assert.dom('[data-test-nearby-station-card]').exists({ count: 2 });
+    assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.true(countStationRequests(store.calls) > 0);
   });
 
@@ -196,21 +211,10 @@ module('Acceptance | nearby route', function (hooks) {
       'service:nearby-location'
     ) as NearbyLocationService;
 
-    nearbyLocation.syncPermissionState = async () => {
-      nearbyLocation.permissionState = 'granted';
-      nearbyLocation.requestState = 'ready';
-      nearbyLocation.coordinates = {
-        accuracy: 20,
-        latitude: 46.521,
-        longitude: 6.632,
-      };
-    };
+    stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitUntil(
-      () =>
-        document.querySelectorAll('[data-test-nearby-station-card]').length === 2
-    );
+    await waitForNearbyStations();
 
     const initialStationRequestCount = countStationRequests(store.calls);
 

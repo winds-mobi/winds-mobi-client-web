@@ -49,7 +49,8 @@ export default class NearbyLocationService extends Service {
 
   get canRequestLocation() {
     return (
-      this.permissionState !== 'unsupported' && this.requestState !== 'requesting'
+      this.permissionState !== 'unsupported' &&
+      this.requestState !== 'requesting'
     );
   }
 
@@ -67,9 +68,7 @@ export default class NearbyLocationService extends Service {
       return;
     }
 
-    if (
-      typeof navigator.permissions?.query !== 'function'
-    ) {
+    if (typeof navigator.permissions?.query !== 'function') {
       this.permissionState = 'prompt';
 
       return;
@@ -146,9 +145,7 @@ export default class NearbyLocationService extends Service {
 
   #hasGeolocationSupport() {
     return (
-      typeof navigator !== 'undefined' &&
-      'geolocation' in navigator &&
-      navigator.geolocation !== undefined
+      typeof navigator !== 'undefined' && navigator.geolocation !== undefined
     );
   }
 

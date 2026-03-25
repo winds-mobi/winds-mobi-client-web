@@ -29,13 +29,8 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare intl: IntlService;
   @service declare mapRefresh: MapRefreshService;
-  @service declare store: typeof import('winds-mobi-client-web/services/store').default;
-
-  constructor(owner: unknown, args: NearbyTemplateSignature['Args']) {
-    super(owner, args);
-
-    void this.nearbyLocation.syncPermissionState();
-  }
+  @service
+  declare store: typeof import('winds-mobi-client-web/services/store').default;
 
   private get requestStore(): RequestStore {
     return this.store as unknown as RequestStore;

@@ -12,26 +12,27 @@ import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
+const defaultStationQueryKeys = [
+  'pv-name',
+  'short',
+  'name',
+  'alt',
+  'peak',
+  'status',
+  'loc',
+  'url',
+  'last._id',
+  'last.w-dir',
+  'last.w-avg',
+  'last.w-max',
+  'last.temp',
+  'last.hum',
+  'last.rain',
+  'last.pres',
+] as const;
+
 const defaultQuery: QueryParamsSource = {
-  keys: [
-    'pv-name',
-    'short',
-    'name',
-    'alt',
-    'peak',
-    'status',
-    'loc',
-    'url',
-    'last._id',
-    'last.w-dir',
-    'last.w-avg',
-    'last.w-max',
-    'last.temp',
-    'last.hum',
-    'last.rain',
-    'last.pres',
-    'last.hum',
-  ],
+  keys: [...defaultStationQueryKeys],
 };
 
 const defaultOptions: ConstrainedRequestOptions = {

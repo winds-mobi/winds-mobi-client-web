@@ -18,12 +18,10 @@ export interface NavbarRouteSwitchSignature {
   Element: null;
 }
 
-const ACTIVE_LINK_CLASS =
-  'border-slate-900 text-slate-950';
+const ACTIVE_LINK_CLASS = 'border-slate-900 text-slate-950';
 const INACTIVE_LINK_CLASS =
   'border-transparent text-slate-500 hover:text-slate-900';
-const BASE_LINK_CLASS =
-  'border-b-2 px-2 py-1 text-sm font-medium transition';
+const BASE_LINK_CLASS = 'border-b-2 px-2 py-1 text-sm font-medium transition';
 
 export default class NavbarRouteSwitch extends Component<NavbarRouteSwitchSignature> {
   @service declare router: RouterService;

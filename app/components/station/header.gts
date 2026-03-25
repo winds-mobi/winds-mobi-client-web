@@ -11,6 +11,7 @@ import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { distanceKm } from 'winds-mobi-client-web/utils/distance';
+import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
   Args: {
@@ -60,40 +61,39 @@ export default class StationHeader extends Component<StationHeaderSignature> {
         {{@station.name}}
       </h2>
 
-      <dl class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500">
-        <div class="flex items-center gap-1.5">
-          <dt class="sr-only">{{t "station.meta.altitude"}}</dt>
-          <dd class="m-0 inline-flex items-center gap-1.5">
-            <Mountains @size={{12}} class="text-slate-400" />
-            <span>{{formatNumber @station.altitude maximumFractionDigits=0}} m</span>
-          </dd>
-        </div>
+      <dl
+        class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500"
+      >
+        <StationMetaItem
+          @icon={{Mountains}}
+          @label={{t "station.meta.altitude"}}
+        >
+          <span>{{formatNumber @station.altitude maximumFractionDigits=0}}
+            m</span>
+        </StationMetaItem>
 
-        <div class="flex items-center gap-1.5">
-          <dt class="sr-only">{{t "station.meta.updated"}}</dt>
-          <dd class="m-0 inline-flex items-center gap-1.5">
-            <ClockCounterClockwise @size={{12}} class="text-slate-400" />
-            <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
-          </dd>
-        </div>
+        <StationMetaItem
+          @icon={{ClockCounterClockwise}}
+          @label={{t "station.meta.updated"}}
+        >
+          <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
+        </StationMetaItem>
 
         {{#if this.formattedDistanceKm}}
-          <div class="flex items-center gap-1.5">
-            <dt class="sr-only">{{t "station.meta.distance"}}</dt>
-            <dd
-              data-test-station-distance
-              class="m-0 inline-flex items-center gap-1.5"
-            >
-              <NavigationArrow @size={{12}} class="text-slate-400" />
-              <span>{{this.formattedDistanceKm}}</span>
-            </dd>
-          </div>
+          <StationMetaItem
+            data-test-station-distance
+            @icon={{NavigationArrow}}
+            @label={{t "station.meta.distance"}}
+          >
+            <span>{{this.formattedDistanceKm}}</span>
+          </StationMetaItem>
         {{/if}}
 
-        <div class="flex items-center gap-1.5">
-          <dt class="sr-only">{{t "station.meta.provider"}}</dt>
-          <dd class="m-0 inline-flex items-center gap-1.5">
-            <ArrowSquareUpRight @size={{12}} class="text-slate-400" />
+        <StationMetaItem
+          @icon={{ArrowSquareUpRight}}
+          @label={{t "station.meta.provider"}}
+        >
+          <span>
             <a
               data-test-station-provider-link
               href={{@station.providerUrl}}
@@ -103,8 +103,8 @@ export default class StationHeader extends Component<StationHeaderSignature> {
             >
               {{@station.providerName}}
             </a>
-          </dd>
-        </div>
+          </span>
+        </StationMetaItem>
       </dl>
     </div>
   </template>

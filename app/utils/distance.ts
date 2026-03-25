@@ -21,7 +21,5 @@ export function distanceKm(
       Math.cos(endLatitude) *
       Math.sin(deltaLongitude / 2) ** 2;
 
-  return (
-    2 * EARTH_RADIUS_KM * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  );
+  return 2 * EARTH_RADIUS_KM * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
