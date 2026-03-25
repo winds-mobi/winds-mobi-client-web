@@ -64,7 +64,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible drop-shadow-[0_1px_2px_rgba(15,23,42,0.18)]"
+        class="h-10 w-10 overflow-visible drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]"
         viewBox="-150 -70 140 340"
       >
         <path

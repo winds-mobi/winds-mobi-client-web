@@ -11,6 +11,12 @@
 https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instructions.md?plain=1
 ```
 
+- Use the WarpDrive LLM docs for request/state patterns and `<Request>` usage:
+
+```text
+https://warp-drive.io/llms-full.txt
+```
+
 ## Project overview
 
 - This repository is a single Ember application at the repo root.
@@ -34,12 +40,19 @@ https://github.com/ember-tooling/ember-mcp/blob/main/.github/copilot-instruction
 - Do not add component arguments as speculative override points when the app has no real call sites for them.
 - If a component has an internal default and no actual external callers pass an override, remove the argument instead of keeping a "future-proof" escape hatch.
 - Do not add trivial passthrough getters just to feed translated strings or other direct template values into child components. Prefer helpers like `{{t ...}}` directly in the template when no class logic is needed.
+- Prefer Tailwind responsive classes for layout changes. Do not add component arguments or class logic just to switch layout variants across breakpoints.
+- For station sections split into a WarpDrive `<Request>` wrapper and a data presenter, keep them in a subdirectory with `index.gts` for the fetcher and `presenter.gts` for the view.
 - Do not add test-only override seams to app components just to make them easier to unit or integration test. Prefer smaller real tests, and skip a test rather than complicating the production API.
 - Do not add DOM hacks, exposed instance handles, or other special production code just so tests can reach inside a component or third-party library. DOM selectors in tests are fine; production test hooks and escape hatches are not. If a test would require that kind of seam, skip or replace the test instead.
 - Do not call `ember-intl` `formatRelativeTime` directly in app UI code. Use the shared `time-ago` helper, or `renderTimeAgoText` in TypeScript, so relative-time wording stays consistent and automatically switches between seconds, minutes, hours, and larger units.
 - Keep `CHANGELOG.md` user-facing. Document shipped behavior, visible improvements, and notable fixes. Do not list internal refactors, test-only changes, or implementation details unless they directly affect users.
 - When async state coordination fits `ember-concurrency`, prefer it over manual timer or promise bookkeeping. If newer `ember-concurrency` syntax or APIs would require installing or upgrading the package, stop and tell the user first. When using `ember-concurrency`, prefer the latest package version and its current syntax over legacy patterns.
 - For app code in `app/**`, prefer Warp Drive builders + `this.store.request(...)` + handlers over ad hoc `fetch()`.
+- When narrowing historical station requests with `keys`, keep the section-specific field needs aligned with the current UI:
+  - `app/components/station/last-hour/index.gts`: `w-dir`, `w-avg`, `w-max`
+  - `app/components/station/wind/index.gts`: `w-dir`, `w-avg`, `w-max`
+  - `app/components/station/air/index.gts`: `temp`, `hum`, `rain`
+- Warp Drive supports partial resource payloads via upsert, but only one level deep. Reusing the same `history` identity with different top-level primitive fields is fine as long as the handler only emits attributes that were actually present in the payload; do not normalize omitted fields to `undefined`, and do not rely on partial deep merges for object-valued fields.
 - Prefer existing Frontile and Tailwind patterns for shared UI.
 - Update `translations/en-us.yaml` when UI text changes.
 - Do not edit generated or installed files such as `dist/` or `node_modules/`.
@@ -79,6 +92,7 @@ Notes: Leaflet-specific state was removed from the location service.
 
 - Install dependencies with `pnpm install`.
 - Use the smallest relevant checks while working.
-- Do not run lint or tests after every small change. Batch work, then run the relevant verification before commit or final handoff.
-- Run `pnpm test` before finishing a substantial change when dependencies are available.
+- Do not run lint or tests after every small change. Batch work, then run the relevant verification before push.
+- Before pushing, run lint and the relevant tests for the changes being shipped.
 - Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember`.
+- If a local Vite dev server is already running and the goal is local verification without disrupting it, prefer `pnpm test:ember:dev` over `pnpm test:ember`. Keep `pnpm test:ember` for isolated build-based verification and CI-style checks.

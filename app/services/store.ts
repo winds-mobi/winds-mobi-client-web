@@ -97,6 +97,7 @@ export const HistorySchema = withDefaults({
     { name: 'gusts', kind: 'field' },
     { name: 'temperature', kind: 'field' },
     { name: 'humidity', kind: 'field' },
+    { name: 'rain', kind: 'field' },
     { name: 'timestamp', kind: 'field' },
   ],
 });
@@ -131,6 +132,7 @@ export type History = {
   gusts: number;
   temperature: number;
   humidity: number;
+  rain: number;
   timestamp: number;
 
   [Type]: 'history';

@@ -13,12 +13,16 @@ map:
   refresh:
     label: Refresh
     ariaLabel: Refresh map and station data
+    sinceLast: '{value} since last refresh'
 
 station:
   summary:
     now: Now
     wind: Wind
     air: Air
+  timeSeries:
+    sync: Sync
+    syncToggle: Toggle shared chart zoom sync
   wind: Wind
   air: Air
 

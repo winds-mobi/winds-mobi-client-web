@@ -7,9 +7,9 @@ import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import StationSectionCard from '../section-card';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
-import StationWindContent from './presenter';
+import StationAirContent from './presenter';
 
-export interface StationWindSignature {
+export interface StationAirSignature {
   Args: {
     stationId: string;
   };
@@ -21,9 +21,9 @@ export interface StationWindSignature {
 
 const DURATION = 435600;
 const EMPTY_HISTORY: History[] = [];
-const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
+const HISTORY_KEYS = ['temp', 'hum', 'rain'];
 
-export default class StationWind extends Component<StationWindSignature> {
+export default class StationAir extends Component<StationAirSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare mapRefresh: MapRefreshService;
@@ -48,19 +48,19 @@ export default class StationWind extends Component<StationWindSignature> {
   }
 
   <template>
-    <section data-test-station-wind-section>
-      <StationSectionCard @title={{t "station.wind"}}>
+    <section data-test-station-air-section>
+      <StationSectionCard @title={{t "station.air"}}>
         <Request @request={{this.historyRequest}}>
           <:content as |result|>
-            <StationWindContent @history={{result.data}} />
+            <StationAirContent @history={{result.data}} />
           </:content>
 
           <:loading>
-            <StationWindContent @history={{EMPTY_HISTORY}} />
+            <StationAirContent @history={{EMPTY_HISTORY}} />
           </:loading>
 
           <:error>
-            <StationWindContent @history={{EMPTY_HISTORY}} />
+            <StationAirContent @history={{EMPTY_HISTORY}} />
           </:error>
         </Request>
       </StationSectionCard>

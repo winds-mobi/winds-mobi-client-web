@@ -1,4 +1,6 @@
 import Component from '@glimmer/component';
+import { service } from '@ember/service';
+import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import HighCharts from 'ember-highcharts/components/high-charts';
 import {
@@ -9,12 +11,23 @@ import {
   sortByNumericValue,
   type TimeSeriesPoint,
 } from 'winds-mobi-client-web/utils/chart-series';
+import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
+import type { SyncChart } from 'winds-mobi-client-web/services/time-series-sync';
 
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
   plotOptions?: ChartOptions;
   tooltip?: ChartOptions;
   xAxis?: ChartOptions;
+}
+
+interface SetExtremesEvent {
+  max: number;
+  min: number;
+  trigger?: string;
+  target: {
+    chart: SyncChart;
+  };
 }
 
 export interface TimeSeriesSignature {
@@ -33,6 +46,10 @@ interface TimeSeriesSeries extends ChartOptions {
 }
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
+  @service declare timeSeriesSync: TimeSeriesSyncService;
+
+  private chart?: SyncChart;
+
   defaultChartOptions: TimeSeriesChartOptions = {
     credits: {
       enabled: false,
@@ -107,6 +124,9 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     navigator: {
       enabled: false,
     },
+    scrollbar: {
+      enabled: true,
+    },
     plotOptions: {
       series: {
         animation: {
@@ -125,12 +145,23 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
 
   @cached
   get mergedChartOptions() {
-    return mergeChartOptions(this.defaultChartOptions, this.args.chartOptions, [
-      'chart',
-      'xAxis',
-      'tooltip',
-      'plotOptions',
-    ]);
+    const mergedOptions = mergeChartOptions(
+      this.defaultChartOptions,
+      this.args.chartOptions,
+      ['chart', 'xAxis', 'tooltip', 'plotOptions']
+    );
+
+    return mergeChartOptions(
+      mergedOptions,
+      {
+        xAxis: {
+          events: {
+            afterSetExtremes: this.handleAfterSetExtremes,
+          },
+        },
+      },
+      ['xAxis']
+    );
   }
 
   @cached
@@ -141,11 +172,36 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     }));
   }
 
+  @action
+  handleChartCreated(chart: SyncChart) {
+    this.chart = chart;
+    this.timeSeriesSync.registerChart(chart);
+  }
+
+  @action
+  handleAfterSetExtremes(event: SetExtremesEvent) {
+    this.timeSeriesSync.syncRange(
+      event.target.chart,
+      event.min,
+      event.max,
+      event.trigger
+    );
+  }
+
+  willDestroy() {
+    super.willDestroy();
+
+    if (this.chart) {
+      this.timeSeriesSync.unregisterChart(this.chart);
+    }
+  }
+
   <template>
     <HighCharts
       @mode="StockChart"
       @content={{this.sortedChartData}}
       @chartOptions={{this.mergedChartOptions}}
+      @callback={{this.handleChartCreated}}
     />
   </template>
 }

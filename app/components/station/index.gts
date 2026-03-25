@@ -3,21 +3,24 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
+import { Switch } from '@frontile/forms';
 import StationSummary from './summary';
-import StationWinds from './wind';
 import StationAir from './air';
+import StationWind from './wind';
 import { formatNumber, t } from 'ember-intl';
+import LockSimple from 'ember-phosphor-icons/components/ph-lock-simple';
+import LockSimpleOpen from 'ember-phosphor-icons/components/ph-lock-simple-open';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import {
   parseMapView,
   serializeMapView,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
-import type { History, Station } from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
 
 export interface StationIndexSignature {
   Args: {
-    history?: History[];
     station?: Station;
   };
   Blocks: {
@@ -28,14 +31,7 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
-
-  get station() {
-    return this.args.station;
-  }
-
-  get history() {
-    return this.args.history ?? [];
-  }
+  @service declare timeSeriesSync: TimeSeriesSyncService;
 
   get lastReadingRelativeSeconds() {
     return Math.round(
@@ -49,11 +45,20 @@ export default class StationIndex extends Component<StationIndexSignature> {
     );
   }
 
+  get isTimeSeriesSyncEnabled() {
+    return this.timeSeriesSync.isSyncEnabled;
+  }
+
   @action
   close() {
     this.router.transitionTo('map', {
       queryParams: serializeMapView(this.mapView),
     });
+  }
+
+  @action
+  toggleTimeSeriesSync(isSelected: boolean) {
+    this.timeSeriesSync.setSyncEnabled(isSelected);
   }
 
   <template>
@@ -63,18 +68,15 @@ export default class StationIndex extends Component<StationIndexSignature> {
     >
       <div class="shrink-0 flex items-center justify-between gap-4 px-4 py-3">
         <div class="min-w-0 flex items-baseline gap-3">
-          {{#if this.station}}
+          {{#if @station}}
             <h1
               data-test-station-title
               class="min-w-0 truncate text-xl font-bold"
             >
-              {{this.station.name}}
+              {{@station.name}}
             </h1>
             <div class="shrink-0 text-xs font-medium text-slate-500">
-              <span>{{formatNumber
-                  this.station.altitude
-                  maximumFractionDigits=0
-                }}
+              <span>{{formatNumber @station.altitude maximumFractionDigits=0}}
                 m</span>
               <span class="mx-1.5 text-slate-300">&middot;</span>
               {{timeAgo this.lastReadingRelativeSeconds}}
@@ -94,14 +96,28 @@ export default class StationIndex extends Component<StationIndexSignature> {
       </div>
 
       <div class="min-h-0 flex-1 overflow-y-auto">
-        {{#if this.station}}
+        {{#if @station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
-            <StationSummary
-              @station={{this.station}}
-              @history={{this.history}}
-            />
-            <StationWinds @history={{this.history}} />
-            <StationAir @history={{this.history}} />
+            <StationSummary @station={{@station}} />
+            <StationWind @stationId={{@station.id}} />
+            <StationAir @stationId={{@station.id}} />
+            <div class="flex">
+              <Switch
+                @isSelected={{this.isTimeSeriesSyncEnabled}}
+                @onChange={{this.toggleTimeSeriesSync}}
+                @intent="success"
+                @label={{t "station.timeSeries.sync"}}
+                aria-label={{t "station.timeSeries.syncToggle"}}
+              >
+                <:startContent>
+                  <LockSimple @size={{14}} />
+                </:startContent>
+
+                <:endContent>
+                  <LockSimpleOpen @size={{14}} />
+                </:endContent>
+              </Switch>
+            </div>
           </div>
         {{/if}}
       </div>

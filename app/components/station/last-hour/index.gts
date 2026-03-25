@@ -7,9 +7,9 @@ import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import StationSectionCard from '../section-card';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
-import StationWindContent from './presenter';
+import StationLastHourContent from './presenter';
 
-export interface StationWindSignature {
+export interface StationLastHourSignature {
   Args: {
     stationId: string;
   };
@@ -19,11 +19,11 @@ export interface StationWindSignature {
   Element: null;
 }
 
-const DURATION = 435600;
+const DURATION = 1 * 60 * 60;
 const EMPTY_HISTORY: History[] = [];
 const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
 
-export default class StationWind extends Component<StationWindSignature> {
+export default class StationLastHour extends Component<StationLastHourSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare mapRefresh: MapRefreshService;
@@ -48,22 +48,20 @@ export default class StationWind extends Component<StationWindSignature> {
   }
 
   <template>
-    <section data-test-station-wind-section>
-      <StationSectionCard @title={{t "station.wind"}}>
-        <Request @request={{this.historyRequest}}>
-          <:content as |result|>
-            <StationWindContent @history={{result.data}} />
-          </:content>
+    <StationSectionCard @title={{t "wind.lastHour"}}>
+      <Request @request={{this.historyRequest}}>
+        <:content as |result|>
+          <StationLastHourContent @history={{result.data}} />
+        </:content>
 
-          <:loading>
-            <StationWindContent @history={{EMPTY_HISTORY}} />
-          </:loading>
+        <:loading>
+          <StationLastHourContent @history={{EMPTY_HISTORY}} />
+        </:loading>
 
-          <:error>
-            <StationWindContent @history={{EMPTY_HISTORY}} />
-          </:error>
-        </Request>
-      </StationSectionCard>
-    </section>
+        <:error>
+          <StationLastHourContent @history={{EMPTY_HISTORY}} />
+        </:error>
+      </Request>
+    </StationSectionCard>
   </template>
 }

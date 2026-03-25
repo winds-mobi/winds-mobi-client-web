@@ -5,9 +5,9 @@ import { windColourZones } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
 
-export interface StationWindsGraphSignature {
+export interface StationWindContentSignature {
   Args: {
-    data: History[];
+    history: History[];
   };
   Blocks: {
     default: [];
@@ -15,18 +15,18 @@ export interface StationWindsGraphSignature {
   Element: null;
 }
 
-export default class StationWindsGraph extends Component<StationWindsGraphSignature> {
+export default class StationWindContent extends Component<StationWindContentSignature> {
   zones = windColourZones();
 
   @cached
   get chartData() {
     const speed = buildTimeSeriesData(
-      this.args.data,
+      this.args.history,
       (elm) => elm.timestamp,
       (elm) => elm.speed
     );
     const gusts = buildTimeSeriesData(
-      this.args.data,
+      this.args.history,
       (elm) => elm.timestamp,
       (elm) => elm.gusts
     );
@@ -37,9 +37,9 @@ export default class StationWindsGraph extends Component<StationWindsGraphSignat
         data: speed,
         fillOpacity: 0.16,
         tooltip: {
-          valueSuffix: 'km/h', // Add degrees Celsius to the tooltip
+          valueSuffix: 'km/h',
         },
-        type: 'area', // Area chart for the second dataset
+        type: 'area',
         zoneAxis: 'y',
         zones: this.zones,
       },
@@ -49,7 +49,7 @@ export default class StationWindsGraph extends Component<StationWindsGraphSignat
         dashStyle: 'ShortDash',
         lineWidth: 2.5,
         tooltip: {
-          valueSuffix: 'km/h', // Add degrees Celsius to the tooltip
+          valueSuffix: 'km/h',
         },
         zoneAxis: 'y',
         zones: this.zones,

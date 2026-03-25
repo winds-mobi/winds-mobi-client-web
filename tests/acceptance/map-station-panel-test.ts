@@ -215,6 +215,8 @@ function countHistoryRequests(calls: string[], stationId: string) {
     .length;
 }
 
+const STATION_HISTORY_REQUESTS_PER_REFRESH = 3;
+
 async function selectStationMarker(stationId: string) {
   await waitUntil(() =>
     Boolean(document.querySelector(`[data-station-id="${stationId}"]`))
@@ -343,7 +345,7 @@ module('Acceptance | map station panel', function (hooks) {
     );
     assert.strictEqual(
       countHistoryRequests(store.calls, 'holfuy-1804'),
-      initialHistoryRequests + 1
+      initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
     );
   });
 
@@ -382,7 +384,7 @@ module('Acceptance | map station panel', function (hooks) {
     );
     assert.true(
       countHistoryRequests(store.calls, 'holfuy-1804') >=
-        initialHistoryRequests + 1
+        initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
     );
   });
 });
