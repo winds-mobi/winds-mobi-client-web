@@ -13,6 +13,7 @@ map:
   refresh:
     label: Refresh
     ariaLabel: Refresh map and station data
+    sinceLast: '{value} since last refresh'
 
 station:
   summary:

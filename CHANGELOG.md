@@ -8,6 +8,7 @@
 - Updated the `Wind` and `Air` station sections so they each load only the historical range and fields they need, which keeps those charts more focused and efficient.
 - Simplified the station sidebar cards so the `Now`, `Last hour`, `Wind`, and `Air` sections now share a single leaner card style without extra layout-specific variants.
 - Refined the station history charts so each graph keeps its own time controls and bottom timeline slider, while a simple `Sync` switch lets the wind and air charts stay zoomed and panned together when you want to compare them side by side.
+- Refined the navbar refresh control so it now shows elapsed time since the last refresh with a small circular progress indicator instead of a refresh icon.
 
 ### Fixed
 

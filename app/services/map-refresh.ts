@@ -45,10 +45,21 @@ export default class MapRefreshService extends Service {
     return new Date(this.scheduleStartedAt.getTime() + this.refreshIntervalMs);
   }
 
+  get lastRefreshAt() {
+    return this.lastRefresh ?? this.scheduleStartedAt;
+  }
+
   get remainingMs() {
     return Math.max(
       0,
       this.nextRefreshAt.getTime() - this.currentTime.getTime()
+    );
+  }
+
+  get elapsedMs() {
+    return Math.max(
+      0,
+      this.currentTime.getTime() - this.lastRefreshAt.getTime()
     );
   }
 

@@ -12,6 +12,7 @@ import {
   type TimeSeriesPoint,
 } from 'winds-mobi-client-web/utils/chart-series';
 import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
+import type { SyncChart } from 'winds-mobi-client-web/services/time-series-sync';
 
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
@@ -20,16 +21,9 @@ interface TimeSeriesChartOptions extends ChartOptions {
   xAxis?: ChartOptions;
 }
 
-interface SyncChart {
-  redraw(): void;
-  xAxis: Array<{
-    chart: SyncChart;
-  }>;
-}
-
 interface SetExtremesEvent {
-  max?: number;
-  min?: number;
+  max: number;
+  min: number;
   trigger?: string;
   target: {
     chart: SyncChart;
@@ -180,10 +174,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
 
   @action
   handleChartCreated(chart: SyncChart) {
-    if (this.chart && this.chart !== chart) {
-      this.timeSeriesSync.unregisterChart(this.chart);
-    }
-
     this.chart = chart;
     this.timeSeriesSync.registerChart(chart);
   }

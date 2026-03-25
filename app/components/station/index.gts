@@ -33,10 +33,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
   @service declare timeSeriesSync: TimeSeriesSyncService;
 
-  get station() {
-    return this.args.station;
-  }
-
   get lastReadingRelativeSeconds() {
     return Math.round(
       this.args.station!.last.timestamp / 1000 - Date.now() / 1000
@@ -72,18 +68,15 @@ export default class StationIndex extends Component<StationIndexSignature> {
     >
       <div class="shrink-0 flex items-center justify-between gap-4 px-4 py-3">
         <div class="min-w-0 flex items-baseline gap-3">
-          {{#if this.station}}
+          {{#if @station}}
             <h1
               data-test-station-title
               class="min-w-0 truncate text-xl font-bold"
             >
-              {{this.station.name}}
+              {{@station.name}}
             </h1>
             <div class="shrink-0 text-xs font-medium text-slate-500">
-              <span>{{formatNumber
-                  this.station.altitude
-                  maximumFractionDigits=0
-                }}
+              <span>{{formatNumber @station.altitude maximumFractionDigits=0}}
                 m</span>
               <span class="mx-1.5 text-slate-300">&middot;</span>
               {{timeAgo this.lastReadingRelativeSeconds}}
@@ -103,11 +96,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
       </div>
 
       <div class="min-h-0 flex-1 overflow-y-auto">
-        {{#if this.station}}
+        {{#if @station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
-            <StationSummary @station={{this.station}} />
-            <StationWind @stationId={{this.station.id}} />
-            <StationAir @stationId={{this.station.id}} />
+            <StationSummary @station={{@station}} />
+            <StationWind @stationId={{@station.id}} />
+            <StationAir @stationId={{@station.id}} />
             <div class="flex">
               <Switch
                 @isSelected={{this.isTimeSeriesSyncEnabled}}

@@ -4,8 +4,6 @@ import { service } from '@ember/service';
 import { htmlSafe } from '@ember/template';
 import { Button } from '@frontile/buttons';
 import type { IntlService } from 'ember-intl';
-import ArrowsClockwise from 'ember-phosphor-icons/components/ph-arrows-clockwise';
-import { renderTimeAgoText } from 'winds-mobi-client-web/helpers/time-ago';
 import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
@@ -26,27 +24,32 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   get progressRatio() {
     return Math.min(
       1,
-      this.mapRefresh.remainingMs / this.mapRefresh.refreshIntervalMs
+      this.mapRefresh.elapsedMs / this.mapRefresh.refreshIntervalMs
     );
   }
 
-  get countdownRingStyle() {
+  get progressCircleStyle() {
     return htmlSafe(
-      `background: conic-gradient(from -90deg, ${COUNTDOWN_ARC_COLOR} 0turn, ${COUNTDOWN_ARC_COLOR} ${this.progressRatio}turn, transparent ${this.progressRatio}turn, transparent 1turn)`
+      `background: conic-gradient(from 0deg, transparent 0turn, transparent ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} 1turn)`
     );
   }
 
-  get refreshRelativeTime() {
-    return Math.round(this.mapRefresh.secondsRemaining);
+  get elapsedLabel() {
+    const totalSeconds = Math.floor(this.mapRefresh.elapsedMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
   }
 
   get title() {
     const ariaLabel = String(this.intl.t('map.refresh.ariaLabel'));
 
-    return `${ariaLabel} (${renderTimeAgoText(
-      this.intl,
-      this.refreshRelativeTime
-    )})`;
+    return `${ariaLabel} (${this.intl.t('map.refresh.sinceLast', {
+      value: this.elapsedLabel,
+    })})`;
   }
 
   @action
@@ -56,16 +59,21 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
 
   <template>
     <Button
-      class="relative"
       aria-label={{this.title}}
       data-test-navbar-refresh
       @appearance="outlined"
+      @class="px-2.5 font-mono tabular-nums"
       title={{this.title}}
       @onPress={{this.handleRefresh}}
       {{activateMapRefresh this.mapRefresh}}
-      style={{this.countdownRingStyle}}
     >
-      <ArrowsClockwise @color="#000" @size={{18}} />
+      <span class="flex items-center gap-2">
+        <span
+          class="inline-block size-4 shrink-0 rounded-full border border-slate-500/70"
+          style={{this.progressCircleStyle}}
+        ></span>
+        <span>{{this.elapsedLabel}}</span>
+      </span>
     </Button>
   </template>
 }

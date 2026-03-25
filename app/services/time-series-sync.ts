@@ -1,20 +1,20 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
-interface SyncRange {
+export interface SyncRange {
   min: number;
   max: number;
 }
 
-interface SyncAxis {
+export interface SyncAxis {
   chart: SyncChart;
   getExtremes(): {
-    min?: number;
-    max?: number;
+    min: number;
+    max: number;
   };
   setExtremes(
-    min?: number,
-    max?: number,
+    min: number,
+    max: number,
     redraw?: boolean,
     animation?: boolean,
     eventArguments?: {
@@ -23,7 +23,7 @@ interface SyncAxis {
   ): void;
 }
 
-interface SyncChart {
+export interface SyncChart {
   redraw(): void;
   xAxis: SyncAxis[];
 }
@@ -50,16 +50,11 @@ export default class TimeSeriesSyncService extends Service {
 
   syncRange(
     sourceChart: SyncChart,
-    min?: number,
-    max?: number,
+    min: number,
+    max: number,
     trigger?: string
   ) {
-    if (
-      !trigger ||
-      trigger === SYNC_TRIGGER ||
-      min === undefined ||
-      max === undefined
-    ) {
+    if (!trigger || trigger === SYNC_TRIGGER) {
       return;
     }
 
@@ -92,11 +87,6 @@ export default class TimeSeriesSyncService extends Service {
 
   private applyRange(chart: SyncChart, range: SyncRange) {
     const axis = chart.xAxis[0];
-
-    if (!axis) {
-      return;
-    }
-
     const { min, max } = axis.getExtremes();
 
     if (min === range.min && max === range.max) {
