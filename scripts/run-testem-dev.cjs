@@ -4,7 +4,9 @@ const { createRequire } = require('node:module');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 
-const emberCliRequire = createRequire(require.resolve('ember-cli/package.json'));
+const emberCliRequire = createRequire(
+  require.resolve('ember-cli/package.json')
+);
 const testemPackagePath = emberCliRequire.resolve('testem/package.json');
 const testemPackage = emberCliRequire(testemPackagePath);
 const testemBinPath = path.resolve(
