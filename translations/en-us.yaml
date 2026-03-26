@@ -58,19 +58,6 @@ help:
     loading: Loading changelog…
     error: The changelog could not be loaded right now.
 
-location:
-  locate: Locate me
-  locating: Locating you…
-  ready: Your location is ready
-  permissionDenied: Location access is blocked in the browser
-  positionUnavailable: Your location is temporarily unavailable
-  timeout: Location lookup timed out
-  unsupported: This browser cannot provide your location
-  unknownError: Your location could not be determined
-
-list:
-  toggle: list
-
 map:
   legend:
     windSpeed: wind [km/h]

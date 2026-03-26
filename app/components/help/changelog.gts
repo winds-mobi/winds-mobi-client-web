@@ -63,7 +63,7 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
   }
 
   <template>
-    <div>
+    <div data-test-help-changelog>
       {{#if this.isLoading}}
         <p class="text-sm text-slate-500">{{t "help.changelog.loading"}}</p>
       {{else if this.error}}

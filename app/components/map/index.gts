@@ -25,6 +25,7 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
+import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
   approximateMapBoundsFromView,
   mapBoundsEqual,
@@ -125,11 +126,7 @@ export default class Map extends Component<MapSignature> {
     visualizePitch: true,
   });
   private geolocateControl = new GeolocateControl({
-    positionOptions: {
-      enableHighAccuracy: true,
-      maximumAge: 5 * 60 * 1000,
-      timeout: 15_000,
-    },
+    positionOptions: DEFAULT_POSITION_OPTIONS,
     showAccuracyCircle: true,
     showUserLocation: true,
     trackUserLocation: true,

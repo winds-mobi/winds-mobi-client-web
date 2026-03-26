@@ -162,9 +162,4 @@ module('Acceptance | map query params', function (hooks) {
       countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
   });
-
-  test('it removes the navbar location button on the map route', async function (assert) {
-    await visit('/map?mapLng=7.82667&mapLat=46.69299&mapZoom=9.5');
-    assert.dom('[data-test-navbar-location]').doesNotExist();
-  });
 });

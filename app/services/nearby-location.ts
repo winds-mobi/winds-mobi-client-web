@@ -1,5 +1,6 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 
 export type NearbyCoordinates = {
   accuracy: number;
@@ -17,11 +18,6 @@ export type NearbyLocationErrorCode =
 type NearbyPermissionState = PermissionState | 'checking' | 'unsupported';
 type NearbyRequestState = 'idle' | 'requesting' | 'ready' | 'error';
 
-const DEFAULT_POSITION_OPTIONS: PositionOptions = {
-  enableHighAccuracy: true,
-  maximumAge: 5 * 60 * 1000,
-  timeout: 15_000,
-};
 const GEOLOCATION_PERMISSION_DENIED = 1;
 const GEOLOCATION_POSITION_UNAVAILABLE = 2;
 const GEOLOCATION_TIMEOUT = 3;
