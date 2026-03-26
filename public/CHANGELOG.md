@@ -4,7 +4,8 @@
 
 ### Changed
 
-- Simplified the mobile navigation drawer so it now uses plain full-width buttons without a redundant menu heading.
+- Refined the navigation with shared menu icons across desktop and mobile, a clearer pill-style selected state on desktop, and a cleaner mobile drawer layout with standard full-width buttons.
+- Shortened the nearby location call to action to a simpler primary button label.
 
 ### Fixed
 

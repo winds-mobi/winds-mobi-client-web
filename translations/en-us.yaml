@@ -74,7 +74,7 @@ nearby:
   location:
     checking: Checking location access…
     locatingDescription: Trying to determine your current location…
-    cta: Use my location to find nearby stations
+    cta: Use location
     permissionDenied: This view needs your location to find nearby stations. Location access is currently blocked in the browser.
     positionUnavailable: This view needs your location to find nearby stations, but the device could not determine it right now.
     timeout: This view needs your location to find nearby stations, but the request timed out.

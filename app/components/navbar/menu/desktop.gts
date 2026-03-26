@@ -5,14 +5,15 @@ import { NAVBAR_MENU_ITEMS } from './items';
 <template>
   <div class="hidden min-w-0 flex-1 md:flex">
     <div class="flex flex-1 justify-center px-3 sm:px-6">
-      <div class="inline-flex items-center gap-4">
+      <div class="inline-flex items-center gap-1 rounded-full bg-slate-100 p-1">
         {{#each NAVBAR_MENU_ITEMS as |item|}}
           <LinkTo
             @route={{item.route}}
-            @activeClass="border-slate-900 text-slate-950"
-            class="border-b-2 border-transparent px-2 py-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
+            @activeClass="bg-white text-wind-20 shadow-sm shadow-slate-900/10"
+            class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-white/70 hover:text-wind-20"
             data-test-navbar-link={{item.route}}
           >
+            <item.icon @size={{14}} />
             {{t item.labelKey}}
           </LinkTo>
         {{/each}}

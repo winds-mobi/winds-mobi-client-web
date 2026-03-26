@@ -59,8 +59,17 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           @placement="right"
           @size="sm"
           data-test-navbar-mobile-menu
+          as |drawer|
         >
-          <div class="p-4">
+          <drawer.Header>
+            <div class="pr-10">
+              <h2 class="text-base font-semibold text-slate-950">
+                {{t "navigation.menu"}}
+              </h2>
+            </div>
+          </drawer.Header>
+
+          <drawer.Body>
             <div class="w-full">
               <div class="flex flex-col items-stretch gap-2">
                 {{#each NAVBAR_MENU_ITEMS as |item|}}
@@ -70,12 +79,15 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
                     @class="w-full"
                     @onPress={{fn this.navigate item.route}}
                   >
-                    {{t item.labelKey}}
+                    <span class="inline-flex items-center gap-2">
+                      <item.icon @size={{16}} />
+                      <span>{{t item.labelKey}}</span>
+                    </span>
                   </Button>
                 {{/each}}
               </div>
             </div>
-          </div>
+          </drawer.Body>
         </Drawer>
       {{/if}}
     </div>
