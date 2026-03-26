@@ -5,8 +5,62 @@ common:
   close: Close
 
 navigation:
+  menu: Menu
   map: Map
   nearby: Nearby
+  help: Help
+
+help:
+  title: Help
+  intro: Winds.mobi helps you inspect live wind and weather stations on the map, compare nearby stations around your current position, and understand what each reading means.
+  sections:
+    mapDescription: Explore stations on the interactive map, compare marker colours, and open a station panel for more detail.
+    nearbyDescription: Use your location to load the closest stations and compare their current conditions side by side.
+    sharedToolsTitle: Shared tools
+    sharedToolsDescription: The countdown refreshes station data on a shared cycle, and the location button updates both the map and nearby views.
+  liveExample:
+    title: Live station example
+    description: This live example loads the current Holfuy 1804 station so you can see the real widgets used in the app.
+    legendTitle: What you are looking at
+    items:
+      headerTitle: Station header
+      headerDescription: The header shows the station name, altitude, relative update time, provider, and the distance from you when your location is available.
+      nowTitle: Now
+      nowDescription: The left summary card shows the latest reported values for wind, gusts, direction, temperature, humidity, pressure, and rain.
+      lastHourTitle: Last hour
+      lastHourDescription: The second summary card focuses on the last hour with trend values and a compact wind-direction history.
+      windHistoryTitle: Wind history
+      windHistoryDescription: The wind section shows the larger historical view for wind speed, gusts, and direction over time.
+      airHistoryTitle: Air history
+      airHistoryDescription: The air section shows the matching historical charts for temperature, humidity, and rain.
+  colors:
+    title: Map marker colours
+    description: Map markers use the same wind palette throughout the app so the strongest stations stand out quickly.
+    items:
+      fillTitle: Marker fill
+      fillDescription: The main marker colour follows the latest mean wind speed.
+      outlineTitle: Marker outline
+      outlineDescription: The marker outline follows the latest gust speed, so stronger gusts stand out even when mean wind stays lower.
+      staleTitle: Grey markers
+      staleDescription: A grey marker means the last reading is stale enough that the station should be treated with caution.
+  providers:
+    title: Data providers
+    description: Winds.mobi aggregates station data from multiple provider networks. The provider name in each station header links back to the original source when available.
+  compatibility:
+    title: Compatibility
+    description: Winds.mobi is built for current desktop and mobile browsers, with the interactive map and charts working best on the latest major browser versions.
+  privacy:
+    title: Privacy
+    description: Winds.mobi uses your browser location only when you ask it to. The nearby view and distance display depend on that location, and the app does not need location access for normal map browsing.
+  about:
+    title: About
+    description: Questions, issues, or improvement ideas are welcome.
+    teamTitle: Built by
+    teamValue: Michal, Fred Montet, Yann Savary
+    emailTitle: Contact
+    emailValue: info@winds.mobi
+    repoTitle: Repository
+    repoValue: github.com/winds-mobi/winds-mobi-client-web
 
 location:
   locate: Locate me

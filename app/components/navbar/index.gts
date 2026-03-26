@@ -2,6 +2,7 @@
 import Component from '@glimmer/component';
 import NavbarLocation from './location';
 import NavbarLogo from './logo';
+import NavbarMobileMenu from './mobile-menu';
 import NavbarRefresh from './refresh';
 import NavbarRouteSwitch from './route-switch';
 // import NavbarNotifications from './notifications';
@@ -23,12 +24,16 @@ export default class Navbar extends Component<NavbarSignature> {
       class="border-b border-slate-200 bg-white shadow-md shadow-slate-900/12"
     >
       <div class="px-2 sm:px-4 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
+        <div
+          class="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-3 md:flex"
+        >
           <NavbarLogo />
-          <NavbarRouteSwitch />
 
-          {{! TODO: <NavbarMobileMenu::Button /> }}
-          <div class="ml-4 flex items-center gap-2">
+          <div class="hidden min-w-0 flex-1 md:flex">
+            <NavbarRouteSwitch />
+          </div>
+
+          <div class="flex items-center justify-self-center gap-2 md:ml-4">
             <NavbarLocation />
             <NavbarRefresh />
 
@@ -36,10 +41,12 @@ export default class Navbar extends Component<NavbarSignature> {
 
             {{! <NavbarUserMenu /> }}
           </div>
+
+          <div class="justify-self-end md:hidden">
+            <NavbarMobileMenu />
+          </div>
         </div>
       </div>
-
-      {{! <NavbarMobileMenu /> }}
     </nav>
   </template>
 }

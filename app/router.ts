@@ -11,4 +11,5 @@ Router.map(function () {
     this.route('station', { path: '/:station_id' });
   });
   this.route('nearby');
+  this.route('help');
 });

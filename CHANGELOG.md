@@ -5,15 +5,19 @@
 ### Added
 
 - Added a new `Nearby` view that can use your current location to show the closest weather stations in a responsive card layout.
+- Added a new `Help` page that explains the main app views, shows a live station example, documents station colours, lists data providers, and summarizes compatibility, privacy, and project contact details.
 
 ### Changed
 
 - Added direct `Map` and `Nearby` navigation links to the navbar so switching between the two views is faster and clearer.
+- Added a `Help` link to the main navigation.
 - Replaced the separate map and nearby location buttons with a single shared navbar location control that updates both views from the same browser location state.
+- Reworked the navbar for small screens with a responsive drawer menu while keeping the refresh countdown and location control always visible in the top bar.
 - Updated the new `Nearby` view to request location only when needed, show a simpler permission prompt, and hide the introductory copy once nearby stations are available.
 - Kept the shared refresh control available in the `Nearby` view so nearby station results can be refreshed manually and through the same automatic refresh cycle as the map.
 - Unified station header details across the map sidebar and nearby cards so station name, altitude, relative update time, distance from you, and provider link are presented consistently.
 - Updated station metadata to use clearer inline icons and proper external provider links that open in a new browser tab.
+- Refined the shared location button so it now signals no location, active lookup, and located states more clearly with distinct icon colours and a pulsing lookup state.
 
 ## v0.0.13 - 2026-03-25
 

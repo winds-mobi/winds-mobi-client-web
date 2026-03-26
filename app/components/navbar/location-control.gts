@@ -52,18 +52,18 @@ export default class NavbarLocationControl extends Component<NavbarLocationContr
 
   get buttonClass() {
     if (this.nearbyLocation.isRequestingLocation) {
-      return 'text-sky-600';
+      return 'text-orange-500';
     }
 
     if (this.nearbyLocation.errorCode) {
-      return 'text-rose-600';
+      return 'text-slate-400';
     }
 
     if (this.nearbyLocation.hasCoordinates) {
-      return 'text-emerald-600';
+      return 'text-sky-600';
     }
 
-    return 'text-slate-600';
+    return 'text-slate-400';
   }
 
   get isDisabled() {
