@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
-import NavbarDesktopMenu from './desktop-menu';
 import NavbarLogo from './logo';
-import NavbarMobileMenu from './mobile-menu';
+import NavbarMenuDesktop from './menu/desktop';
+import NavbarMenuMobile from './menu/mobile';
 import NavbarRefreshControl from './refresh-control';
 
 export interface NavbarSignature {
@@ -25,14 +25,14 @@ export default class Navbar extends Component<NavbarSignature> {
         >
           <NavbarLogo />
 
-          <NavbarDesktopMenu />
+          <NavbarMenuDesktop />
 
           <div class="flex items-center justify-self-center gap-2 md:ml-4">
             <NavbarRefreshControl />
           </div>
 
           <div class="justify-self-end md:hidden">
-            <NavbarMobileMenu />
+            <NavbarMenuMobile />
           </div>
         </div>
       </div>

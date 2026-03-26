@@ -1,13 +1,16 @@
 import Component from '@glimmer/component';
-import { action } from '@ember/object';
+import { fn } from '@ember/helper';
 import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
+import type RouterService from '@ember/routing/router-service';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
-import NavbarRouteSwitch from './route-switch';
+import { NAVBAR_MENU_ITEMS, type NavbarMenuItem } from './items';
 
-export interface NavbarMobileMenuSignature {
+export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
   Blocks: {
     default: [];
@@ -15,7 +18,9 @@ export interface NavbarMobileMenuSignature {
   Element: null;
 }
 
-export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignature> {
+export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
+  @service declare router: RouterService;
+
   @tracked isOpen = false;
 
   @action
@@ -26,6 +31,12 @@ export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignatur
   @action
   close() {
     this.isOpen = false;
+  }
+
+  @action
+  navigate(route: NavbarMenuItem['route']) {
+    this.close();
+    void this.router.transitionTo(route);
   }
 
   <template>
@@ -59,7 +70,23 @@ export default class NavbarMobileMenu extends Component<NavbarMobileMenuSignatur
           </drawer.Header>
 
           <drawer.Body>
-            <NavbarRouteSwitch @layout="drawer" @onNavigate={{this.close}} />
+            <div class="w-full">
+              <div class="flex flex-col items-stretch gap-2">
+                {{#each NAVBAR_MENU_ITEMS as |item|}}
+                  <Button
+                    data-test-navbar-link={{item.route}}
+                    @appearance="outlined"
+                    @class="w-full"
+                    @onPress={{fn this.navigate item.route}}
+                  >
+                    <span class="inline-flex items-center gap-2">
+                      <item.icon @size={{16}} />
+                      <span>{{t item.labelKey}}</span>
+                    </span>
+                  </Button>
+                {{/each}}
+              </div>
+            </div>
           </drawer.Body>
         </Drawer>
       {{/if}}

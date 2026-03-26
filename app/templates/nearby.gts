@@ -147,7 +147,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
                 <Button
                   data-test-nearby-location-button
                   disabled={{this.isLocationButtonDisabled}}
-                  @appearance="filled"
+                  @intent="primary"
                   @onPress={{this.requestLocation}}
                 >
                   {{t "nearby.location.cta"}}

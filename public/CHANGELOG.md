@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.0.16 - 2026-03-26
+
+### Changed
+
+- Refined the navigation with shared menu icons across desktop and mobile, a clearer pill-style selected state on desktop, and a cleaner mobile drawer layout with standard full-width buttons.
+- Shortened the nearby location call to action to a simpler primary button label.
+
+### Fixed
+
+- Fixed mobile menu navigation so choosing `Map`, `Nearby`, or `Help` closes the drawer and transitions inside the app instead of triggering a full page reload.
+
+## v0.0.15 - 2026-03-26
+
+### Changed
+
+- Simplified the main navigation so desktop and mobile menus now share one set of links while each keeps its own layout and markup.
+- Refined the mobile menu structure to feel more consistent and predictable when switching between the `Map`, `Nearby`, and `Help` views.
+
 ## v0.0.14 - 2026-03-25
 
 ### Added
