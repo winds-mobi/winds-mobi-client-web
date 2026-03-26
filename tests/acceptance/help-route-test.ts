@@ -75,8 +75,8 @@ module('Acceptance | help route', function (hooks) {
   test('it shows the help page and live station example', async function (assert) {
     await visit('/help');
 
-    assert.dom('[data-test-navbar-help-link]').exists();
-    assert.dom('[data-test-navbar-help-link]').hasText('Help');
+    assert.dom('[data-test-navbar-link=\"help\"]').exists();
+    assert.dom('[data-test-navbar-link=\"help\"]').hasText('Help');
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
     assert.dom('[data-test-station-summary-section]').exists();
     assert.dom('[data-test-station-wind-section]').exists();

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.15 - 2026-03-26
+
+### Changed
+
+- Simplified the main navigation so desktop and mobile menus now share one set of links while each keeps its own layout and markup.
+- Refined the mobile menu structure to feel more consistent and predictable when switching between the `Map`, `Nearby`, and `Help` views.
+
 ## v0.0.14 - 2026-03-25
 
 ### Added
