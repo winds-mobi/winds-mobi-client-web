@@ -1,13 +1,14 @@
 import Component from '@glimmer/component';
+import { fn } from '@ember/helper';
 import { tracked } from '@glimmer/tracking';
-import { on } from '@ember/modifier';
 import { action } from '@ember/object';
-import { LinkTo } from '@ember/routing';
+import { service } from '@ember/service';
+import type RouterService from '@ember/routing/router-service';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
-import { NAVBAR_MENU_ITEMS } from './items';
+import { NAVBAR_MENU_ITEMS, type NavbarMenuItem } from './items';
 
 export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
@@ -18,6 +19,8 @@ export interface NavbarMenuMobileSignature {
 }
 
 export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
+  @service declare router: RouterService;
+
   @tracked isOpen = false;
 
   @action
@@ -28,6 +31,12 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
   @action
   close() {
     this.isOpen = false;
+  }
+
+  @action
+  navigate(route: NavbarMenuItem['route']) {
+    this.close();
+    void this.router.transitionTo(route);
   }
 
   <template>
@@ -50,33 +59,23 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           @placement="right"
           @size="sm"
           data-test-navbar-mobile-menu
-          as |drawer|
         >
-          <drawer.Header>
-            <div class="pr-10">
-              <h2 class="text-base font-semibold text-slate-950">
-                {{t "navigation.menu"}}
-              </h2>
-            </div>
-          </drawer.Header>
-
-          <drawer.Body>
+          <div class="p-4">
             <div class="w-full">
               <div class="flex flex-col items-stretch gap-2">
                 {{#each NAVBAR_MENU_ITEMS as |item|}}
-                  <LinkTo
-                    @route={{item.route}}
-                    @activeClass="bg-slate-900 text-white"
-                    class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+                  <Button
                     data-test-navbar-link={{item.route}}
-                    {{on "click" this.close}}
+                    @appearance="outlined"
+                    @class="w-full"
+                    @onPress={{fn this.navigate item.route}}
                   >
                     {{t item.labelKey}}
-                  </LinkTo>
+                  </Button>
                 {{/each}}
               </div>
             </div>
-          </drawer.Body>
+          </div>
         </Drawer>
       {{/if}}
     </div>

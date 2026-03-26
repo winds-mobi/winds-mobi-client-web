@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.16 - 2026-03-26
+
+### Changed
+
+- Simplified the mobile navigation drawer so it now uses plain full-width buttons without a redundant menu heading.
+
+### Fixed
+
+- Fixed mobile menu navigation so choosing `Map`, `Nearby`, or `Help` closes the drawer and transitions inside the app instead of triggering a full page reload.
+
 ## v0.0.15 - 2026-03-26
 
 ### Changed

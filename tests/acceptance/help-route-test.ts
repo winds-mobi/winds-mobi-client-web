@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { visit } from '@ember/test-helpers';
+import { click, currentURL, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
@@ -82,6 +82,22 @@ module('Acceptance | help route', function (hooks) {
     assert.dom('[data-test-station-wind-section]').exists();
     assert.dom('[data-test-station-air-section]').exists();
     assert.dom('[data-test-station-provider-link]').hasText('Holfuy');
+    assert.dom('[data-test-help-changelog]').exists();
+  });
+
+  test('it navigates to help from the mobile menu without reloading the app', async function (assert) {
+    await visit('/nearby');
+
+    await click('[data-test-navbar-mobile-menu-button]');
+
+    assert.dom('[data-test-navbar-mobile-menu]').exists();
+
+    await click(
+      '[data-test-navbar-mobile-menu] [data-test-navbar-link="help"]'
+    );
+
+    assert.strictEqual(currentURL(), '/help');
+    assert.dom('[data-test-navbar-mobile-menu]').doesNotExist();
     assert.dom('[data-test-help-changelog]').exists();
   });
 });
