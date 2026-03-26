@@ -16,8 +16,9 @@ export interface MapLegendSignature {
 
 <template>
   <aside
-    class="pointer-events-none absolute left-4 top-4 z-10 w-16 rounded-xl border border-slate-200 bg-white/92 px-1 py-1 shadow-lg shadow-slate-900/10 backdrop-blur"
+    class="w-16 rounded-xl border border-slate-200 bg-white/92 px-1 py-1 shadow-lg shadow-slate-900/10 backdrop-blur"
     data-test-map-wind-legend
+    ...attributes
   >
     <p
       class="text-[8px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-500"

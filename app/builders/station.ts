@@ -12,26 +12,27 @@ import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
+const defaultStationQueryKeys = [
+  'pv-name',
+  'short',
+  'name',
+  'alt',
+  'peak',
+  'status',
+  'loc',
+  'url',
+  'last._id',
+  'last.w-dir',
+  'last.w-avg',
+  'last.w-max',
+  'last.temp',
+  'last.hum',
+  'last.rain',
+  'last.pres',
+] as const;
+
 const defaultQuery: QueryParamsSource = {
-  keys: [
-    'pv-name',
-    'short',
-    'name',
-    'alt',
-    'peak',
-    'status',
-    'loc',
-    'url',
-    'last._id',
-    'last.w-dir',
-    'last.w-avg',
-    'last.w-max',
-    'last.temp',
-    'last.hum',
-    'last.rain',
-    'last.pres',
-    'last.hum',
-  ],
+  keys: [...defaultStationQueryKeys],
 };
 
 const defaultOptions: ConstrainedRequestOptions = {
@@ -122,4 +123,23 @@ function mapQuery<T>(
   );
 }
 
-export { findRecord, mapQuery, query };
+function nearbyQuery<T>(
+  type: string,
+  latitude: number,
+  longitude: number,
+  limit = 10,
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      'is-highest-duplicates-rating': true,
+      limit,
+      'near-lat': latitude,
+      'near-lon': longitude,
+    },
+    options
+  );
+}
+
+export { findRecord, mapQuery, nearbyQuery, query };

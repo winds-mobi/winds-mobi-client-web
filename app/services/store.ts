@@ -80,7 +80,7 @@ export const StationSchema = withDefaults({
     { name: 'name', kind: 'field' },
     { name: 'status', kind: 'field' },
 
-    // providerUrl stays as a raw field (since the value is an object of URLs)
+    // providerUrl is normalized to a single URL string in the station handler.
     { name: 'providerUrl', kind: 'field' },
 
     // last = embedded reading object

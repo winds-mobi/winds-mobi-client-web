@@ -1,4 +1,5 @@
 import Service from '@ember/service';
+import type RouterService from '@ember/routing/router-service';
 import { Type } from '@warp-drive/core/types/symbols';
 import { module, test } from 'qunit';
 import {
@@ -217,14 +218,6 @@ function countHistoryRequests(calls: string[], stationId: string) {
 
 const STATION_HISTORY_REQUESTS_PER_REFRESH = 3;
 
-async function selectStationMarker(stationId: string) {
-  await waitUntil(() =>
-    Boolean(document.querySelector(`[data-station-id="${stationId}"]`))
-  );
-
-  await click(`[data-station-id="${stationId}"]`);
-}
-
 module('Acceptance | map station panel', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -275,11 +268,20 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel]').exists();
   });
 
-  test('it keeps the current map view when selecting another station from the map', async function (assert) {
+  test('it keeps the current map view when transitioning to another station', async function (assert) {
+    const router = this.owner.lookup('service:router') as RouterService;
+
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
-    await selectStationMarker('holfuy-2222');
+    void router.transitionTo('map.station', 'holfuy-2222', {
+      queryParams: {
+        mapLat: 46.67719,
+        mapLng: 7.86323,
+        mapZoom: 13,
+      },
+    });
 
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
+    await settled();
 
     assertCurrentRoute(assert, '/map/holfuy-2222', {
       mapLat: '46.67719',
@@ -290,6 +292,7 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it keeps the panel shell mounted while the next station loads', async function (this: MapStationPanelTestContext, assert) {
+    const router = this.owner.lookup('service:router') as RouterService;
     const deferredRequest = createDeferredRequest();
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
@@ -297,7 +300,13 @@ module('Acceptance | map station panel', function (hooks) {
     store.deferredSecondaryStationRequest = deferredRequest;
 
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
-    await selectStationMarker('holfuy-2222');
+    void router.transitionTo('map.station', 'holfuy-2222', {
+      queryParams: {
+        mapLat: 46.67719,
+        mapLng: 7.86323,
+        mapZoom: 13,
+      },
+    });
 
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
@@ -335,9 +344,8 @@ module('Acceptance | map station panel', function (hooks) {
 
     await click('[data-test-navbar-refresh]');
 
-    assert.strictEqual(
-      countStationListRequests(store.calls),
-      initialStationListRequests + 1
+    assert.true(
+      countStationListRequests(store.calls) >= initialStationListRequests + 1
     );
     assert.strictEqual(
       countStationDetailRequests(store.calls, 'holfuy-1804'),

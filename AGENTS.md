@@ -91,8 +91,7 @@ Notes: Leaflet-specific state was removed from the location service.
 ## Verification
 
 - Install dependencies with `pnpm install`.
-- Use the smallest relevant checks while working.
-- Do not run lint or tests after every small change. Batch work, then run the relevant verification before push.
+- Do not run lint or tests while iterating unless the user explicitly asks for them sooner. Verification should happen only as the final pre-push step.
 - Before pushing, run lint and the relevant tests for the changes being shipped.
-- Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember`.
-- If a local Vite dev server is already running and the goal is local verification without disrupting it, prefer `pnpm test:ember:dev` over `pnpm test:ember`. Keep `pnpm test:ember` for isolated build-based verification and CI-style checks.
+- Assume the local Vite dev server is already running. Try `pnpm test:ember:dev` first, and use `pnpm test:ember` only when the dev variant is unavailable or an isolated build-style run is specifically needed.
+- Useful targeted commands: `pnpm lint:format`, `pnpm lint`, `pnpm test:ember:dev`, `pnpm test:ember`.

@@ -62,14 +62,14 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
       aria-label={{this.title}}
       data-test-navbar-refresh
       @appearance="outlined"
-      @class="px-2.5 font-mono tabular-nums"
+      @class="px-2 text-xs font-mono tabular-nums"
       title={{this.title}}
       @onPress={{this.handleRefresh}}
       {{activateMapRefresh this.mapRefresh}}
     >
-      <span class="flex items-center gap-2">
+      <span class="flex items-center gap-1.5">
         <span
-          class="inline-block size-4 shrink-0 rounded-full border border-slate-500/70"
+          class="inline-block size-3.5 shrink-0 rounded-full border border-slate-500/70"
           style={{this.progressCircleStyle}}
         ></span>
         <span>{{this.elapsedLabel}}</span>
