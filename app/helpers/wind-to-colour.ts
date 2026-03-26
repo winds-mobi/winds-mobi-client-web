@@ -12,6 +12,11 @@ export interface WindColourZone {
   value?: number;
 }
 
+export interface WindLegendBand {
+  backgroundClass: string;
+  label: string;
+}
+
 const COLORS = [
   {
     backgroundClass: 'bg-wind-05',
@@ -136,6 +141,13 @@ export function windColourZones() {
       color: band.color,
     };
   }) as WindColourZone[];
+}
+
+export function windLegendBands(): WindLegendBand[] {
+  return [...WIND_COLOUR_BANDS].reverse().map((band) => ({
+    backgroundClass: band.backgroundClass,
+    label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
+  }));
 }
 
 export default function windToColour(speed: number) {

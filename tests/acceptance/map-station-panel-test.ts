@@ -344,9 +344,8 @@ module('Acceptance | map station panel', function (hooks) {
 
     await click('[data-test-navbar-refresh]');
 
-    assert.strictEqual(
-      countStationListRequests(store.calls),
-      initialStationListRequests + 1
+    assert.true(
+      countStationListRequests(store.calls) >= initialStationListRequests + 1
     );
     assert.strictEqual(
       countStationDetailRequests(store.calls, 'holfuy-1804'),

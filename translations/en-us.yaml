@@ -16,8 +16,6 @@ help:
   sections:
     mapDescription: Explore stations on the interactive map, compare marker colours, and open a station panel for more detail.
     nearbyDescription: Use your location to load the closest stations and compare their current conditions side by side.
-    sharedToolsTitle: Shared tools
-    sharedToolsDescription: The countdown refreshes station data on a shared cycle, and the location button updates both the map and nearby views.
   liveExample:
     title: Live station example
     description: This live example loads the current Holfuy 1804 station so you can see the real widgets used in the app.
@@ -35,14 +33,7 @@ help:
       airHistoryDescription: The air section shows the matching historical charts for temperature, humidity, and rain.
   colors:
     title: Map marker colours
-    description: Map markers use the same wind palette throughout the app so the strongest stations stand out quickly.
-    items:
-      fillTitle: Marker fill
-      fillDescription: The main marker colour follows the latest mean wind speed.
-      outlineTitle: Marker outline
-      outlineDescription: The marker outline follows the latest gust speed, so stronger gusts stand out even when mean wind stays lower.
-      staleTitle: Grey markers
-      staleDescription: A grey marker means the last reading is stale enough that the station should be treated with caution.
+    description: Winds.mobi reuses this shared wind palette for wind speed and gusts across station markers, the last-hour wind rose, and the wind history chart so stronger conditions stay easy to read everywhere.
   providers:
     title: Data providers
     description: Winds.mobi aggregates station data from multiple provider networks. The provider name in each station header links back to the original source when available.
@@ -61,6 +52,11 @@ help:
     emailValue: info@winds.mobi
     repoTitle: Repository
     repoValue: github.com/winds-mobi/winds-mobi-client-web
+  changelog:
+    title: Changelog
+    description: The latest shipped changes are listed below directly from the project changelog.
+    loading: Loading changelog…
+    error: The changelog could not be loaded right now.
 
 location:
   locate: Locate me
@@ -85,12 +81,13 @@ map:
 
 nearby:
   title: Nearby stations
-  description: Use the location button in the menu to find the closest stations around your current position and compare the live reading with the last hour at a glance.
+  description: Use your location to find the closest stations around your current position and compare the live reading with the last hour at a glance.
   loading: Looking up the closest stations…
   requestError: Nearby stations could not be loaded right now.
   location:
     checking: Checking location access…
     locatingDescription: Trying to determine your current location…
+    cta: Use my location to find nearby stations
     permissionDenied: This view needs your location to find nearby stations. Location access is currently blocked in the browser.
     positionUnavailable: This view needs your location to find nearby stations, but the device could not determine it right now.
     timeout: This view needs your location to find nearby stations, but the request timed out.

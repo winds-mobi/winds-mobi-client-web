@@ -1,8 +1,11 @@
 import Component from '@glimmer/component';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import HelpChangelog from 'winds-mobi-client-web/components/help/changelog';
 import HelpLiveStation from 'winds-mobi-client-web/components/help/live-station';
+import MapLegend from 'winds-mobi-client-web/components/map/legend';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
+import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 interface HelpTemplateSignature {
   Args: {
@@ -27,6 +30,8 @@ const PROVIDERS = [
 export default class HelpTemplate extends Component<HelpTemplateSignature> {
   providers = PROVIDERS;
 
+  legendBands = windLegendBands();
+
   <template>
     {{pageTitle (t "help.title")}}
 
@@ -39,7 +44,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
             <p class="max-w-3xl text-sm leading-6 text-slate-600">
               {{t "help.intro"}}
             </p>
-            <dl class="grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+            <dl class="grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
               <div class="rounded-lg bg-slate-50 p-3">
                 <dt class="font-semibold text-slate-950">{{t
                     "navigation.map"
@@ -51,14 +56,6 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                     "navigation.nearby"
                   }}</dt>
                 <dd class="mt-1">{{t "help.sections.nearbyDescription"}}</dd>
-              </div>
-              <div class="rounded-lg bg-slate-50 p-3">
-                <dt class="font-semibold text-slate-950">{{t
-                    "help.sections.sharedToolsTitle"
-                  }}</dt>
-                <dd class="mt-1">{{t
-                    "help.sections.sharedToolsDescription"
-                  }}</dd>
               </div>
             </dl>
           </div>
@@ -128,32 +125,13 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
               <p class="text-sm leading-6 text-slate-600">
                 {{t "help.colors.description"}}
               </p>
-              <dl class="grid gap-2 text-sm text-slate-700">
-                <div class="rounded-lg bg-slate-50 p-3">
-                  <dt class="font-semibold text-slate-950">{{t
-                      "help.colors.items.fillTitle"
-                    }}</dt>
-                  <dd class="mt-1">{{t
-                      "help.colors.items.fillDescription"
-                    }}</dd>
-                </div>
-                <div class="rounded-lg bg-slate-50 p-3">
-                  <dt class="font-semibold text-slate-950">{{t
-                      "help.colors.items.outlineTitle"
-                    }}</dt>
-                  <dd class="mt-1">{{t
-                      "help.colors.items.outlineDescription"
-                    }}</dd>
-                </div>
-                <div class="rounded-lg bg-slate-50 p-3">
-                  <dt class="font-semibold text-slate-950">{{t
-                      "help.colors.items.staleTitle"
-                    }}</dt>
-                  <dd class="mt-1">{{t
-                      "help.colors.items.staleDescription"
-                    }}</dd>
-                </div>
-              </dl>
+              <div class="relative min-h-32 rounded-lg bg-slate-50 p-4">
+                <MapLegend
+                  class="relative"
+                  @bands={{this.legendBands}}
+                  @title={{t "map.legend.windSpeed"}}
+                />
+              </div>
             </div>
           </StationSectionCard>
 
@@ -224,6 +202,15 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                 </dd>
               </div>
             </dl>
+          </div>
+        </StationSectionCard>
+
+        <StationSectionCard @title={{t "help.changelog.title"}}>
+          <div class="grid gap-4">
+            <p class="text-sm leading-6 text-slate-600">
+              {{t "help.changelog.description"}}
+            </p>
+            <HelpChangelog />
           </div>
         </StationSectionCard>
       </div>

@@ -54,6 +54,31 @@ export default class NearbyLocationService extends Service {
     );
   }
 
+  beginLocationRequest() {
+    this.errorCode = undefined;
+    this.requestState = 'requesting';
+  }
+
+  updateFromPosition(position: GeolocationPosition) {
+    this.coordinates = {
+      accuracy: position.coords.accuracy,
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    };
+    this.errorCode = undefined;
+    this.permissionState = 'granted';
+    this.requestState = 'ready';
+  }
+
+  updateFromError(error?: GeolocationPositionError) {
+    this.errorCode = this.#mapErrorCode(error);
+    this.requestState = 'error';
+
+    if (this.errorCode === 'permission-denied') {
+      this.permissionState = 'denied';
+    }
+  }
+
   async syncPermissionState() {
     if (this.#hasSyncedPermissionState) {
       return;
@@ -102,8 +127,7 @@ export default class NearbyLocationService extends Service {
       return;
     }
 
-    this.errorCode = undefined;
-    this.requestState = 'requesting';
+    this.beginLocationRequest();
 
     try {
       const position = await new Promise<GeolocationPosition>(
@@ -116,22 +140,9 @@ export default class NearbyLocationService extends Service {
         }
       );
 
-      this.coordinates = {
-        accuracy: position.coords.accuracy,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      };
-      this.permissionState = 'granted';
-      this.requestState = 'ready';
+      this.updateFromPosition(position);
     } catch (error) {
-      const geolocationError = error as GeolocationPositionError | undefined;
-
-      this.errorCode = this.#mapErrorCode(geolocationError);
-      this.requestState = 'error';
-
-      if (this.errorCode === 'permission-denied') {
-        this.permissionState = 'denied';
-      }
+      this.updateFromError(error as GeolocationPositionError | undefined);
     }
   }
 

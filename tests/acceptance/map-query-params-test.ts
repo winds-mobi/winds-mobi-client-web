@@ -4,7 +4,6 @@ import { click, currentURL, visit, waitUntil } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
-import NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 type FakeStoreRequest = {
@@ -65,8 +64,6 @@ class ShortIntervalMapRefreshService extends MapRefreshService {
   refreshIntervalMs = 75;
   countdownTickMs = 10;
 }
-
-const NAVBAR_LOCATION_SELECTOR = '[data-test-navbar-location]';
 
 function countStationRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations?')).length;
@@ -166,40 +163,8 @@ module('Acceptance | map query params', function (hooks) {
     );
   });
 
-  test('it recenters the map from the shared navbar location button', async function (assert) {
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
-
-    nearbyLocation.syncPermissionState = async () => {
-      nearbyLocation.permissionState = 'prompt';
-    };
-    nearbyLocation.requestCurrentPosition = async () => {
-      nearbyLocation.permissionState = 'granted';
-      nearbyLocation.requestState = 'ready';
-      nearbyLocation.coordinates = {
-        accuracy: 20,
-        latitude: 46.54321,
-        longitude: 8.12345,
-      };
-    };
-
+  test('it removes the navbar location button on the map route', async function (assert) {
     await visit('/map?mapLng=7.82667&mapLat=46.69299&mapZoom=9.5');
-
-    assert.dom(NAVBAR_LOCATION_SELECTOR).exists();
-
-    await click(NAVBAR_LOCATION_SELECTOR);
-
-    await waitUntil(
-      () =>
-        currentURL().includes('mapLat=46.54321') &&
-        currentURL().includes('mapLng=8.12345')
-    );
-
-    assertCurrentMapUrl(assert, {
-      mapLat: '46.54321',
-      mapLng: '8.12345',
-      mapZoom: '12',
-    });
+    assert.dom('[data-test-navbar-location]').doesNotExist();
   });
 });

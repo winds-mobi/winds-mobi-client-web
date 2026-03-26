@@ -4,6 +4,8 @@ import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { Request } from '@warp-drive/ember';
 import { pageTitle } from 'ember-page-title';
+import { action } from '@ember/object';
+import { Button } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
@@ -82,6 +84,15 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     );
   }
 
+  get isLocationButtonDisabled() {
+    return !this.nearbyLocation.canRequestLocation;
+  }
+
+  @action
+  async requestLocation() {
+    await this.nearbyLocation.requestCurrentPosition();
+  }
+
   <template>
     {{pageTitle (t "nearby.title")}}
 
@@ -132,6 +143,16 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
               <p class="text-sm leading-6 text-slate-600">
                 {{this.locationMessage}}
               </p>
+              <div class="mt-4">
+                <Button
+                  data-test-nearby-location-button
+                  disabled={{this.isLocationButtonDisabled}}
+                  @appearance="filled"
+                  @onPress={{this.requestLocation}}
+                >
+                  {{t "nearby.location.cta"}}
+                </Button>
+              </div>
             </div>
           </StationSectionCard>
         {{else}}

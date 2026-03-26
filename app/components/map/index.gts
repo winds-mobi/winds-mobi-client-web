@@ -12,14 +12,19 @@ import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, StyleSpecification } from 'ember-maplibre-gl';
-import { NavigationControl, TerrainControl } from 'maplibre-gl';
-import { WIND_COLOUR_BANDS } from 'winds-mobi-client-web/helpers/wind-to-colour';
+import {
+  GeolocateControl,
+  NavigationControl,
+  TerrainControl,
+} from 'maplibre-gl';
+import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
   type WindLegendBand,
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import {
   approximateMapBoundsFromView,
   mapBoundsEqual,
@@ -109,6 +114,7 @@ export default class Map extends Component<MapSignature> {
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
+  @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
   @tracked requestedViewport?: RequestedViewport;
@@ -118,6 +124,17 @@ export default class Map extends Component<MapSignature> {
     showCompass: true,
     visualizePitch: true,
   });
+  private geolocateControl = new GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true,
+      maximumAge: 5 * 60 * 1000,
+      timeout: 15_000,
+    },
+    showAccuracyCircle: true,
+    showUserLocation: true,
+    trackUserLocation: true,
+  });
+  #didBindGeolocateEvents = false;
 
   private terrainControl =
     config.environment === 'test'
@@ -170,10 +187,7 @@ export default class Map extends Component<MapSignature> {
   }
 
   get legendBands(): WindLegendBand[] {
-    return [...WIND_COLOUR_BANDS].reverse().map((band) => ({
-      backgroundClass: band.backgroundClass,
-      label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
-    }));
+    return windLegendBands();
   }
 
   get initOptions() {
@@ -211,6 +225,7 @@ export default class Map extends Component<MapSignature> {
 
   @action
   handleMapLoaded(map: MaplibreMap) {
+    this.bindGeolocateEvents();
     this.handleViewportChange(mapViewFromMap(map), mapBoundsFromMap(map));
   }
 
@@ -230,6 +245,24 @@ export default class Map extends Component<MapSignature> {
 
     event.target.easeTo({
       pitch: 70,
+    });
+  }
+
+  private bindGeolocateEvents() {
+    if (this.#didBindGeolocateEvents) {
+      return;
+    }
+
+    this.#didBindGeolocateEvents = true;
+
+    this.geolocateControl.on('trackuserlocationstart', () => {
+      this.nearbyLocation.beginLocationRequest();
+    });
+    this.geolocateControl.on('geolocate', (event) => {
+      this.nearbyLocation.updateFromPosition(event.data);
+    });
+    this.geolocateControl.on('error', (event) => {
+      this.nearbyLocation.updateFromError(event.data);
     });
   }
 
@@ -279,6 +312,7 @@ export default class Map extends Component<MapSignature> {
           @control={{this.navigationControl}}
           @position="bottom-right"
         />
+        <map.control @control={{this.geolocateControl}} @position="top-right" />
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
         {{/if}}
@@ -296,6 +330,7 @@ export default class Map extends Component<MapSignature> {
         {{/each}}
 
         <MapLegend
+          class="pointer-events-none absolute left-4 top-4 z-10"
           @bands={{this.legendBands}}
           @title={{t "map.legend.windSpeed"}}
         />

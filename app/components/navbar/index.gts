@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
-import NavbarLocation from './location';
+import NavbarDesktopMenu from './desktop-menu';
 import NavbarLogo from './logo';
 import NavbarMobileMenu from './mobile-menu';
 import NavbarRefresh from './refresh';
-import NavbarRouteSwitch from './route-switch';
 // import NavbarNotifications from './notifications';
 // import NavbarUserMenu from './user-menu';
 // import NavbarMobileMenu from './mobile-menu';
@@ -29,12 +28,9 @@ export default class Navbar extends Component<NavbarSignature> {
         >
           <NavbarLogo />
 
-          <div class="hidden min-w-0 flex-1 md:flex">
-            <NavbarRouteSwitch />
-          </div>
+          <NavbarDesktopMenu />
 
           <div class="flex items-center justify-self-center gap-2 md:ml-4">
-            <NavbarLocation />
             <NavbarRefresh />
 
             {{! <NavbarNotifications /> }}
