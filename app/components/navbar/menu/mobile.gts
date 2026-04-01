@@ -71,32 +71,22 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           </drawer.Header>
 
           <drawer.Body>
-            <div class="w-full space-y-4">
-              <div class="flex flex-col items-stretch gap-2">
-                {{#each NAVBAR_MENU_ITEMS as |item|}}
-                  <Button
-                    data-test-navbar-link={{item.route}}
-                    @appearance="outlined"
-                    @class="w-full"
-                    @onPress={{fn this.navigate item.route}}
-                  >
-                    <span class="inline-flex items-center gap-2">
-                      <item.icon @size={{16}} />
-                      <span>{{t item.labelKey}}</span>
-                    </span>
-                  </Button>
-                {{/each}}
-              </div>
+            <div class="flex w-full flex-col items-stretch gap-2">
+              {{#each NAVBAR_MENU_ITEMS as |item|}}
+                <Button
+                  data-test-navbar-link={{item.route}}
+                  @appearance="outlined"
+                  @class="w-full"
+                  @onPress={{fn this.navigate item.route}}
+                >
+                  <span class="inline-flex items-center gap-2">
+                    <item.icon @size={{16}} />
+                    <span>{{t item.labelKey}}</span>
+                  </span>
+                </Button>
+              {{/each}}
 
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-                <div class="flex items-center justify-between gap-3">
-                  <p class="text-sm font-medium text-slate-950">
-                    {{t "map.refresh.label"}}
-                  </p>
-
-                  <NavbarRefreshControl />
-                </div>
-              </div>
+              <NavbarRefreshControl @isFullWidth={{true}} />
             </div>
           </drawer.Body>
         </Drawer>

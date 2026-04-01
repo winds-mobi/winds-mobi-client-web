@@ -25,19 +25,17 @@ export default class Navbar extends Component<NavbarSignature> {
       class="border-b border-slate-200 bg-white shadow-md shadow-slate-900/12"
       {{activateMapRefresh this.mapRefresh}}
     >
-      <div class="px-2 sm:px-4 lg:px-8">
-        <div
-          class="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-3 md:flex"
-        >
+      <div class="px-2.5">
+        <div class="flex h-16 items-center gap-3">
           <NavbarLogo />
 
           <NavbarMenuDesktop />
 
-          <div class="hidden items-center justify-self-center gap-2 md:ml-4 md:flex">
+          <div class="hidden items-center gap-2 md:ml-3 md:flex">
             <NavbarRefreshControl />
           </div>
 
-          <div class="justify-self-end md:hidden">
+          <div class="ml-auto md:hidden">
             <NavbarMenuMobile />
           </div>
         </div>
