@@ -128,7 +128,6 @@ module('Acceptance | map query params', function (hooks) {
         'title',
         'Refresh map and station data (00:00 since last refresh)'
       );
-    assert.dom('[data-test-navbar-refresh]').hasText('00:00');
 
     await click('[data-test-navbar-refresh]');
 
@@ -142,7 +141,6 @@ module('Acceptance | map query params', function (hooks) {
         'title',
         'Refresh map and station data (00:00 since last refresh)'
       );
-    assert.dom('[data-test-navbar-refresh]').hasText('00:00');
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {

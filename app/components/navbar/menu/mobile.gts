@@ -8,6 +8,7 @@ import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
+import NavbarRefreshControl from '../refresh-control';
 import { NAVBAR_MENU_ITEMS, type NavbarMenuItem } from './items';
 
 export interface NavbarMenuMobileSignature {
@@ -70,22 +71,22 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           </drawer.Header>
 
           <drawer.Body>
-            <div class="w-full">
-              <div class="flex flex-col items-stretch gap-2">
-                {{#each NAVBAR_MENU_ITEMS as |item|}}
-                  <Button
-                    data-test-navbar-link={{item.route}}
-                    @appearance="outlined"
-                    @class="w-full"
-                    @onPress={{fn this.navigate item.route}}
-                  >
-                    <span class="inline-flex items-center gap-2">
-                      <item.icon @size={{16}} />
-                      <span>{{t item.labelKey}}</span>
-                    </span>
-                  </Button>
-                {{/each}}
-              </div>
+            <div class="flex w-full flex-col items-stretch gap-2">
+              {{#each NAVBAR_MENU_ITEMS as |item|}}
+                <Button
+                  data-test-navbar-link={{item.route}}
+                  @appearance="outlined"
+                  @class="w-full"
+                  @onPress={{fn this.navigate item.route}}
+                >
+                  <span class="inline-flex items-center gap-2">
+                    <item.icon @size={{16}} />
+                    <span>{{t item.labelKey}}</span>
+                  </span>
+                </Button>
+              {{/each}}
+
+              <NavbarRefreshControl @isFullWidth={{true}} />
             </div>
           </drawer.Body>
         </Drawer>

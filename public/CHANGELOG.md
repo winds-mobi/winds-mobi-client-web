@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.0.17 - 2026-04-01
+
+### Changed
+
+- Refined the map chrome alignment so the wind legend and map loading badge now sit flush with the same top and left offset as the built-in map controls.
+- Tightened the desktop navbar spacing so the logo, navigation, and refresh action align more cleanly with the map view below.
+- Simplified the shared refresh action to a standard outlined button, keeping a compact square icon button in the desktop navbar and a full-width labeled button in the mobile menu drawer.
+
 ## v0.0.16 - 2026-03-26
 
 ### Changed

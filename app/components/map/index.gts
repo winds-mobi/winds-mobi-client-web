@@ -327,7 +327,7 @@ export default class Map extends Component<MapSignature> {
         {{/each}}
 
         <MapLegend
-          class="pointer-events-none absolute left-4 top-4 z-10"
+          class="pointer-events-none absolute left-2.5 top-2.5 z-10"
           @bands={{this.legendBands}}
           @title={{t "map.legend.windSpeed"}}
         />
@@ -335,7 +335,7 @@ export default class Map extends Component<MapSignature> {
 
       {{#if this.requestState?.isPending}}
         <div
-          class="pointer-events-none absolute left-4 top-4 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
+          class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
         >
           Loading stations…
         </div>

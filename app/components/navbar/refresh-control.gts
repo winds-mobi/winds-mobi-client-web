@@ -1,37 +1,32 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { htmlSafe } from '@ember/template';
 import { Button } from '@frontile/buttons';
+import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
-import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
+import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
 export interface NavbarRefreshControlSignature {
-  Args: Record<string, never>;
+  Args: {
+    isFullWidth?: boolean;
+  };
   Blocks: {
     default: [];
   };
   Element: null;
 }
 
-const COUNTDOWN_ARC_COLOR = 'rgb(148 163 184 / 0.5)';
-
 export default class NavbarRefreshControl extends Component<NavbarRefreshControlSignature> {
   @service declare mapRefresh: MapRefreshService;
   @service declare intl: IntlService;
 
-  get progressRatio() {
-    return Math.min(
-      1,
-      this.mapRefresh.elapsedMs / this.mapRefresh.refreshIntervalMs
-    );
-  }
+  get buttonClass() {
+    if (this.args.isFullWidth) {
+      return 'w-full justify-start';
+    }
 
-  get progressCircleStyle() {
-    return htmlSafe(
-      `background: conic-gradient(from 0deg, transparent 0turn, transparent ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} 1turn)`
-    );
+    return 'size-10 p-0';
   }
 
   get elapsedLabel() {
@@ -62,17 +57,15 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
       aria-label={{this.title}}
       data-test-navbar-refresh
       @appearance="outlined"
-      @class="px-2 text-xs font-mono tabular-nums"
+      @class={{this.buttonClass}}
       title={{this.title}}
       @onPress={{this.handleRefresh}}
-      {{activateMapRefresh this.mapRefresh}}
     >
-      <span class="flex items-center gap-1.5">
-        <span
-          class="inline-block size-3.5 shrink-0 rounded-full border border-slate-500/70"
-          style={{this.progressCircleStyle}}
-        ></span>
-        <span>{{this.elapsedLabel}}</span>
+      <span class="inline-flex items-center gap-2">
+        <ArrowClockwise @size={{14}} />
+        {{#if @isFullWidth}}
+          <span>{{t "map.refresh.label"}}</span>
+        {{/if}}
       </span>
     </Button>
   </template>

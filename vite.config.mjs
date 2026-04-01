@@ -5,9 +5,23 @@ import { babel } from '@rollup/plugin-babel';
 import { loadTranslations } from '@ember-intl/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const DEFAULT_APP_URL = 'http://127.0.0.1:4200';
+
+function hmrClientConfig() {
+  const appURL = new URL(process.env.APP_URL || DEFAULT_APP_URL);
+  const protocol = appURL.protocol === 'https:' ? 'wss' : 'ws';
+  const port = appURL.port || (appURL.protocol === 'https:' ? '443' : '80');
+
+  return {
+    clientPort: Number(port),
+    protocol,
+  };
+}
+
 export default defineConfig(({ mode }) => ({
   server: {
     allowedHosts: ['ui.winds-mobi-client-web.orb.local'],
+    hmr: hmrClientConfig(),
   },
   plugins: [
     classicEmberSupport(),
