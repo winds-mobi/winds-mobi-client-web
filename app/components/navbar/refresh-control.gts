@@ -1,10 +1,9 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { htmlSafe } from '@ember/template';
 import { Button } from '@frontile/buttons';
 import type { IntlService } from 'ember-intl';
-import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
+import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
 export interface NavbarRefreshControlSignature {
@@ -15,7 +14,8 @@ export interface NavbarRefreshControlSignature {
   Element: null;
 }
 
-const COUNTDOWN_ARC_COLOR = 'rgb(148 163 184 / 0.5)';
+const PROGRESS_RADIUS = 17;
+const PROGRESS_CIRCUMFERENCE = 2 * Math.PI * PROGRESS_RADIUS;
 
 export default class NavbarRefreshControl extends Component<NavbarRefreshControlSignature> {
   @service declare mapRefresh: MapRefreshService;
@@ -28,10 +28,8 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
     );
   }
 
-  get progressCircleStyle() {
-    return htmlSafe(
-      `background: conic-gradient(from 0deg, transparent 0turn, transparent ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} ${this.progressRatio}turn, ${COUNTDOWN_ARC_COLOR} 1turn)`
-    );
+  get progressDasharray() {
+    return `${PROGRESS_CIRCUMFERENCE * (1 - this.progressRatio)} ${PROGRESS_CIRCUMFERENCE}`;
   }
 
   get elapsedLabel() {
@@ -61,18 +59,39 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
     <Button
       aria-label={{this.title}}
       data-test-navbar-refresh
-      @appearance="outlined"
-      @class="px-2 text-xs font-mono tabular-nums"
+      @appearance="custom"
+      @class="relative size-10 rounded-full bg-white p-0 text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30"
       title={{this.title}}
       @onPress={{this.handleRefresh}}
-      {{activateMapRefresh this.mapRefresh}}
     >
-      <span class="flex items-center gap-1.5">
-        <span
-          class="inline-block size-3.5 shrink-0 rounded-full border border-slate-500/70"
-          style={{this.progressCircleStyle}}
-        ></span>
-        <span>{{this.elapsedLabel}}</span>
+      <span class="pointer-events-none relative flex size-full items-center justify-center">
+        <svg
+          aria-hidden="true"
+          class="absolute inset-0 size-full -rotate-90"
+          viewBox="0 0 40 40"
+        >
+          <circle
+            class="text-slate-300/70"
+            cx="20"
+            cy="20"
+            r={{PROGRESS_RADIUS}}
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          />
+          <circle
+            class="text-slate-500/80"
+            cx="20"
+            cy="20"
+            r={{PROGRESS_RADIUS}}
+            fill="none"
+            stroke="currentColor"
+            stroke-dasharray={{this.progressDasharray}}
+            stroke-linecap="round"
+            stroke-width="2.5"
+          />
+        </svg>
+        <ArrowClockwise @size={{16}} class="relative text-slate-700" />
       </span>
     </Button>
   </template>
