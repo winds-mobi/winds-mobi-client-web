@@ -6,7 +6,6 @@ import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import NavbarLogo from './logo';
 import NavbarMenuDesktop from './menu/desktop';
 import NavbarMenuMobile from './menu/mobile';
-import NavbarRefreshControl from './refresh-control';
 
 export interface NavbarSignature {
   Args: {};
@@ -30,10 +29,6 @@ export default class Navbar extends Component<NavbarSignature> {
           <NavbarLogo />
 
           <NavbarMenuDesktop />
-
-          <div class="hidden items-center gap-2 md:ml-3 md:flex">
-            <NavbarRefreshControl />
-          </div>
 
           <div class="ml-auto md:hidden">
             <NavbarMenuMobile />
