@@ -2,7 +2,7 @@ import { module, test } from 'qunit';
 import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
 
 module('Unit | Utility | chart-series', function () {
-  test('it keeps time-series points in chronological order from newest-first API rows', function (assert) {
+  test('it preserves the input order for time-series points', function (assert) {
     assert.deepEqual(
       buildTimeSeriesData(
         [
@@ -14,9 +14,9 @@ module('Unit | Utility | chart-series', function () {
         (row) => row.value
       ),
       [
-        [1, 10],
-        [2, 20],
         [3, 30],
+        [2, 20],
+        [1, 10],
       ]
     );
   });
