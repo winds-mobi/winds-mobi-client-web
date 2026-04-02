@@ -5,7 +5,6 @@ import StationMetricCard from '../metric-card';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from '../wind-direction';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
-import { sortByNumericValue } from 'winds-mobi-client-web/utils/chart-series';
 
 export interface StationLastHourContentSignature {
   Args: {
@@ -20,7 +19,7 @@ export interface StationLastHourContentSignature {
 export default class StationLastHourContent extends Component<StationLastHourContentSignature> {
   @cached
   get lastHourHistory() {
-    return sortByNumericValue(this.args.history, (record) => record.timestamp);
+    return this.args.history;
   }
 
   @cached
@@ -73,7 +72,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   <template>
     <div class="grid gap-2 md:gap-3">
       <div class="min-w-0 w-full aspect-square">
-        <WindDirection @data={{@history}} />
+        <WindDirection @data={{this.lastHourHistory}} />
       </div>
 
       <dl class="m-0 grid gap-1 md:gap-2">

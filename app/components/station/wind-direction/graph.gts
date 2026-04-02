@@ -4,7 +4,6 @@ import { service } from '@ember/service';
 import { type IntlService } from 'ember-intl';
 import Polar from 'winds-mobi-client-web/components/chart/polar';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
-import { sortByNumericValue } from 'winds-mobi-client-web/utils/chart-series';
 
 export interface WindDirectionGraphSignature {
   Args: {
@@ -56,24 +55,21 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   }
 
   get points() {
-    const sortedData = sortByNumericValue(
-      this.args.data,
-      (record) => record.timestamp
-    );
-
-    if (sortedData.length === 0) {
+    if (this.args.data.length === 0) {
       return [];
     }
 
-    return sortedData.map((elm) => ({
+    return this.args.data.map((elm) => ({
       x: elm.direction,
       y: elm.timestamp,
       color: windToColour(elm.speed),
-      customTooltip: this.intl.formatTime(elm.timestamp, {
+      customTooltip: `${this.intl.formatTime(elm.timestamp, {
         hour: 'numeric',
         minute: 'numeric',
         hour12: false,
-      }),
+      })} ${this.intl.formatNumber(elm.temperature, {
+        format: 'temperature',
+      })}`,
     }));
   }
 
@@ -91,7 +87,5 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     ];
   }
 
-  <template>
-    <Polar @chartData={{this.chartData}} @chartOptions={{this.chartOptions}} />
-  </template>
+  <template><Polar @chartData={{this.chartData}} @chartOptions={{this.chartOptions}} /></template>
 }

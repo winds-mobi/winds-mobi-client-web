@@ -49,7 +49,7 @@ module('Unit | Handler | history', function () {
     );
   });
 
-  test('it keeps historic records sorted by timestamp', async function (assert) {
+  test('it reverses newest-first historic API rows into chronological order', async function (assert) {
     const response = await HistoryHandler.request<{
       data: { id: string; attributes: { timestamp: number } }[];
     }>(

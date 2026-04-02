@@ -7,10 +7,7 @@ import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
-import {
-  sortByNumericValue,
-  type TimeSeriesPoint,
-} from 'winds-mobi-client-web/utils/chart-series';
+import { type TimeSeriesPoint } from 'winds-mobi-client-web/utils/chart-series';
 import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
 import type { SyncChart } from 'winds-mobi-client-web/services/time-series-sync';
 
@@ -164,14 +161,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     );
   }
 
-  @cached
-  get sortedChartData() {
-    return this.args.chartData?.map((series) => ({
-      ...series,
-      data: sortByNumericValue(series.data, (point) => point[0]),
-    }));
-  }
-
   @action
   handleChartCreated(chart: SyncChart) {
     this.chart = chart;
@@ -199,7 +188,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
   <template>
     <HighCharts
       @mode="StockChart"
-      @content={{this.sortedChartData}}
+      @content={{@chartData}}
       @chartOptions={{this.mergedChartOptions}}
       @callback={{this.handleChartCreated}}
     />

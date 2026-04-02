@@ -77,11 +77,11 @@ const HistoryHandler: Handler = {
       // JSON-API requires us to have IDs
       // Historic timestamps are only unique within a station,
       // so cache identity must include the station id.
+      // The historic API returns newest-first rows, but the app consumes
+      // history in chronological order for charting and the last-hour graph.
 
       const contedWithIds = Array.isArray(content)
-        ? content
-            .map((elm) => renameFields(elm, stationId))
-            .sort((a, b) => a.attributes.timestamp - b.attributes.timestamp)
+        ? content.map((elm) => renameFields(elm, stationId)).reverse()
         : renameFields(content, stationId);
 
       const jsonApiLikeData = {

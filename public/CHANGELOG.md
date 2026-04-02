@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.19 - 2026-04-02
+
+### Changed
+
+- Streamlined station history loading so the `Last hour`, `Wind`, and `Air` graphs update more efficiently and consistently when switching between stations.
+- Updated the `Last hour` wind-direction tooltip so each point now shows the sample time together with the matching temperature.
+
+### Fixed
+
+- Fixed station details so provider links now appear reliably the first time a station sidebar opens, instead of sometimes only showing up only after reopening or switching stations.
+
 ## v0.0.18 - 2026-04-02
 
 ### Changed

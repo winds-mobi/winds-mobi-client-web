@@ -1,18 +1,5 @@
 export type TimeSeriesPoint = [number, number | null];
 
-export function sortByNumericValue<T>(
-  values: T[] | null | undefined,
-  numericValue: (value: T) => number
-) {
-  if (!Array.isArray(values)) {
-    return [];
-  }
-
-  return [...values].sort(
-    (left, right) => numericValue(left) - numericValue(right)
-  );
-}
-
 export function buildTimeSeriesData<T>(
   rows: T[] | null | undefined,
   xValue: (row: T) => number,
