@@ -86,7 +86,7 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
                 </Button>
               {{/each}}
 
-              <NavbarRefreshControl @isFullWidth={{true}} />
+              <NavbarRefreshControl @appearance="mobile" />
             </div>
           </drawer.Body>
         </Drawer>

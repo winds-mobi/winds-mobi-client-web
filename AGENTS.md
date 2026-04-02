@@ -53,6 +53,7 @@ https://warp-drive.io/llms-full.txt
   - `app/components/station/wind/index.gts`: `w-dir`, `w-avg`, `w-max`
   - `app/components/station/air/index.gts`: `temp`, `hum`, `rain`
 - Warp Drive supports partial resource payloads via upsert, but only one level deep. Reusing the same `history` identity with different top-level primitive fields is fine as long as the handler only emits attributes that were actually present in the payload; do not normalize omitted fields to `undefined`, and do not rely on partial deep merges for object-valued fields.
+- For partial station payloads, station handlers must omit missing station-level and `last.*` attributes entirely instead of serializing them as `undefined`.
 - Prefer existing Frontile and Tailwind patterns for shared UI.
 - Update `translations/en-us.yaml` when UI text changes.
 - Do not edit generated or installed files such as `dist/` or `node_modules/`.

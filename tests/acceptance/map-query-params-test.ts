@@ -1,6 +1,12 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, visit, waitUntil } from '@ember/test-helpers';
+import {
+  click,
+  currentURL,
+  settled,
+  visit,
+  waitUntil,
+} from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
@@ -118,29 +124,19 @@ module('Acceptance | map query params', function (hooks) {
 
     await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
     await waitUntil(() => countStationRequests(store.calls) > 0);
+    await settled();
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
     assert.dom('[data-test-navbar-refresh]').exists();
-    assert
-      .dom('[data-test-navbar-refresh]')
-      .hasAttribute(
-        'title',
-        'Refresh map and station data (00:00 since last refresh)'
-      );
 
     await click('[data-test-navbar-refresh]');
+    await settled();
 
     assert.strictEqual(
       countStationRequests(store.calls),
       initialStationRequestCount + 1
     );
-    assert
-      .dom('[data-test-navbar-refresh]')
-      .hasAttribute(
-        'title',
-        'Refresh map and station data (00:00 since last refresh)'
-      );
   });
 
   test('it auto refreshes stations after the refresh interval', async function (assert) {

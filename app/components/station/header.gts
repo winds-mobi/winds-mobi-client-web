@@ -27,6 +27,12 @@ export default class StationHeader extends Component<StationHeaderSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare intl: IntlService;
 
+  get hasProviderLink() {
+    return Boolean(
+      this.args.station.providerName && this.args.station.providerUrl
+    );
+  }
+
   get lastReadingRelativeSeconds() {
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
@@ -89,22 +95,24 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           </StationMetaItem>
         {{/if}}
 
-        <StationMetaItem
-          @icon={{ArrowSquareUpRight}}
-          @label={{t "station.meta.provider"}}
-        >
-          <span>
-            <a
-              data-test-station-provider-link
-              href={{@station.providerUrl}}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="underline decoration-slate-300 underline-offset-3 transition hover:text-slate-900 hover:decoration-slate-500"
-            >
-              {{@station.providerName}}
-            </a>
-          </span>
-        </StationMetaItem>
+        {{#if this.hasProviderLink}}
+          <StationMetaItem
+            @icon={{ArrowSquareUpRight}}
+            @label={{t "station.meta.provider"}}
+          >
+            <span>
+              <a
+                data-test-station-provider-link
+                href={{@station.providerUrl}}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline decoration-slate-300 underline-offset-3 transition hover:text-slate-900 hover:decoration-slate-500"
+              >
+                {{@station.providerName}}
+              </a>
+            </span>
+          </StationMetaItem>
+        {{/if}}
       </dl>
     </div>
   </template>

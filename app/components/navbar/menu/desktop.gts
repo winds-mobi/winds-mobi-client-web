@@ -1,11 +1,14 @@
 import { LinkTo } from '@ember/routing';
 import { t } from 'ember-intl';
+import NavbarRefreshControl from '../refresh-control';
 import { NAVBAR_MENU_ITEMS } from './items';
 
 <template>
   <div class="hidden min-w-0 flex-1 md:flex">
     <div class="flex flex-1 justify-center">
-      <div class="inline-flex items-center gap-1 rounded-full bg-slate-100 p-1">
+      <div
+        class="inline-flex items-center gap-1 rounded-full bg-slate-100 p-1 shadow-inner shadow-white/80"
+      >
         {{#each NAVBAR_MENU_ITEMS as |item|}}
           <LinkTo
             @route={{item.route}}
@@ -17,6 +20,10 @@ import { NAVBAR_MENU_ITEMS } from './items';
             {{t item.labelKey}}
           </LinkTo>
         {{/each}}
+
+        <span class="mx-1 h-6 w-px bg-slate-200"></span>
+
+        <NavbarRefreshControl @appearance="desktop" />
       </div>
     </div>
   </div>

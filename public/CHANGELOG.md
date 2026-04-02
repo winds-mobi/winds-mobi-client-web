@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.0.18 - 2026-04-02
+
+### Changed
+
+- Refined the desktop navbar so the refresh action now sits directly with the main navigation as a compact icon button, while the mobile drawer keeps a full-width labeled refresh button.
+- Simplified the refresh action presentation by removing the extra countdown and hover title text, and added a subtle one-shot spin animation on the refresh icon when you trigger a manual refresh.
+- Trimmed the map station payload further so provider details are loaded only when opening a station, keeping the initial map data leaner.
+
+### Fixed
+
+- Fixed station details so provider links now appear reliably the first time a station sidebar opens, instead of sometimes only showing up after reopening or switching stations.
+- Fixed station sidebar provider links so they now appear only when a complete provider link is available, avoiding empty or incomplete provider entries while station details are still loading.
+
 ## v0.0.17 - 2026-04-01
 
 ### Changed

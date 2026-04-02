@@ -33,6 +33,10 @@ interface StationApiPayload {
   };
 }
 
+function hasOwn<T extends object>(obj: T, key: PropertyKey): key is keyof T {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
 function normalizeProviderUrl(urls?: Record<string, string>) {
   if (!urls) {
     return undefined;
@@ -59,37 +63,90 @@ function normalizePressure(
 }
 
 function jsonApifyFields(elm: StationApiPayload) {
-  const last = elm.last
-    ? {
-        timestamp: elm.last._id ? elm.last._id * 1000 : undefined,
-        direction: elm.last['w-dir'],
-        speed: elm.last['w-avg'],
-        gusts: elm.last['w-max'],
-        temperature: elm.last.temp,
-        humidity: elm.last.hum,
-        rain: elm.last.rain,
-        pressure: normalizePressure(elm.last.pres),
+  const attributes: Record<string, unknown> = {
+    _id: elm._id,
+  };
+
+  if (hasOwn(elm, 'alt')) {
+    attributes.altitude = elm.alt;
+  }
+
+  if (hasOwn(elm, 'loc')) {
+    attributes.location = elm.loc
+      ? {
+          coordinates: elm.loc.coordinates,
+        }
+      : elm.loc;
+  }
+
+  if (hasOwn(elm, 'peak')) {
+    attributes.isPeak = elm.peak;
+  }
+
+  if (hasOwn(elm, 'pv-name')) {
+    attributes.providerName = elm['pv-name'];
+  }
+
+  if (hasOwn(elm, 'short') || hasOwn(elm, 'name')) {
+    attributes.name = elm.short ?? elm.name;
+  }
+
+  if (hasOwn(elm, 'status')) {
+    attributes.status = elm.status;
+  }
+
+  if (hasOwn(elm, 'url')) {
+    attributes.providerUrl = normalizeProviderUrl(elm.url);
+  }
+
+  if (hasOwn(elm, 'last') && elm.last) {
+    const last: Record<string, unknown> = {};
+
+    if (hasOwn(elm.last, '_id') && elm.last._id !== undefined) {
+      last.timestamp = elm.last._id * 1000;
+    }
+
+    if (hasOwn(elm.last, 'w-dir')) {
+      last.direction = elm.last['w-dir'];
+    }
+
+    if (hasOwn(elm.last, 'w-avg')) {
+      last.speed = elm.last['w-avg'];
+    }
+
+    if (hasOwn(elm.last, 'w-max')) {
+      last.gusts = elm.last['w-max'];
+    }
+
+    if (hasOwn(elm.last, 'temp')) {
+      last.temperature = elm.last.temp;
+    }
+
+    if (hasOwn(elm.last, 'hum')) {
+      last.humidity = elm.last.hum;
+    }
+
+    if (hasOwn(elm.last, 'rain')) {
+      last.rain = elm.last.rain;
+    }
+
+    if (hasOwn(elm.last, 'pres')) {
+      const pressure = normalizePressure(elm.last.pres);
+
+      if (pressure !== undefined) {
+        last.pressure = pressure;
       }
-    : undefined;
+    }
+
+    if (Object.keys(last).length > 0) {
+      attributes.last = last;
+    }
+  }
 
   return {
     type: 'station',
     id: elm._id,
-    attributes: {
-      _id: elm._id,
-      altitude: elm.alt,
-      location: elm.loc
-        ? {
-            coordinates: elm.loc.coordinates,
-          }
-        : undefined,
-      isPeak: elm.peak,
-      providerName: elm['pv-name'],
-      name: elm.short ?? elm.name,
-      status: elm.status,
-      providerUrl: normalizeProviderUrl(elm.url),
-      last,
-    },
+    attributes,
   };
 }
 

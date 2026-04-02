@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { Button } from '@frontile/buttons';
+import type { PressEvent } from '@frontile/utilities/modifiers/press';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
@@ -9,7 +10,7 @@ import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
 export interface NavbarRefreshControlSignature {
   Args: {
-    isFullWidth?: boolean;
+    appearance: 'desktop' | 'mobile';
   };
   Blocks: {
     default: [];
@@ -21,52 +22,62 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   @service declare mapRefresh: MapRefreshService;
   @service declare intl: IntlService;
 
+  get isMobileAppearance() {
+    return this.args.appearance === 'mobile';
+  }
+
   get buttonClass() {
-    if (this.args.isFullWidth) {
+    if (this.isMobileAppearance) {
       return 'w-full justify-start';
     }
 
-    return 'size-10 p-0';
+    return 'size-9 rounded-full p-0 text-slate-500 transition hover:bg-white/70 hover:text-wind-20';
   }
 
-  get elapsedLabel() {
-    const totalSeconds = Math.floor(this.mapRefresh.elapsedMs / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    return `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`;
-  }
-
-  get title() {
-    const ariaLabel = String(this.intl.t('map.refresh.ariaLabel'));
-
-    return `${ariaLabel} (${this.intl.t('map.refresh.sinceLast', {
-      value: this.elapsedLabel,
-    })})`;
+  get ariaLabel() {
+    return String(this.intl.t('map.refresh.ariaLabel'));
   }
 
   @action
-  handleRefresh() {
+  handleRefresh(event: PressEvent) {
+    const icon = event.target.querySelector('[data-refresh-icon]');
+
+    if (icon instanceof Element) {
+      icon.animate(
+        [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+        {
+          duration: 550,
+          easing: 'linear',
+          iterations: 1,
+        }
+      );
+    }
+
     this.mapRefresh.refreshNow();
   }
 
   <template>
     <Button
-      aria-label={{this.title}}
+      aria-label={{this.ariaLabel}}
       data-test-navbar-refresh
-      @appearance="outlined"
+      @appearance={{if this.isMobileAppearance "outlined" "custom"}}
       @class={{this.buttonClass}}
-      title={{this.title}}
       @onPress={{this.handleRefresh}}
     >
-      <span class="inline-flex items-center gap-2">
-        <ArrowClockwise @size={{14}} />
-        {{#if @isFullWidth}}
+      {{#if this.isMobileAppearance}}
+        <span class="inline-flex items-center gap-2">
+          <span data-refresh-icon>
+            <ArrowClockwise @size={{14}} />
+          </span>
           <span>{{t "map.refresh.label"}}</span>
-        {{/if}}
-      </span>
+        </span>
+      {{else}}
+        <span class="grid size-full place-items-center">
+          <span data-refresh-icon class="inline-flex">
+            <ArrowClockwise @size={{14}} />
+          </span>
+        </span>
+      {{/if}}
     </Button>
   </template>
 }
