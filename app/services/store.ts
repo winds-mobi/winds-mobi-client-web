@@ -108,8 +108,8 @@ export type Station = {
   latitude: number;
   longitude: number;
   isPeak: boolean;
-  providerName: string;
-  providerUrl: string;
+  providerName?: string;
+  providerUrl?: string;
   name: string;
   last: {
     timestamp: number;

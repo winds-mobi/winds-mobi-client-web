@@ -45,7 +45,6 @@ const mapStationQueryKeys = [
   'short',
   'loc',
   'status',
-  'pv-name',
   'alt',
   'peak',
   'last._id',
