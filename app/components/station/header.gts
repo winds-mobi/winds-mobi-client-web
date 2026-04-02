@@ -28,7 +28,9 @@ export default class StationHeader extends Component<StationHeaderSignature> {
   @service declare intl: IntlService;
 
   get hasProviderLink() {
-    return Boolean(this.args.station.providerName && this.args.station.providerUrl);
+    return Boolean(
+      this.args.station.providerName && this.args.station.providerUrl
+    );
   }
 
   get lastReadingRelativeSeconds() {

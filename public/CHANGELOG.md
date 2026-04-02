@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.19 - 2026-04-02
+
+### Fixed
+
+- Fixed station details so provider links now appear reliably the first time a station sidebar opens, instead of sometimes only showing up after reopening or switching stations.
+
 ## v0.0.18 - 2026-04-02
 
 ### Changed

@@ -44,10 +44,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
 
     if (icon instanceof Element) {
       icon.animate(
-        [
-          { transform: 'rotate(0deg)' },
-          { transform: 'rotate(360deg)' },
-        ],
+        [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
         {
           duration: 550,
           easing: 'linear',
