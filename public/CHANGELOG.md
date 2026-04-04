@@ -8,7 +8,7 @@
 - Tightened the chart presentation by trimming extra horizontal gutter in the history graphs and keeping polar-chart label scaling focused on very small sizes without shrinking chart heights or active controls, so the station graphs use their space more efficiently.
 - Reworked the wind legend into a more compact horizontal layout and ordered it from lower to higher wind speeds so it takes less room on the map and reads more naturally.
 - Refreshed the app branding assets so the favicon, app icons, and navbar logo reflect the winds.mobi color palette more clearly.
-- Strengthened the `v2.winds.mobi` wordmark in the navbar so the app name reads as a primary brand element instead of low-priority helper text.
+- Strengthened the `v2.winds.mobi` wordmark in the navbar with larger, bolder black text so the app name reads as a primary brand element without an extra badge background.
 
 ## v0.0.19 - 2026-04-02
 
