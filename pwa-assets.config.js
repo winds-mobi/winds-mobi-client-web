@@ -15,6 +15,7 @@ export default defineConfig({
     },
     apple: {
       ...preset.apple,
+      sizes: [152, 167, 180],
       padding: 0.08,
     },
     maskable: {

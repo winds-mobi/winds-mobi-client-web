@@ -35,6 +35,10 @@ export default defineConfig(({ mode }) => ({
     mode === 'production'
       ? VitePWA({
           registerType: 'autoUpdate',
+          pwaAssets: {
+            config: true,
+            includeHtmlHeadLinks: true,
+          },
           includeAssets: ['favicon.ico', 'icons/pwa-*/**/*.png'], // include generated icons
           manifest: {
             name: 'winds.mobi',
