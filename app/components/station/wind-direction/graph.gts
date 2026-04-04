@@ -4,7 +4,6 @@ import { service } from '@ember/service';
 import { type IntlService } from 'ember-intl';
 import Polar from 'winds-mobi-client-web/components/chart/polar';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
-import { sortByNumericValue } from 'winds-mobi-client-web/utils/chart-series';
 
 export interface WindDirectionGraphSignature {
   Args: {
@@ -41,11 +40,11 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       chart: {
         height: '100%',
         // Keep a tiny inset so the outer polar line does not clip against the card edge.
-        spacing: [1, 1, 1, 1],
+        spacing: [0, 0, 0, 0],
         type: 'scatter',
       },
       pane: {
-        size: '99%',
+        size: '100%',
       },
       yAxis: {
         min: minTimestamp,
@@ -56,24 +55,23 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   }
 
   get points() {
-    const sortedData = sortByNumericValue(
-      this.args.data,
-      (record) => record.timestamp
-    );
+    const data = this.args.data ?? [];
 
-    if (sortedData.length === 0) {
+    if (data.length === 0) {
       return [];
     }
 
-    return sortedData.map((elm) => ({
+    return data.map((elm) => ({
       x: elm.direction,
       y: elm.timestamp,
       color: windToColour(elm.speed),
-      customTooltip: this.intl.formatTime(elm.timestamp, {
+      customTooltip: `${this.intl.formatTime(elm.timestamp, {
         hour: 'numeric',
         minute: 'numeric',
         hour12: false,
-      }),
+      })} ${this.intl.formatNumber(elm.temperature, {
+        format: 'temperature',
+      })}`,
     }));
   }
 
@@ -92,6 +90,10 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   }
 
   <template>
-    <Polar @chartData={{this.chartData}} @chartOptions={{this.chartOptions}} />
+    <Polar
+      class="h-full min-h-0 min-w-0 w-full [&_.chart-container]:h-full [&_.chart-container]:min-h-0 [&_.chart-container]:w-full"
+      @chartData={{this.chartData}}
+      @chartOptions={{this.chartOptions}}
+    />
   </template>
 }

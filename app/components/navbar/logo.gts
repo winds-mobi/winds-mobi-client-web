@@ -15,11 +15,13 @@ import {
       mapLng=DEFAULT_MAP_LNG
       mapZoom=DEFAULT_MAP_ZOOM
     }}
-    class="flex flex-shrink-0 items-center"
+    class="flex flex-shrink-0 items-center gap-2"
     data-test-navbar-logo
   >
-    <img class="h-8 w-auto" src="/logo.png" alt={{t "application.name"}} />
-    <span class="hidden whitespace-nowrap pl-2 sm:inline">
+    <img class="h-8 w-auto" src="/logo.svg" alt={{t "application.name"}} />
+    <span
+      class="hidden whitespace-nowrap text-base font-black tracking-[0.01em] text-slate-950 sm:inline"
+    >
       {{t "application.name"}}
     </span>
   </LinkTo>

@@ -58,7 +58,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   <template>
     <section
       data-test-station-panel
-      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 md:h-full md:w-[32rem] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
+      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 landscape:h-full landscape:w-[min(32rem,50vw)] landscape:border-r landscape:border-t-0 landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)] md:h-full md:w-[32rem] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
     >
       <div class="shrink-0 flex items-start justify-between gap-4 px-4 py-3">
         <div class="min-w-0">

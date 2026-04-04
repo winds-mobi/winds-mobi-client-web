@@ -7,16 +7,15 @@ import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
-import {
-  sortByNumericValue,
-  type TimeSeriesPoint,
-} from 'winds-mobi-client-web/utils/chart-series';
+import { type TimeSeriesPoint } from 'winds-mobi-client-web/utils/chart-series';
 import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
 import type { SyncChart } from 'winds-mobi-client-web/services/time-series-sync';
 
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
   plotOptions?: ChartOptions;
+  responsive?: ChartOptions;
+  rangeSelector?: ChartOptions;
   tooltip?: ChartOptions;
   xAxis?: ChartOptions;
 }
@@ -56,6 +55,9 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     },
     chart: {
       height: 272,
+      reflow: true,
+      spacingLeft: 0,
+      spacingRight: 0,
       type: 'spline',
       panning: {
         enabled: true,
@@ -94,7 +96,20 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
           text: '6h',
         },
       ],
+      buttonSpacing: 4,
+      buttonTheme: {
+        height: 22,
+        padding: 2,
+        r: 6,
+        style: {
+          fontSize: '10px',
+          fontWeight: '600',
+        },
+      },
       selected: 4,
+      labelStyle: {
+        fontSize: '10px',
+      },
     },
     title: {
       text: undefined,
@@ -104,6 +119,10 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       gridLineWidth: 1,
       crosshair: true,
       labels: {
+        style: {
+          fontSize: '10px',
+          lineHeight: '12px',
+        },
         useHTML: true,
         formatter: function (this: {
           chart: {
@@ -141,6 +160,40 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       outside: true,
       valueDecimals: 0,
     },
+    responsive: {
+      rules: [
+        {
+          condition: {
+            maxWidth: 420,
+          },
+          chartOptions: {
+            xAxis: {
+              labels: {
+                style: {
+                  fontSize: '9px',
+                  lineHeight: '11px',
+                },
+              },
+            },
+          },
+        },
+        {
+          condition: {
+            maxWidth: 360,
+          },
+          chartOptions: {
+            xAxis: {
+              labels: {
+                style: {
+                  fontSize: '8px',
+                  lineHeight: '10px',
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
   };
 
   @cached
@@ -148,7 +201,14 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     const mergedOptions = mergeChartOptions(
       this.defaultChartOptions,
       this.args.chartOptions,
-      ['chart', 'xAxis', 'tooltip', 'plotOptions']
+      [
+        'chart',
+        'xAxis',
+        'tooltip',
+        'plotOptions',
+        'rangeSelector',
+        'responsive',
+      ]
     );
 
     return mergeChartOptions(
@@ -162,14 +222,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       },
       ['xAxis']
     );
-  }
-
-  @cached
-  get sortedChartData() {
-    return this.args.chartData?.map((series) => ({
-      ...series,
-      data: sortByNumericValue(series.data, (point) => point[0]),
-    }));
   }
 
   @action
@@ -199,7 +251,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
   <template>
     <HighCharts
       @mode="StockChart"
-      @content={{this.sortedChartData}}
+      @content={{@chartData}}
       @chartOptions={{this.mergedChartOptions}}
       @callback={{this.handleChartCreated}}
     />

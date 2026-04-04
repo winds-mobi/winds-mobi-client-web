@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.0.20 - 2026-04-04
+
+### Changed
+
+- Refined the mobile map layout so landscape phones now show station details beside the map instead of below it, with more stable full-height behavior when rotating the device and a side panel sized to `min(32rem, 50vw)`.
+- Tightened the chart presentation by trimming extra horizontal gutter in the history graphs and keeping polar-chart label scaling focused on very small sizes without shrinking chart heights or active controls, so the station graphs use their space more efficiently.
+- Reworked the wind legend into a more compact horizontal layout and ordered it from lower to higher wind speeds so it takes less room on the map and reads more naturally.
+- Refreshed the app branding assets so the favicon, app icons, and navbar logo reflect the winds.mobi color palette more clearly.
+- Strengthened the `v2.winds.mobi` wordmark in the navbar with larger, bolder black text so the app name reads as a primary brand element without an extra badge background.
+
+## v0.0.19 - 2026-04-02
+
+### Changed
+
+- Streamlined station history loading so the `Last hour`, `Wind`, and `Air` graphs update more efficiently and consistently when switching between stations.
+- Updated the `Last hour` wind-direction tooltip so each point now shows the sample time together with the matching temperature.
+
+### Fixed
+
+- Fixed station details so provider links now appear reliably the first time a station sidebar opens, instead of sometimes only showing up only after reopening or switching stations.
+
 ## v0.0.18 - 2026-04-02
 
 ### Changed

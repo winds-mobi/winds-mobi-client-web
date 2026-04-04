@@ -11,6 +11,7 @@ interface PolarChartOptions extends ChartOptions {
   chart?: ChartOptions;
   pane?: ChartOptions;
   plotOptions?: ChartOptions;
+  responsive?: ChartOptions;
   tooltip?: ChartOptions;
   xAxis?: ChartOptions;
   yAxis?: ChartOptions;
@@ -34,6 +35,7 @@ export default class Polar extends Component<PolarSignature> {
     },
     chart: {
       polar: true,
+      reflow: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
     },
@@ -52,9 +54,9 @@ export default class Polar extends Component<PolarSignature> {
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
         },
-        distance: '80%',
+        distance: '76%',
         style: {
-          fontSize: '10px',
+          fontSize: '9px',
         },
       },
     },
@@ -79,6 +81,36 @@ export default class Polar extends Component<PolarSignature> {
         color: '#aaa',
       },
     },
+    responsive: {
+      rules: [
+        {
+          condition: {
+            maxWidth: 199,
+          },
+          chartOptions: {
+            pane: {
+              size: '92%',
+            },
+            plotOptions: {
+              series: {
+                lineWidth: 1.25,
+                marker: {
+                  radius: 2.5,
+                },
+              },
+            },
+            xAxis: {
+              labels: {
+                distance: '68%',
+                style: {
+                  fontSize: '7px',
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
   };
 
   get mergedChartOptions() {
@@ -89,6 +121,7 @@ export default class Polar extends Component<PolarSignature> {
       'tooltip',
       'pane',
       'plotOptions',
+      'responsive',
     ]);
   }
 

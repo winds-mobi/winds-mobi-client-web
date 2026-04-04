@@ -1,33 +1,27 @@
 import { module, test } from 'qunit';
-import {
-  buildTimeSeriesData,
-  sortByNumericValue,
-} from 'winds-mobi-client-web/utils/chart-series';
+import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
 
 module('Unit | Utility | chart-series', function () {
-  test('it sorts rows by the provided numeric value', function (assert) {
+  test('it preserves the input order for time-series points', function (assert) {
     assert.deepEqual(
-      sortByNumericValue(
+      buildTimeSeriesData(
         [
-          { label: 'third', value: 3 },
-          { label: 'first', value: 1 },
-          { label: 'second', value: 2 },
+          { timestamp: 3, value: 30 },
+          { timestamp: 2, value: 20 },
+          { timestamp: 1, value: 10 },
         ],
+        (row) => row.timestamp,
         (row) => row.value
       ),
       [
-        { label: 'first', value: 1 },
-        { label: 'second', value: 2 },
-        { label: 'third', value: 3 },
+        [3, 30],
+        [2, 20],
+        [1, 10],
       ]
     );
   });
 
-  test('it tolerates missing collections for sorting and series building', function (assert) {
-    assert.deepEqual(
-      sortByNumericValue<number>(undefined, (value) => value),
-      []
-    );
+  test('it tolerates missing collections for series building', function (assert) {
     assert.deepEqual(
       buildTimeSeriesData<number>(
         undefined,

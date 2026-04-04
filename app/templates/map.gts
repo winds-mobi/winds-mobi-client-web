@@ -9,9 +9,11 @@ interface MyRouteSignature {
 export default class MyRoute extends Component<MyRouteSignature> {
   <template>
     <div
-      class="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-200 md:flex-row-reverse"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden bg-slate-200 landscape:flex-row-reverse md:flex-row-reverse"
     >
-      <div class="min-h-[18rem] min-w-0 flex-1 bg-white md:min-h-0">
+      <div
+        class="min-h-[18rem] min-w-0 flex-1 bg-white landscape:min-h-0 md:min-h-0"
+      >
         <Map />
       </div>
 
