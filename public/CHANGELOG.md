@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.22 - 2026-04-04
+
+### Changed
+
+- Sharpened the generated app icons so the windsock artwork fills more of the icon canvas, which makes installed home-screen icons look crisper on phones and tablets.
+- Added explicit Apple touch icons in `152x152`, `167x167`, and `180x180` sizes so iPhone and iPad home-screen installs can use a size that better matches the device.
+
 ## v0.0.20 - 2026-04-04
 
 ### Changed
