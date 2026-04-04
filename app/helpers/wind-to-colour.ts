@@ -144,7 +144,7 @@ export function windColourZones() {
 }
 
 export function windLegendBands(): WindLegendBand[] {
-  return [...WIND_COLOUR_BANDS].reverse().map((band) => ({
+  return WIND_COLOUR_BANDS.map((band) => ({
     backgroundClass: band.backgroundClass,
     label: Number.isFinite(band.max) ? `${band.max}` : `${band.min}+`,
   }));
