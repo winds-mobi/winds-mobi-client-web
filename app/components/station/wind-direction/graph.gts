@@ -55,11 +55,13 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   }
 
   get points() {
-    if (this.args.data.length === 0) {
+    const data = this.args.data ?? [];
+
+    if (data.length === 0) {
       return [];
     }
 
-    return this.args.data.map((elm) => ({
+    return data.map((elm) => ({
       x: elm.direction,
       y: elm.timestamp,
       color: windToColour(elm.speed),

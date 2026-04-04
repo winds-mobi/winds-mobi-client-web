@@ -193,8 +193,14 @@ module('Integration | Component | station/last-hour', function (hooks) {
     this.stationId = 'station-a';
     await settled();
 
-    assert.deepEqual(renderedPointSignature(this.element), stationAInitialPoints);
-    assert.strictEqual(renderedGraphSignature(this.element), stationAInitialGraph);
+    assert.deepEqual(
+      renderedPointSignature(this.element),
+      stationAInitialPoints
+    );
+    assert.strictEqual(
+      renderedGraphSignature(this.element),
+      stationAInitialGraph
+    );
 
     deferredStationBHistory.resolve({
       content: {
@@ -203,7 +209,13 @@ module('Integration | Component | station/last-hour', function (hooks) {
     });
     await settled();
 
-    assert.deepEqual(renderedPointSignature(this.element), stationAInitialPoints);
-    assert.strictEqual(renderedGraphSignature(this.element), stationAInitialGraph);
+    assert.deepEqual(
+      renderedPointSignature(this.element),
+      stationAInitialPoints
+    );
+    assert.strictEqual(
+      renderedGraphSignature(this.element),
+      stationAInitialGraph
+    );
   });
 });
