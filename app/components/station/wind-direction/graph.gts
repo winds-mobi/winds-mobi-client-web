@@ -40,11 +40,11 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       chart: {
         height: '100%',
         // Keep a tiny inset so the outer polar line does not clip against the card edge.
-        spacing: [1, 1, 1, 1],
+        spacing: [0, 0, 0, 0],
         type: 'scatter',
       },
       pane: {
-        size: '99%',
+        size: '100%',
       },
       yAxis: {
         min: minTimestamp,

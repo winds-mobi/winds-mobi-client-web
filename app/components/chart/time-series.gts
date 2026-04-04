@@ -56,6 +56,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     chart: {
       height: 272,
       reflow: true,
+      spacingLeft: 0,
+      spacingRight: 0,
       type: 'spline',
       panning: {
         enabled: true,
@@ -165,24 +167,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
             maxWidth: 420,
           },
           chartOptions: {
-            chart: {
-              height: 244,
-            },
-            rangeSelector: {
-              buttonSpacing: 2,
-              buttonTheme: {
-                height: 20,
-                padding: 1,
-                width: 28,
-                style: {
-                  fontSize: '9px',
-                  fontWeight: '600',
-                },
-              },
-              labelStyle: {
-                fontSize: '9px',
-              },
-            },
             xAxis: {
               labels: {
                 style: {
@@ -198,23 +182,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
             maxWidth: 360,
           },
           chartOptions: {
-            chart: {
-              height: 224,
-            },
-            rangeSelector: {
-              buttonTheme: {
-                height: 18,
-                padding: 1,
-                width: 24,
-                style: {
-                  fontSize: '8px',
-                  fontWeight: '600',
-                },
-              },
-              labelStyle: {
-                fontSize: '8px',
-              },
-            },
             xAxis: {
               labels: {
                 style: {

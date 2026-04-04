@@ -85,25 +85,7 @@ export default class Polar extends Component<PolarSignature> {
       rules: [
         {
           condition: {
-            maxWidth: 320,
-          },
-          chartOptions: {
-            pane: {
-              size: '95%',
-            },
-            xAxis: {
-              labels: {
-                distance: '72%',
-                style: {
-                  fontSize: '8px',
-                },
-              },
-            },
-          },
-        },
-        {
-          condition: {
-            maxWidth: 260,
+            maxWidth: 199,
           },
           chartOptions: {
             pane: {
