@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.20 - 2026-04-04
+
+### Changed
+
+- Refined the mobile map layout so landscape phones now show station details beside the map instead of below it, with more stable full-height behavior when rotating the device.
+
 ## v0.0.19 - 2026-04-02
 
 ### Changed
