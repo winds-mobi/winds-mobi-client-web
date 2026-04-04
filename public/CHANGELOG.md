@@ -6,6 +6,7 @@
 
 - Refined the mobile map layout so landscape phones now show station details beside the map instead of below it, with more stable full-height behavior when rotating the device.
 - Improved chart down-scaling on smaller screens so polar-chart labels and time-series controls stay better proportioned as available space shrinks.
+- Refreshed the app icon set so the favicon and related app icons reflect the winds.mobi color palette more clearly.
 
 ## v0.0.19 - 2026-04-02
 
