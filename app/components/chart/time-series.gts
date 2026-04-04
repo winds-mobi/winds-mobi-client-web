@@ -14,6 +14,8 @@ import type { SyncChart } from 'winds-mobi-client-web/services/time-series-sync'
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
   plotOptions?: ChartOptions;
+  responsive?: ChartOptions;
+  rangeSelector?: ChartOptions;
   tooltip?: ChartOptions;
   xAxis?: ChartOptions;
 }
@@ -53,6 +55,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     },
     chart: {
       height: 272,
+      reflow: true,
       type: 'spline',
       panning: {
         enabled: true,
@@ -91,7 +94,20 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
           text: '6h',
         },
       ],
+      buttonSpacing: 4,
+      buttonTheme: {
+        height: 22,
+        padding: 2,
+        r: 6,
+        style: {
+          fontSize: '10px',
+          fontWeight: '600',
+        },
+      },
       selected: 4,
+      labelStyle: {
+        fontSize: '10px',
+      },
     },
     title: {
       text: undefined,
@@ -101,6 +117,10 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       gridLineWidth: 1,
       crosshair: true,
       labels: {
+        style: {
+          fontSize: '10px',
+          lineHeight: '12px',
+        },
         useHTML: true,
         formatter: function (this: {
           chart: {
@@ -138,6 +158,75 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       outside: true,
       valueDecimals: 0,
     },
+    responsive: {
+      rules: [
+        {
+          condition: {
+            maxWidth: 420,
+          },
+          chartOptions: {
+            chart: {
+              height: 244,
+            },
+            rangeSelector: {
+              buttonSpacing: 2,
+              buttonTheme: {
+                height: 20,
+                padding: 1,
+                width: 28,
+                style: {
+                  fontSize: '9px',
+                  fontWeight: '600',
+                },
+              },
+              labelStyle: {
+                fontSize: '9px',
+              },
+            },
+            xAxis: {
+              labels: {
+                style: {
+                  fontSize: '9px',
+                  lineHeight: '11px',
+                },
+              },
+            },
+          },
+        },
+        {
+          condition: {
+            maxWidth: 360,
+          },
+          chartOptions: {
+            chart: {
+              height: 224,
+            },
+            rangeSelector: {
+              buttonTheme: {
+                height: 18,
+                padding: 1,
+                width: 24,
+                style: {
+                  fontSize: '8px',
+                  fontWeight: '600',
+                },
+              },
+              labelStyle: {
+                fontSize: '8px',
+              },
+            },
+            xAxis: {
+              labels: {
+                style: {
+                  fontSize: '8px',
+                  lineHeight: '10px',
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
   };
 
   @cached
@@ -145,7 +234,14 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     const mergedOptions = mergeChartOptions(
       this.defaultChartOptions,
       this.args.chartOptions,
-      ['chart', 'xAxis', 'tooltip', 'plotOptions']
+      [
+        'chart',
+        'xAxis',
+        'tooltip',
+        'plotOptions',
+        'rangeSelector',
+        'responsive',
+      ]
     );
 
     return mergeChartOptions(

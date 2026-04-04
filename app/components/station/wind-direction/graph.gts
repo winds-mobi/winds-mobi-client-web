@@ -87,5 +87,11 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     ];
   }
 
-  <template><Polar @chartData={{this.chartData}} @chartOptions={{this.chartOptions}} /></template>
+  <template>
+    <Polar
+      class="h-full min-h-0 min-w-0 w-full [&_.chart-container]:h-full [&_.chart-container]:min-h-0 [&_.chart-container]:w-full"
+      @chartData={{this.chartData}}
+      @chartOptions={{this.chartOptions}}
+    />
+  </template>
 }
