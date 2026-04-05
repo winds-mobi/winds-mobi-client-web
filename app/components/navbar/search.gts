@@ -13,10 +13,14 @@ import { Popover } from '@frontile/overlays';
 import type { IntlService } from 'ember-intl';
 import { t } from 'ember-intl';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
+import type MapNavigationService from 'winds-mobi-client-web/services/map-navigation';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
-import { serializeMapView } from 'winds-mobi-client-web/utils/map-view';
+import {
+  isMapRoute,
+  serializeMapView,
+} from 'winds-mobi-client-web/utils/map-view';
 import { windBandForSpeed } from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 export interface NavbarSearchSignature {
@@ -39,6 +43,7 @@ function responseData<T>(response: RequestResponse<T>): T {
 
 export default class NavbarSearch extends Component<NavbarSearchSignature> {
   @service declare intl: IntlService;
+  @service('map-navigation') declare mapNavigation: MapNavigationService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare router: RouterService;
   @service
@@ -159,14 +164,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
     this.isOpen = false;
   }
 
-  private targetQueryParams(station: Station) {
-    return serializeMapView({
-      latitude: station.latitude,
-      longitude: station.longitude,
-      zoom: SEARCH_RESULT_ZOOM,
-    });
-  }
-
   @action
   handleInput(value: string) {
     this.query = value;
@@ -238,11 +235,22 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
 
   @action
   selectStation(station: Station) {
-    const queryParams = this.targetQueryParams(station);
+    const targetMapView = {
+      latitude: station.latitude,
+      longitude: station.longitude,
+      zoom: SEARCH_RESULT_ZOOM,
+    };
 
     this.resetSearch();
+
+    if (isMapRoute(this.router.currentRouteName) && this.mapNavigation.hasMap) {
+      this.mapNavigation.flyTo(targetMapView);
+      void this.router.transitionTo('map.station', station.id);
+      return;
+    }
+
     void this.router.transitionTo('map.station', station.id, {
-      queryParams,
+      queryParams: serializeMapView(targetMapView),
     });
   }
 

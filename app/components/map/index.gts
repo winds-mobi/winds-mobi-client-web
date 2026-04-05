@@ -6,7 +6,6 @@ import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
-import didUpdate from '@ember/render-modifiers/modifiers/did-update';
 import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
@@ -25,6 +24,7 @@ import MapLegend, {
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type MapNavigationService from 'winds-mobi-client-web/services/map-navigation';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
@@ -116,6 +116,7 @@ export default class Map extends Component<MapSignature> {
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
+  @service('map-navigation') declare mapNavigation: MapNavigationService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
@@ -225,6 +226,7 @@ export default class Map extends Component<MapSignature> {
   @action
   handleMapLoaded(map: MaplibreMap) {
     this.liveMap = map;
+    this.mapNavigation.registerMap(map);
     this.bindGeolocateEvents();
     this.handleViewportChange(mapViewFromMap(map), mapBoundsFromMap(map));
   }
@@ -245,22 +247,6 @@ export default class Map extends Component<MapSignature> {
 
     event.target.easeTo({
       pitch: 70,
-    });
-  }
-
-  @action
-  syncLiveMapToRoute() {
-    if (!this.liveMap) {
-      return;
-    }
-
-    if (mapViewsEqual(mapViewFromMap(this.liveMap), this.mapView)) {
-      return;
-    }
-
-    this.liveMap.jumpTo({
-      center: [this.mapView.longitude, this.mapView.latitude],
-      zoom: this.mapView.zoom,
     });
   }
 
@@ -308,17 +294,16 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
+  willDestroy(): void {
+    if (this.liveMap) {
+      this.mapNavigation.unregisterMap(this.liveMap);
+    }
+
+    super.willDestroy();
+  }
+
   <template>
-    <div
-      data-test-map-container
-      class="relative h-full w-full"
-      {{didUpdate
-        this.syncLiveMapToRoute
-        this.mapView.latitude
-        this.mapView.longitude
-        this.mapView.zoom
-      }}
-    >
+    <div data-test-map-container class="relative h-full w-full">
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
