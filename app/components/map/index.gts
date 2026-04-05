@@ -24,7 +24,6 @@ import MapLegend, {
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
-import type MapNavigationService from 'winds-mobi-client-web/services/map-navigation';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
@@ -116,13 +115,13 @@ export default class Map extends Component<MapSignature> {
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
-  @service('map-navigation') declare mapNavigation: MapNavigationService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
+  @tracked currentMapView?: MapView;
+  @tracked pendingFlyToView?: MapView;
   @tracked stations: Station[] = [];
   @tracked requestedViewport?: RequestedViewport;
   #requestVersion = 0;
-  private liveMap?: MaplibreMap;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -225,18 +224,24 @@ export default class Map extends Component<MapSignature> {
 
   @action
   handleMapLoaded(map: MaplibreMap) {
-    this.liveMap = map;
-    this.mapNavigation.registerMap(map);
+    const view = mapViewFromMap(map);
+
+    this.currentMapView = view;
     this.bindGeolocateEvents();
-    this.handleViewportChange(mapViewFromMap(map), mapBoundsFromMap(map));
+    this.handleViewportChange(view, mapBoundsFromMap(map));
   }
 
   @action
   handleMoveEnd(event: { target: MaplibreMap }) {
-    this.handleViewportChange(
-      mapViewFromMap(event.target),
-      mapBoundsFromMap(event.target)
-    );
+    const view = mapViewFromMap(event.target);
+
+    this.currentMapView = view;
+
+    if (this.pendingFlyToView && mapViewsEqual(this.pendingFlyToView, view)) {
+      this.pendingFlyToView = undefined;
+    }
+
+    this.handleViewportChange(view, mapBoundsFromMap(event.target));
   }
 
   @action
@@ -294,12 +299,27 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
-  willDestroy(): void {
-    if (this.liveMap) {
-      this.mapNavigation.unregisterMap(this.liveMap);
+  get flyToOptions() {
+    if (!this.currentMapView || mapViewsEqual(this.currentMapView, this.mapView)) {
+      return undefined;
     }
 
-    super.willDestroy();
+    if (
+      this.pendingFlyToView &&
+      mapViewsEqual(this.pendingFlyToView, this.mapView)
+    ) {
+      return undefined;
+    }
+
+    return {
+      center: [this.mapView.longitude, this.mapView.latitude] as [number, number],
+      zoom: this.mapView.zoom,
+    };
+  }
+
+  @action
+  noteFlyToRequest() {
+    this.pendingFlyToView = this.mapView;
   }
 
   <template>
@@ -316,6 +336,14 @@ export default class Map extends Component<MapSignature> {
         @reuseMaps={{false}}
         as |map|
       >
+        {{#if this.flyToOptions}}
+          <map.call
+            @func="flyTo"
+            @onResp={{this.noteFlyToRequest}}
+            @positionalArguments={{array this.flyToOptions}}
+          />
+        {{/if}}
+
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />
         <map.control
