@@ -9,6 +9,11 @@ navigation:
   map: Map
   nearby: Nearby
   help: Help
+  search:
+    label: Search stations
+    placeholder: Search stations
+    loading: Searching stations…
+    empty: No stations found.
 
 help:
   title: Help

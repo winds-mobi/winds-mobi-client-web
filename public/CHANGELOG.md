@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.23 - 2026-04-05
+
+### Added
+
+- Added a shared station search in the navbar and mobile menu drawer so you can quickly find a station by name from anywhere in the app and jump straight to its map detail.
+
+### Changed
+
+- Updated station search selection so choosing a result recenters the map on that station at zoom level `10`, making the jump more consistent and easier to orient.
+
 ## v0.0.22 - 2026-04-04
 
 ### Changed

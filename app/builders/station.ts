@@ -53,6 +53,18 @@ const mapStationQueryKeys = [
   'last.w-max',
 ] as const;
 
+const searchStationQueryKeys = [
+  'short',
+  'loc',
+  'status',
+  'alt',
+  'peak',
+  'last._id',
+  'last.w-dir',
+  'last.w-avg',
+  'last.w-max',
+] as const;
+
 function findRecord<T>(
   type: string,
   id: string,
@@ -141,4 +153,22 @@ function nearbyQuery<T>(
   );
 }
 
-export { findRecord, mapQuery, nearbyQuery, query };
+function searchQuery<T>(
+  type: string,
+  search: string,
+  limit = 8,
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      'is-highest-duplicates-rating': true,
+      keys: [...searchStationQueryKeys],
+      limit,
+      search: search.trim(),
+    },
+    options
+  );
+}
+
+export { findRecord, mapQuery, nearbyQuery, query, searchQuery };

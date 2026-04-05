@@ -6,6 +6,7 @@ import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
+import didUpdate from '@ember/render-modifiers/modifiers/did-update';
 import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
@@ -120,6 +121,7 @@ export default class Map extends Component<MapSignature> {
   @tracked stations: Station[] = [];
   @tracked requestedViewport?: RequestedViewport;
   #requestVersion = 0;
+  private liveMap?: MaplibreMap;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -222,6 +224,7 @@ export default class Map extends Component<MapSignature> {
 
   @action
   handleMapLoaded(map: MaplibreMap) {
+    this.liveMap = map;
     this.bindGeolocateEvents();
     this.handleViewportChange(mapViewFromMap(map), mapBoundsFromMap(map));
   }
@@ -242,6 +245,31 @@ export default class Map extends Component<MapSignature> {
 
     event.target.easeTo({
       pitch: 70,
+    });
+  }
+
+  @action
+  syncLiveMapToRoute() {
+    if (!this.liveMap) {
+      return;
+    }
+
+    if (
+      this.requestedViewport &&
+      mapViewsEqual(this.requestedViewport.view, this.mapView)
+    ) {
+      return;
+    }
+
+    const currentMapView = mapViewFromMap(this.liveMap);
+
+    if (mapViewsEqual(currentMapView, this.mapView)) {
+      return;
+    }
+
+    this.liveMap.jumpTo({
+      center: [this.mapView.longitude, this.mapView.latitude],
+      zoom: this.mapView.zoom,
     });
   }
 
@@ -290,7 +318,16 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div data-test-map-container class="relative h-full w-full">
+    <div
+      data-test-map-container
+      class="relative h-full w-full"
+      {{didUpdate
+        this.syncLiveMapToRoute
+        this.mapView.latitude
+        this.mapView.longitude
+        this.mapView.zoom
+      }}
+    >
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
