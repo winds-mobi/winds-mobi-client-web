@@ -12,6 +12,7 @@ import { Input as FrontileInput } from '@frontile/forms';
 import { Popover } from '@frontile/overlays';
 import type { IntlService } from 'ember-intl';
 import { t } from 'ember-intl';
+import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
@@ -44,37 +45,40 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   declare store: typeof import('winds-mobi-client-web/services/store').default;
 
   @tracked activeResultIndex = 0;
-  @tracked debouncedQuery = '';
   @tracked isOpen = false;
   @tracked query = '';
 
   updateDebouncedQuery = task({ restartable: true }, async (value: string) => {
     const trimmedValue = value.trim();
 
-    this.debouncedQuery = '';
-
     if (trimmedValue.length < MIN_SEARCH_LENGTH) {
-      return;
+      return '';
     }
 
     await rawTimeout(SEARCH_DEBOUNCE_MS);
 
-    this.debouncedQuery = trimmedValue;
+    return trimmedValue;
   });
 
   @cached
   get request(): Future<RequestResponse<Station[]>> | undefined {
-    if (this.debouncedQuery.length < MIN_SEARCH_LENGTH) {
+    if (this.settledQuery.length < MIN_SEARCH_LENGTH) {
       return undefined;
     }
 
     return this.store.request<RequestResponse<Station[]>>(
-      searchQuery<Station>('station', this.debouncedQuery)
+      searchQuery<Station>('station', this.settledQuery)
     );
   }
 
   get requestState() {
     return this.request ? getRequestState(this.request) : undefined;
+  }
+
+  get settledQuery() {
+    const value = this.updateDebouncedQuery.lastSuccessful?.value;
+
+    return value === this.trimmedQuery ? value : '';
   }
 
   get trimmedQuery() {
@@ -117,7 +121,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
 
   get hasNoResults() {
     return (
-      this.debouncedQuery.length >= MIN_SEARCH_LENGTH &&
+      this.settledQuery.length >= MIN_SEARCH_LENGTH &&
       this.requestState?.isSuccess === true &&
       this.results.length === 0
     );
@@ -127,35 +131,32 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
     return this.isOpen && this.hasEnoughCharacters;
   }
 
-  isActiveResult(index: number) {
+  isActiveResult = (index: number) => {
     return index === this.clampedActiveResultIndex;
-  }
+  };
 
-  resultButtonClass(index: number) {
+  resultButtonClass = (index: number) => {
     return [
       'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition',
       this.isActiveResult(index)
         ? 'bg-slate-100 text-slate-950'
         : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950',
     ].join(' ');
-  }
+  };
 
-  windBand(station: Station) {
+  windBand = (station: Station) => {
     return windBandForSpeed(station.last.speed);
-  }
+  };
 
-  windSpeedLabelFor(station: Station) {
+  windSpeedLabelFor = (station: Station) => {
     return `${this.intl.formatNumber(station.last.speed, {
       maximumFractionDigits: station.last.speed < 10 ? 1 : 0,
     })} km/h`;
-  }
+  };
 
   private resetSearch() {
     this.query = '';
-    this.debouncedQuery = '';
-    this.activeResultIndex = 0;
     this.isOpen = false;
-    void this.updateDebouncedQuery.cancelAll();
   }
 
   private targetQueryParams(station: Station) {
@@ -296,52 +297,56 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
                   class="max-h-80 overflow-y-auto p-1"
                 >
                   {{#each this.results as |station index|}}
-                    {{#let
-                      (format-distance-km
-                        this.nearbyLocation.coordinates.latitude
-                        this.nearbyLocation.coordinates.longitude
-                        station.latitude
-                        station.longitude
-                      )
-                      (this.isActiveResult index)
-                      (this.windBand station)
-                      as |distanceLabel isActive windBand|
-                    }}
-                      <li role="presentation">
-                        <button
-                          aria-selected={{if isActive "true" "false"}}
-                          class={{this.resultButtonClass index}}
-                          data-test-navbar-search-result={{station.id}}
-                          role="option"
-                          type="button"
-                          {{on "click" (fn this.selectStation station)}}
-                          {{on "mousemove" (fn this.activateResult index)}}
-                        >
-                          <span class="min-w-0">
-                            <span class="block truncate text-sm font-semibold">
-                              {{station.name}}
+                    {{#let this.nearbyLocation.coordinates as |coordinates|}}
+                      {{#let
+                        (formatDistanceKm
+                          coordinates.latitude
+                          coordinates.longitude
+                          station.latitude
+                          station.longitude
+                        )
+                        (this.isActiveResult index)
+                        (this.windBand station)
+                        as |distanceLabel isActive windBand|
+                      }}
+                        <li role="presentation">
+                          <button
+                            aria-selected={{if isActive "true" "false"}}
+                            class={{this.resultButtonClass index}}
+                            data-test-navbar-search-result={{station.id}}
+                            role="option"
+                            type="button"
+                            {{on "click" (fn this.selectStation station)}}
+                            {{on "mousemove" (fn this.activateResult index)}}
+                          >
+                            <span class="min-w-0">
+                              <span
+                                class="block truncate text-sm font-semibold"
+                              >
+                                {{station.name}}
+                              </span>
+
+                              {{#if distanceLabel}}
+                                <span
+                                  class="mt-0.5 block truncate text-xs text-slate-500"
+                                >
+                                  {{distanceLabel}}
+                                </span>
+                              {{/if}}
                             </span>
 
-                            {{#if distanceLabel}}
-                              <span
-                                class="mt-0.5 block truncate text-xs text-slate-500"
-                              >
-                                {{distanceLabel}}
-                              </span>
-                            {{/if}}
-                          </span>
-
-                          <span
-                            class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold
-                              {{windBand.textClass}}"
-                          >
                             <span
-                              class="size-2 rounded-full {{windBand.backgroundClass}}"
-                            ></span>
-                            {{this.windSpeedLabelFor station}}
-                          </span>
-                        </button>
-                      </li>
+                              class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold
+                                {{windBand.textClass}}"
+                            >
+                              <span
+                                class="size-2 rounded-full {{windBand.backgroundClass}}"
+                              ></span>
+                              {{this.windSpeedLabelFor station}}
+                            </span>
+                          </button>
+                        </li>
+                      {{/let}}
                     {{/let}}
                   {{/each}}
                 </ul>

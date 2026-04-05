@@ -6,6 +6,7 @@ import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-
 import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
+import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -63,24 +64,26 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
         </StationMetaItem>
 
-        {{#let
-          (format-distance-km
-            this.nearbyLocation.coordinates.latitude
-            this.nearbyLocation.coordinates.longitude
-            @station.latitude
-            @station.longitude
-          )
-          as |distanceLabel|
-        }}
-          {{#if distanceLabel}}
-            <StationMetaItem
-              data-test-station-distance
-              @icon={{NavigationArrow}}
-              @label={{t "station.meta.distance"}}
-            >
-              <span>{{distanceLabel}}</span>
-            </StationMetaItem>
-          {{/if}}
+        {{#let this.nearbyLocation.coordinates as |coordinates|}}
+          {{#let
+            (formatDistanceKm
+              coordinates.latitude
+              coordinates.longitude
+              @station.latitude
+              @station.longitude
+            )
+            as |distanceLabel|
+          }}
+            {{#if distanceLabel}}
+              <StationMetaItem
+                data-test-station-distance
+                @icon={{NavigationArrow}}
+                @label={{t "station.meta.distance"}}
+              >
+                <span>{{distanceLabel}}</span>
+              </StationMetaItem>
+            {{/if}}
+          {{/let}}
         {{/let}}
 
         {{#if this.hasProviderLink}}
