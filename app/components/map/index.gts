@@ -254,16 +254,7 @@ export default class Map extends Component<MapSignature> {
       return;
     }
 
-    if (
-      this.requestedViewport &&
-      mapViewsEqual(this.requestedViewport.view, this.mapView)
-    ) {
-      return;
-    }
-
-    const currentMapView = mapViewFromMap(this.liveMap);
-
-    if (mapViewsEqual(currentMapView, this.mapView)) {
+    if (mapViewsEqual(mapViewFromMap(this.liveMap), this.mapView)) {
       return;
     }
 

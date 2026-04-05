@@ -1,6 +1,5 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
-import type { IntlService } from 'ember-intl';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
@@ -10,7 +9,6 @@ import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import { distanceKm } from 'winds-mobi-client-web/utils/distance';
 import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
@@ -25,7 +23,6 @@ export interface StationHeaderSignature {
 
 export default class StationHeader extends Component<StationHeaderSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
-  @service declare intl: IntlService;
 
   get hasProviderLink() {
     return Boolean(
@@ -37,25 +34,6 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
     );
-  }
-
-  get formattedDistanceKm() {
-    const coordinates = this.nearbyLocation.coordinates;
-
-    if (!coordinates) {
-      return undefined;
-    }
-
-    const distance = distanceKm(
-      coordinates.latitude,
-      coordinates.longitude,
-      this.args.station.latitude,
-      this.args.station.longitude
-    );
-
-    return `${this.intl.formatNumber(distance, {
-      maximumFractionDigits: distance < 10 ? 1 : 0,
-    })} km`;
   }
 
   <template>
@@ -85,15 +63,25 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
         </StationMetaItem>
 
-        {{#if this.formattedDistanceKm}}
-          <StationMetaItem
-            data-test-station-distance
-            @icon={{NavigationArrow}}
-            @label={{t "station.meta.distance"}}
-          >
-            <span>{{this.formattedDistanceKm}}</span>
-          </StationMetaItem>
-        {{/if}}
+        {{#let
+          (format-distance-km
+            this.nearbyLocation.coordinates.latitude
+            this.nearbyLocation.coordinates.longitude
+            @station.latitude
+            @station.longitude
+          )
+          as |distanceLabel|
+        }}
+          {{#if distanceLabel}}
+            <StationMetaItem
+              data-test-station-distance
+              @icon={{NavigationArrow}}
+              @label={{t "station.meta.distance"}}
+            >
+              <span>{{distanceLabel}}</span>
+            </StationMetaItem>
+          {{/if}}
+        {{/let}}
 
         {{#if this.hasProviderLink}}
           <StationMetaItem

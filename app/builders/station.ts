@@ -41,19 +41,7 @@ const defaultOptions: ConstrainedRequestOptions = {
   },
 };
 
-const mapStationQueryKeys = [
-  'short',
-  'loc',
-  'status',
-  'alt',
-  'peak',
-  'last._id',
-  'last.w-dir',
-  'last.w-avg',
-  'last.w-max',
-] as const;
-
-const searchStationQueryKeys = [
+const summaryStationQueryKeys = [
   'short',
   'loc',
   'status',
@@ -123,7 +111,7 @@ function mapQuery<T>(
     type,
     {
       'is-highest-duplicates-rating': true,
-      keys: [...mapStationQueryKeys],
+      keys: [...summaryStationQueryKeys],
       limit: 470,
       'within-pt1-lat': bounds.northEast[1],
       'within-pt1-lon': bounds.northEast[0],
@@ -163,7 +151,7 @@ function searchQuery<T>(
     type,
     {
       'is-highest-duplicates-rating': true,
-      keys: [...searchStationQueryKeys],
+      keys: [...summaryStationQueryKeys],
       limit,
       search: search.trim(),
     },

@@ -1,16 +1,14 @@
 import Component from '@glimmer/component';
-import { fn } from '@ember/helper';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import { service } from '@ember/service';
-import type RouterService from '@ember/routing/router-service';
+import { LinkTo } from '@ember/routing';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
 import NavbarSearch from '../search';
 import NavbarRefreshControl from '../refresh-control';
-import { NAVBAR_MENU_ITEMS, type NavbarMenuItem } from './items';
+import { NAVBAR_MENU_ITEMS } from './items';
 
 export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
@@ -21,23 +19,7 @@ export interface NavbarMenuMobileSignature {
 }
 
 export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
-  @service declare router: RouterService;
-
   @tracked isOpen = false;
-  private handleRouteDidChange = () => {
-    this.close();
-  };
-
-  constructor(owner: unknown, args: NavbarMenuMobileSignature['Args']) {
-    super(owner, args);
-
-    this.router.on('routeDidChange', this.handleRouteDidChange);
-  }
-
-  willDestroy(): void {
-    this.router.off('routeDidChange', this.handleRouteDidChange);
-    super.willDestroy();
-  }
 
   @action
   open() {
@@ -47,12 +29,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
   @action
   close() {
     this.isOpen = false;
-  }
-
-  @action
-  navigate(route: NavbarMenuItem['route']) {
-    this.close();
-    void this.router.transitionTo(route);
   }
 
   <template>
@@ -90,17 +66,15 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
               <NavbarSearch data-test-navbar-search="mobile" />
 
               {{#each NAVBAR_MENU_ITEMS as |item|}}
-                <Button
+                <LinkTo
+                  @route={{item.route}}
+                  @activeClass="border-wind-20 bg-wind-5 text-wind-20"
                   data-test-navbar-link={{item.route}}
-                  @appearance="outlined"
-                  @class="w-full"
-                  @onPress={{fn this.navigate item.route}}
+                  class="inline-flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                 >
-                  <span class="inline-flex items-center gap-2">
-                    <item.icon @size={{16}} />
-                    <span>{{t item.labelKey}}</span>
-                  </span>
-                </Button>
+                  <item.icon @size={{16}} />
+                  <span>{{t item.labelKey}}</span>
+                </LinkTo>
               {{/each}}
 
               <NavbarRefreshControl @appearance="mobile" />
