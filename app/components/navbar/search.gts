@@ -10,14 +10,15 @@ import { getRequestState } from '@warp-drive/core/reactive';
 import { rawTimeout, task } from 'ember-concurrency';
 import { Input as FrontileInput } from '@frontile/forms';
 import { Popover } from '@frontile/overlays';
-import type { IntlService } from 'ember-intl';
 import { t } from 'ember-intl';
-import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
-import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
 import { serializeMapView } from 'winds-mobi-client-web/utils/map-view';
-import { windBandForSpeed } from 'winds-mobi-client-web/helpers/wind-to-colour';
+import {
+  type RequestResponse,
+  responseData,
+} from 'winds-mobi-client-web/utils/request-response';
+import NavbarSearchResult from './search-result';
 
 export interface NavbarSearchSignature {
   Args: Record<string, never>;
@@ -27,19 +28,11 @@ export interface NavbarSearchSignature {
   Element: HTMLDivElement;
 }
 
-type RequestResponse<T> = { data: T } | { content: { data: T } };
-
 const MIN_SEARCH_LENGTH = 2;
 const SEARCH_DEBOUNCE_MS = 200;
 const SEARCH_RESULT_ZOOM = 10;
 
-function responseData<T>(response: RequestResponse<T>): T {
-  return 'data' in response ? response.data : response.content.data;
-}
-
 export default class NavbarSearch extends Component<NavbarSearchSignature> {
-  @service declare intl: IntlService;
-  @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare router: RouterService;
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -133,25 +126,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
 
   isActiveResult = (index: number) => {
     return index === this.clampedActiveResultIndex;
-  };
-
-  resultButtonClass = (index: number) => {
-    return [
-      'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition',
-      this.isActiveResult(index)
-        ? 'bg-slate-100 text-slate-950'
-        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950',
-    ].join(' ');
-  };
-
-  windBand = (station: Station) => {
-    return windBandForSpeed(station.last.speed);
-  };
-
-  windSpeedLabelFor = (station: Station) => {
-    return `${this.intl.formatNumber(station.last.speed, {
-      maximumFractionDigits: station.last.speed < 10 ? 1 : 0,
-    })} km/h`;
   };
 
   private resetSearch() {
@@ -274,6 +248,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
             @closeOnEscapeKey={{true}}
             @closeOnOutsideClick={{true}}
             @disableFocusTrap={{true}}
+            @preventAutoFocus={{true}}
             @size="trigger"
           >
             <div
@@ -294,57 +269,14 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
                   class="max-h-80 overflow-y-auto p-1"
                 >
                   {{#each this.results as |station index|}}
-                    {{#let this.nearbyLocation.coordinates as |coordinates|}}
-                      {{#let
-                        (formatDistanceKm
-                          coordinates.latitude
-                          coordinates.longitude
-                          station.latitude
-                          station.longitude
-                        )
-                        (this.isActiveResult index)
-                        (this.windBand station)
-                        as |distanceLabel isActive windBand|
-                      }}
-                        <li role="presentation">
-                          <button
-                            aria-selected={{if isActive "true" "false"}}
-                            class={{this.resultButtonClass index}}
-                            data-test-navbar-search-result={{station.id}}
-                            role="option"
-                            type="button"
-                            {{on "click" (fn this.selectStation station)}}
-                            {{on "mousemove" (fn this.activateResult index)}}
-                          >
-                            <span class="min-w-0">
-                              <span
-                                class="block truncate text-sm font-semibold"
-                              >
-                                {{station.name}}
-                              </span>
-
-                              {{#if distanceLabel}}
-                                <span
-                                  class="mt-0.5 block truncate text-xs text-slate-500"
-                                >
-                                  {{distanceLabel}}
-                                </span>
-                              {{/if}}
-                            </span>
-
-                            <span
-                              class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold
-                                {{windBand.textClass}}"
-                            >
-                              <span
-                                class="size-2 rounded-full {{windBand.backgroundClass}}"
-                              ></span>
-                              {{this.windSpeedLabelFor station}}
-                            </span>
-                          </button>
-                        </li>
-                      {{/let}}
-                    {{/let}}
+                    <li role="presentation">
+                      <NavbarSearchResult
+                        @isActive={{this.isActiveResult index}}
+                        @onActivate={{fn this.activateResult index}}
+                        @onSelect={{fn this.selectStation station}}
+                        @station={{station}}
+                      />
+                    </li>
                   {{/each}}
                 </ul>
               {{else if this.hasNoResults}}

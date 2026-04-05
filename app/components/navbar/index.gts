@@ -28,13 +28,13 @@ export default class Navbar extends Component<NavbarSignature> {
       <div class="px-2.5">
         <div class="flex h-16 items-center gap-3">
           <NavbarLogo />
-          <div class="hidden min-w-0 shrink-0 md:block md:w-[min(24rem,35vw)]">
-            <NavbarSearch data-test-navbar-search="desktop" />
+          <div class="min-w-0 flex-1 md:max-w-[min(24rem,35vw)]">
+            <NavbarSearch data-test-navbar-search="navbar" />
           </div>
 
           <NavbarMenuDesktop />
 
-          <div class="ml-auto md:hidden">
+          <div class="md:hidden">
             <NavbarMenuMobile />
           </div>
         </div>

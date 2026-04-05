@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { array } from '@ember/helper';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
@@ -25,6 +26,10 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
+import {
+  type RequestResponse,
+  responseData,
+} from 'winds-mobi-client-web/utils/request-response';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
   approximateMapBoundsFromView,
@@ -104,12 +109,6 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
-type RequestResponse<T> = { data: T } | { content: { data: T } };
-
-function responseData<T>(response: RequestResponse<T>): T {
-  return 'data' in response ? response.data : response.content.data;
-}
-
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -117,8 +116,6 @@ export default class Map extends Component<MapSignature> {
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
-  @tracked currentMapView?: MapView;
-  @tracked pendingFlyToView?: MapView;
   @tracked stations: Station[] = [];
   @tracked requestedViewport?: RequestedViewport;
   #requestVersion = 0;
@@ -226,7 +223,6 @@ export default class Map extends Component<MapSignature> {
   handleMapLoaded(map: MaplibreMap) {
     const view = mapViewFromMap(map);
 
-    this.currentMapView = view;
     this.bindGeolocateEvents();
     this.handleViewportChange(view, mapBoundsFromMap(map));
   }
@@ -234,12 +230,6 @@ export default class Map extends Component<MapSignature> {
   @action
   handleMoveEnd(event: { target: MaplibreMap }) {
     const view = mapViewFromMap(event.target);
-
-    this.currentMapView = view;
-
-    if (this.pendingFlyToView && mapViewsEqual(this.pendingFlyToView, view)) {
-      this.pendingFlyToView = undefined;
-    }
 
     this.handleViewportChange(view, mapBoundsFromMap(event.target));
   }
@@ -300,26 +290,10 @@ export default class Map extends Component<MapSignature> {
   }
 
   get flyToOptions() {
-    if (!this.currentMapView || mapViewsEqual(this.currentMapView, this.mapView)) {
-      return undefined;
-    }
-
-    if (
-      this.pendingFlyToView &&
-      mapViewsEqual(this.pendingFlyToView, this.mapView)
-    ) {
-      return undefined;
-    }
-
     return {
       center: [this.mapView.longitude, this.mapView.latitude] as [number, number],
       zoom: this.mapView.zoom,
     };
-  }
-
-  @action
-  noteFlyToRequest() {
-    this.pendingFlyToView = this.mapView;
   }
 
   <template>
@@ -336,13 +310,10 @@ export default class Map extends Component<MapSignature> {
         @reuseMaps={{false}}
         as |map|
       >
-        {{#if this.flyToOptions}}
-          <map.call
-            @func="flyTo"
-            @onResp={{this.noteFlyToRequest}}
-            @positionalArguments={{array this.flyToOptions}}
-          />
-        {{/if}}
+        <map.call
+          @func="flyTo"
+          @positionalArguments={{array this.flyToOptions}}
+        />
 
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />

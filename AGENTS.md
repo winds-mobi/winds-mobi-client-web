@@ -35,11 +35,13 @@ https://warp-drive.io/llms-full.txt
 - Prefer simple, typed Ember code. Assume configuration, declared dependencies, and API payloads are correct unless there is a proven issue.
 - If a requested implementation appears to require hacks, brittle workarounds, or patterns that cut against Ember or app architecture, push back clearly and explain why it does not seem like the best practice before proceeding.
 - Keep imperative DOM or third-party library integration in modifiers.
+- Never use raw DOM events in app code when a component or addon already exposes a supported Ember/Frontile API for the interaction. Prefer the framework-level callback/argument/modifier surface first.
 - Do not add app initializers, bundler alias tricks, or other startup-time hacks just to force third-party libraries into a working state. Prefer normal package upgrades or supported integration points, and stop to discuss before adding that kind of workaround.
 - For `ember-highcharts`, treat `highcharts` as a real app dependency and keep it current instead of relying on a transitive peer version. If wind/air stock-chart range selector buttons break, suspect Highcharts module/version mismatches first and prefer upgrading `highcharts` and `ember-highcharts` before adding app-side loading workarounds.
 - Do not add component arguments as speculative override points when the app has no real call sites for them.
 - If a component has an internal default and no actual external callers pass an override, remove the argument instead of keeping a "future-proof" escape hatch.
 - Do not add trivial passthrough getters just to feed translated strings or other direct template values into child components. Prefer helpers like `{{t ...}}` directly in the template when no class logic is needed.
+- Lean on Ember reactivity instead of adding duplicate guard state preemptively. If a value is already derived from tracked state or reactive route/query-param state, prefer expressing that directly first; only add extra "pending/applied/in-flight" state after confirming a real rerender or repeated-invocation problem.
 - Prefer Tailwind responsive classes for layout changes. Do not add component arguments or class logic just to switch layout variants across breakpoints.
 - For station sections split into a WarpDrive `<Request>` wrapper and a data presenter, keep them in a subdirectory with `index.gts` for the fetcher and `presenter.gts` for the view.
 - Do not add test-only override seams to app components just to make them easier to unit or integration test. Prefer smaller real tests, and skip a test rather than complicating the production API.

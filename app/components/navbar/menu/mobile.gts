@@ -6,7 +6,6 @@ import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
-import NavbarSearch from '../search';
 import NavbarRefreshControl from '../refresh-control';
 import { NAVBAR_MENU_ITEMS } from './items';
 
@@ -63,8 +62,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
 
           <drawer.Body>
             <div class="flex w-full flex-col items-stretch gap-2">
-              <NavbarSearch data-test-navbar-search="mobile" />
-
               {{#each NAVBAR_MENU_ITEMS as |item|}}
                 <LinkTo
                   @route={{item.route}}
