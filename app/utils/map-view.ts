@@ -6,9 +6,9 @@ export const DEFAULT_MAP_LNG = 8.2275;
 export const DEFAULT_MAP_LAT = 46.8011;
 export const DEFAULT_MAP_ZOOM = 7;
 
-// Zoom applied when centering the map on the user's location at startup — a
-// large area around them rather than a street-level view.
-export const INITIAL_LOCATION_ZOOM = 10;
+// Zoom applied when centering the map on the user's location — a comfortable
+// regional area around them rather than a wide country-level or street-level view.
+export const INITIAL_LOCATION_ZOOM = 11;
 export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 

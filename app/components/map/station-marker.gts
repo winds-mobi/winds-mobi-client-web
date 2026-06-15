@@ -12,11 +12,9 @@ const MARKER_STROKE_WIDTH = '16';
 
 export interface MapStationMarkerSignature {
   Args: {
+    isSelected?: boolean;
     onSelect: (stationId: string) => void;
     station: Station;
-  };
-  Blocks: {
-    default: [];
   };
   Element: HTMLButtonElement;
 }
@@ -48,6 +46,14 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `rotate(${this.args.station.last.direction} -80 100)`;
   }
 
+  get svgClass() {
+    const base = 'h-10 w-10 overflow-visible transition-transform duration-150';
+
+    return this.args.isSelected
+      ? `${base} scale-110 drop-shadow-[0_7px_4px_rgba(0,0,0,0.55)]`
+      : `${base} drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]`;
+  }
+
   @action
   handleSelect() {
     this.args.onSelect(this.args.station.id);
@@ -64,7 +70,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]"
+        class={{this.svgClass}}
         viewBox="-150 -70 140 340"
       >
         <path

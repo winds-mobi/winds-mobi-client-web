@@ -142,6 +142,27 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
+  // The station whose detail panel is open (the `map.station/:station_id` route).
+  get selectedStationId(): string | undefined {
+    let route = this.router.currentRoute;
+
+    while (route) {
+      const id = route.params?.['station_id'];
+
+      if (typeof id === 'string') {
+        return id;
+      }
+
+      route = route.parent;
+    }
+
+    return undefined;
+  }
+
+  isStationSelected = (station: Station): boolean => {
+    return station.id === this.selectedStationId;
+  };
+
   private get requestStore(): RequestStore {
     return this.store as unknown as RequestStore;
   }
@@ -356,6 +377,7 @@ export default class Map extends Component<MapSignature> {
             @lngLat={{this.markerPosition station}}
           >
             <MapStationMarker
+              @isSelected={{this.isStationSelected station}}
               @onSelect={{this.stationSelected}}
               @station={{station}}
             />
