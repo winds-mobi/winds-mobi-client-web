@@ -23,9 +23,6 @@ import NavbarSearchResult from './search-result';
 
 export interface NavbarSearchSignature {
   Args: Record<string, never>;
-  Blocks: {
-    default: [];
-  };
   Element: HTMLDivElement;
 }
 
@@ -138,7 +135,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   handleInput(value: string) {
     this.query = value;
     this.activeResultIndex = 0;
-    this.isOpen = value.trim().length >= MIN_SEARCH_LENGTH;
+    this.isOpen = this.hasEnoughCharacters;
 
     void this.updateDebouncedQuery.perform(value);
   }
@@ -230,6 +227,8 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
         as |popover|
       >
         <div {{popover.anchor}} class="w-full">
+          {{! @onInput is Frontile Input's supported public API, not a native event handler }}
+          {{! template-lint-disable no-passed-in-event-handlers }}
           <FrontileInput
             aria-label={{t "navigation.search.label"}}
             autocomplete="off"
@@ -255,6 +254,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
               <Binoculars @size={{14}} />
             </:startContent>
           </FrontileInput>
+          {{! template-lint-enable no-passed-in-event-handlers }}
         </div>
 
         {{#if this.isPopoverOpen}}

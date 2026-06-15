@@ -157,7 +157,7 @@ module('Acceptance | navbar search', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
-    await fillIn('[data-test-navbar-search="desktop"] input', 'leh');
+    await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
     await waitUntil(
       () => document.querySelector('[data-test-navbar-search-results]') !== null
@@ -183,7 +183,7 @@ module('Acceptance | navbar search', function (hooks) {
 
   test('it uses zoom 10 when searching from a non-map route', async function (assert) {
     await visit('/help');
-    await fillIn('[data-test-navbar-search="desktop"] input', 'leh');
+    await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(
       () =>
         document.querySelector(
@@ -206,12 +206,12 @@ module('Acceptance | navbar search', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map');
-    await fillIn('[data-test-navbar-search="desktop"] input', 'l');
+    await fillIn('[data-test-navbar-search="navbar"] input', 'l');
     await settled();
 
     assert.strictEqual(countSearchRequests(store.calls), 0);
 
-    await fillIn('[data-test-navbar-search="desktop"] input', 'zz');
+    await fillIn('[data-test-navbar-search="navbar"] input', 'zz');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
     await waitUntil(
       () => document.querySelector('[data-test-navbar-search-empty]') !== null
@@ -220,16 +220,9 @@ module('Acceptance | navbar search', function (hooks) {
     assert.dom('[data-test-navbar-search-empty]').hasText('No stations found.');
   });
 
-  test('it works from the mobile drawer and closes the drawer after selection', async function (assert) {
+  test('it clears the search field and closes the results after selecting a station', async function (assert) {
     await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
-    await click('[data-test-navbar-mobile-menu-button]');
-
-    assert.dom('[data-test-navbar-mobile-menu]').exists();
-
-    await fillIn(
-      '[data-test-navbar-mobile-menu] [data-test-navbar-search="mobile"] input',
-      'leh'
-    );
+    await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(
       () =>
         document.querySelector(
@@ -241,6 +234,7 @@ module('Acceptance | navbar search', function (hooks) {
     await waitUntil(() => currentURL().startsWith('/map/holfuy-1850?'));
     await settled();
 
-    assert.dom('[data-test-navbar-mobile-menu]').doesNotExist();
+    assert.dom('[data-test-navbar-search="navbar"] input').hasValue('');
+    assert.dom('[data-test-navbar-search-results]').doesNotExist();
   });
 });

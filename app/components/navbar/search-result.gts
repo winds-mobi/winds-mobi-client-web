@@ -14,9 +14,6 @@ export interface NavbarSearchResultSignature {
     onSelect: () => void;
     station: Station;
   };
-  Blocks: {
-    default: [];
-  };
   Element: HTMLButtonElement;
 }
 
@@ -83,7 +80,9 @@ export default class NavbarSearchResult extends Component<NavbarSearchResultSign
         class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold
           {{this.windBand.textClass}}"
       >
-        <span class="size-2 rounded-full {{this.windBand.backgroundClass}}"></span>
+        <span
+          class="size-2 rounded-full {{this.windBand.backgroundClass}}"
+        ></span>
         {{this.windSpeedLabel}}
       </span>
     </button>
