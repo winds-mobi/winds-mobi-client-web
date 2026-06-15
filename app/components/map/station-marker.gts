@@ -8,7 +8,15 @@ const STATION_ARROW_PATH =
   'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
-const MARKER_STROKE_WIDTH = '16';
+const MARKER_STROKE_WIDTH = '10';
+const MARKER_OUTLINE_COLOUR = 'rgba(15, 23, 42, 0.5)';
+// The arrow path has a circular hole centred here; a gusts-coloured ring sits over
+// the hole edge (in front, rotating with the arrow) so it reads as the gusts colour
+// and covers the path's inner outline. Double the arrow's outline thickness.
+const MARKER_HUB_X = '-80';
+const MARKER_HUB_Y = '80';
+const MARKER_HUB_RADIUS = '35';
+const MARKER_HUB_STROKE_WIDTH = '20';
 
 export interface MapStationMarkerSignature {
   Args: {
@@ -38,7 +46,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return this.colourForWindReading(this.args.station.last.speed);
   }
 
-  get markerOutlineColor() {
+  get gustsColor() {
     return this.colourForWindReading(this.args.station.last.gusts);
   }
 
@@ -72,19 +80,28 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]"
+        class="h-10 w-10 overflow-visible"
         viewBox="-150 -70 140 340"
       >
-        <path
-          d={{this.arrowPath}}
-          fill={{this.markerColor}}
-          stroke={{this.markerOutlineColor}}
-          stroke-alignment="outer"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width={{MARKER_STROKE_WIDTH}}
-          transform={{this.rotationTransform}}
-        />
+        <g transform={{this.rotationTransform}}>
+          <path
+            d={{this.arrowPath}}
+            fill={{this.markerColor}}
+            stroke={{MARKER_OUTLINE_COLOUR}}
+            stroke-alignment="outer"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={{MARKER_STROKE_WIDTH}}
+          />
+          <circle
+            cx={{MARKER_HUB_X}}
+            cy={{MARKER_HUB_Y}}
+            r={{MARKER_HUB_RADIUS}}
+            fill="none"
+            stroke={{this.gustsColor}}
+            stroke-width={{MARKER_HUB_STROKE_WIDTH}}
+          />
+        </g>
       </svg>
     </button>
   </template>
