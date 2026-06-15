@@ -229,7 +229,11 @@ export default class Map extends Component<MapSignature> {
     // On a fresh load, ask the map's own geolocation for the user's position and
     // center on it; otherwise the whole-Switzerland default view stays (#32).
     if (this.isInitialDefaultView && config.environment !== 'test') {
-      this.geolocateControl.trigger();
+      // `mapLoaded` fires before ember-maplibre-gl renders its block and adds the
+      // GeolocateControl, so the control isn't on the map yet ("triggered before
+      // added to a map"). The addon documents deferring such effectful onMapLoaded
+      // work to the next frame, by which point the control is attached.
+      requestAnimationFrame(() => this.geolocateControl.trigger());
     }
   }
 
@@ -239,14 +243,17 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleGeolocate(event: { data: GeolocationPosition }) {
-    this.nearbyLocation.updateFromPosition(event.data);
-    this.centerOnInitialLocation(event.data);
+  handleGeolocate(event: GeolocationPosition) {
+    // MapLibre fires `new Event('geolocate', position)`, which spreads the
+    // GeolocationPosition fields (coords, timestamp) onto the event itself — there
+    // is no `event.data`. Pass the event straight through.
+    this.nearbyLocation.updateFromPosition(event);
+    this.centerOnInitialLocation(event);
   }
 
   @action
-  handleGeolocateError(event: { data?: GeolocationPositionError }) {
-    this.nearbyLocation.updateFromError(event.data);
+  handleGeolocateError(event: GeolocationPositionError) {
+    this.nearbyLocation.updateFromError(event);
   }
 
   @action
