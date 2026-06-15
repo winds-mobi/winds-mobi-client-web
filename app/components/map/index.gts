@@ -12,7 +12,11 @@ import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
-import type { Map as MaplibreMap, StyleSpecification } from 'ember-maplibre-gl';
+import type {
+  Map as MaplibreMap,
+  MapInitOptions,
+  StyleSpecification,
+} from 'ember-maplibre-gl';
 import {
   GeolocateControl,
   NavigationControl,
@@ -31,9 +35,6 @@ import {
   responseData,
 } from 'winds-mobi-client-web/utils/request-response';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
-import bindGeolocateEvents, {
-  type GeolocateEventHandlers,
-} from 'winds-mobi-client-web/modifiers/bind-geolocate-events';
 import {
   approximateMapBoundsFromView,
   INITIAL_LOCATION_ZOOM,
@@ -125,16 +126,6 @@ export default class Map extends Component<MapSignature> {
     trackUserLocation: true,
   });
 
-  // Stable handler object for the `bindGeolocateEvents` modifier.
-  geolocateHandlers: GeolocateEventHandlers = {
-    onStart: () => this.nearbyLocation.beginLocationRequest(),
-    onGeolocate: (position) => {
-      this.nearbyLocation.updateFromPosition(position);
-      this.centerOnInitialLocation(position);
-    },
-    onError: (error) => this.nearbyLocation.updateFromError(error),
-  };
-
   private terrainControl =
     config.environment === 'test'
       ? undefined
@@ -194,7 +185,7 @@ export default class Map extends Component<MapSignature> {
     return windLegendBands();
   }
 
-  get initOptions() {
+  get initOptions(): MapInitOptions {
     return {
       bearing: 0,
       center: [this.mapView.longitude, this.mapView.latitude] as [
@@ -240,6 +231,22 @@ export default class Map extends Component<MapSignature> {
     if (this.isInitialDefaultView && config.environment !== 'test') {
       this.geolocateControl.trigger();
     }
+  }
+
+  @action
+  handleGeolocateStart() {
+    this.nearbyLocation.beginLocationRequest();
+  }
+
+  @action
+  handleGeolocate(event: { data: GeolocationPosition }) {
+    this.nearbyLocation.updateFromPosition(event.data);
+    this.centerOnInitialLocation(event.data);
+  }
+
+  @action
+  handleGeolocateError(event: { data?: GeolocationPositionError }) {
+    this.nearbyLocation.updateFromError(event.data);
   }
 
   @action
@@ -306,11 +313,7 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div
-      data-test-map-container
-      class="relative h-full w-full"
-      {{bindGeolocateEvents this.geolocateControl this.geolocateHandlers}}
-    >
+    <div data-test-map-container class="relative h-full w-full">
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
@@ -334,7 +337,18 @@ export default class Map extends Component<MapSignature> {
           @control={{this.navigationControl}}
           @position="bottom-right"
         />
-        <map.control @control={{this.geolocateControl}} @position="top-right" />
+        <map.control
+          @control={{this.geolocateControl}}
+          @position="top-right"
+          as |control|
+        >
+          <control.on
+            @event="trackuserlocationstart"
+            @action={{this.handleGeolocateStart}}
+          />
+          <control.on @event="geolocate" @action={{this.handleGeolocate}} />
+          <control.on @event="error" @action={{this.handleGeolocateError}} />
+        </map.control>
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
         {{/if}}
