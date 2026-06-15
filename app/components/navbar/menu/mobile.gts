@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import { on } from '@ember/modifier';
 import { LinkTo } from '@ember/routing';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
@@ -68,6 +69,7 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
                   @activeClass="border-wind-20 bg-wind-5 text-wind-20"
                   data-test-navbar-link={{item.route}}
                   class="inline-flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+                  {{on "click" this.close}}
                 >
                   <item.icon @size={{16}} />
                   <span>{{t item.labelKey}}</span>
