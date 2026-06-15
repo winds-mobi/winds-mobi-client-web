@@ -46,12 +46,14 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `rotate(${this.args.station.last.direction} -80 100)`;
   }
 
-  get svgClass() {
-    const base = 'h-10 w-10 overflow-visible transition-transform duration-150';
+  get buttonClass() {
+    const base =
+      'block cursor-pointer rounded-full p-1 transition focus:outline-none';
 
+    // Selected: a grey disc + ring framing the arrow so it stands out on the map.
     return this.args.isSelected
-      ? `${base} scale-110 drop-shadow-[0_7px_4px_rgba(0,0,0,0.55)]`
-      : `${base} drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]`;
+      ? `${base} bg-slate-400/40 ring-2 ring-slate-500/70`
+      : base;
   }
 
   @action
@@ -63,14 +65,14 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     <button
       type="button"
       aria-label={{@station.name}}
-      class="cursor-pointer rounded-full p-0.5 focus:outline-none"
+      class={{this.buttonClass}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
       {{on "click" this.handleSelect}}
     >
       <svg
         aria-hidden="true"
-        class={{this.svgClass}}
+        class="h-10 w-10 overflow-visible drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]"
         viewBox="-150 -70 140 340"
       >
         <path
