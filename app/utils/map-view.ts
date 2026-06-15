@@ -58,6 +58,23 @@ export function normalizeMapView(view: MapView): MapView {
   };
 }
 
+function snap(value: number, step: number) {
+  return Math.round(value / step) * step;
+}
+
+// Snap a view to the station-refetch thresholds so that small map movements
+// resolve to the same value. The map request is derived from this, which lets
+// sub-threshold panning update the URL without triggering a refetch — keeping
+// station fetching declaratively driven by the routed view instead of imperative
+// viewport bookkeeping.
+export function quantizeMapViewForRequest(view: MapView): MapView {
+  return normalizeMapView({
+    longitude: snap(view.longitude, MAP_REQUEST_COORDINATE_THRESHOLD),
+    latitude: snap(view.latitude, MAP_REQUEST_COORDINATE_THRESHOLD),
+    zoom: snap(view.zoom, MAP_REQUEST_ZOOM_THRESHOLD),
+  });
+}
+
 export function normalizeMapBounds(bounds: MapBounds): MapBounds {
   return {
     northEast: [

@@ -33,15 +33,11 @@ import {
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
   approximateMapBoundsFromView,
-  mapBoundsEqual,
-  mapBoundsFromMap,
   mapViewsEqual,
-  mapViewChangeRequiresStationRefetch,
   mapViewFromMap,
-  normalizeMapBounds,
   parseMapView,
+  quantizeMapViewForRequest,
   serializeMapView,
-  type MapBounds,
   type MapQueryParams,
   type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
@@ -100,11 +96,6 @@ const TEST_MAP_STYLE: StyleSpecification = {
   ],
 };
 
-type RequestedViewport = {
-  bounds: MapBounds;
-  view: MapView;
-};
-
 type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
@@ -117,7 +108,6 @@ export default class Map extends Component<MapSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
-  @tracked requestedViewport?: RequestedViewport;
   #requestVersion = 0;
 
   private navigationControl = new NavigationControl({
@@ -150,16 +140,19 @@ export default class Map extends Component<MapSignature> {
     return this.store as unknown as RequestStore;
   }
 
+  // Quantized so sub-threshold panning resolves to the same value and does not
+  // refetch; the URL still tracks every move for the declarative fly-to sync.
+  get requestView(): MapView {
+    return quantizeMapViewForRequest(this.mapView);
+  }
+
   @cached
   get request(): Future<RequestResponse<Station[]>> | undefined {
-    const requestedViewport = this.requestedViewport ?? {
-      bounds: approximateMapBoundsFromView(this.mapView),
-      view: this.mapView,
-    };
+    const bounds = approximateMapBoundsFromView(this.requestView);
 
     this.mapRefresh.lastRefresh;
 
-    const options = mapQuery<Station>('station', requestedViewport.bounds, {
+    const options = mapQuery<Station>('station', bounds, {
       backgroundReload: true,
     });
 
@@ -220,18 +213,34 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleMapLoaded(map: MaplibreMap) {
-    const view = mapViewFromMap(map);
-
+  handleMapLoaded() {
+    // The initial request viewport is already derived from the routed map view
+    // (see the `request` getter fallback); writing `requestedViewport` here would
+    // mutate tracked state that the same render already read. Real bounds are
+    // captured on the first `moveend` instead.
     this.bindGeolocateEvents();
-    this.handleViewportChange(view, mapBoundsFromMap(map));
   }
 
   @action
-  handleMoveEnd(event: { target: MaplibreMap }) {
+  handleMoveEnd(event: { target: MaplibreMap; originalEvent?: unknown }) {
+    // Only user gestures carry `originalEvent`. Programmatic moves (our own
+    // declarative fly-to sync, geolocation, etc.) already originate from the
+    // routed view, so reacting to them would mutate router state mid-render and
+    // loop the fly-to. The routed view stays the single source of truth: user
+    // move -> URL -> fly-to + request (throttled via the quantized requestView).
+    if (!event.originalEvent) {
+      return;
+    }
+
     const view = mapViewFromMap(event.target);
 
-    this.handleViewportChange(view, mapBoundsFromMap(event.target));
+    if (mapViewsEqual(this.mapView, view)) {
+      return;
+    }
+
+    this.router.replaceWith({
+      queryParams: serializeMapView(view),
+    });
   }
 
   @action
@@ -263,35 +272,12 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
-  private handleViewportChange(view: MapView, bounds: MapBounds) {
-    const nextViewport = {
-      bounds: normalizeMapBounds(bounds),
-      view,
-    };
-
-    if (
-      !this.requestedViewport ||
-      !mapBoundsEqual(this.requestedViewport.bounds, nextViewport.bounds) ||
-      mapViewChangeRequiresStationRefetch(
-        this.requestedViewport.view,
-        nextViewport.view
-      )
-    ) {
-      this.requestedViewport = nextViewport;
-    }
-
-    if (mapViewsEqual(this.mapView, nextViewport.view)) {
-      return;
-    }
-
-    this.router.replaceWith({
-      queryParams: serializeMapView(nextViewport.view),
-    });
-  }
-
   get flyToOptions() {
     return {
-      center: [this.mapView.longitude, this.mapView.latitude] as [number, number],
+      center: [this.mapView.longitude, this.mapView.latitude] as [
+        number,
+        number,
+      ],
       zoom: this.mapView.zoom,
     };
   }
