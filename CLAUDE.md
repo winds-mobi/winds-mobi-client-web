@@ -105,6 +105,11 @@ state, route models, and query params.
 - **Prefer declarative, derived state.** Express derived data as `get` getters from tracked/route/query-param state.
   Excessive local `@tracked` is a smell — look for a simpler root state to derive from. Don't add duplicate guard state
   preemptively; only add "pending/applied/in-flight" tracking after confirming a real rerender or repeated-invocation bug.
+- **No imperative bookkeeping in untracked private fields.** Don't reach for plain `#flag`/`#counter`/`#didX` fields to
+  gate one-time setup, dedupe stale async results, or remember "have I done this yet." That's imperative state that
+  side-steps reactivity. Instead: subscribe/teardown once via a **modifier**; derive one-shot conditions from existing
+  state (e.g. "still the default view?") so they self-disarm; and detect stale async by comparing the current cached
+  value/Future identity rather than a version counter. Reactive state that the template reads must be `@tracked`.
 - Keep imperative DOM / third-party library integration inside **modifiers** ([app/modifiers/](app/modifiers/)).
 - **Never use Ember's runloop** (`@ember/runloop`: `scheduleOnce`, `next`, `later`, `debounce`, `run`, etc.). If you
   reach for it to defer a state write or break a render cycle, that's a signal the state is modeled imperatively —
