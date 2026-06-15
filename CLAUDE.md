@@ -58,11 +58,11 @@ There is no `fetch()` in app code and no classic EmberData adapters/serializers.
    [app/app.ts](app/app.ts) via `setBuildURLConfig` (`https://winds.mobi/api`, namespace `2.3`; a commented
    localhost line is the dev override).
 3. **Handlers** ([app/handlers/](app/handlers/)) reshape the upstream non-JSON:API payload into JSON:API. The
-   station handler renames terse API fields (`pv-name`→`providerName`, `w-avg`→`speed`, `last._id`*1000→`timestamp`,
-   etc.) and normalizes `url`/`pres`. **Handlers must omit absent station-level and `last.*` attributes entirely —
-   never serialize a missing field as `undefined`.** Warp Drive upsert merges partial payloads only one level deep,
-   so emitting only present primitive fields lets the same identity be refetched with different `keys` safely; do
-   not rely on deep partial merges for object-valued fields.
+   station handler renames terse API fields (`pv-name` to `providerName`, `w-avg` to `speed`, `last._id` (seconds)
+   to a millisecond `timestamp`, etc.) and normalizes `url`/`pres`. **Handlers must omit absent station-level and
+   `last.*` attributes entirely — never serialize a missing field as `undefined`.** Warp Drive upsert merges partial
+   payloads only one level deep, so emitting only present primitive fields lets the same identity be refetched with
+   different `keys` safely; do not rely on deep partial merges for object-valued fields.
 4. **Schema-record store** ([app/services/store.ts](app/services/store.ts)) defines reactive schemas, not Models:
    `StationSchema` (with embedded `location`/`reading`/`pressure` `schema-object`s and **derived** `latitude`/
    `longitude` unwrapped from `location.coordinates`) and `HistorySchema`. Exported `Station`/`History` TS types are
@@ -106,6 +106,19 @@ state, route models, and query params.
   Excessive local `@tracked` is a smell — look for a simpler root state to derive from. Don't add duplicate guard state
   preemptively; only add "pending/applied/in-flight" tracking after confirming a real rerender or repeated-invocation bug.
 - Keep imperative DOM / third-party library integration inside **modifiers** ([app/modifiers/](app/modifiers/)).
+- **Never use Ember's runloop** (`@ember/runloop`: `scheduleOnce`, `next`, `later`, `debounce`, `run`, etc.). If you
+  reach for it to defer a state write or break a render cycle, that's a signal the state is modeled imperatively —
+  re-derive it from tracked/route/query-param state instead. For async coordination use ember-concurrency.
+- Subscribe to service/router/library events with a **module-scope `ember-modifier`**, not `constructor`/`willDestroy`:
+  define the modifier, attach it to an element in the template, and return the teardown function. Example:
+  ```js
+  import { modifier } from 'ember-modifier';
+  const onRouteChange = modifier((_, [router, callback]) => {
+    router.on('routeDidChange', callback);
+    return () => router.off('routeDidChange', callback);
+  });
+  // template: {{onRouteChange this.router this.closeSidebar}}
+  ```
 - Never use raw DOM events when a component/addon (Frontile, etc.) exposes a supported callback/argument/modifier API —
   reach for the framework surface first.
 - No startup-time hacks (app initializers, bundler aliases) to force third-party libs to work. Prefer package upgrades

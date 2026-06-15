@@ -10,7 +10,13 @@
 
 - Updated station search results to show the station name together with distance from you and the current wind speed, making it easier to choose the right match before opening it.
 - Updated station search selection so choosing a result recenters the map on that station at zoom level `10` with a smooth animated map move, while keeping the resulting map position in the URL for reloads and sharing.
+- Refined the navbar search field with a rounded pill style, a binoculars search icon, and clearer focus, loading, and keyboard-navigation states so it reads as a primary navbar control on both mobile and desktop.
 - Refined the `Last hour` wind-direction chart so the compass labels sit in a more natural position around the graph instead of feeling too tight to the center.
+
+### Fixed
+
+- Fixed map view syncing so selecting a search result, opening a station, or panning keeps the map, the shareable URL, and the visible stations in step without redundant re-centering or stalls.
+- Fixed the mobile menu so choosing `Map`, `Nearby`, or `Help` closes the drawer again after the navigation was reworked.
 
 ## v0.0.22 - 2026-04-04
 
