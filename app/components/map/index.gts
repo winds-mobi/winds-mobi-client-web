@@ -9,7 +9,6 @@ import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
-import { modifier } from 'ember-modifier';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
@@ -106,23 +105,6 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
-// Tracks whether a route navigation is in progress, so the map doesn't write the
-// routed view back to the URL while a transition is already driving it.
-const trackRouting = modifier(
-  (_element, [router, onChange]: [RouterService, (isRouting: boolean) => void]) => {
-    const onWillChange = () => onChange(true);
-    const onDidChange = () => onChange(false);
-
-    router.on('routeWillChange', onWillChange);
-    router.on('routeDidChange', onDidChange);
-
-    return () => {
-      router.off('routeWillChange', onWillChange);
-      router.off('routeDidChange', onDidChange);
-    };
-  }
-);
-
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -131,7 +113,6 @@ export default class Map extends Component<MapSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
-  @tracked isRouting = false;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -142,7 +123,9 @@ export default class Map extends Component<MapSignature> {
     fitBoundsOptions: { maxZoom: INITIAL_LOCATION_ZOOM },
     showAccuracyCircle: true,
     showUserLocation: true,
-    trackUserLocation: true,
+    // Locate on demand rather than continuously tracking — we recenter the routed
+    // view from the `geolocate` event, and tracking would fight manual panning.
+    trackUserLocation: false,
   });
 
   private terrainControl =
@@ -265,9 +248,18 @@ export default class Map extends Component<MapSignature> {
   handleGeolocate(event: GeolocationPosition) {
     // MapLibre fires `new Event('geolocate', position)`, which spreads the
     // GeolocationPosition fields (coords, timestamp) onto the event itself — there
-    // is no `event.data`. The GeolocateControl flies the map to the position; the
-    // resulting `moveend` syncs the routed view and refetches.
+    // is no `event.data`. The geolocate fly is programmatic (skipped by
+    // handleMoveEnd), so center the routed view on the located position here — this
+    // is what refetches stations around the user.
     this.nearbyLocation.updateFromPosition(event);
+
+    this.router.replaceWith({
+      queryParams: serializeMapView({
+        longitude: event.coords.longitude,
+        latitude: event.coords.latitude,
+        zoom: INITIAL_LOCATION_ZOOM,
+      }),
+    });
   }
 
   @action
@@ -276,18 +268,12 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  setRouting(isRouting: boolean) {
-    this.isRouting = isRouting;
-  }
-
-  @action
-  handleMoveEnd(event: { target: MaplibreMap }) {
-    // While a route navigation is driving the map (e.g. selecting a search result
-    // flies to the station), the URL is already being set by that transition and
-    // our fly-to is chasing it — writing back here would mutate router state
-    // mid-transition. Skip those; let user pans/zooms and the geolocate fly (which
-    // happen outside a transition) sync the routed view, which drives the refetch.
-    if (this.isRouting) {
+  handleMoveEnd(event: { target: MaplibreMap; originalEvent?: unknown }) {
+    // Only user gestures (pan/zoom) carry `originalEvent`. Programmatic moves — the
+    // initial settle, our URL-driven fly-to, the geolocate fly — either already
+    // match the routed view or are handled where they originate, and writing back
+    // here would drift the URL or mutate router state mid-transition.
+    if (!event.originalEvent) {
       return;
     }
 
@@ -324,11 +310,7 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div
-      data-test-map-container
-      class="relative h-full w-full"
-      {{trackRouting this.router this.setRouting}}
-    >
+    <div data-test-map-container class="relative h-full w-full">
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
