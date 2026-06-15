@@ -6,8 +6,11 @@ services:
       target: base
     # env_file:
     # - ./ui/.env
-    ports:
-      - 4200:4200
+    # No host port publish: OrbStack routes https://ui.winds-mobi-client-web.orb.local
+    # to the container's port 4200 via the labels below, so several projects can run
+    # side by side without competing for the host's single :4200.
+    expose:
+      - 4200
     volumes:
       - .:/app
       - /app/node_modules
