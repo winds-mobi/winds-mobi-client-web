@@ -77,10 +77,31 @@ In components, read responses through the `<Request>` component or `getRequestSt
 
 Map center/zoom are route query params on [app/controllers/map.ts](app/controllers/map.ts) (`mapLng`/`mapLat`/
 `mapZoom`), making views shareable and refresh-stable. [app/utils/map-view.ts](app/utils/map-view.ts) is the single
-source of map math: parse/serialize/normalize views and bounds, equality checks, and `mapViewChangeRequiresStationRefetch`
-(threshold gate so small pans don't refetch). The map component syncs query params → MapLibre declaratively (fly-to
-from state) rather than imperatively writing back mid-interaction. Keep this direction; don't reintroduce imperative
-view bookkeeping.
+source of map math: parse/serialize/normalize views and bounds, equality checks, and `quantizeMapViewForRequest`
+(snaps the view to the refetch thresholds so sub-threshold pans don't refetch). The map component syncs query params →
+MapLibre declaratively (fly-to from state) rather than imperatively writing back mid-interaction. Keep this direction;
+don't reintroduce imperative view bookkeeping.
+
+**The two directions, and why `moveend` only writes back for user gestures** (learned the hard way — don't undo this):
+
+- **URL → map → request.** The `request` getter derives its bounds from `quantizeMapViewForRequest(mapView)`, and a
+  declarative `<map.call @func="flyTo">` flies the map to the routed view whenever it changes (deep link, search
+  select, logo reset, locate). The request is _only_ a function of the routed view, so anything that should refetch
+  must change the query params.
+- **map → URL only on user gestures.** `handleMoveEnd` calls `router.replaceWith` **only when `event.originalEvent` is
+  set** (a real pan/zoom). It must _not_ write back on programmatic moves, because:
+  - the initial/style-driven settle reports a slightly different view (notably in tests) and would drift the URL; and
+  - our own fly-to, or a fly-to triggered by a route transition (e.g. selecting a search result), fires `moveend`
+    **synchronously while the router transition is still computing**, and `replaceWith` there throws Ember's
+    "`targetState` … already used in the same computation" backtracking assertion → unrecoverable render loop. The
+    browser usually hides this because fly-to _animates_ (async), but it bites synchronous cases: the acceptance tests,
+    and real users with `prefers-reduced-motion: reduce` (MapLibre jumps instantly). **If the map-panel/search tests
+    hang or 60s-timeout, this is why — keep the `originalEvent` guard.**
+- **Programmatic moves that _should_ refetch handle it at the source, not in `moveend`.** The geolocate/locate fly is
+  programmatic (no `originalEvent`), so the `geolocate` event handler explicitly `replaceWith`s the located position
+  (which drives the refetch); the control is `trackUserLocation: false` so it locates once instead of fighting manual
+  pans. MapLibre fires `new Event('geolocate', position)` — the `GeolocationPosition` fields are spread onto the event,
+  so read `event.coords` (there is no `event.data`).
 
 ### Routes & services
 
