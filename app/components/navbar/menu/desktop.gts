@@ -7,8 +7,7 @@ import { NAVBAR_MENU_ITEMS } from './items';
     {{#each NAVBAR_MENU_ITEMS as |item|}}
       <LinkTo
         @route={{item.route}}
-        @activeClass="text-wind-20"
-        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+        class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900 aria-[current=page]:border-wind-20 aria-[current=page]:bg-wind-20 aria-[current=page]:text-white"
         data-test-navbar-link={{item.route}}
       >
         <item.icon @size={{16}} />

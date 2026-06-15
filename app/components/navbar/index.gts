@@ -30,11 +30,15 @@ export default class Navbar extends Component<NavbarSignature> {
         <div class="flex h-16 items-center gap-2 md:gap-3">
           <NavbarLogo />
 
-          <div class="min-w-0 flex-1 md:max-w-sm">
-            <NavbarSearch data-test-navbar-search="navbar" />
+          {{! Desktop: navigation centered between the logo and the right group. }}
+          <div class="hidden md:flex md:flex-1 md:justify-center">
+            <NavbarMenuDesktop />
           </div>
 
-          <NavbarMenuDesktop />
+          {{! Search: full width on mobile, compact and right-aligned on desktop. }}
+          <div class="min-w-0 flex-1 md:w-40 md:flex-none">
+            <NavbarSearch data-test-navbar-search="navbar" />
+          </div>
 
           <NavbarRefreshControl />
 

@@ -9,6 +9,7 @@ import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
 import { tracked } from '@glimmer/tracking';
+import { modifier } from 'ember-modifier';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
@@ -105,6 +106,23 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
+// Tracks whether a route navigation is in progress, so the map doesn't write the
+// routed view back to the URL while a transition is already driving it.
+const trackRouting = modifier(
+  (_element, [router, onChange]: [RouterService, (isRouting: boolean) => void]) => {
+    const onWillChange = () => onChange(true);
+    const onDidChange = () => onChange(false);
+
+    router.on('routeWillChange', onWillChange);
+    router.on('routeDidChange', onDidChange);
+
+    return () => {
+      router.off('routeWillChange', onWillChange);
+      router.off('routeDidChange', onDidChange);
+    };
+  }
+);
+
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -113,6 +131,7 @@ export default class Map extends Component<MapSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
+  @tracked isRouting = false;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -246,9 +265,9 @@ export default class Map extends Component<MapSignature> {
   handleGeolocate(event: GeolocationPosition) {
     // MapLibre fires `new Event('geolocate', position)`, which spreads the
     // GeolocationPosition fields (coords, timestamp) onto the event itself — there
-    // is no `event.data`. Pass the event straight through.
+    // is no `event.data`. The GeolocateControl flies the map to the position; the
+    // resulting `moveend` syncs the routed view and refetches.
     this.nearbyLocation.updateFromPosition(event);
-    this.centerOnInitialLocation(event);
   }
 
   @action
@@ -257,13 +276,18 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleMoveEnd(event: { target: MaplibreMap; originalEvent?: unknown }) {
-    // Only user gestures carry `originalEvent`. Programmatic moves (our own
-    // declarative fly-to sync, geolocation, etc.) already originate from the
-    // routed view, so reacting to them would mutate router state mid-render and
-    // loop the fly-to. The routed view stays the single source of truth: user
-    // move -> URL -> fly-to + request (throttled via the quantized requestView).
-    if (!event.originalEvent) {
+  setRouting(isRouting: boolean) {
+    this.isRouting = isRouting;
+  }
+
+  @action
+  handleMoveEnd(event: { target: MaplibreMap }) {
+    // While a route navigation is driving the map (e.g. selecting a search result
+    // flies to the station), the URL is already being set by that transition and
+    // our fly-to is chasing it — writing back here would mutate router state
+    // mid-transition. Skip those; let user pans/zooms and the geolocate fly (which
+    // happen outside a transition) sync the routed view, which drives the refetch.
+    if (this.isRouting) {
       return;
     }
 
@@ -289,26 +313,6 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
-  // Center the routed view on the user the first time geolocation resolves after
-  // a fresh load. Guarded by the derived `isInitialDefaultView`: once we center,
-  // the routed view is no longer the default, so later tracking updates and
-  // manual geolocations don't re-center. Runs from the async geolocate event
-  // (post-render), so updating the URL here is safe; everything else (fly-to,
-  // station request) follows the routed view.
-  private centerOnInitialLocation(position: GeolocationPosition) {
-    if (!this.isInitialDefaultView) {
-      return;
-    }
-
-    this.router.replaceWith({
-      queryParams: serializeMapView({
-        longitude: position.coords.longitude,
-        latitude: position.coords.latitude,
-        zoom: INITIAL_LOCATION_ZOOM,
-      }),
-    });
-  }
-
   get flyToOptions() {
     return {
       center: [this.mapView.longitude, this.mapView.latitude] as [
@@ -320,7 +324,11 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div data-test-map-container class="relative h-full w-full">
+    <div
+      data-test-map-container
+      class="relative h-full w-full"
+      {{trackRouting this.router this.setRouting}}
+    >
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
