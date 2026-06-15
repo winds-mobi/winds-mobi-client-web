@@ -5,6 +5,7 @@ import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-ref
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
+import NavbarRefreshControl from './refresh-control';
 import NavbarMenuDesktop from './menu/desktop';
 import NavbarMenuMobile from './menu/mobile';
 
@@ -26,23 +27,18 @@ export default class Navbar extends Component<NavbarSignature> {
       {{activateMapRefresh this.mapRefresh}}
     >
       <div class="px-2.5">
-        <div class="flex h-16 items-center gap-3">
+        <div class="flex h-16 items-center gap-2 md:gap-3">
           <NavbarLogo />
-          <div class="min-w-0 flex-1 md:flex md:justify-center">
-            <div
-              class="min-w-0 w-full md:inline-flex md:max-w-[min(48rem,70vw)] md:items-center md:gap-1 md:rounded-full md:bg-slate-100 md:p-1 md:shadow-inner md:shadow-white/80"
-            >
-              <div class="min-w-0 flex-1 md:max-w-[min(24rem,35vw)]">
-                <NavbarSearch data-test-navbar-search="navbar" />
-              </div>
 
-              <NavbarMenuDesktop />
-            </div>
+          <div class="min-w-0 flex-1 md:max-w-sm">
+            <NavbarSearch data-test-navbar-search="navbar" />
           </div>
 
-          <div class="md:hidden">
-            <NavbarMenuMobile />
-          </div>
+          <NavbarMenuDesktop />
+
+          <NavbarRefreshControl />
+
+          <NavbarMenuMobile />
         </div>
       </div>
     </nav>

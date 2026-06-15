@@ -7,7 +7,6 @@ import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
-import NavbarRefreshControl from '../refresh-control';
 import { NAVBAR_MENU_ITEMS } from './items';
 
 export interface NavbarMenuMobileSignature {
@@ -75,8 +74,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
                   <span>{{t item.labelKey}}</span>
                 </LinkTo>
               {{/each}}
-
-              <NavbarRefreshControl @appearance="mobile" />
             </div>
           </drawer.Body>
         </Drawer>

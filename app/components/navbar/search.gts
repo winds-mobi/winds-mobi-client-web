@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { fn, hash } from '@ember/helper';
+import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
@@ -216,10 +216,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   }
 
   <template>
-    <div
-      ...attributes
-      class="w-full rounded-full border border-slate-200 bg-slate-50/95 p-1 shadow-sm shadow-slate-900/8 md:border-0 md:bg-transparent md:p-0 md:shadow-none"
-    >
+    <div ...attributes class="w-full">
       <Popover
         @isOpen={{this.isPopoverOpen}}
         @onOpenChange={{this.handleOpenChange}}
@@ -236,13 +233,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
             data-test-navbar-search-input
             name="station-search"
             placeholder={{t "navigation.search.placeholder"}}
-            @classes={{hash
-              base="border-0 bg-transparent shadow-none"
-              innerContainer="rounded-full bg-transparent"
-              input="h-8 bg-transparent px-0 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-0"
-              startContent="pl-2.5 text-slate-400"
-              endContent="pr-1.5 text-slate-400"
-            }}
             @onInput={{this.handleInput}}
             @size="sm"
             @type="search"
