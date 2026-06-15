@@ -41,7 +41,7 @@ const defaultOptions: ConstrainedRequestOptions = {
   },
 };
 
-const mapStationQueryKeys = [
+const summaryStationQueryKeys = [
   'short',
   'loc',
   'status',
@@ -111,7 +111,7 @@ function mapQuery<T>(
     type,
     {
       'is-highest-duplicates-rating': true,
-      keys: [...mapStationQueryKeys],
+      keys: [...summaryStationQueryKeys],
       limit: 470,
       'within-pt1-lat': bounds.northEast[1],
       'within-pt1-lon': bounds.northEast[0],
@@ -141,4 +141,22 @@ function nearbyQuery<T>(
   );
 }
 
-export { findRecord, mapQuery, nearbyQuery, query };
+function searchQuery<T>(
+  type: string,
+  search: string,
+  limit = 8,
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      'is-highest-duplicates-rating': true,
+      keys: [...summaryStationQueryKeys],
+      limit,
+      search: search.trim(),
+    },
+    options
+  );
+}
+
+export { findRecord, mapQuery, nearbyQuery, query, searchQuery };

@@ -54,9 +54,9 @@ export default class Polar extends Component<PolarSignature> {
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
         },
-        distance: '76%',
+        distance: '86%',
         style: {
-          fontSize: '9px',
+          fontSize: '10px',
         },
       },
     },
@@ -101,9 +101,9 @@ export default class Polar extends Component<PolarSignature> {
             },
             xAxis: {
               labels: {
-                distance: '68%',
+                distance: '78%',
                 style: {
-                  fontSize: '7px',
+                  fontSize: '8px',
                 },
               },
             },

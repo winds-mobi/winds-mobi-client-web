@@ -8,15 +8,20 @@ const STATION_ARROW_PATH =
   'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
-const MARKER_STROKE_WIDTH = '16';
+// The arrow carries two readings as a double outline: the gusts colour is the
+// visible outline, drawn over a slightly wider black stroke. SVG strokes are
+// single-valued and centred, so the path is rendered twice in the same rotation
+// group — black underneath, gusts on top — leaving a thin black rim beyond the
+// gusts ring for contrast against the map.
+const MARKER_CONTRAST_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
+const MARKER_CONTRAST_OUTLINE_WIDTH = '32';
+const MARKER_GUSTS_OUTLINE_WIDTH = '16';
 
 export interface MapStationMarkerSignature {
   Args: {
+    isSelected?: boolean;
     onSelect: (stationId: string) => void;
     station: Station;
-  };
-  Blocks: {
-    default: [];
   };
   Element: HTMLButtonElement;
 }
@@ -40,12 +45,22 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return this.colourForWindReading(this.args.station.last.speed);
   }
 
-  get markerOutlineColor() {
+  get gustsColor() {
     return this.colourForWindReading(this.args.station.last.gusts);
   }
 
   get rotationTransform() {
     return `rotate(${this.args.station.last.direction} -80 100)`;
+  }
+
+  get buttonClass() {
+    const base =
+      'block cursor-pointer rounded-full p-1 transition focus:outline-none';
+
+    // Selected: a grey disc + ring framing the arrow so it stands out on the map.
+    return this.args.isSelected
+      ? `${base} bg-slate-400/40 ring-2 ring-slate-500/70`
+      : base;
   }
 
   @action
@@ -57,26 +72,36 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     <button
       type="button"
       aria-label={{@station.name}}
-      class="cursor-pointer rounded-full p-0.5 focus:outline-none"
+      class={{this.buttonClass}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
       {{on "click" this.handleSelect}}
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible drop-shadow-[0_3px_6px_rgba(15,23,42,0.28)]"
+        class="h-10 w-10 overflow-visible"
         viewBox="-150 -70 140 340"
       >
-        <path
-          d={{this.arrowPath}}
-          fill={{this.markerColor}}
-          stroke={{this.markerOutlineColor}}
-          stroke-alignment="outer"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width={{MARKER_STROKE_WIDTH}}
-          transform={{this.rotationTransform}}
-        />
+        <g transform={{this.rotationTransform}}>
+          {{! Black under-stroke: a thin rim peeks beyond the gusts outline. }}
+          <path
+            d={{this.arrowPath}}
+            fill={{this.markerColor}}
+            stroke={{MARKER_CONTRAST_OUTLINE_COLOUR}}
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={{MARKER_CONTRAST_OUTLINE_WIDTH}}
+          />
+          {{! Gusts-coloured outline on top, plus the wind-speed fill. }}
+          <path
+            d={{this.arrowPath}}
+            fill={{this.markerColor}}
+            stroke={{this.gustsColor}}
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={{MARKER_GUSTS_OUTLINE_WIDTH}}
+          />
+        </g>
       </svg>
     </button>
   </template>

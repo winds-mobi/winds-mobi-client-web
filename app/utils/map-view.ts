@@ -1,8 +1,14 @@
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 
-export const DEFAULT_MAP_LNG = 7.82667;
-export const DEFAULT_MAP_LAT = 46.69299;
-export const DEFAULT_MAP_ZOOM = 10.94;
+// Whole-Switzerland overview: the default when no view is in the URL and the
+// user's location is unavailable (see issue #32).
+export const DEFAULT_MAP_LNG = 8.2275;
+export const DEFAULT_MAP_LAT = 46.8011;
+export const DEFAULT_MAP_ZOOM = 7;
+
+// Zoom applied when centering the map on the user's location — a comfortable
+// regional area around them rather than a wide country-level or street-level view.
+export const INITIAL_LOCATION_ZOOM = 11;
 export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 
@@ -56,6 +62,23 @@ export function normalizeMapView(view: MapView): MapView {
     latitude: round(view.latitude, COORDINATE_PRECISION),
     zoom: round(view.zoom, ZOOM_PRECISION),
   };
+}
+
+function snap(value: number, step: number) {
+  return Math.round(value / step) * step;
+}
+
+// Snap a view to the station-refetch thresholds so that small map movements
+// resolve to the same value. The map request is derived from this, which lets
+// sub-threshold panning update the URL without triggering a refetch — keeping
+// station fetching declaratively driven by the routed view instead of imperative
+// viewport bookkeeping.
+export function quantizeMapViewForRequest(view: MapView): MapView {
+  return normalizeMapView({
+    longitude: snap(view.longitude, MAP_REQUEST_COORDINATE_THRESHOLD),
+    latitude: snap(view.latitude, MAP_REQUEST_COORDINATE_THRESHOLD),
+    zoom: snap(view.zoom, MAP_REQUEST_ZOOM_THRESHOLD),
+  });
 }
 
 export function normalizeMapBounds(bounds: MapBounds): MapBounds {

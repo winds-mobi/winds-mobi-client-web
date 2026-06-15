@@ -4,6 +4,8 @@ import { service } from '@ember/service';
 import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import NavbarLogo from './logo';
+import NavbarSearch from './search';
+import NavbarRefreshControl from './refresh-control';
 import NavbarMenuDesktop from './menu/desktop';
 import NavbarMenuMobile from './menu/mobile';
 
@@ -25,14 +27,22 @@ export default class Navbar extends Component<NavbarSignature> {
       {{activateMapRefresh this.mapRefresh}}
     >
       <div class="px-2.5">
-        <div class="flex h-16 items-center gap-3">
+        <div class="flex h-16 items-center gap-2 md:gap-3">
           <NavbarLogo />
 
-          <NavbarMenuDesktop />
-
-          <div class="ml-auto md:hidden">
-            <NavbarMenuMobile />
+          {{! Desktop: navigation centered between the logo and the right group. }}
+          <div class="hidden md:flex md:flex-1 md:justify-center">
+            <NavbarMenuDesktop />
           </div>
+
+          {{! Search: full width on mobile, compact and right-aligned on desktop. }}
+          <div class="min-w-0 flex-1 md:w-40 md:flex-none">
+            <NavbarSearch data-test-navbar-search="navbar" />
+          </div>
+
+          <NavbarRefreshControl />
+
+          <NavbarMenuMobile />
         </div>
       </div>
     </nav>

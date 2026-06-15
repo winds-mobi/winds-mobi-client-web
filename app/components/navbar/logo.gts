@@ -20,7 +20,7 @@ import {
   >
     <img class="h-8 w-auto" src="/logo.svg" alt={{t "application.name"}} />
     <span
-      class="hidden whitespace-nowrap text-base font-black tracking-[0.01em] text-slate-950 sm:inline"
+      class="hidden whitespace-nowrap text-base font-semibold text-slate-800 sm:inline"
     >
       {{t "application.name"}}
     </span>
