@@ -1,14 +1,16 @@
 # Changelog
 
-## v0.0.23 - 2026-04-05
+## v0.1.0 - 2026-04-05
 
 ### Added
 
-- Added a shared station search in the navbar and mobile menu drawer so you can quickly find a station by name from anywhere in the app and jump straight to its map detail.
+- Added a shared station search directly in the navbar so you can quickly find a station by name on both mobile and desktop and jump straight to its map detail.
 
 ### Changed
 
-- Updated station search selection so choosing a result recenters the map on that station at zoom level `10`, making the jump more consistent and easier to orient.
+- Updated station search results to show the station name together with distance from you and the current wind speed, making it easier to choose the right match before opening it.
+- Updated station search selection so choosing a result recenters the map on that station at zoom level `10` with a smooth animated map move, while keeping the resulting map position in the URL for reloads and sharing.
+- Refined the `Last hour` wind-direction chart so the compass labels sit in a more natural position around the graph instead of feeling too tight to the center.
 
 ## v0.0.22 - 2026-04-04
 

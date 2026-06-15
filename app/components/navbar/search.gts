@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { fn } from '@ember/helper';
+import { fn, hash } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
@@ -11,6 +11,7 @@ import { rawTimeout, task } from 'ember-concurrency';
 import { Input as FrontileInput } from '@frontile/forms';
 import { Popover } from '@frontile/overlays';
 import { t } from 'ember-intl';
+import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
 import { serializeMapView } from 'winds-mobi-client-web/utils/map-view';
@@ -218,7 +219,10 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   }
 
   <template>
-    <div ...attributes class="w-full">
+    <div
+      ...attributes
+      class="w-full rounded-full border border-slate-200 bg-slate-50/95 p-1 shadow-sm shadow-slate-900/8 md:border-0 md:bg-transparent md:p-0 md:shadow-none"
+    >
       <Popover
         @isOpen={{this.isPopoverOpen}}
         @onOpenChange={{this.handleOpenChange}}
@@ -233,12 +237,24 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
             data-test-navbar-search-input
             name="station-search"
             placeholder={{t "navigation.search.placeholder"}}
+            @classes={{hash
+              base="border-0 bg-transparent shadow-none"
+              innerContainer="rounded-full bg-transparent"
+              input="h-8 bg-transparent px-0 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-0"
+              startContent="pl-2.5 text-slate-400"
+              endContent="pr-1.5 text-slate-400"
+            }}
             @onInput={{this.handleInput}}
+            @size="sm"
             @type="search"
             @value={{this.query}}
             {{on "focus" this.handleFocus}}
             {{on "keydown" this.handleKeydown}}
-          />
+          >
+            <:startContent>
+              <Binoculars @size={{14}} />
+            </:startContent>
+          </FrontileInput>
         </div>
 
         {{#if this.isPopoverOpen}}
@@ -252,7 +268,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
             @size="trigger"
           >
             <div
-              class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/12"
+              class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/12"
             >
               {{#if this.isLoading}}
                 <p
