@@ -11,6 +11,11 @@ services:
     # side by side without competing for the host's single :4200.
     expose:
       - 4200
+    environment:
+      # The container is served over OrbStack's HTTPS domain, so Vite's HMR client
+      # must use wss (not ws) to avoid the page blocking insecure WebSocket content.
+      # `hmrClientConfig()` in vite.config.mjs derives the protocol/port from this.
+      - APP_URL=https://ui.winds-mobi-client-web.orb.local
     volumes:
       - .:/app
       - /app/node_modules
