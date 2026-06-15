@@ -1,8 +1,14 @@
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 
-export const DEFAULT_MAP_LNG = 7.82667;
-export const DEFAULT_MAP_LAT = 46.69299;
-export const DEFAULT_MAP_ZOOM = 10.94;
+// Whole-Switzerland overview: the default when no view is in the URL and the
+// user's location is unavailable (see issue #32).
+export const DEFAULT_MAP_LNG = 8.2275;
+export const DEFAULT_MAP_LAT = 46.8011;
+export const DEFAULT_MAP_ZOOM = 7;
+
+// Zoom applied when centering the map on the user's location at startup — a
+// large area around them rather than a street-level view.
+export const INITIAL_LOCATION_ZOOM = 10;
 export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 

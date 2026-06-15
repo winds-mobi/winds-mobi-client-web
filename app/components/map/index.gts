@@ -31,8 +31,12 @@ import {
   responseData,
 } from 'winds-mobi-client-web/utils/request-response';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
+import bindGeolocateEvents, {
+  type GeolocateEventHandlers,
+} from 'winds-mobi-client-web/modifiers/bind-geolocate-events';
 import {
   approximateMapBoundsFromView,
+  INITIAL_LOCATION_ZOOM,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
@@ -108,7 +112,6 @@ export default class Map extends Component<MapSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   @tracked stations: Station[] = [];
-  #requestVersion = 0;
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -116,11 +119,21 @@ export default class Map extends Component<MapSignature> {
   });
   private geolocateControl = new GeolocateControl({
     positionOptions: DEFAULT_POSITION_OPTIONS,
+    fitBoundsOptions: { maxZoom: INITIAL_LOCATION_ZOOM },
     showAccuracyCircle: true,
     showUserLocation: true,
     trackUserLocation: true,
   });
-  #didBindGeolocateEvents = false;
+
+  // Stable handler object for the `bindGeolocateEvents` modifier.
+  geolocateHandlers: GeolocateEventHandlers = {
+    onStart: () => this.nearbyLocation.beginLocationRequest(),
+    onGeolocate: (position) => {
+      this.nearbyLocation.updateFromPosition(position);
+      this.centerOnInitialLocation(position);
+    },
+    onError: (error) => this.nearbyLocation.updateFromError(error),
+  };
 
   private terrainControl =
     config.environment === 'test'
@@ -158,10 +171,12 @@ export default class Map extends Component<MapSignature> {
 
     const request =
       this.requestStore.request<RequestResponse<Station[]>>(options);
-    const requestVersion = ++this.#requestVersion;
 
     void request.then((result) => {
-      if (this.#requestVersion !== requestVersion) {
+      // Ignore a stale response: if the routed view changed while this request
+      // was in flight, `this.request` is now a different (cached) Future and its
+      // own result will set the stations.
+      if (this.request !== request) {
         return;
       }
 
@@ -212,13 +227,19 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
+  // True on a fresh load where no view is present in the URL, so the routed view
+  // still equals the whole-Switzerland default.
+  get isInitialDefaultView() {
+    return mapViewsEqual(this.mapView, parseMapView());
+  }
+
   @action
   handleMapLoaded() {
-    // The initial request viewport is already derived from the routed map view
-    // (see the `request` getter fallback); writing `requestedViewport` here would
-    // mutate tracked state that the same render already read. Real bounds are
-    // captured on the first `moveend` instead.
-    this.bindGeolocateEvents();
+    // On a fresh load, ask the map's own geolocation for the user's position and
+    // center on it; otherwise the whole-Switzerland default view stays (#32).
+    if (this.isInitialDefaultView && config.environment !== 'test') {
+      this.geolocateControl.trigger();
+    }
   }
 
   @action
@@ -254,21 +275,23 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
-  private bindGeolocateEvents() {
-    if (this.#didBindGeolocateEvents) {
+  // Center the routed view on the user the first time geolocation resolves after
+  // a fresh load. Guarded by the derived `isInitialDefaultView`: once we center,
+  // the routed view is no longer the default, so later tracking updates and
+  // manual geolocations don't re-center. Runs from the async geolocate event
+  // (post-render), so updating the URL here is safe; everything else (fly-to,
+  // station request) follows the routed view.
+  private centerOnInitialLocation(position: GeolocationPosition) {
+    if (!this.isInitialDefaultView) {
       return;
     }
 
-    this.#didBindGeolocateEvents = true;
-
-    this.geolocateControl.on('trackuserlocationstart', () => {
-      this.nearbyLocation.beginLocationRequest();
-    });
-    this.geolocateControl.on('geolocate', (event) => {
-      this.nearbyLocation.updateFromPosition(event.data);
-    });
-    this.geolocateControl.on('error', (event) => {
-      this.nearbyLocation.updateFromError(event.data);
+    this.router.replaceWith({
+      queryParams: serializeMapView({
+        longitude: position.coords.longitude,
+        latitude: position.coords.latitude,
+        zoom: INITIAL_LOCATION_ZOOM,
+      }),
     });
   }
 
@@ -283,7 +306,11 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div data-test-map-container class="relative h-full w-full">
+    <div
+      data-test-map-container
+      class="relative h-full w-full"
+      {{bindGeolocateEvents this.geolocateControl this.geolocateHandlers}}
+    >
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>

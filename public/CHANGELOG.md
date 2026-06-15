@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0 - 2026-06-15
+
+### Changed
+
+- The map now starts centered on your location when it is available, showing a large area around you; when location is unavailable it opens on the whole of Switzerland instead of always jumping to a fixed region around Interlaken on a new tab or refresh.
+
 ## v0.1.0 - 2026-04-05
 
 ### Added
