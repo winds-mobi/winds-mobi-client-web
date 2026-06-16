@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Stations on a peak now stand out: map markers use a distinct arrow shape, and the altitude line in the station detail and nearby views shows a mountain icon (a location pin for other stations).
+
 ## v0.2.0 - 2026-06-15
 
 ### Changed

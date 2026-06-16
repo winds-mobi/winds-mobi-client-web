@@ -4,8 +4,19 @@ import { on } from '@ember/modifier';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
+// Two whole-marker shapes that share a circular hub: regular stations get the
+// rounded-shoulder arrow; peaks get the v1 "star"-shouldered arrow so they read
+// as a different shape on the map (echoing the round/triangle distinction of the
+// v1 map). Each shape has its own viewBox; both are 340 units tall so they render
+// at the same on-screen size, and each rotates around its own viewBox centre.
 const STATION_ARROW_PATH =
   'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
+const STATION_ARROW_VIEW_BOX = '-150 -70 140 340';
+const STATION_ARROW_ROTATION_CENTRE = '-80 100';
+const STATION_PEAK_ARROW_PATH =
+  'M20,67.4L88.3-51H20v-99h-40v99h-68.3L-20,67.4V115l-50-25L0,190L70,90l-50,25V67.4z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z';
+const STATION_PEAK_ARROW_VIEW_BOX = '-89 -150 178 340';
+const STATION_PEAK_ARROW_ROTATION_CENTRE = '0 20';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 // The arrow carries two readings as a double outline: the gusts colour is the
@@ -27,7 +38,17 @@ export interface MapStationMarkerSignature {
 }
 
 export default class MapStationMarker extends Component<MapStationMarkerSignature> {
-  arrowPath = STATION_ARROW_PATH;
+  get arrowPath() {
+    return this.args.station.isPeak
+      ? STATION_PEAK_ARROW_PATH
+      : STATION_ARROW_PATH;
+  }
+
+  get viewBox() {
+    return this.args.station.isPeak
+      ? STATION_PEAK_ARROW_VIEW_BOX
+      : STATION_ARROW_VIEW_BOX;
+  }
 
   private colourForWindReading(speed: number) {
     const { timestamp } = this.args.station.last;
@@ -50,7 +71,11 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   }
 
   get rotationTransform() {
-    return `rotate(${this.args.station.last.direction} -80 100)`;
+    const centre = this.args.station.isPeak
+      ? STATION_PEAK_ARROW_ROTATION_CENTRE
+      : STATION_ARROW_ROTATION_CENTRE;
+
+    return `rotate(${this.args.station.last.direction} ${centre})`;
   }
 
   get buttonClass() {
@@ -80,7 +105,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       <svg
         aria-hidden="true"
         class="h-10 w-10 overflow-visible"
-        viewBox="-150 -70 140 340"
+        viewBox={{this.viewBox}}
       >
         <g transform={{this.rotationTransform}}>
           {{! Black under-stroke: a thin rim peeks beyond the gusts outline. }}
