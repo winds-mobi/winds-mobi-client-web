@@ -144,6 +144,7 @@ function nearbyQuery<T>(
 function searchQuery<T>(
   type: string,
   search: string,
+  near?: { latitude: number; longitude: number },
   limit = 8,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
@@ -154,6 +155,10 @@ function searchQuery<T>(
       keys: [...summaryStationQueryKeys],
       limit,
       search: search.trim(),
+      ...(near && {
+        'near-lat': near.latitude,
+        'near-lon': near.longitude,
+      }),
     },
     options
   );
