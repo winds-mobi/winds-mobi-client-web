@@ -4,6 +4,7 @@ import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
 import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
+import MapPin from 'ember-phosphor-icons/components/ph-map-pin';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
@@ -31,6 +32,12 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     );
   }
 
+  // Peaks (free-flight take-off sites) get the mountain glyph; other stations
+  // get a plain location pin, mirroring the distinct map-marker shape.
+  get altitudeIcon() {
+    return this.args.station.isPeak ? Mountains : MapPin;
+  }
+
   get lastReadingRelativeSeconds() {
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
@@ -50,7 +57,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
         class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500"
       >
         <StationMetaItem
-          @icon={{Mountains}}
+          @icon={{this.altitudeIcon}}
           @label={{t "station.meta.altitude"}}
         >
           <span>{{formatNumber @station.altitude maximumFractionDigits=0}}
