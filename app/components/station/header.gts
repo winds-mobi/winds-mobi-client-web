@@ -48,7 +48,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
       </h2>
 
       <dl
-        class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500"
+        class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-medium text-slate-500"
       >
         {{! Peaks (free-flight take-off sites) get the mountain glyph; other }}
         {{! stations get a plain location pin, mirroring the map-marker shape. }}

@@ -85,6 +85,9 @@ export default class StationAirContent extends Component<StationAirContentSignat
           },
           labels: {
             format: '{value:.0f}°C',
+            style: {
+              fontSize: '12px',
+            },
           },
           maxPadding: 0.04,
           minPadding: 0.02,
@@ -101,6 +104,9 @@ export default class StationAirContent extends Component<StationAirContentSignat
           },
           labels: {
             format: '{value:.0f}%',
+            style: {
+              fontSize: '12px',
+            },
           },
           maxPadding: 0.04,
           minPadding: 0.02,

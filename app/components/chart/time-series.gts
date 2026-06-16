@@ -98,17 +98,17 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       ],
       buttonSpacing: 4,
       buttonTheme: {
-        height: 22,
-        padding: 2,
+        height: 24,
+        padding: 3,
         r: 6,
         style: {
-          fontSize: '10px',
+          fontSize: '12px',
           fontWeight: '600',
         },
       },
       selected: 4,
       labelStyle: {
-        fontSize: '10px',
+        fontSize: '12px',
       },
     },
     title: {
@@ -120,8 +120,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       crosshair: true,
       labels: {
         style: {
-          fontSize: '10px',
-          lineHeight: '12px',
+          fontSize: '12px',
+          lineHeight: '14px',
         },
         useHTML: true,
         formatter: function (this: {
@@ -170,8 +170,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
             xAxis: {
               labels: {
                 style: {
-                  fontSize: '9px',
-                  lineHeight: '11px',
+                  fontSize: '11px',
+                  lineHeight: '13px',
                 },
               },
             },
@@ -185,8 +185,8 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
             xAxis: {
               labels: {
                 style: {
-                  fontSize: '8px',
-                  lineHeight: '10px',
+                  fontSize: '10px',
+                  lineHeight: '12px',
                 },
               },
             },

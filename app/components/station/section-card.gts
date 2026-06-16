@@ -15,7 +15,7 @@ export interface StationSectionCardSignature {
     ...attributes
   >
     <p
-      class="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 md:text-[11px] md:tracking-[0.16em]
+      class="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 md:text-xs md:tracking-[0.14em]
         {{if @titleClass @titleClass}}"
     >
       {{@title}}
