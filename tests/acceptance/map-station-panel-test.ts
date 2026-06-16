@@ -395,4 +395,27 @@ module('Acceptance | map station panel', function (hooks) {
         initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
     );
   });
+
+  test('it shows the selected station as the browser favicon and restores it on close', async function (assert) {
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
+
+    assert
+      .dom("link[type='image/svg+xml']", document.head)
+      .exists('a favicon link is rendered into the document head')
+      .hasAttribute(
+        'href',
+        /^data:image\/svg\+xml,/,
+        'the favicon is an inline svg data uri'
+      )
+      .hasAttribute(
+        'href',
+        /rotate\(240/,
+        "the favicon arrow points to the station's wind direction"
+      );
+
+    await click('[data-test-station-close]');
+    await waitUntil(() => currentURL().startsWith('/map?'));
+
+    assert.dom("link[type='image/svg+xml']", document.head).doesNotExist();
+  });
 });
