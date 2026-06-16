@@ -32,12 +32,6 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     );
   }
 
-  // Peaks (free-flight take-off sites) get the mountain glyph; other stations
-  // get a plain location pin, mirroring the distinct map-marker shape.
-  get altitudeIcon() {
-    return this.args.station.isPeak ? Mountains : MapPin;
-  }
-
   get lastReadingRelativeSeconds() {
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
@@ -56,8 +50,10 @@ export default class StationHeader extends Component<StationHeaderSignature> {
       <dl
         class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-500"
       >
+        {{! Peaks (free-flight take-off sites) get the mountain glyph; other }}
+        {{! stations get a plain location pin, mirroring the map-marker shape. }}
         <StationMetaItem
-          @icon={{this.altitudeIcon}}
+          @icon={{if @station.isPeak Mountains MapPin}}
           @label={{t "station.meta.altitude"}}
         >
           <span>{{formatNumber @station.altitude maximumFractionDigits=0}}
