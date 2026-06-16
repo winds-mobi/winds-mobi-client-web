@@ -13,6 +13,7 @@ import { Popover } from '@frontile/overlays';
 import { t } from 'ember-intl';
 import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
 import { serializeMapView } from 'winds-mobi-client-web/utils/map-view';
 import {
@@ -32,6 +33,8 @@ const SEARCH_RESULT_ZOOM = 10;
 
 export default class NavbarSearch extends Component<NavbarSearchSignature> {
   @service declare router: RouterService;
+  @service('nearby-location')
+  declare nearbyLocation: NearbyLocationService;
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
 
@@ -58,7 +61,11 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
     }
 
     return this.store.request<RequestResponse<Station[]>>(
-      searchQuery<Station>('station', this.settledQuery)
+      searchQuery<Station>(
+        'station',
+        this.settledQuery,
+        this.nearbyLocation.coordinates
+      )
     );
   }
 
