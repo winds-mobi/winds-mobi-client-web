@@ -5,6 +5,7 @@
 ### Changed
 
 - Station search now favors stations near you when your location is already known, so the closest matches rise to the top instead of results being ranked by name alone (your location is never requested just to search).
+- Made the station detail panel easier to read, especially on mobile: larger values and labels in the summary and last-hour cards, bigger compass labels (N, NE, E…) on the wind-direction chart, and larger axis and range-selector text in the wind and air charts.
 
 ## v0.3.0 - 2026-06-16
 

@@ -92,13 +92,13 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
         ...attributes
       >
         <dt
-          class="text-[9px] font-medium leading-tight text-slate-500 md:text-[11px]
+          class="text-[11px] font-medium leading-tight text-slate-500 md:text-xs
             {{if @labelClass @labelClass}}"
         >
           {{@label}}
         </dt>
         <dd
-          class="mt-0.5 text-[13px] font-semibold leading-tight md:mt-1.5 md:text-base
+          class="mt-0.5 text-base font-semibold leading-tight md:mt-1.5 md:text-lg
             {{if @valueClass @valueClass}}"
         >
           {{this.formattedValue}}
