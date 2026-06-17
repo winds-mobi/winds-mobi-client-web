@@ -10,11 +10,11 @@ import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 // by the on-map marker ([app/components/map/station-marker.gts]) and the dynamic
 // browser favicon ([app/utils/station-favicon.ts]).
 export const STATION_ARROW_PATH =
-  'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
+  'M -46,150 C -24,140 -10,114 -10,80 C -10,46 -24,20 -46,10 L -46,-70 L -114,-70 L -114,10 C -136,20 -150,46 -150,80 C -150,114 -136,140 -114,150 L -114,178 L -150,168 L -80,270 L -10,168 L -46,178 Z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
 export const STATION_ARROW_VIEW_BOX = '-150 -70 140 340';
 export const STATION_ARROW_ROTATION_CENTRE = '-80 100';
 export const STATION_PEAK_ARROW_PATH =
-  'M20,67.4L88.3-51H20v-99h-40v99h-68.3L-20,67.4V115l-50-25L0,190L70,90l-50,25V67.4z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z';
+  'M30,67.4L88.3-51H30V-150H-30V-51H-88.3L-30,67.4V116L-82,86L0,190L82,86L30,116V67.4Z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z';
 export const STATION_PEAK_ARROW_VIEW_BOX = '-89 -150 178 340';
 export const STATION_PEAK_ARROW_ROTATION_CENTRE = '0 20';
 
