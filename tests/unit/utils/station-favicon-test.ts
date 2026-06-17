@@ -48,8 +48,8 @@ module('Unit | Utility | station-favicon', function () {
     );
     assert.strictEqual(
       svg.match(/<path/g)?.length,
-      2,
-      'it draws the arrow as an outline stroke plus an inflated body stroke'
+      1,
+      'it draws the arrow as a single path'
     );
     assert.true(
       svg.includes('stroke="rgb(0, 0, 0)"'),

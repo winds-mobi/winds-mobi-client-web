@@ -5,7 +5,6 @@ import { on } from '@ember/modifier';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   colourForWindReading,
-  MARKER_BODY_WIDTH,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   scaleForReadingAge,
@@ -121,23 +120,15 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
               fill={{this.gustsColor}}
             />
           {{/if}}
-          {{! Black outline stroke; the wind-colour body on top leaves it as a hairline rim. }}
+          {{! Plain black hairline outline, grown outward via paint-order. }}
           <path
             d={{this.arrowPath}}
-            fill="none"
+            fill={{this.markerColor}}
+            paint-order="stroke"
             stroke={{MARKER_PLAIN_OUTLINE_COLOUR}}
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width={{MARKER_OUTLINE_WIDTH}}
-          />
-          {{! Wind-colour body, inflated by its own stroke for a chubby silhouette. }}
-          <path
-            d={{this.arrowPath}}
-            fill={{this.markerColor}}
-            stroke={{this.markerColor}}
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width={{MARKER_BODY_WIDTH}}
           />
         </g>
       </svg>

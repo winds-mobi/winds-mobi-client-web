@@ -28,18 +28,14 @@ export const STATION_PEAK_ARROW_FAVICON_VIEW_BOX = '-220 -200 440 440';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 
-// The arrow shape is inflated to read chubby and friendly rather than thin and
-// spiky. It is drawn as two stacked strokes of the *same* path, with round joins
-// and caps so the silhouette swells out and rounds off:
-//   1. a black outline stroke (MARKER_OUTLINE_WIDTH), then
-//   2. a slightly narrower wind-colour stroke (MARKER_BODY_WIDTH) on top.
-// The wind-colour stroke fattens the body outward; the black stroke peeking
-// beyond it by `(MARKER_OUTLINE_WIDTH - MARKER_BODY_WIDTH) / 2` is the hairline
-// outline. Both strokes are centred on the path, so the same swelling applies to
-// the hub hole, where it frames the gusts disc with a matching black hairline.
+// Every arrow always carries the same plain black hairline outline; it just
+// separates the marker from the map and never changes. `paint-order="stroke"`
+// paints the stroke first and the fill on top, so the fill covers the inner
+// half of the stroke and only its outer half shows — the outline grows outward
+// instead of eating into the arrow body. The puffy, chubby look lives in the
+// path geometry itself (see STATION_ARROW_PATH), not in this outline.
 export const MARKER_PLAIN_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
-export const MARKER_OUTLINE_WIDTH = '44';
-export const MARKER_BODY_WIDTH = '32';
+export const MARKER_OUTLINE_WIDTH = '12';
 
 // The hub baked into each arrow path is a hole (the inner circle winds opposite
 // the body, so the non-zero fill rule punches it out). The gust reading is shown

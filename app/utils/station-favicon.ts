@@ -1,6 +1,5 @@
 import {
   colourForWindReading,
-  MARKER_BODY_WIDTH,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   STATION_ARROW_HUB_RADIUS,
@@ -49,8 +48,7 @@ export function stationFaviconDataUri(station: Station): string {
     `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.faviconViewBox}">` +
     `<g transform="rotate(${direction} ${geometry.rotationCentre})">` +
     hub +
-    `<path d="${geometry.path}" fill="none" stroke="${MARKER_PLAIN_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
-    `<path d="${geometry.path}" fill="${fill}" stroke="${fill}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_BODY_WIDTH}"/>` +
+    `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${MARKER_PLAIN_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
     `</g></svg>`;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;

@@ -1,7 +1,6 @@
 import Component from '@glimmer/component';
 import {
   colourForWindReading,
-  MARKER_BODY_WIDTH,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   STATION_ARROW_HUB_RADIUS,
@@ -74,19 +73,12 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
         {{/if}}
         <path
           d={{this.geometry.path}}
-          fill="none"
+          fill={{this.markerColor}}
+          paint-order="stroke"
           stroke={{MARKER_PLAIN_OUTLINE_COLOUR}}
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width={{MARKER_OUTLINE_WIDTH}}
-        />
-        <path
-          d={{this.geometry.path}}
-          fill={{this.markerColor}}
-          stroke={{this.markerColor}}
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width={{MARKER_BODY_WIDTH}}
         />
       </g>
     </svg>
