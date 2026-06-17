@@ -9,6 +9,10 @@ export const DEFAULT_MAP_ZOOM = 7;
 // Zoom applied when centering the map on the user's location — a comfortable
 // regional area around them rather than a wide country-level or street-level view.
 export const INITIAL_LOCATION_ZOOM = 11;
+
+// Zoom applied when focusing a single station — selecting a search result or
+// clicking a station name (see issue #47). Keep these paths consistent.
+export const STATION_FOCUS_ZOOM = 10;
 export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 

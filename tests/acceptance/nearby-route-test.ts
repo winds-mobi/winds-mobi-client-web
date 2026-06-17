@@ -1,6 +1,13 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, findAll, visit, waitUntil } from '@ember/test-helpers';
+import {
+  click,
+  currentURL,
+  findAll,
+  settled,
+  visit,
+  waitUntil,
+} from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
@@ -82,6 +89,18 @@ class FakeStoreService extends Service {
       return Promise.resolve({
         content: {
           data: HISTORY_FIXTURES,
+        },
+      });
+    }
+
+    const singleStation = STATION_FIXTURES.find((station) =>
+      url.includes(`/stations/${station.id}?`)
+    );
+
+    if (singleStation) {
+      return Promise.resolve({
+        content: {
+          data: singleStation,
         },
       });
     }
@@ -201,6 +220,26 @@ module('Acceptance | nearby route', function (hooks) {
     assert.dom(NEARBY_LOCATION_BUTTON_SELECTOR).doesNotExist();
     assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.true(countStationRequests(store.calls) > 0);
+  });
+
+  test('it opens the map zoomed to a station when its name is clicked', async function (assert) {
+    const nearbyLocation = this.owner.lookup(
+      'service:nearby-location'
+    ) as NearbyLocationService;
+
+    stubGrantedPermission(nearbyLocation);
+
+    await visit('/nearby');
+    await waitForNearbyStations();
+
+    await click(`${NEARBY_STATION_CARD_SELECTOR} [data-test-station-title]`);
+    await waitUntil(() => currentURL().startsWith('/map/holfuy-1804?'));
+    await settled();
+
+    const params = new URL(currentURL(), 'https://winds.mobi').searchParams;
+    assert.strictEqual(params.get('mapLat'), '46.521');
+    assert.strictEqual(params.get('mapLng'), '6.632');
+    assert.strictEqual(params.get('mapZoom'), '10');
   });
 
   test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {
