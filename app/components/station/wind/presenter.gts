@@ -67,6 +67,9 @@ export default class StationWindContent extends Component<StationWindContentSign
         },
         labels: {
           format: '{value:.0f} km/h',
+          style: {
+            fontSize: '12px',
+          },
         },
         maxPadding: 0.04,
         minPadding: 0.02,

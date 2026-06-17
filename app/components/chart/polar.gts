@@ -56,7 +56,7 @@ export default class Polar extends Component<PolarSignature> {
         },
         distance: '86%',
         style: {
-          fontSize: '10px',
+          fontSize: '11px',
         },
       },
     },
@@ -103,7 +103,7 @@ export default class Polar extends Component<PolarSignature> {
               labels: {
                 distance: '78%',
                 style: {
-                  fontSize: '8px',
+                  fontSize: '10px',
                 },
               },
             },
