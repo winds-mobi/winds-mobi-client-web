@@ -12,7 +12,7 @@ navigation:
   help: Help
   search:
     label: Search stations
-    placeholder: Search stations
+    placeholder: Search
     loading: Searching stations…
     empty: No stations found.
 
@@ -38,8 +38,6 @@ settings:
       so zooming or panning one moves the other. You can still unlink them per
       station.
   preview:
-    faviconStation: Station
-    faviconDefault: Default
     graphWind: Wind
     graphAir: Air
 
