@@ -71,15 +71,20 @@ export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
 // day-old stations (already greyed by `colourForWindReading`) faintly visible.
 export const MIN_MARKER_OPACITY = 0.25;
 
-// Each half-life the gap between the current opacity and the floor halves, so an
-// arrow stays near-opaque for the first few minutes and then fades faster. With
-// a 6-minute half-life this single, easy formula approximates the target curve:
-// ≈1.0 at <1 min, ≈0.67 at 5 min, ≈0.49 at 10 min, ≈0.27 (near the floor) at
-// 30 min — opaque when fresh, clearly faded once stale.
-const MARKER_OPACITY_HALF_LIFE = 6 * 60 * 1000;
+// Once a reading reaches this age it sits at the opacity floor; everything older
+// stays there. Readings fade along a cubic ease-in between fresh and this age.
+const MARKER_FULLY_FADED_AGE = 30 * 60 * 1000;
 
-// Opacity for a reading of the given age (epoch ms), decaying fresh→old toward
-// MIN_MARKER_OPACITY. Future or unknown timestamps are treated as fully fresh.
+// The fade follows `progress^EXPONENT`, so a higher exponent keeps the arrow
+// near-opaque early and concentrates the drop near the end. Cubic (3) holds the
+// first ~third of the window almost fully opaque then falls away quickly, giving
+// the target feel: ≈1.0 at 10 min, ≈0.78 at 20 min, dropping to the floor by 30.
+const MARKER_FADE_EXPONENT = 3;
+
+// Opacity for a reading of the given age (epoch ms): fully opaque when fresh,
+// holding near-opaque for the first several minutes and then dropping faster
+// toward MIN_MARKER_OPACITY as it nears MARKER_FULLY_FADED_AGE. Future or
+// unknown timestamps are treated as fully fresh.
 export function opacityForReadingAge(timestamp: number): number {
   if (!Number.isFinite(timestamp)) {
     return 1;
@@ -90,10 +95,9 @@ export function opacityForReadingAge(timestamp: number): number {
     return 1;
   }
 
-  const opacity =
-    MIN_MARKER_OPACITY +
-    (1 - MIN_MARKER_OPACITY) * 2 ** (-age / MARKER_OPACITY_HALF_LIFE);
-  return Math.max(MIN_MARKER_OPACITY, Math.min(1, opacity));
+  const progress = Math.min(1, age / MARKER_FULLY_FADED_AGE);
+  const fade = progress ** MARKER_FADE_EXPONENT;
+  return 1 - (1 - MIN_MARKER_OPACITY) * fade;
 }
 
 // A reading older than a day is drawn grey rather than in its wind-speed colour.

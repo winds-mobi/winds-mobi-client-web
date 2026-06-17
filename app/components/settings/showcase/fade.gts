@@ -9,12 +9,15 @@ export interface SettingsShowcaseFadeSignature {
   Element: HTMLDivElement;
 }
 
-// The same station shown at three reading ages. With the preference on, older
-// readings fade toward transparent exactly as the on-map markers do; with it
-// off every arrow stays fully opaque whatever its age.
+// Four sample readings spread across the fade window. With the preference on the
+// arrows fade fresh→old exactly as the on-map markers do — near-opaque for the
+// first ten minutes or so, then dropping faster toward thirty; with it off every
+// arrow stays fully opaque. They sit on a banded vertical gradient so the growing
+// transparency is obvious as the darker bands show through the faded arrows.
 const SAMPLES = [
   { label: 'now', ageMinutes: 0 },
   { label: '10 min', ageMinutes: 10 },
+  { label: '20 min', ageMinutes: 20 },
   { label: '30 min', ageMinutes: 30 },
 ];
 
@@ -29,23 +32,28 @@ export default class SettingsShowcaseFade extends Component<SettingsShowcaseFade
   }
 
   <template>
-    <div
-      class="flex items-center justify-center gap-4 rounded-lg bg-slate-100 p-4"
-      ...attributes
-    >
-      {{#each this.samples as |sample|}}
-        <div class="flex flex-col items-center gap-1">
+    <div class="overflow-hidden rounded-lg" ...attributes>
+      <div
+        class="grid grid-cols-4 items-center bg-[linear-gradient(to_bottom,#f1f5f9_0%,#94a3b8_35%,#f1f5f9_65%,#475569_100%)] px-2 py-4"
+      >
+        {{#each this.samples as |sample|}}
           <SettingsWindArrow
-            class="h-12 w-12"
+            class="mx-auto h-10 w-10"
             @direction={{135}}
             @speed={{18}}
             @gusts={{32}}
             @showGusts={{true}}
             @opacity={{sample.opacity}}
           />
-          <span class="text-[10px] text-slate-500">{{sample.label}}</span>
-        </div>
-      {{/each}}
+        {{/each}}
+      </div>
+      <div
+        class="grid grid-cols-4 bg-slate-100 px-2 py-1 text-center text-[10px] text-slate-500"
+      >
+        {{#each this.samples as |sample|}}
+          <span>{{sample.label}}</span>
+        {{/each}}
+      </div>
     </div>
   </template>
 }
