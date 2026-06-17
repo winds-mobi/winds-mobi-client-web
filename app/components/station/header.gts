@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
+import { LinkTo } from '@ember/routing';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
@@ -11,6 +12,10 @@ import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
+import {
+  serializeMapView,
+  STATION_FOCUS_ZOOM,
+} from 'winds-mobi-client-web/utils/map-view';
 import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
@@ -38,13 +43,29 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     );
   }
 
+  // Query params that focus the map on this station — shared with the navbar
+  // search so clicking a name behaves like selecting a search result (#47).
+  get focusQueryParams() {
+    return serializeMapView({
+      latitude: this.args.station.latitude,
+      longitude: this.args.station.longitude,
+      zoom: STATION_FOCUS_ZOOM,
+    });
+  }
+
   <template>
     <div class="min-w-0">
-      <h2
-        data-test-station-title
-        class="min-w-0 truncate text-xl font-bold text-slate-950"
-      >
-        {{@station.name}}
+      <h2 class="min-w-0">
+        <LinkTo
+          data-test-station-title
+          @route="map.station"
+          @model={{@station.id}}
+          @query={{this.focusQueryParams}}
+          title={{t "station.showOnMap"}}
+          class="block truncate text-xl font-bold text-slate-950 underline decoration-transparent underline-offset-3 transition hover:decoration-slate-300"
+        >
+          {{@station.name}}
+        </LinkTo>
       </h2>
 
       <dl

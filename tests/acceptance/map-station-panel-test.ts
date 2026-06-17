@@ -243,6 +243,19 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-air-section]').exists();
   });
 
+  test('it zooms in to the open station when its name is clicked', async function (this: MapStationPanelTestContext, assert) {
+    await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=8');
+    await click('[data-test-station-title]');
+    await waitUntil(() => currentURL().includes('mapZoom=10'));
+    await settled();
+
+    assertCurrentRoute(assert, '/map/holfuy-1804', {
+      mapLat: '46.67719',
+      mapLng: '7.86323',
+      mapZoom: '10',
+    });
+  });
+
   test('it closes from the explicit close button and preserves map query params', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?mapLat=46.67719&mapLng=7.86323&mapZoom=13');
     await click('[data-test-station-close]');

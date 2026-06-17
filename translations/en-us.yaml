@@ -114,6 +114,7 @@ nearby:
 
 station:
   lastPickup: Last pickup
+  showOnMap: Show on map
   meta:
     altitude: Altitude
     updated: Updated
