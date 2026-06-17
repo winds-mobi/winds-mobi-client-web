@@ -4,11 +4,11 @@ import { service } from '@ember/service';
 import { on } from '@ember/modifier';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
+  ARROW_DIRECTION_OFFSET,
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   scaleForReadingAge,
-  STATION_ARROW_HUB_RADIUS,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -71,7 +71,8 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   // centre so the arrow gets smaller in place instead of drifting off its point.
   get markerTransform() {
     const centre = this.geometry.rotationCentre;
-    const rotate = `rotate(${this.args.station.last.direction} ${centre})`;
+    const angle = this.args.station.last.direction + ARROW_DIRECTION_OFFSET;
+    const rotate = `rotate(${angle} ${centre})`;
     const scale = this.markerScale;
     if (scale === 1) {
       return rotate;
@@ -111,14 +112,9 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
         viewBox={{this.viewBox}}
       >
         <g transform={{this.markerTransform}}>
-          {{! Gusts band differs: a gusts-coloured disc behind, shown through the hub hole. }}
+          {{! Gusts band differs: the gusts shape behind, shown through the hub hole. }}
           {{#if this.showGustsHub}}
-            <circle
-              cx={{this.geometry.hubCx}}
-              cy={{this.geometry.hubCy}}
-              r={{STATION_ARROW_HUB_RADIUS}}
-              fill={{this.gustsColor}}
-            />
+            <path d={{this.geometry.gustsPath}} fill={{this.gustsColor}} />
           {{/if}}
           {{! Plain black hairline outline, grown outward via paint-order. }}
           <path

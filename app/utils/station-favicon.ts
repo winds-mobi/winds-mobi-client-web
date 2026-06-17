@@ -1,8 +1,8 @@
 import {
+  ARROW_DIRECTION_OFFSET,
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
-  STATION_ARROW_HUB_RADIUS,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -42,11 +42,11 @@ export function stationFaviconDataUri(station: Station): string {
   const hub =
     gustsColour === windColour
       ? ''
-      : `<circle cx="${geometry.hubCx}" cy="${geometry.hubCy}" r="${STATION_ARROW_HUB_RADIUS}" fill="${resolveColour(gustsColour)}"/>`;
+      : `<path d="${geometry.gustsPath}" fill="${resolveColour(gustsColour)}"/>`;
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.faviconViewBox}">` +
-    `<g transform="rotate(${direction} ${geometry.rotationCentre})">` +
+    `<g transform="rotate(${direction + ARROW_DIRECTION_OFFSET} ${geometry.rotationCentre})">` +
     hub +
     `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${MARKER_PLAIN_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
     `</g></svg>`;

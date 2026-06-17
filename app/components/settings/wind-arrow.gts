@@ -1,9 +1,9 @@
 import Component from '@glimmer/component';
 import {
+  ARROW_DIRECTION_OFFSET,
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
-  STATION_ARROW_HUB_RADIUS,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 
@@ -45,7 +45,8 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
   // centre so the arrow gets smaller in place — mirroring the on-map marker.
   get markerTransform() {
     const centre = this.geometry.rotationCentre;
-    const rotate = `rotate(${this.args.direction} ${centre})`;
+    const angle = this.args.direction + ARROW_DIRECTION_OFFSET;
+    const rotate = `rotate(${angle} ${centre})`;
     const scale = this.args.scale ?? 1;
     if (scale === 1) {
       return rotate;
@@ -64,12 +65,7 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
     >
       <g transform={{this.markerTransform}}>
         {{#if this.showGustsHub}}
-          <circle
-            cx={{this.geometry.hubCx}}
-            cy={{this.geometry.hubCy}}
-            r={{STATION_ARROW_HUB_RADIUS}}
-            fill={{this.gustsColor}}
-          />
+          <path d={{this.geometry.gustsPath}} fill={{this.gustsColor}} />
         {{/if}}
         <path
           d={{this.geometry.path}}
