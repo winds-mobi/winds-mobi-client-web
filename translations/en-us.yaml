@@ -32,6 +32,12 @@ settings:
       Colour each wind arrow's outline by its gusts, so the marker shows both
       average and gust speed. Turn off for a plain outline showing average
       wind only.
+  fadeOldData:
+    label: Gradually fade off old data
+    description: >-
+      Make each wind arrow more transparent the older its last reading is, so
+      fresh stations stand out and stale ones recede. Recent readings stay
+      opaque; the oldest never fade below a quarter visible.
   syncGraphsByDefault:
     label: Sync wind & air graphs
     description: >-

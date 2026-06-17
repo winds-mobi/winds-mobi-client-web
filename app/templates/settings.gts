@@ -7,6 +7,7 @@ import { Switch } from '@frontile/forms';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
+import SettingsShowcaseFade from 'winds-mobi-client-web/components/settings/showcase/fade';
 import SettingsShowcaseGraphSync from 'winds-mobi-client-web/components/settings/showcase/graph-sync';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -27,6 +28,11 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
   @action
   setShowGustsOutline(value: boolean) {
     this.settings.showGustsOutline = value;
+  }
+
+  @action
+  setFadeOldData(value: boolean) {
+    this.settings.fadeOldData = value;
   }
 
   @action
@@ -83,6 +89,22 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
               <SettingsShowcaseGusts
                 @enabled={{this.settings.showGustsOutline}}
               />
+            </div>
+
+            <div
+              class="grid items-center gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_14rem]"
+            >
+              <div>
+                <Switch
+                  data-test-setting="fadeOldData"
+                  @isSelected={{this.settings.fadeOldData}}
+                  @onChange={{this.setFadeOldData}}
+                  @intent="success"
+                  @label={{t "settings.fadeOldData.label"}}
+                  @description={{t "settings.fadeOldData.description"}}
+                />
+              </div>
+              <SettingsShowcaseFade @enabled={{this.settings.fadeOldData}} />
             </div>
 
             <div

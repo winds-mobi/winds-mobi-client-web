@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- A new "Gradually fade off old data" setting (on by default) makes each station's wind arrow more transparent the older its last reading is, so fresh stations stand out and stale ones recede. The faintest, oldest readings stay at least a quarter visible, and you can turn the fade off in Settings.
+
 ### Changed
 
 - Station wind arrows now use a single thin outline instead of a heavy black rim plus a separate gusts ring: with gusts shown the outline is the gusts colour, and with gusts off it's a plain hairline border — same shape either way, just clearer.

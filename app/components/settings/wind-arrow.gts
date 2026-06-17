@@ -14,6 +14,8 @@ export interface SettingsWindArrowSignature {
     // When false the outline is a plain black border; when true it takes the
     // gusts-speed colour — mirroring the on-map marker.
     showGusts: boolean;
+    // Whole-arrow opacity, mirroring the on-map age fade. Defaults to opaque.
+    opacity?: number;
   };
   Element: SVGSVGElement;
 }
@@ -47,7 +49,10 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
       viewBox={{this.geometry.viewBox}}
       ...attributes
     >
-      <g transform={{this.rotationTransform}}>
+      <g
+        opacity={{if @opacity @opacity 1}}
+        transform={{this.rotationTransform}}
+      >
         <path
           d={{this.geometry.path}}
           fill={{this.markerColor}}

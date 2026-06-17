@@ -15,6 +15,11 @@ export default class SettingsService extends Service {
   @trackedInLocalStorage({ keyName: 'settings.showGustsOutline' })
   showGustsOutline = true;
 
+  // Fade each wind arrow toward transparent as its reading ages, so fresh
+  // stations stand out and stale ones recede (never fully vanishing).
+  @trackedInLocalStorage({ keyName: 'settings.fadeOldData' })
+  fadeOldData = true;
+
   // Whether a freshly opened station panel starts with its wind and air graphs
   // synced. The per-panel switch remains the live override for that session.
   @trackedInLocalStorage({ keyName: 'settings.syncGraphsByDefault' })

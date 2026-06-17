@@ -7,6 +7,7 @@ import {
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
+  opacityForReadingAge,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -54,6 +55,17 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `rotate(${this.args.station.last.direction} ${this.geometry.rotationCentre})`;
   }
 
+  // Fade the whole arrow (fill + outline) by reading age when the preference is
+  // on. Recomputed each refresh cycle as new readings replace the record, so no
+  // timer is needed — the data only changes on refresh anyway.
+  get markerOpacity() {
+    if (!this.settings.fadeOldData) {
+      return 1;
+    }
+
+    return opacityForReadingAge(this.args.station.last.timestamp);
+  }
+
   get buttonClass() {
     const base =
       'block cursor-pointer rounded-full p-1 transition focus:outline-none';
@@ -83,7 +95,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
         class="h-10 w-10 overflow-visible"
         viewBox={{this.viewBox}}
       >
-        <g transform={{this.rotationTransform}}>
+        <g opacity={{this.markerOpacity}} transform={{this.rotationTransform}}>
           {{! Outline grows outward (paint-order): gusts colour when enabled, plain black otherwise. }}
           <path
             d={{this.arrowPath}}
