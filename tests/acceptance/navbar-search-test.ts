@@ -4,6 +4,7 @@ import {
   click,
   currentURL,
   fillIn,
+  find,
   settled,
   visit,
   waitUntil,
@@ -159,9 +160,7 @@ module('Acceptance | navbar search', function (hooks) {
     await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
-    await waitUntil(
-      () => document.querySelector('[data-test-navbar-search-results]') !== null
-    );
+    await waitUntil(() => find('[data-test-navbar-search-results]'));
 
     assert
       .dom('[data-test-navbar-search-result="holfuy-1850"]')
@@ -184,11 +183,8 @@ module('Acceptance | navbar search', function (hooks) {
   test('it uses zoom 10 when searching from a non-map route', async function (assert) {
     await visit('/help');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(
-      () =>
-        document.querySelector(
-          '[data-test-navbar-search-result="holfuy-1850"]'
-        ) !== null
+    await waitUntil(() =>
+      find('[data-test-navbar-search-result="holfuy-1850"]')
     );
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
@@ -213,9 +209,7 @@ module('Acceptance | navbar search', function (hooks) {
 
     await fillIn('[data-test-navbar-search="navbar"] input', 'zz');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
-    await waitUntil(
-      () => document.querySelector('[data-test-navbar-search-empty]') !== null
-    );
+    await waitUntil(() => find('[data-test-navbar-search-empty]'));
 
     assert.dom('[data-test-navbar-search-empty]').hasText('No stations found.');
   });
@@ -223,11 +217,8 @@ module('Acceptance | navbar search', function (hooks) {
   test('it clears the search field and closes the results after selecting a station', async function (assert) {
     await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(
-      () =>
-        document.querySelector(
-          '[data-test-navbar-search-result="holfuy-1850"]'
-        ) !== null
+    await waitUntil(() =>
+      find('[data-test-navbar-search-result="holfuy-1850"]')
     );
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');

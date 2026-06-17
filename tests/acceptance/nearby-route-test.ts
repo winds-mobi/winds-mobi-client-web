@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, visit, waitUntil } from '@ember/test-helpers';
+import { click, findAll, visit, waitUntil } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
@@ -135,8 +135,7 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
 async function waitForNearbyStations() {
   await waitUntil(
     () =>
-      document.querySelectorAll(NEARBY_STATION_CARD_SELECTOR).length ===
-      STATION_FIXTURES.length
+      findAll(NEARBY_STATION_CARD_SELECTOR).length === STATION_FIXTURES.length
   );
 }
 

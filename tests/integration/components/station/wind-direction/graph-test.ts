@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { render, settled } from '@ember/test-helpers';
+import { find, findAll, render, settled } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -9,14 +9,14 @@ type WindDirectionGraphTestContext = {
   data: History[];
 };
 
-function renderedPointSignature(root: Element) {
-  return [...root.querySelectorAll('.highcharts-point')]
+function renderedPointSignature() {
+  return findAll('.highcharts-point')
     .map((point) => point.getAttribute('d'))
     .filter((value): value is string => Boolean(value));
 }
 
-function renderedGraphSignature(root: Element) {
-  return root.querySelector('.highcharts-graph')?.getAttribute('d');
+function renderedGraphSignature() {
+  return find('.highcharts-graph')?.getAttribute('d');
 }
 
 module(
@@ -104,8 +104,8 @@ module(
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
       await settled();
 
-      const firstStationInitialPoints = renderedPointSignature(this.element);
-      const firstStationInitialGraph = renderedGraphSignature(this.element);
+      const firstStationInitialPoints = renderedPointSignature();
+      const firstStationInitialGraph = renderedGraphSignature();
 
       assert.true(firstStationInitialPoints.length > 0);
       assert.true(Boolean(firstStationInitialGraph));
@@ -180,14 +180,8 @@ module(
 
       await settled();
 
-      assert.deepEqual(
-        renderedPointSignature(this.element),
-        firstStationInitialPoints
-      );
-      assert.strictEqual(
-        renderedGraphSignature(this.element),
-        firstStationInitialGraph
-      );
+      assert.deepEqual(renderedPointSignature(), firstStationInitialPoints);
+      assert.strictEqual(renderedGraphSignature(), firstStationInitialGraph);
     });
   }
 );
