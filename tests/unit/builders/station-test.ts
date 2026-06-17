@@ -28,4 +28,24 @@ module('Unit | Builder | station', function () {
     assert.false(url.searchParams.has('within-pt2-lat'));
     assert.false(url.searchParams.has('within-pt2-lon'));
   });
+
+  test('searchQuery omits the location bias when no position is given', function (assert) {
+    const request = searchQuery('station', 'leh') as { url: string };
+    const url = new URL(request.url, 'https://winds.mobi');
+
+    assert.false(url.searchParams.has('near-lat'));
+    assert.false(url.searchParams.has('near-lon'));
+  });
+
+  test('searchQuery biases toward a known position when one is given', function (assert) {
+    const request = searchQuery('station', 'leh', {
+      latitude: 46.68084,
+      longitude: 7.82554,
+    }) as { url: string };
+    const url = new URL(request.url, 'https://winds.mobi');
+
+    assert.strictEqual(url.searchParams.get('near-lat'), '46.68084');
+    assert.strictEqual(url.searchParams.get('near-lon'), '7.82554');
+    assert.strictEqual(url.searchParams.get('search'), 'leh');
+  });
 });

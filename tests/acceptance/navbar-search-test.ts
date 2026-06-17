@@ -137,6 +137,14 @@ function countSearchRequests(calls: string[]) {
   ).length;
 }
 
+function lastSearchRequestParams(calls: string[]) {
+  const url = [...calls]
+    .reverse()
+    .find((call) => call.includes('/stations?') && call.includes('search='));
+
+  return url ? new URL(url, 'https://winds.mobi').searchParams : undefined;
+}
+
 module('Acceptance | navbar search', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -162,6 +170,18 @@ module('Acceptance | navbar search', function (hooks) {
     await waitUntil(() => countSearchRequests(store.calls) > 0);
     await waitUntil(() => find('[data-test-navbar-search-results]'));
 
+    const searchParams = lastSearchRequestParams(store.calls);
+    assert.strictEqual(
+      searchParams?.get('near-lat'),
+      '46.69299',
+      'the search is biased toward the known latitude'
+    );
+    assert.strictEqual(
+      searchParams?.get('near-lon'),
+      '7.82667',
+      'the search is biased toward the known longitude'
+    );
+
     assert
       .dom('[data-test-navbar-search-result="holfuy-1850"]')
       .includesText('Lehn');
@@ -178,6 +198,26 @@ module('Acceptance | navbar search', function (hooks) {
       mapLng: '7.82554',
       mapZoom: '10',
     });
+  });
+
+  test('it searches without a location bias when the position is unknown', async function (assert) {
+    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
+    nearbyLocation.coordinates = undefined;
+
+    await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
+    await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
+    await waitUntil(() => countSearchRequests(store.calls) > 0);
+
+    const searchParams = lastSearchRequestParams(store.calls);
+    assert.false(
+      searchParams?.has('near-lat'),
+      'no latitude bias is sent when the position is unknown'
+    );
+    assert.false(
+      searchParams?.has('near-lon'),
+      'no longitude bias is sent when the position is unknown'
+    );
   });
 
   test('it uses zoom 10 when searching from a non-map route', async function (assert) {
