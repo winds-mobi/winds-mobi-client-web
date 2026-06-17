@@ -227,6 +227,13 @@ export default class Map extends Component<MapSignature> {
   get markerInitOptions() {
     return {
       anchor: 'center' as const,
+      // Pin the marker to the map plane so MapLibre counter-rotates it by the
+      // bearing and tilts it by the pitch on every rotate/pitch event. The wind
+      // direction stays in the marker's own SVG `rotate(...)`, so the net effect
+      // is an arrow that keeps pointing at true compass north and lies flat on
+      // the ground in 3D, instead of staying fixed to the screen (#46).
+      pitchAlignment: 'map' as const,
+      rotationAlignment: 'map' as const,
     };
   }
 
