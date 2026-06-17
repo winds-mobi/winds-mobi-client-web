@@ -8,6 +8,7 @@ import {
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   opacityForReadingAge,
+  STATION_ARROW_HUB_RADIUS,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -41,14 +42,18 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return colourForWindReading(speed, timestamp);
   }
 
-  // Gusts colour when the preference is on, a plain black border otherwise.
-  get outlineColor() {
-    if (!this.settings.showGustsOutline) {
-      return MARKER_PLAIN_OUTLINE_COLOUR;
-    }
-
+  get gustsColor() {
     const { gusts, timestamp } = this.args.station.last;
     return colourForWindReading(gusts, timestamp);
+  }
+
+  // Fill the hub with the gusts colour only when the preference is on and the
+  // gusts fall in a different wind band than the average (different displayed
+  // colour) — so the hub adds information instead of repeating the body colour.
+  get showGustsHub() {
+    return (
+      this.settings.showGustsOutline && this.gustsColor !== this.markerColor
+    );
   }
 
   get rotationTransform() {
@@ -92,16 +97,25 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible"
+        class="h-14 w-14 overflow-visible"
         viewBox={{this.viewBox}}
       >
         <g opacity={{this.markerOpacity}} transform={{this.rotationTransform}}>
-          {{! Outline grows outward (paint-order): gusts colour when enabled, plain black otherwise. }}
+          {{! Gusts band differs: a gusts-coloured disc behind, shown through the hub hole. }}
+          {{#if this.showGustsHub}}
+            <circle
+              cx={{this.geometry.hubCx}}
+              cy={{this.geometry.hubCy}}
+              r={{STATION_ARROW_HUB_RADIUS}}
+              fill={{this.gustsColor}}
+            />
+          {{/if}}
+          {{! Plain black hairline outline, grown outward via paint-order. }}
           <path
             d={{this.arrowPath}}
             fill={{this.markerColor}}
             paint-order="stroke"
-            stroke={{this.outlineColor}}
+            stroke={{MARKER_PLAIN_OUTLINE_COLOUR}}
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width={{MARKER_OUTLINE_WIDTH}}

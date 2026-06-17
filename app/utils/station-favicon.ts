@@ -1,6 +1,8 @@
 import {
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
+  MARKER_PLAIN_OUTLINE_COLOUR,
+  STATION_ARROW_HUB_RADIUS,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -26,19 +28,27 @@ function resolveColour(colour: string): string {
 }
 
 // Builds an `image/svg+xml` data URI of the station's wind arrow, mirroring the
-// on-map marker (wind-speed fill, hairline gusts-coloured outline, rotated to
-// the wind direction) so a selected station's reading is visible in the browser
-// tab.
+// on-map marker (wind-speed fill, black hairline outline, and a gusts-coloured
+// disc behind the arrow shown through the hub hole when the gust band differs,
+// rotated to the wind direction) so a selected station's reading is visible in
+// the browser tab.
 export function stationFaviconDataUri(station: Station): string {
   const geometry = stationArrowGeometry(station.isPeak);
   const { direction, speed, gusts, timestamp } = station.last;
-  const fill = resolveColour(colourForWindReading(speed, timestamp));
-  const gustsColour = resolveColour(colourForWindReading(gusts, timestamp));
+  const windColour = colourForWindReading(speed, timestamp);
+  const gustsColour = colourForWindReading(gusts, timestamp);
+  const fill = resolveColour(windColour);
+
+  const hub =
+    gustsColour === windColour
+      ? ''
+      : `<circle cx="${geometry.hubCx}" cy="${geometry.hubCy}" r="${STATION_ARROW_HUB_RADIUS}" fill="${resolveColour(gustsColour)}"/>`;
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.faviconViewBox}">` +
     `<g transform="rotate(${direction} ${geometry.rotationCentre})">` +
-    `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${gustsColour}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
+    hub +
+    `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${MARKER_PLAIN_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
     `</g></svg>`;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;

@@ -48,9 +48,31 @@ module('Unit | Utility | station-favicon', function () {
     );
     assert.strictEqual(
       svg.match(/<path/g)?.length,
-      2,
-      'it draws the contrast and gusts strokes as two paths'
+      1,
+      'it draws the arrow as a single path'
     );
+    assert.true(
+      svg.includes('stroke="rgb(0, 0, 0)"'),
+      'the arrow carries a plain black outline'
+    );
+  });
+
+  test('it lights the hub when gusts fall in a higher wind band', function (assert) {
+    // speed 12 (wind-15 band) vs gusts 18 (wind-20 band) → hub recoloured.
+    const svg = decode(stationFaviconDataUri(BASE_STATION));
+
+    assert.true(svg.includes('<circle'), 'it draws a gusts hub disc');
+  });
+
+  test('it omits the hub when gusts share the average wind band', function (assert) {
+    const svg = decode(
+      stationFaviconDataUri({
+        ...BASE_STATION,
+        last: { ...BASE_STATION.last, speed: 12, gusts: 13 },
+      })
+    );
+
+    assert.false(svg.includes('<circle'), 'a same-band gust adds no hub disc');
   });
 
   test('it uses the peak geometry for peak stations', function (assert) {

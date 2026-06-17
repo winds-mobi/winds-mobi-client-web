@@ -28,26 +28,32 @@ export const STATION_PEAK_ARROW_FAVICON_VIEW_BOX = '-220 -200 440 440';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 
-// The arrow has a single hairline outline whose width and style never change —
-// only its colour does. When the gusts preference is on, the outline is the
-// gusts-speed colour, so it carries a second reading; when off, it's a plain
-// black border that just separates the marker from the map. Keeping it one thin
-// stroke (rather than a halo or a double rim) makes the marker simple to
-// describe in settings — "the outline shows gusts" — and avoids any heavy black.
-//
-// SVG strokes are centred on the path, but `paint-order="stroke"` paints the
-// stroke first and the fill on top, so the fill covers the inner half of the
-// stroke and only its outer half shows — the outline grows outward instead of
-// eating into the arrow body. The visible (outward) thickness is therefore half
-// of MARKER_OUTLINE_WIDTH.
+// Every arrow always carries the same plain black hairline outline; it just
+// separates the marker from the map and never changes. `paint-order="stroke"`
+// paints the stroke first and the fill on top, so the fill covers the inner
+// half of the stroke and only its outer half shows — the outline grows outward
+// instead of eating into the arrow body. The outline stays hairline even though
+// the marker is drawn larger (see the marker's `h-*`/`w-*`).
 export const MARKER_PLAIN_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
-export const MARKER_OUTLINE_WIDTH = '32';
+export const MARKER_OUTLINE_WIDTH = '12';
+
+// The hub baked into each arrow path is a hole (the inner circle winds opposite
+// the body, so the non-zero fill rule punches it out). The gust reading is shown
+// by filling a disc in the gusts colour *behind* the arrow: it shows through the
+// hole, framed by the arrow's own hairline hub outline. Drawn only when the gust
+// speed falls in a different wind band than the average, so the hub lights up
+// only when gusts add information. The disc radius matches the hole.
+export const STATION_ARROW_HUB_RADIUS = 35;
 
 export interface StationArrowGeometry {
   path: string;
   viewBox: string;
   rotationCentre: string;
   faviconViewBox: string;
+  // Centre of the hub circle baked into the path (in the shape's own units),
+  // around which the gusts ring is drawn.
+  hubCx: number;
+  hubCy: number;
 }
 
 export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
@@ -57,12 +63,16 @@ export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
         viewBox: STATION_PEAK_ARROW_VIEW_BOX,
         rotationCentre: STATION_PEAK_ARROW_ROTATION_CENTRE,
         faviconViewBox: STATION_PEAK_ARROW_FAVICON_VIEW_BOX,
+        hubCx: 0,
+        hubCy: 0,
       }
     : {
         path: STATION_ARROW_PATH,
         viewBox: STATION_ARROW_VIEW_BOX,
         rotationCentre: STATION_ARROW_ROTATION_CENTRE,
         faviconViewBox: STATION_ARROW_FAVICON_VIEW_BOX,
+        hubCx: -80,
+        hubCy: 80,
       };
 }
 

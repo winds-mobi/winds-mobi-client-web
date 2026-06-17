@@ -8,7 +8,7 @@
 
 ### Changed
 
-- Station wind arrows now use a single thin outline instead of a heavy black rim plus a separate gusts ring: with gusts shown the outline is the gusts colour, and with gusts off it's a plain hairline border — same shape either way, just clearer.
+- Station wind arrows are now drawn larger and bolder so they're easier to read on the map, with a clean black hairline outline. The gust reading is shown by filling the arrow's centre circle with the gust's wind-band colour — but only when the gusts are stronger than the average, so the centre lights up only when it adds information. (The setting is now "Highlight gusts in the arrow centre".)
 
 ### Fixed
 

@@ -27,11 +27,11 @@ settings:
       Replace the browser-tab icon with the open station's wind arrow, so its
       latest reading is visible at a glance from another tab.
   showGustsOutline:
-    label: Show gusts as arrow outline
+    label: Highlight gusts in the arrow centre
     description: >-
-      Colour each wind arrow's outline by its gusts, so the marker shows both
-      average and gust speed. Turn off for a plain outline showing average
-      wind only.
+      When a station's gusts are stronger than its average wind, fill the
+      arrow's centre circle with the gust's wind-band colour, so the marker
+      shows both readings at once. Turn off to keep every arrow a single colour.
   fadeOldData:
     label: Gradually fade off old data
     description: >-
