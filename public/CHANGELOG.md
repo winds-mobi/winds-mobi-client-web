@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- When the map opens centered on your location, it now draws straight there instead of animating a pan and zoom in from the country-wide view.
+
 ## v0.4.0 - 2026-06-17
 
 ### Added
