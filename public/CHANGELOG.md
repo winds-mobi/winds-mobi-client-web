@@ -5,6 +5,7 @@
 ### Fixed
 
 - When the map opens centered on your location, it now draws straight there instead of animating a pan and zoom in from the country-wide view.
+- Clicking a station on the map now smoothly pans so it's centered in the map area beside the detail panel, instead of often staying off to the side.
 
 ## v0.4.0 - 2026-06-17
 

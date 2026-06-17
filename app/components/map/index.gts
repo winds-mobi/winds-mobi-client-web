@@ -246,9 +246,19 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  stationSelected(stationId: string) {
-    void this.router.transitionTo('map.station', stationId, {
-      queryParams: serializeMapView(this.mapView),
+  stationSelected(station: Station) {
+    // Recenter the routed view on the clicked station (keeping the current zoom,
+    // so it's a smooth pan) — the declarative fly-to then pans the map and the
+    // station ends up centered in the map area that remains beside the detail
+    // panel. Centering on the station's geographic coordinate is resize-robust:
+    // the panel shrinks the map container and MapLibre re-centers on that point
+    // when it resizes, so the station stays centered regardless of timing (#52).
+    void this.router.transitionTo('map.station', station.id, {
+      queryParams: serializeMapView({
+        longitude: station.longitude,
+        latitude: station.latitude,
+        zoom: this.mapView.zoom,
+      }),
     });
   }
 

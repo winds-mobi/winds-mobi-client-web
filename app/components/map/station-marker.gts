@@ -15,7 +15,7 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 export interface MapStationMarkerSignature {
   Args: {
     isSelected?: boolean;
-    onSelect: (stationId: string) => void;
+    onSelect: (station: Station) => void;
     station: Station;
   };
   Element: HTMLButtonElement;
@@ -62,7 +62,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
 
   @action
   handleSelect() {
-    this.args.onSelect(this.args.station.id);
+    this.args.onSelect(this.args.station);
   }
 
   <template>
