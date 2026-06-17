@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Station wind arrows now use a single thin outline instead of a heavy black rim plus a separate gusts ring: with gusts shown the outline is the gusts colour, and with gusts off it's a plain hairline border — same shape either way, just clearer.
+
 ### Fixed
 
 - When the map opens centered on your location, it now draws straight there instead of animating a pan and zoom in from the country-wide view.

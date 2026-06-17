@@ -28,14 +28,20 @@ export const STATION_PEAK_ARROW_FAVICON_VIEW_BOX = '-220 -200 440 440';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 
-// The arrow carries two readings as a double outline: the gusts colour is the
-// visible outline, drawn over a slightly wider black stroke. SVG strokes are
-// single-valued and centred, so the path is rendered twice in the same rotation
-// group — black underneath, gusts on top — leaving a thin black rim beyond the
-// gusts ring for contrast.
-export const MARKER_CONTRAST_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
-export const MARKER_CONTRAST_OUTLINE_WIDTH = '32';
-export const MARKER_GUSTS_OUTLINE_WIDTH = '16';
+// The arrow has a single hairline outline whose width and style never change —
+// only its colour does. When the gusts preference is on, the outline is the
+// gusts-speed colour, so it carries a second reading; when off, it's a plain
+// black border that just separates the marker from the map. Keeping it one thin
+// stroke (rather than a halo or a double rim) makes the marker simple to
+// describe in settings — "the outline shows gusts" — and avoids any heavy black.
+//
+// SVG strokes are centred on the path, but `paint-order="stroke"` paints the
+// stroke first and the fill on top, so the fill covers the inner half of the
+// stroke and only its outer half shows — the outline grows outward instead of
+// eating into the arrow body. The visible (outward) thickness is therefore half
+// of MARKER_OUTLINE_WIDTH.
+export const MARKER_PLAIN_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
+export const MARKER_OUTLINE_WIDTH = '32';
 
 export interface StationArrowGeometry {
   path: string;

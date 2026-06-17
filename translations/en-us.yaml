@@ -29,8 +29,9 @@ settings:
   showGustsOutline:
     label: Show gusts as arrow outline
     description: >-
-      Draw a second, gusts-coloured outline around each wind arrow on the map.
-      Turn off for a simpler arrow showing average wind only.
+      Colour each wind arrow's outline by its gusts, so the marker shows both
+      average and gust speed. Turn off for a plain outline showing average
+      wind only.
   syncGraphsByDefault:
     label: Sync wind & air graphs
     description: >-

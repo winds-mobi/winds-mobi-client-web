@@ -1,9 +1,8 @@
 import Component from '@glimmer/component';
 import {
   colourForWindReading,
-  MARKER_CONTRAST_OUTLINE_COLOUR,
-  MARKER_CONTRAST_OUTLINE_WIDTH,
-  MARKER_GUSTS_OUTLINE_WIDTH,
+  MARKER_OUTLINE_WIDTH,
+  MARKER_PLAIN_OUTLINE_COLOUR,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 
@@ -12,8 +11,8 @@ export interface SettingsWindArrowSignature {
     direction: number;
     speed: number;
     gusts: number;
-    // When false the gusts-coloured outline is hidden, leaving the plain
-    // black-rimmed wind-speed arrow — mirroring the on-map marker.
+    // When false the outline is a plain black border; when true it takes the
+    // gusts-speed colour — mirroring the on-map marker.
     showGusts: boolean;
   };
   Element: SVGSVGElement;
@@ -21,9 +20,9 @@ export interface SettingsWindArrowSignature {
 
 // Presentational copy of the on-map station arrow used to give the settings
 // page a live preview. It deliberately mirrors [map/station-marker.gts]: the
-// same geometry, the black contrast under-stroke, and the gusts outline on top.
-// The reading is a fixed sample (now-dated, so colours are never the stale
-// grey) since the preview illustrates the toggle, not real data.
+// same geometry and the single hairline outline that takes the gusts colour or
+// plain black. The reading is a fixed sample (now-dated, so colours are never
+// the stale grey) since the preview illustrates the toggle, not real data.
 export default class SettingsWindArrow extends Component<SettingsWindArrowSignature> {
   geometry = stationArrowGeometry(false);
 
@@ -31,8 +30,10 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
     return colourForWindReading(this.args.speed, Date.now());
   }
 
-  get gustsColor() {
-    return colourForWindReading(this.args.gusts, Date.now());
+  get outlineColor() {
+    return this.args.showGusts
+      ? colourForWindReading(this.args.gusts, Date.now())
+      : MARKER_PLAIN_OUTLINE_COLOUR;
   }
 
   get rotationTransform() {
@@ -50,18 +51,11 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
         <path
           d={{this.geometry.path}}
           fill={{this.markerColor}}
-          stroke={{MARKER_CONTRAST_OUTLINE_COLOUR}}
+          paint-order="stroke"
+          stroke={{this.outlineColor}}
           stroke-linecap="round"
           stroke-linejoin="round"
-          stroke-width={{MARKER_CONTRAST_OUTLINE_WIDTH}}
-        />
-        <path
-          d={{this.geometry.path}}
-          fill={{this.markerColor}}
-          stroke={{if @showGusts this.gustsColor "none"}}
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width={{MARKER_GUSTS_OUTLINE_WIDTH}}
+          stroke-width={{MARKER_OUTLINE_WIDTH}}
         />
       </g>
     </svg>

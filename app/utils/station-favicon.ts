@@ -1,8 +1,6 @@
 import {
   colourForWindReading,
-  MARKER_CONTRAST_OUTLINE_COLOUR,
-  MARKER_CONTRAST_OUTLINE_WIDTH,
-  MARKER_GUSTS_OUTLINE_WIDTH,
+  MARKER_OUTLINE_WIDTH,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -28,9 +26,9 @@ function resolveColour(colour: string): string {
 }
 
 // Builds an `image/svg+xml` data URI of the station's wind arrow, mirroring the
-// on-map marker (wind-speed fill, gusts-coloured outline over a black contrast
-// rim, rotated to the wind direction) so a selected station's reading is visible
-// in the browser tab.
+// on-map marker (wind-speed fill, hairline gusts-coloured outline, rotated to
+// the wind direction) so a selected station's reading is visible in the browser
+// tab.
 export function stationFaviconDataUri(station: Station): string {
   const geometry = stationArrowGeometry(station.isPeak);
   const { direction, speed, gusts, timestamp } = station.last;
@@ -40,8 +38,7 @@ export function stationFaviconDataUri(station: Station): string {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.faviconViewBox}">` +
     `<g transform="rotate(${direction} ${geometry.rotationCentre})">` +
-    `<path d="${geometry.path}" fill="${fill}" stroke="${MARKER_CONTRAST_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_CONTRAST_OUTLINE_WIDTH}"/>` +
-    `<path d="${geometry.path}" fill="${fill}" stroke="${gustsColour}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_GUSTS_OUTLINE_WIDTH}"/>` +
+    `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${gustsColour}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
     `</g></svg>`;
 
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;

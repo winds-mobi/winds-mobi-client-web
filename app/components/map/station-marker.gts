@@ -5,9 +5,8 @@ import { on } from '@ember/modifier';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   colourForWindReading,
-  MARKER_CONTRAST_OUTLINE_COLOUR,
-  MARKER_CONTRAST_OUTLINE_WIDTH,
-  MARKER_GUSTS_OUTLINE_WIDTH,
+  MARKER_OUTLINE_WIDTH,
+  MARKER_PLAIN_OUTLINE_COLOUR,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -41,7 +40,12 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return colourForWindReading(speed, timestamp);
   }
 
-  get gustsColor() {
+  // Gusts colour when the preference is on, a plain black border otherwise.
+  get outlineColor() {
+    if (!this.settings.showGustsOutline) {
+      return MARKER_PLAIN_OUTLINE_COLOUR;
+    }
+
     const { gusts, timestamp } = this.args.station.last;
     return colourForWindReading(gusts, timestamp);
   }
@@ -80,23 +84,15 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
         viewBox={{this.viewBox}}
       >
         <g transform={{this.rotationTransform}}>
-          {{! Black under-stroke: a thin rim peeks beyond the gusts outline. }}
+          {{! Outline grows outward (paint-order): gusts colour when enabled, plain black otherwise. }}
           <path
             d={{this.arrowPath}}
             fill={{this.markerColor}}
-            stroke={{MARKER_CONTRAST_OUTLINE_COLOUR}}
+            paint-order="stroke"
+            stroke={{this.outlineColor}}
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width={{MARKER_CONTRAST_OUTLINE_WIDTH}}
-          />
-          {{! Gusts-coloured outline on top, plus the wind-speed fill. }}
-          <path
-            d={{this.arrowPath}}
-            fill={{this.markerColor}}
-            stroke={{if this.settings.showGustsOutline this.gustsColor "none"}}
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width={{MARKER_GUSTS_OUTLINE_WIDTH}}
+            stroke-width={{MARKER_OUTLINE_WIDTH}}
           />
         </g>
       </svg>
