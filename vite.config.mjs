@@ -19,7 +19,6 @@ function hmrClientConfig() {
 }
 
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? process.env.CDN_URL || '/' : '/',
   server: {
     allowedHosts: ['ui.winds-mobi-client-web.orb.local'],
     hmr: hmrClientConfig(),

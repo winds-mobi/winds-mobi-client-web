@@ -24,8 +24,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-        env:
-          CDN_URL: https://v2.winds-mobi.b-cdn.net/
 
       - name: Write ssh keys
         run: |
