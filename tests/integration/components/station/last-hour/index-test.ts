@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { render, settled } from '@ember/test-helpers';
+import { find, findAll, render, settled } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -67,14 +67,14 @@ function lastHourRequestUrl(stationId: string) {
   ).url!;
 }
 
-function renderedPointSignature(root: Element) {
-  return [...root.querySelectorAll('.highcharts-point')]
+function renderedPointSignature() {
+  return findAll('.highcharts-point')
     .map((point) => point.getAttribute('d'))
     .filter((value): value is string => Boolean(value));
 }
 
-function renderedGraphSignature(root: Element) {
-  return root.querySelector('.highcharts-graph')?.getAttribute('d');
+function renderedGraphSignature() {
+  return find('.highcharts-graph')?.getAttribute('d');
 }
 
 module('Integration | Component | station/last-hour', function (hooks) {
@@ -181,8 +181,8 @@ module('Integration | Component | station/last-hour', function (hooks) {
     await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
     await settled();
 
-    const stationAInitialPoints = renderedPointSignature(this.element);
-    const stationAInitialGraph = renderedGraphSignature(this.element);
+    const stationAInitialPoints = renderedPointSignature();
+    const stationAInitialGraph = renderedGraphSignature();
 
     assert.true(stationAInitialPoints.length > 0);
     assert.true(Boolean(stationAInitialGraph));
@@ -193,14 +193,8 @@ module('Integration | Component | station/last-hour', function (hooks) {
     this.stationId = 'station-a';
     await settled();
 
-    assert.deepEqual(
-      renderedPointSignature(this.element),
-      stationAInitialPoints
-    );
-    assert.strictEqual(
-      renderedGraphSignature(this.element),
-      stationAInitialGraph
-    );
+    assert.deepEqual(renderedPointSignature(), stationAInitialPoints);
+    assert.strictEqual(renderedGraphSignature(), stationAInitialGraph);
 
     deferredStationBHistory.resolve({
       content: {
@@ -209,13 +203,7 @@ module('Integration | Component | station/last-hour', function (hooks) {
     });
     await settled();
 
-    assert.deepEqual(
-      renderedPointSignature(this.element),
-      stationAInitialPoints
-    );
-    assert.strictEqual(
-      renderedGraphSignature(this.element),
-      stationAInitialGraph
-    );
+    assert.deepEqual(renderedPointSignature(), stationAInitialPoints);
+    assert.strictEqual(renderedGraphSignature(), stationAInitialGraph);
   });
 });

@@ -199,6 +199,11 @@ state, route models, and query params.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.
+- **Never reach for raw DOM in tests** (`document.querySelector`/`querySelectorAll`, `getElementById`, `.textContent`,
+  `.getAttribute`, etc.). Assert with **qunit-dom** (`assert.dom(selector).exists()/.hasText()/.hasAttribute(...)`, and
+  `assert.dom(selector, rootElement)` to scope — e.g. `document.head` for head content); `hasAttribute` accepts a regex
+  for partial matches. For non-assertion queries — `waitUntil` predicates, or collecting values for a `deepEqual` —
+  use the `@ember/test-helpers` `find`/`findAll` helpers, never `document.querySelector*`.
 
 ### Changelog
 

@@ -1,0 +1,72 @@
+import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
+
+// Two whole-marker shapes that share a circular hub: regular stations get the
+// rounded-shoulder arrow; peaks get the v1 "star"-shouldered arrow so they read
+// as a different shape (echoing the round/triangle distinction of the v1 map).
+// Each shape has its own viewBox; both are 340 units tall so they render at the
+// same on-screen size, and each rotates around its own viewBox centre.
+//
+// These constants are the single source of truth for the arrow geometry, shared
+// by the on-map marker ([app/components/map/station-marker.gts]) and the dynamic
+// browser favicon ([app/utils/station-favicon.ts]).
+export const STATION_ARROW_PATH =
+  'M -60,147.1 C -31.1,138.5 -10,111.7 -10,80 -10,48.3 -31.1,21.5 -60,12.9 V -70 h -40 v 82.9 c -28.9,8.6 -50,35.4 -50,67.1 0,31.7 21.1,58.5 50,67.1 V 195 l -50,-25 70,100 70,-100 -50,25 z M -115,80 c 0,-19.3 15.7,-35 35,-35 19.3,0 35,15.7 35,35 0,19.3 -15.7,35 -35,35 -19.3,0 -35,-15.7 -35,-35 z';
+export const STATION_ARROW_VIEW_BOX = '-150 -70 140 340';
+export const STATION_ARROW_ROTATION_CENTRE = '-80 100';
+export const STATION_PEAK_ARROW_PATH =
+  'M20,67.4L88.3-51H20v-99h-40v99h-68.3L-20,67.4V115l-50-25L0,190L70,90l-50,25V67.4z M-35,0c0-19.3,15.7-35,35-35S35-19.3,35,0S19.3,35,0,35S-35,19.3-35,0z';
+export const STATION_PEAK_ARROW_VIEW_BOX = '-89 -150 178 340';
+export const STATION_PEAK_ARROW_ROTATION_CENTRE = '0 20';
+
+// The on-map marker leans on `overflow-visible` so the rotating arrow may spill
+// past its (tall, narrow) viewBox. A clipped context like a favicon can't do
+// that, so each shape also carries a square viewBox centred on its rotation
+// centre, large enough to contain the arrow at any rotation plus the outline.
+export const STATION_ARROW_FAVICON_VIEW_BOX = '-300 -120 440 440';
+export const STATION_PEAK_ARROW_FAVICON_VIEW_BOX = '-220 -200 440 440';
+
+const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
+export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
+
+// The arrow carries two readings as a double outline: the gusts colour is the
+// visible outline, drawn over a slightly wider black stroke. SVG strokes are
+// single-valued and centred, so the path is rendered twice in the same rotation
+// group — black underneath, gusts on top — leaving a thin black rim beyond the
+// gusts ring for contrast.
+export const MARKER_CONTRAST_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
+export const MARKER_CONTRAST_OUTLINE_WIDTH = '32';
+export const MARKER_GUSTS_OUTLINE_WIDTH = '16';
+
+export interface StationArrowGeometry {
+  path: string;
+  viewBox: string;
+  rotationCentre: string;
+  faviconViewBox: string;
+}
+
+export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
+  return isPeak
+    ? {
+        path: STATION_PEAK_ARROW_PATH,
+        viewBox: STATION_PEAK_ARROW_VIEW_BOX,
+        rotationCentre: STATION_PEAK_ARROW_ROTATION_CENTRE,
+        faviconViewBox: STATION_PEAK_ARROW_FAVICON_VIEW_BOX,
+      }
+    : {
+        path: STATION_ARROW_PATH,
+        viewBox: STATION_ARROW_VIEW_BOX,
+        rotationCentre: STATION_ARROW_ROTATION_CENTRE,
+        faviconViewBox: STATION_ARROW_FAVICON_VIEW_BOX,
+      };
+}
+
+// A reading older than a day is drawn grey rather than in its wind-speed colour.
+export function colourForWindReading(speed: number, timestamp: number): string {
+  if (!Number.isFinite(timestamp)) {
+    return windToColour(speed);
+  }
+
+  return Date.now() - timestamp > STALE_READING_THRESHOLD
+    ? STALE_STATION_COLOUR
+    : windToColour(speed);
+}

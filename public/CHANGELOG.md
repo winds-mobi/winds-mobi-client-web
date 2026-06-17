@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- The browser tab icon now becomes the selected station's wind arrow — coloured by wind speed and gusts, rotated to the wind direction, and shaped for peaks — so an open station's latest reading is visible at a glance even from another tab. Closing the station restores the default icon.
+
 ## v0.3.0 - 2026-06-16
 
 ### Changed
