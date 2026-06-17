@@ -1,6 +1,8 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { service } from '@ember/service';
 import { on } from '@ember/modifier';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   colourForWindReading,
   MARKER_CONTRAST_OUTLINE_COLOUR,
@@ -20,6 +22,8 @@ export interface MapStationMarkerSignature {
 }
 
 export default class MapStationMarker extends Component<MapStationMarkerSignature> {
+  @service declare settings: SettingsService;
+
   get geometry() {
     return stationArrowGeometry(this.args.station.isPeak);
   }
@@ -89,7 +93,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
           <path
             d={{this.arrowPath}}
             fill={{this.markerColor}}
-            stroke={{this.gustsColor}}
+            stroke={{if this.settings.showGustsOutline this.gustsColor "none"}}
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width={{MARKER_GUSTS_OUTLINE_WIDTH}}

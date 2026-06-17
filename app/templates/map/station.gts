@@ -8,6 +8,7 @@ import type RouterService from '@ember/routing/router-service';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station as StationModel } from 'winds-mobi-client-web/services/store.js';
 
 interface MapStationTemplateSignature {
@@ -21,6 +22,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare mapRefresh: MapRefreshService;
+  @service declare settings: SettingsService;
 
   get stationId() {
     return this.router.currentRoute?.params['station_id'];
@@ -71,9 +73,15 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       {{#if this.station}}
         {{pageTitle this.station.name}}
 
-        {{#in-element this.documentHead insertBefore=null}}
-          <link rel="icon" type="image/svg+xml" href={{this.faviconDataUri}} />
-        {{/in-element}}
+        {{#if this.settings.faviconFollowsStation}}
+          {{#in-element this.documentHead insertBefore=null}}
+            <link
+              rel="icon"
+              type="image/svg+xml"
+              href={{this.faviconDataUri}}
+            />
+          {{/in-element}}
+        {{/if}}
       {{/if}}
 
       <Station @station={{this.station}} />

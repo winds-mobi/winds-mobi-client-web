@@ -1,5 +1,7 @@
 import Service from '@ember/service';
+import { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 export interface SyncRange {
   min: number;
@@ -31,7 +33,11 @@ export interface SyncChart {
 const SYNC_TRIGGER = 'time-series-sync';
 
 export default class TimeSeriesSyncService extends Service {
-  @tracked isSyncEnabled = true;
+  @service declare settings: SettingsService;
+
+  // Seed the live sync state from the persisted preference. The per-panel
+  // switch then overrides it for the rest of the session via `setSyncEnabled`.
+  @tracked isSyncEnabled = this.settings.syncGraphsByDefault;
 
   private charts = new Set<SyncChart>();
   private currentRange?: SyncRange;
