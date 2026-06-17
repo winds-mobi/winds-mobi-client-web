@@ -65,7 +65,7 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
               {{#each NAVBAR_MENU_ITEMS as |item|}}
                 <LinkTo
                   @route={{item.route}}
-                  @activeClass="border-wind-20 bg-wind-5 text-wind-20"
+                  @activeClass="border-wind-20 bg-wind-20 font-semibold text-white shadow-sm hover:bg-wind-20 hover:text-white"
                   data-test-navbar-link={{item.route}}
                   class="inline-flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
                   {{on "click" this.close}}
