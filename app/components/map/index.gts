@@ -120,7 +120,11 @@ export default class Map extends Component<MapSignature> {
   });
   private geolocateControl = new GeolocateControl({
     positionOptions: DEFAULT_POSITION_OPTIONS,
-    fitBoundsOptions: { maxZoom: INITIAL_LOCATION_ZOOM },
+    // The control's own `_updateCamera` runs `fitBounds(..., fitBoundsOptions)`
+    // on every fix. `animate: false` makes it settle instantly so the initial
+    // auto-center (and any later manual click) draws straight at the user's
+    // location rather than animating a pan/zoom in from the default view (#55).
+    fitBoundsOptions: { maxZoom: INITIAL_LOCATION_ZOOM, animate: false },
     showAccuracyCircle: true,
     showUserLocation: true,
     // Locate on demand rather than continuously tracking — we recenter the routed
