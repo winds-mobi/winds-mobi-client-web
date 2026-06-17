@@ -6,7 +6,7 @@ import StationSectionCard from 'winds-mobi-client-web/components/station/section
 import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
-import SettingsShowcaseFade from 'winds-mobi-client-web/components/settings/showcase/fade';
+import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseGraphSync from 'winds-mobi-client-web/components/settings/showcase/graph-sync';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -47,8 +47,10 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
               />
             </SettingsRow>
 
-            <SettingsRow @settings={{this.settings}} @name="fadeOldData">
-              <SettingsShowcaseFade @enabled={{this.settings.fadeOldData}} />
+            <SettingsRow @settings={{this.settings}} @name="shrinkOldData">
+              <SettingsShowcaseShrink
+                @enabled={{this.settings.shrinkOldData}}
+              />
             </SettingsRow>
 
             <SettingsRow

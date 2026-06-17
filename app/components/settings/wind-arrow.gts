@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import {
   colourForWindReading,
+  MARKER_BODY_WIDTH,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   STATION_ARROW_HUB_RADIUS,
@@ -15,8 +16,8 @@ export interface SettingsWindArrowSignature {
     // When true, and the gusts fall in a different wind band than the average,
     // the hub is recoloured with the gusts colour — mirroring the on-map marker.
     showGusts: boolean;
-    // Whole-arrow opacity, mirroring the on-map age fade. Defaults to opaque.
-    opacity?: number;
+    // Whole-arrow scale, mirroring the on-map age shrink. Defaults to full size.
+    scale?: number;
   };
   Element: SVGSVGElement;
 }
@@ -41,8 +42,18 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
     return this.args.showGusts && this.gustsColor !== this.markerColor;
   }
 
-  get rotationTransform() {
-    return `rotate(${this.args.direction} ${this.geometry.rotationCentre})`;
+  // Rotate to the wind direction and, when scaled, shrink about the same hub
+  // centre so the arrow gets smaller in place — mirroring the on-map marker.
+  get markerTransform() {
+    const centre = this.geometry.rotationCentre;
+    const rotate = `rotate(${this.args.direction} ${centre})`;
+    const scale = this.args.scale ?? 1;
+    if (scale === 1) {
+      return rotate;
+    }
+
+    const [cx = 0, cy = 0] = centre.split(' ').map(Number);
+    return `${rotate} translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
   }
 
   <template>
@@ -52,10 +63,7 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
       viewBox={{this.geometry.viewBox}}
       ...attributes
     >
-      <g
-        opacity={{if @opacity @opacity 1}}
-        transform={{this.rotationTransform}}
-      >
+      <g transform={{this.markerTransform}}>
         {{#if this.showGustsHub}}
           <circle
             cx={{this.geometry.hubCx}}
@@ -66,12 +74,19 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
         {{/if}}
         <path
           d={{this.geometry.path}}
-          fill={{this.markerColor}}
-          paint-order="stroke"
+          fill="none"
           stroke={{MARKER_PLAIN_OUTLINE_COLOUR}}
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width={{MARKER_OUTLINE_WIDTH}}
+        />
+        <path
+          d={{this.geometry.path}}
+          fill={{this.markerColor}}
+          stroke={{this.markerColor}}
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width={{MARKER_BODY_WIDTH}}
         />
       </g>
     </svg>

@@ -21,8 +21,8 @@ export interface SettingsShowcaseFaviconSignature {
         <SettingsWindArrow
           class="h-4 w-4"
           @direction={{135}}
-          @speed={{18}}
-          @gusts={{32}}
+          @speed={{15}}
+          @gusts={{40}}
           @showGusts={{true}}
         />
       {{else}}

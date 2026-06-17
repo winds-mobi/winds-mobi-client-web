@@ -4,11 +4,11 @@
 
 ### Added
 
-- A new "Gradually fade off old data" setting (on by default) makes each station's wind arrow more transparent the older its last reading is, so fresh stations stand out and stale ones recede. The faintest, oldest readings stay at least a quarter visible, and you can turn the fade off in Settings.
+- A new "Make old data's arrows smaller" setting (on by default) shrinks each station's wind arrow the older its last reading is, so fresh stations stand out and stale ones recede. The oldest readings stay at least half size, and you can turn it off in Settings.
 
 ### Changed
 
-- Station wind arrows are now drawn larger and bolder so they're easier to read on the map, with a clean black hairline outline. The gust reading is shown by filling the arrow's centre circle with the gust's wind-band colour — but only when the gusts are stronger than the average, so the centre lights up only when it adds information. (The setting is now "Highlight gusts in the arrow centre".)
+- Station wind arrows now have a rounder, chubbier shape with a clean black hairline outline, making them friendlier and easier to read on the map. The gust reading is shown by filling the arrow's centre circle with the gust's wind-band colour — but only when the gusts reach a higher wind-speed colour band than the average, so the centre lights up only when it adds information. (The setting is now "Highlight gusts in the arrow centre".)
 
 ### Fixed
 

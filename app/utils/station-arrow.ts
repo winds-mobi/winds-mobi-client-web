@@ -28,14 +28,18 @@ export const STATION_PEAK_ARROW_FAVICON_VIEW_BOX = '-220 -200 440 440';
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';
 
-// Every arrow always carries the same plain black hairline outline; it just
-// separates the marker from the map and never changes. `paint-order="stroke"`
-// paints the stroke first and the fill on top, so the fill covers the inner
-// half of the stroke and only its outer half shows — the outline grows outward
-// instead of eating into the arrow body. The outline stays hairline even though
-// the marker is drawn larger (see the marker's `h-*`/`w-*`).
+// The arrow shape is inflated to read chubby and friendly rather than thin and
+// spiky. It is drawn as two stacked strokes of the *same* path, with round joins
+// and caps so the silhouette swells out and rounds off:
+//   1. a black outline stroke (MARKER_OUTLINE_WIDTH), then
+//   2. a slightly narrower wind-colour stroke (MARKER_BODY_WIDTH) on top.
+// The wind-colour stroke fattens the body outward; the black stroke peeking
+// beyond it by `(MARKER_OUTLINE_WIDTH - MARKER_BODY_WIDTH) / 2` is the hairline
+// outline. Both strokes are centred on the path, so the same swelling applies to
+// the hub hole, where it frames the gusts disc with a matching black hairline.
 export const MARKER_PLAIN_OUTLINE_COLOUR = 'rgb(0, 0, 0)';
-export const MARKER_OUTLINE_WIDTH = '12';
+export const MARKER_OUTLINE_WIDTH = '44';
+export const MARKER_BODY_WIDTH = '32';
 
 // The hub baked into each arrow path is a hole (the inner circle winds opposite
 // the body, so the non-zero fill rule punches it out). The gust reading is shown
@@ -51,7 +55,7 @@ export interface StationArrowGeometry {
   rotationCentre: string;
   faviconViewBox: string;
   // Centre of the hub circle baked into the path (in the shape's own units),
-  // around which the gusts ring is drawn.
+  // around which the gusts disc is drawn.
   hubCx: number;
   hubCy: number;
 }
@@ -76,26 +80,27 @@ export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
       };
 }
 
-// Fresh readings are drawn fully opaque; older ones fade toward this floor so
-// stale stations recede on the map without ever vanishing. The floor keeps even
-// day-old stations (already greyed by `colourForWindReading`) faintly visible.
-export const MIN_MARKER_OPACITY = 0.25;
+// Fresh readings are drawn full size; older ones shrink toward this floor so
+// stale stations recede on the map without becoming too small to see or click.
+// The floor keeps even day-old stations (already greyed by `colourForWindReading`)
+// at half size rather than vanishing.
+export const MIN_MARKER_SCALE = 0.5;
 
-// Once a reading reaches this age it sits at the opacity floor; everything older
-// stays there. Readings fade along a cubic ease-in between fresh and this age.
-const MARKER_FULLY_FADED_AGE = 30 * 60 * 1000;
+// Once a reading reaches this age it sits at the size floor; everything older
+// stays there. Readings shrink along a cubic ease-in between fresh and this age.
+const MARKER_FULLY_SHRUNK_AGE = 30 * 60 * 1000;
 
-// The fade follows `progress^EXPONENT`, so a higher exponent keeps the arrow
-// near-opaque early and concentrates the drop near the end. Cubic (3) holds the
-// first ~third of the window almost fully opaque then falls away quickly, giving
-// the target feel: ≈1.0 at 10 min, ≈0.78 at 20 min, dropping to the floor by 30.
-const MARKER_FADE_EXPONENT = 3;
+// The shrink follows `progress^EXPONENT`, so a higher exponent keeps the arrow
+// near-full-size early and concentrates the shrink near the end. Cubic (3) holds
+// the first ~third of the window almost full size then falls away quickly, giving
+// the target feel: ≈1.0 at 10 min, ≈0.85 at 20 min, dropping to the floor by 30.
+const MARKER_SHRINK_EXPONENT = 3;
 
-// Opacity for a reading of the given age (epoch ms): fully opaque when fresh,
-// holding near-opaque for the first several minutes and then dropping faster
-// toward MIN_MARKER_OPACITY as it nears MARKER_FULLY_FADED_AGE. Future or
-// unknown timestamps are treated as fully fresh.
-export function opacityForReadingAge(timestamp: number): number {
+// Scale for a reading of the given age (epoch ms): full size when fresh, holding
+// near-full-size for the first several minutes and then shrinking faster toward
+// MIN_MARKER_SCALE as it nears MARKER_FULLY_SHRUNK_AGE. Future or unknown
+// timestamps are treated as fully fresh.
+export function scaleForReadingAge(timestamp: number): number {
   if (!Number.isFinite(timestamp)) {
     return 1;
   }
@@ -105,9 +110,9 @@ export function opacityForReadingAge(timestamp: number): number {
     return 1;
   }
 
-  const progress = Math.min(1, age / MARKER_FULLY_FADED_AGE);
-  const fade = progress ** MARKER_FADE_EXPONENT;
-  return 1 - (1 - MIN_MARKER_OPACITY) * fade;
+  const progress = Math.min(1, age / MARKER_FULLY_SHRUNK_AGE);
+  const shrink = progress ** MARKER_SHRINK_EXPONENT;
+  return 1 - (1 - MIN_MARKER_SCALE) * shrink;
 }
 
 // A reading older than a day is drawn grey rather than in its wind-speed colour.

@@ -29,15 +29,16 @@ settings:
   showGustsOutline:
     label: Highlight gusts in the arrow centre
     description: >-
-      When a station's gusts are stronger than its average wind, fill the
-      arrow's centre circle with the gust's wind-band colour, so the marker
-      shows both readings at once. Turn off to keep every arrow a single colour.
-  fadeOldData:
-    label: Gradually fade off old data
+      When a station's gusts reach a higher wind-speed colour band than its
+      average wind, fill the arrow's centre circle with the gust's colour, so the
+      marker shows both readings at once. Turn off to keep every arrow a single
+      colour.
+  shrinkOldData:
+    label: Make old data's arrows smaller
     description: >-
-      Make each wind arrow more transparent the older its last reading is, so
-      fresh stations stand out and stale ones recede. Recent readings stay
-      opaque; the oldest never fade below a quarter visible.
+      Shrink each wind arrow the older its last reading is, so fresh stations
+      stand out and stale ones recede. Recent readings stay full size; the
+      oldest never shrink below half size.
   syncGraphsByDefault:
     label: Sync wind & air graphs
     description: >-

@@ -14,7 +14,7 @@ class FakeStoreService extends Service {
 const STORAGE_KEYS = [
   'settings.faviconFollowsStation',
   'settings.showGustsOutline',
-  'settings.fadeOldData',
+  'settings.shrinkOldData',
   'settings.syncGraphsByDefault',
 ];
 
@@ -36,7 +36,7 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
     assert.dom('[data-test-setting="faviconFollowsStation"]').isChecked();
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
-    assert.dom('[data-test-setting="fadeOldData"]').isChecked();
+    assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="syncGraphsByDefault"]').isChecked();
   });
 

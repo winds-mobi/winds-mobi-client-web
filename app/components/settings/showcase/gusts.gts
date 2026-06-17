@@ -19,8 +19,8 @@ export interface SettingsShowcaseGustsSignature {
     <SettingsWindArrow
       class="h-16 w-16"
       @direction={{135}}
-      @speed={{18}}
-      @gusts={{38}}
+      @speed={{15}}
+      @gusts={{40}}
       @showGusts={{@enabled}}
     />
   </div>
