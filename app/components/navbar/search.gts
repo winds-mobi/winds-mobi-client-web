@@ -257,50 +257,46 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
         {{#if this.isPopoverOpen}}
           <popover.Content
             @blockScroll={{false}}
-            @class="p-0"
+            @class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-xl shadow-slate-900/12"
             @closeOnEscapeKey={{true}}
             @closeOnOutsideClick={{true}}
             @disableFocusTrap={{true}}
             @preventAutoFocus={{true}}
             @size="trigger"
           >
-            <div
-              class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/12"
-            >
-              {{#if this.isLoading}}
-                <p
-                  data-test-navbar-search-loading
-                  class="px-4 py-3 text-sm font-medium text-slate-500"
-                >
-                  {{t "navigation.search.loading"}}
-                </p>
-              {{else if this.results.length}}
-                <ul
-                  aria-label={{t "navigation.search.label"}}
-                  data-test-navbar-search-results
-                  role="listbox"
-                  class="max-h-80 overflow-y-auto p-1"
-                >
-                  {{#each this.results as |station index|}}
-                    <li role="presentation">
-                      <NavbarSearchResult
-                        @isActive={{this.isActiveResult index}}
-                        @onActivate={{fn this.activateResult index}}
-                        @onSelect={{fn this.selectStation station}}
-                        @station={{station}}
-                      />
-                    </li>
-                  {{/each}}
-                </ul>
-              {{else if this.hasNoResults}}
-                <p
-                  data-test-navbar-search-empty
-                  class="px-4 py-3 text-sm font-medium text-slate-500"
-                >
-                  {{t "navigation.search.empty"}}
-                </p>
-              {{/if}}
-            </div>
+            {{#if this.isLoading}}
+              <p
+                data-test-navbar-search-loading
+                class="px-4 py-3 text-sm font-medium text-slate-500"
+              >
+                {{t "navigation.search.loading"}}
+              </p>
+            {{else if this.results.length}}
+              <ul
+                aria-label={{t "navigation.search.label"}}
+                data-test-navbar-search-results
+                role="listbox"
+                class="max-h-80 overflow-y-auto p-1"
+              >
+                {{#each this.results as |station index|}}
+                  <li role="presentation">
+                    <NavbarSearchResult
+                      @isActive={{this.isActiveResult index}}
+                      @onActivate={{fn this.activateResult index}}
+                      @onSelect={{fn this.selectStation station}}
+                      @station={{station}}
+                    />
+                  </li>
+                {{/each}}
+              </ul>
+            {{else if this.hasNoResults}}
+              <p
+                data-test-navbar-search-empty
+                class="px-4 py-3 text-sm font-medium text-slate-500"
+              >
+                {{t "navigation.search.empty"}}
+              </p>
+            {{/if}}
           </popover.Content>
         {{/if}}
       </Popover>

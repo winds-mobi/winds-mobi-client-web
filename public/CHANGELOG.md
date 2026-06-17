@@ -4,10 +4,13 @@
 
 ### Added
 
+- A new Settings page (reachable from the menu on desktop and mobile) lets you customise the interface, with a live preview of each option beside it. You can choose whether the browser tab shows the selected station, whether wind gusts are drawn as an arrow outline on the map, and whether station graphs start synced. Your choices are saved in this browser.
 - The browser tab icon now becomes the selected station's wind arrow — coloured by wind speed and gusts, rotated to the wind direction, and shaped for peaks — so an open station's latest reading is visible at a glance even from another tab. Closing the station restores the default icon.
 
 ### Changed
 
+- The currently selected navigation item is now clearly highlighted with a solid background on both the desktop top bar and the mobile menu, so it's obvious which page you're on.
+- The navbar search results now appear in a single clean panel (previously two overlapping boxes with mismatched rounded corners), and the search field placeholder is shortened to "Search".
 - Station search now favors stations near you when your location is already known, so the closest matches rise to the top instead of results being ranked by name alone (your location is never requested just to search).
 
 ## v0.3.0 - 2026-06-16

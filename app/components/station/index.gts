@@ -3,14 +3,12 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
-import { Switch } from '@frontile/forms';
 import StationHeader from './header';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
+import StationSyncToggle from './sync-toggle';
 import { t } from 'ember-intl';
-import LockSimple from 'ember-phosphor-icons/components/ph-lock-simple';
-import LockSimpleOpen from 'ember-phosphor-icons/components/ph-lock-simple-open';
 import {
   parseMapView,
   serializeMapView,
@@ -85,21 +83,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <StationWind @stationId={{@station.id}} />
             <StationAir @stationId={{@station.id}} />
             <div class="flex">
-              <Switch
+              <StationSyncToggle
                 @isSelected={{this.isTimeSeriesSyncEnabled}}
                 @onChange={{this.toggleTimeSeriesSync}}
-                @intent="success"
-                @label={{t "station.timeSeries.sync"}}
-                aria-label={{t "station.timeSeries.syncToggle"}}
-              >
-                <:startContent>
-                  <LockSimple @size={{14}} />
-                </:startContent>
-
-                <:endContent>
-                  <LockSimpleOpen @size={{14}} />
-                </:endContent>
-              </Switch>
+              />
             </div>
           </div>
         {{/if}}

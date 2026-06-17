@@ -8,12 +8,38 @@ navigation:
   menu: Menu
   map: Map
   nearby: Nearby
+  settings: Settings
   help: Help
   search:
     label: Search stations
-    placeholder: Search stations
+    placeholder: Search
     loading: Searching stations…
     empty: No stations found.
+
+settings:
+  title: Settings
+  intro: >-
+    Personalise how winds.mobi looks and behaves. These preferences are stored
+    in this browser only and take effect right away.
+  faviconFollowsStation:
+    label: Selected station in the browser tab
+    description: >-
+      Replace the browser-tab icon with the open station's wind arrow, so its
+      latest reading is visible at a glance from another tab.
+  showGustsOutline:
+    label: Show gusts as arrow outline
+    description: >-
+      Draw a second, gusts-coloured outline around each wind arrow on the map.
+      Turn off for a simpler arrow showing average wind only.
+  syncGraphsByDefault:
+    label: Sync wind & air graphs
+    description: >-
+      Open station panels with the wind and air graphs sharing one time range,
+      so zooming or panning one moves the other. You can still unlink them per
+      station.
+  preview:
+    graphWind: Wind
+    graphAir: Air
 
 help:
   title: Help

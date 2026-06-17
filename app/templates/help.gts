@@ -39,7 +39,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
       <div
         class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
       >
-        <StationSectionCard @title={{t "help.title"}}>
+        <StationSectionCard @title={{t "help.title"}} @titleClass="sr-only">
           <div class="grid gap-3">
             <p class="max-w-3xl text-sm leading-6 text-slate-600">
               {{t "help.intro"}}
