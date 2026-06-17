@@ -10,6 +10,7 @@
 
 ### Changed
 
+- Wind arrows on the map now keep pointing at true compass directions when you rotate the map, and lie flat on the terrain when you tilt into 3D, instead of staying fixed to the screen and pointing the wrong way.
 - The currently selected navigation item is now clearly highlighted with a solid background on both the desktop top bar and the mobile menu, so it's obvious which page you're on.
 - The navbar search results now appear in a single clean panel (previously two overlapping boxes with mismatched rounded corners), and the search field placeholder is shortened to "Search".
 - Station search now favors stations near you when your location is already known, so the closest matches rise to the top instead of results being ranked by name alone (your location is never requested just to search).
