@@ -1,20 +1,20 @@
 import { array } from '@ember/helper';
 import { t } from 'ember-intl';
-import Link from 'ember-phosphor-icons/components/ph-link';
-import LinkBreak from 'ember-phosphor-icons/components/ph-link-break';
+import StationSyncToggle from 'winds-mobi-client-web/components/station/sync-toggle';
 
 export interface SettingsShowcaseGraphSyncSignature {
   Args: {
     enabled: boolean;
+    onChange: (value: boolean) => void;
   };
   Element: HTMLDivElement;
 }
 
-// Two stacked mini graphs (wind + air). When synced, a single shared vertical
-// cursor crosses both at the same time; when not, each has its own. A link /
-// broken-link badge sits between them.
+// Two stacked mini graphs (wind + air): when synced they share one vertical
+// cursor, otherwise each has its own. Below them sits the same "Sync" toggle
+// used in the station detail panel, reflecting (and driving) the preference.
 <template>
-  <div class="relative grid gap-2 rounded-lg bg-slate-100 p-3" ...attributes>
+  <div class="grid gap-2 rounded-lg bg-slate-100 p-3" ...attributes>
     {{#each
       (array (t "settings.preview.graphWind") (t "settings.preview.graphAir"))
       as |label index|
@@ -46,15 +46,8 @@ export interface SettingsShowcaseGraphSyncSignature {
       </div>
     {{/each}}
 
-    <span
-      class="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 shadow-sm"
-      aria-hidden="true"
-    >
-      {{#if @enabled}}
-        <Link @size={{14}} />
-      {{else}}
-        <LinkBreak @size={{14}} />
-      {{/if}}
-    </span>
+    <div class="flex justify-center pt-1">
+      <StationSyncToggle @isSelected={{@enabled}} @onChange={{@onChange}} />
+    </div>
   </div>
 </template>

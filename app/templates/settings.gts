@@ -41,7 +41,7 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
       <div
         class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
       >
-        <StationSectionCard @title={{t "settings.title"}}>
+        <StationSectionCard @title={{t "settings.title"}} @titleClass="sr-only">
           <p class="max-w-2xl text-sm leading-6 text-slate-600">
             {{t "settings.intro"}}
           </p>
@@ -100,6 +100,7 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
               </div>
               <SettingsShowcaseGraphSync
                 @enabled={{this.settings.syncGraphsByDefault}}
+                @onChange={{this.setSyncGraphsByDefault}}
               />
             </div>
           </dl>

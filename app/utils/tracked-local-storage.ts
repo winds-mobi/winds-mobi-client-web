@@ -87,7 +87,6 @@ interface FieldDescriptor {
  * standard-decorator tsconfig; the property's type still comes from its
  * initializer.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function trackedInLocalStorage(
   options: TrackedLocalStorageOptions = {}
 ): any {
@@ -97,7 +96,7 @@ export function trackedInLocalStorage(
     descriptor?: FieldDescriptor
   ) {
     const key = options.keyName ?? propertyKey;
-    const seed = () => readStored(key, descriptor?.initializer?.() as unknown);
+    const seed = () => readStored(key, descriptor?.initializer?.());
 
     return {
       get(): unknown {
@@ -106,7 +105,7 @@ export function trackedInLocalStorage(
 
       set(value: unknown) {
         const cell = cellFor(key, seed);
-        const defaultValue = descriptor?.initializer?.() as unknown;
+        const defaultValue = descriptor?.initializer?.();
 
         if (value === defaultValue) {
           safeRemove(key);
