@@ -9,6 +9,7 @@ import type {
 import type { QueryParamsSource } from '@warp-drive/core/types/params';
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
+import type { Coordinates } from 'winds-mobi-client-web/utils/location';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
@@ -144,7 +145,7 @@ function nearbyQuery<T>(
 function searchQuery<T>(
   type: string,
   search: string,
-  near?: { latitude: number; longitude: number },
+  near?: Coordinates,
   limit = 8,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {

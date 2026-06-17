@@ -1,11 +1,12 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
-import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
+import {
+  type Coordinates,
+  DEFAULT_POSITION_OPTIONS,
+} from 'winds-mobi-client-web/utils/location';
 
-export type NearbyCoordinates = {
+export type NearbyCoordinates = Coordinates & {
   accuracy: number;
-  latitude: number;
-  longitude: number;
 };
 
 export type NearbyLocationErrorCode =
