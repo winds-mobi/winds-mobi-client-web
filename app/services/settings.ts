@@ -26,6 +26,16 @@ export default class SettingsService extends Service {
   syncGraphsByDefault = true;
 }
 
+// The boolean preferences, named so the settings UI can drive each one through a
+// single generic row (read `settings[key]`, write `settings[key] = value`) and a
+// matching `settings.<key>.{label,description}` translation. Keep this union in
+// step with the fields above when adding a preference.
+export type BooleanSettingKey =
+  | 'faviconFollowsStation'
+  | 'showGustsOutline'
+  | 'fadeOldData'
+  | 'syncGraphsByDefault';
+
 declare module '@ember/service' {
   interface Registry {
     settings: SettingsService;
