@@ -4,7 +4,7 @@
 
 ### Added
 
-- A new "Make old data's arrows smaller" setting (on by default) shrinks each station's wind arrow the older its last reading is, so fresh stations stand out and stale ones recede. The oldest readings stay at least half size, and you can turn it off in Settings.
+- A new "Make old data's arrows smaller" setting (on by default) shrinks each station's wind arrow the older its last reading is, so fresh stations stand out and stale ones recede. Arrows scale down evenly from full size now to half size at 30 minutes and never shrink below half, and you can turn it off in Settings.
 
 ### Changed
 
