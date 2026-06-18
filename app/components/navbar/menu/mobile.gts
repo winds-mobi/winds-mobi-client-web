@@ -1,12 +1,14 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import { on } from '@ember/modifier';
+import { service } from '@ember/service';
 import { LinkTo } from '@ember/routing';
+import type RouterService from '@ember/routing/router-service';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
+import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import { NAVBAR_MENU_ITEMS } from './items';
 
 export interface NavbarMenuMobileSignature {
@@ -18,6 +20,8 @@ export interface NavbarMenuMobileSignature {
 }
 
 export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
+  @service declare router: RouterService;
+
   @tracked isOpen = false;
 
   @action
@@ -31,7 +35,11 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
   }
 
   <template>
-    <div class="md:hidden">
+    {{! Closes the drawer reactively once a transition actually completes, rather
+      than racing a click listener against LinkTo's own click handling on the same
+      element — that race could let the browser's native anchor navigation win,
+      causing a full page reload instead of an in-app transition. }}
+    <div class="md:hidden" {{onRouteChange this.router this.close}}>
       <Button
         aria-label={{t "navigation.menu"}}
         data-test-navbar-mobile-menu-button
@@ -68,7 +76,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
                   @activeClass="border-wind-20 bg-wind-20 font-semibold text-white shadow-sm hover:bg-wind-20 hover:text-white"
                   data-test-navbar-link={{item.route}}
                   class="inline-flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                  {{on "click" this.close}}
                 >
                   <item.icon @size={{16}} />
                   <span>{{t item.labelKey}}</span>

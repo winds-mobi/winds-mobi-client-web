@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Shareable map links now use clearer `longitude`/`latitude`/`zoom` web-address parameters (previously `mapLng`/`mapLat`/`mapZoom`). Map links you bookmarked or shared before this release will open the default view instead of the saved one — re-share or re-bookmark them to capture the new format.
+- Clicking a station marker on the map now opens its detail panel without moving the map, rather than always recentering on it. Click the station's name in the panel if you want to center the map on it.
+
+### Fixed
+
+- Choosing a page from the mobile menu could occasionally reload the whole app instead of navigating within it; it now always navigates in place.
+
 ## v.0.5.0 - 2026-06-18
 
 ### Added
@@ -8,13 +19,12 @@
 
 ### Changed
 
-- Shareable map links now use clearer `longitude`/`latitude`/`zoom` web-address parameters (previously `mapLng`/`mapLat`/`mapZoom`). Map links you bookmarked or shared before this release will open the default view instead of the saved one — re-share or re-bookmark them to capture the new format.
 - Station wind arrows now have a rounder, chubbier shape with a clean black hairline outline, making them friendlier and easier to read on the map. The gust reading is shown by filling the arrow's centre circle with the gust's wind-band colour — but only when the gusts reach a higher wind-speed colour band than the average, so the centre lights up only when it adds information. (The setting is now "Highlight gusts in the arrow centre".)
-- Clicking a station marker on the map now opens its detail panel without moving the map, instead of sometimes recentering and sometimes not. Click the station's name in the panel if you want to center the map on it.
 
 ### Fixed
 
 - When the map opens centered on your location, it now draws straight there instead of animating a pan and zoom in from the country-wide view.
+- Clicking a station on the map now smoothly pans so it's centered in the map area beside the detail panel, instead of often staying off to the side.
 
 ## v0.4.0 - 2026-06-17
 
