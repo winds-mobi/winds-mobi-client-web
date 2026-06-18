@@ -338,9 +338,10 @@ export default class Map extends Component<MapSignature> {
     // own `resize` event is the only signal that fires once the container has
     // actually settled (a route transition resolves before layout/resize, which
     // is why sequencing the camera move on the transition raced and failed — #61).
-    // Re-centering on the routed view is idempotent, so unrelated resizes (window
-    // resize, the initial canvas settle) are no-ops.
-    event.target.jumpTo(this.flyToOptions);
+    // `easeTo` glides to the centered position rather than snapping. Re-centering
+    // on the routed view is idempotent, so unrelated resizes (window resize, the
+    // initial canvas settle) ease to where the map already is — visually a no-op.
+    event.target.easeTo(this.flyToOptions);
   }
 
   @action
