@@ -13,6 +13,9 @@ pnpm-debug.log*
 Dockerfile
 .dockerignore
 
+# editor files
+.vscode
+
 # OS files
 .DS_Store
 Thumbs.db
