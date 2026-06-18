@@ -27,10 +27,18 @@ settings:
       Replace the browser-tab icon with the open station's wind arrow, so its
       latest reading is visible at a glance from another tab.
   showGustsOutline:
-    label: Show gusts as arrow outline
+    label: Highlight gusts in the arrow centre
     description: >-
-      Draw a second, gusts-coloured outline around each wind arrow on the map.
-      Turn off for a simpler arrow showing average wind only.
+      When a station's gusts reach a higher wind-speed colour band than its
+      average wind, fill the arrow's centre circle with the gust's colour, so the
+      marker shows both readings at once. Turn off to keep every arrow a single
+      colour.
+  shrinkOldData:
+    label: Make old data's arrows smaller
+    description: >-
+      Shrink each wind arrow the older its last reading is, so fresh stations
+      stand out and stale ones recede. Arrows scale linearly from full size
+      now down to half size at 30 minutes, and never shrink below half size.
   syncGraphsByDefault:
     label: Sync wind & air graphs
     description: >-

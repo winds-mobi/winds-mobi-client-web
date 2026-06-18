@@ -1,9 +1,9 @@
 import Component from '@glimmer/component';
 import {
+  ARROW_DIRECTION_OFFSET,
   colourForWindReading,
-  MARKER_CONTRAST_OUTLINE_COLOUR,
-  MARKER_CONTRAST_OUTLINE_WIDTH,
-  MARKER_GUSTS_OUTLINE_WIDTH,
+  MARKER_OUTLINE_WIDTH,
+  MARKER_PLAIN_OUTLINE_COLOUR,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 
@@ -12,18 +12,20 @@ export interface SettingsWindArrowSignature {
     direction: number;
     speed: number;
     gusts: number;
-    // When false the gusts-coloured outline is hidden, leaving the plain
-    // black-rimmed wind-speed arrow — mirroring the on-map marker.
+    // When true, and the gusts fall in a different wind band than the average,
+    // the hub is recoloured with the gusts colour — mirroring the on-map marker.
     showGusts: boolean;
+    // Whole-arrow scale, mirroring the on-map age shrink. Defaults to full size.
+    scale?: number;
   };
   Element: SVGSVGElement;
 }
 
 // Presentational copy of the on-map station arrow used to give the settings
 // page a live preview. It deliberately mirrors [map/station-marker.gts]: the
-// same geometry, the black contrast under-stroke, and the gusts outline on top.
-// The reading is a fixed sample (now-dated, so colours are never the stale
-// grey) since the preview illustrates the toggle, not real data.
+// same geometry, a plain black hairline outline, and a gusts-coloured disc
+// behind the arrow (shown through the hub hole) when the gusts band differs. The
+// reading is a fixed sample (now-dated, so colours are never the stale grey).
 export default class SettingsWindArrow extends Component<SettingsWindArrowSignature> {
   geometry = stationArrowGeometry(false);
 
@@ -35,8 +37,23 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
     return colourForWindReading(this.args.gusts, Date.now());
   }
 
-  get rotationTransform() {
-    return `rotate(${this.args.direction} ${this.geometry.rotationCentre})`;
+  get showGustsHub() {
+    return this.args.showGusts && this.gustsColor !== this.markerColor;
+  }
+
+  // Rotate to the wind direction and, when scaled, shrink about the same hub
+  // centre so the arrow gets smaller in place — mirroring the on-map marker.
+  get markerTransform() {
+    const centre = this.geometry.rotationCentre;
+    const angle = this.args.direction + ARROW_DIRECTION_OFFSET;
+    const rotate = `rotate(${angle} ${centre})`;
+    const scale = this.args.scale ?? 1;
+    if (scale === 1) {
+      return rotate;
+    }
+
+    const [cx = 0, cy = 0] = centre.split(' ').map(Number);
+    return `${rotate} translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
   }
 
   <template>
@@ -46,22 +63,18 @@ export default class SettingsWindArrow extends Component<SettingsWindArrowSignat
       viewBox={{this.geometry.viewBox}}
       ...attributes
     >
-      <g transform={{this.rotationTransform}}>
+      <g transform={{this.markerTransform}}>
+        {{#if this.showGustsHub}}
+          <path d={{this.geometry.gustsPath}} fill={{this.gustsColor}} />
+        {{/if}}
         <path
           d={{this.geometry.path}}
           fill={{this.markerColor}}
-          stroke={{MARKER_CONTRAST_OUTLINE_COLOUR}}
+          paint-order="stroke"
+          stroke={{MARKER_PLAIN_OUTLINE_COLOUR}}
           stroke-linecap="round"
           stroke-linejoin="round"
-          stroke-width={{MARKER_CONTRAST_OUTLINE_WIDTH}}
-        />
-        <path
-          d={{this.geometry.path}}
-          fill={{this.markerColor}}
-          stroke={{if @showGusts this.gustsColor "none"}}
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width={{MARKER_GUSTS_OUTLINE_WIDTH}}
+          stroke-width={{MARKER_OUTLINE_WIDTH}}
         />
       </g>
     </svg>

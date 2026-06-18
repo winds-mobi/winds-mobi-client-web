@@ -14,6 +14,7 @@ class FakeStoreService extends Service {
 const STORAGE_KEYS = [
   'settings.faviconFollowsStation',
   'settings.showGustsOutline',
+  'settings.shrinkOldData',
   'settings.syncGraphsByDefault',
 ];
 
@@ -29,12 +30,13 @@ module('Acceptance | settings route', function (hooks) {
     STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
-  test('it shows the three preferences, on by default', async function (assert) {
+  test('it shows the four preferences, on by default', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
     assert.dom('[data-test-setting="faviconFollowsStation"]').isChecked();
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
+    assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="syncGraphsByDefault"]').isChecked();
   });
 

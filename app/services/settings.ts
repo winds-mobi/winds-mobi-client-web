@@ -15,11 +15,26 @@ export default class SettingsService extends Service {
   @trackedInLocalStorage({ keyName: 'settings.showGustsOutline' })
   showGustsOutline = true;
 
+  // Shrink each wind arrow as its reading ages, so fresh stations stand out and
+  // stale ones recede (never below half size).
+  @trackedInLocalStorage({ keyName: 'settings.shrinkOldData' })
+  shrinkOldData = true;
+
   // Whether a freshly opened station panel starts with its wind and air graphs
   // synced. The per-panel switch remains the live override for that session.
   @trackedInLocalStorage({ keyName: 'settings.syncGraphsByDefault' })
   syncGraphsByDefault = true;
 }
+
+// The boolean preferences, named so the settings UI can drive each one through a
+// single generic row (read `settings[key]`, write `settings[key] = value`) and a
+// matching `settings.<key>.{label,description}` translation. Keep this union in
+// step with the fields above when adding a preference.
+export type BooleanSettingKey =
+  | 'faviconFollowsStation'
+  | 'showGustsOutline'
+  | 'shrinkOldData'
+  | 'syncGraphsByDefault';
 
 declare module '@ember/service' {
   interface Registry {

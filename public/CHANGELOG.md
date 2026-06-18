@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- A new "Make old data's arrows smaller" setting (on by default) shrinks each station's wind arrow the older its last reading is, so fresh stations stand out and stale ones recede. Arrows scale down evenly from full size now to half size at 30 minutes and never shrink below half, and you can turn it off in Settings.
+
+### Changed
+
+- Station wind arrows now have a rounder, chubbier shape with a clean black hairline outline, making them friendlier and easier to read on the map. The gust reading is shown by filling the arrow's centre circle with the gust's wind-band colour — but only when the gusts reach a higher wind-speed colour band than the average, so the centre lights up only when it adds information. (The setting is now "Highlight gusts in the arrow centre".)
+
 ### Fixed
 
 - When the map opens centered on your location, it now draws straight there instead of animating a pan and zoom in from the country-wide view.

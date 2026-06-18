@@ -4,6 +4,7 @@ import { extensions, classicEmberSupport, ember } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
 import { loadTranslations } from '@ember-intl/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { stationArrows } from './build/vite-plugin-station-arrows.mjs';
 
 const DEFAULT_APP_URL = 'http://127.0.0.1:4200';
 
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     classicEmberSupport(),
     ember(), // extra plugins here
+    stationArrows(),
     babel({
       babelHelpers: 'runtime',
       extensions,

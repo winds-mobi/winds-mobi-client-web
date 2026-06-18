@@ -1,12 +1,12 @@
 import Component from '@glimmer/component';
-import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
-import { Switch } from '@frontile/forms';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
+import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
+import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseGraphSync from 'winds-mobi-client-web/components/settings/showcase/graph-sync';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -18,21 +18,6 @@ interface SettingsTemplateSignature {
 
 export default class SettingsTemplate extends Component<SettingsTemplateSignature> {
   @service declare settings: SettingsService;
-
-  @action
-  setFaviconFollowsStation(value: boolean) {
-    this.settings.faviconFollowsStation = value;
-  }
-
-  @action
-  setShowGustsOutline(value: boolean) {
-    this.settings.showGustsOutline = value;
-  }
-
-  @action
-  setSyncGraphsByDefault(value: boolean) {
-    this.settings.syncGraphsByDefault = value;
-  }
 
   <template>
     {{pageTitle (t "settings.title")}}
@@ -47,62 +32,37 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
           </p>
 
           <dl class="mt-4 divide-y divide-slate-200">
-            <div
-              class="grid items-center gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_14rem]"
+            <SettingsRow
+              @settings={{this.settings}}
+              @name="faviconFollowsStation"
             >
-              <div>
-                <Switch
-                  data-test-setting="faviconFollowsStation"
-                  @isSelected={{this.settings.faviconFollowsStation}}
-                  @onChange={{this.setFaviconFollowsStation}}
-                  @intent="success"
-                  @label={{t "settings.faviconFollowsStation.label"}}
-                  @description={{t
-                    "settings.faviconFollowsStation.description"
-                  }}
-                />
-              </div>
               <SettingsShowcaseFavicon
                 @enabled={{this.settings.faviconFollowsStation}}
               />
-            </div>
+            </SettingsRow>
 
-            <div
-              class="grid items-center gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_14rem]"
-            >
-              <div>
-                <Switch
-                  data-test-setting="showGustsOutline"
-                  @isSelected={{this.settings.showGustsOutline}}
-                  @onChange={{this.setShowGustsOutline}}
-                  @intent="success"
-                  @label={{t "settings.showGustsOutline.label"}}
-                  @description={{t "settings.showGustsOutline.description"}}
-                />
-              </div>
+            <SettingsRow @settings={{this.settings}} @name="showGustsOutline">
               <SettingsShowcaseGusts
                 @enabled={{this.settings.showGustsOutline}}
               />
-            </div>
+            </SettingsRow>
 
-            <div
-              class="grid items-center gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_14rem]"
-            >
-              <div>
-                <Switch
-                  data-test-setting="syncGraphsByDefault"
-                  @isSelected={{this.settings.syncGraphsByDefault}}
-                  @onChange={{this.setSyncGraphsByDefault}}
-                  @intent="success"
-                  @label={{t "settings.syncGraphsByDefault.label"}}
-                  @description={{t "settings.syncGraphsByDefault.description"}}
-                />
-              </div>
-              <SettingsShowcaseGraphSync
-                @enabled={{this.settings.syncGraphsByDefault}}
-                @onChange={{this.setSyncGraphsByDefault}}
+            <SettingsRow @settings={{this.settings}} @name="shrinkOldData">
+              <SettingsShowcaseShrink
+                @enabled={{this.settings.shrinkOldData}}
               />
-            </div>
+            </SettingsRow>
+
+            <SettingsRow
+              @settings={{this.settings}}
+              @name="syncGraphsByDefault"
+              as |row|
+            >
+              <SettingsShowcaseGraphSync
+                @enabled={{row.enabled}}
+                @onChange={{row.update}}
+              />
+            </SettingsRow>
           </dl>
         </StationSectionCard>
       </div>
