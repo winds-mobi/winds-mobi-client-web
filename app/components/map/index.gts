@@ -247,18 +247,12 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(station: Station) {
-    // Recenter the routed view on the clicked station, keeping the current zoom.
-    // The declarative fly-to pans there; because opening the panel shrinks the
-    // map container, `handleMapResize` re-asserts this view once the container
-    // settles so the station ends up centered in the area beside the panel,
-    // not the pre-panel one (#52, #61).
-    void this.router.transitionTo('map.station', station.id, {
-      queryParams: {
-        longitude: station.longitude,
-        latitude: station.latitude,
-        zoom: this.mapView.zoom,
-      },
-    });
+    // Opens the panel without moving the map. Recentering here used to race the
+    // panel-open resize of the *already-mounted* map (#61) — clicking a marker
+    // means the station is already visible, so the simplest fix is to not try:
+    // the map stays exactly as the user left it, panel opens in place. Omitting
+    // queryParams leaves the current routed view untouched (Ember's sticky QPs).
+    void this.router.transitionTo('map.station', station.id);
   }
 
   // True on a fresh load where no view is present in the URL, so the routed view
@@ -330,21 +324,6 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleMapResize(event: { target: MaplibreMap }) {
-    // Re-assert the routed view whenever the container changes size — notably
-    // when the detail panel opens (or closes) and reflows the flex layout,
-    // shrinking the map. MapLibre keeps the center pinned across a resize, but
-    // the fly-to that *set* that center ran against the pre-panel size; the map's
-    // own `resize` event is the only signal that fires once the container has
-    // actually settled (a route transition resolves before layout/resize, which
-    // is why sequencing the camera move on the transition raced and failed — #61).
-    // `easeTo` glides to the centered position rather than snapping. Re-centering
-    // on the routed view is idempotent, so unrelated resizes (window resize, the
-    // initial canvas settle) ease to where the map already is — visually a no-op.
-    event.target.easeTo(this.flyToOptions);
-  }
-
-  @action
   handleTerrainChange(event: { target: MaplibreMap }) {
     if (!event.target.getTerrain() || event.target.getPitch() >= 70) {
       return;
@@ -357,10 +336,11 @@ export default class Map extends Component<MapSignature> {
 
   // Cached so the reference is stable across re-renders (stations loading, each
   // refresh tick): the declarative `<map.call @func="flyTo">` re-fires only when
-  // this reference changes, so it now fires only on a real routed-view change
-  // rather than on every render — otherwise its repeated calls fight the
-  // `easeTo` running in `handleMapResize`. Invalidates when `mapView` (the routed
-  // query params) changes, which is exactly when the map should move.
+  // this reference changes, so it fires only on a real routed-view change rather
+  // than on every render. Without this a refresh tick could re-issue a fly-to
+  // mid-gesture, before `moveend` writes the new view back, yanking the camera
+  // to the stale routed view. Invalidates when `mapView` (the routed query
+  // params) changes, which is exactly when the map should move.
   @cached
   get flyToOptions() {
     return {
@@ -392,7 +372,6 @@ export default class Map extends Component<MapSignature> {
         />
 
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
-        <map.on @event="resize" @action={{this.handleMapResize}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />
         <map.control
           @control={{this.navigationControl}}
