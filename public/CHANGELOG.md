@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Shareable map links now use clearer `longitude`/`latitude`/`zoom` web-address parameters (previously `mapLng`/`mapLat`/`mapZoom`). Map links you bookmarked or shared before this release will open the default view instead of the saved one — re-share or re-bookmark them to capture the new format.
+- Clicking a station marker on the map now opens its detail panel without moving the map, rather than always recentering on it. Click the station's name in the panel if you want to center the map on it.
+
+### Fixed
+
+- Choosing a page from the mobile menu could occasionally reload the whole app instead of navigating within it; it now always navigates in place.
+
 ## v.0.5.0 - 2026-06-18
 
 ### Added

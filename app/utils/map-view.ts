@@ -6,22 +6,18 @@ export const DEFAULT_MAP_LNG = 8.2275;
 export const DEFAULT_MAP_LAT = 46.8011;
 export const DEFAULT_MAP_ZOOM = 7;
 
-// Zoom applied when centering the map on the user's location — a comfortable
-// regional area around them rather than a wide country-level or street-level view.
-export const INITIAL_LOCATION_ZOOM = 11;
+// Zoom applied whenever the map focuses on a single point of interest — the
+// user's location (on load or the geolocate button) or a station (search result,
+// station name, nearby card). A comfortable regional area rather than a wide
+// country-level or street-level view (see issues #32, #47).
+export const FOCUS_ZOOM = 10;
+const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
+const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 
-// Zoom applied when focusing a single station — selecting a search result or
-// clicking a station name (see issue #47). Keep these paths consistent.
-export const STATION_FOCUS_ZOOM = 10;
-export const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
-export const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
-
-const COORDINATE_PRECISION = 5;
-const ZOOM_PRECISION = 2;
 const WORLD_LONGITUDE_SPAN = 360;
 const WORLD_LATITUDE_SPAN = 170;
 
-export type MapCoordinate = [number, number];
+type MapCoordinate = [number, number];
 
 export type MapBounds = {
   northEast: MapCoordinate;
@@ -34,15 +30,14 @@ export type MapView = {
   zoom: number;
 };
 
+// Query params share the `MapView` field names so a routed view round-trips
+// without any renaming — `parseMapView` only parses/defaults, and a `MapView`
+// *is* the query-param object.
 export type MapQueryParams = {
-  mapLng?: number | string;
-  mapLat?: number | string;
-  mapZoom?: number | string;
+  longitude?: number | string;
+  latitude?: number | string;
+  zoom?: number | string;
 };
-
-function round(value: number, precision: number) {
-  return Number(value.toFixed(precision));
-}
 
 function parseNumber(
   value: number | string | undefined,
@@ -60,14 +55,6 @@ function parseNumber(
   return fallback;
 }
 
-export function normalizeMapView(view: MapView): MapView {
-  return {
-    longitude: round(view.longitude, COORDINATE_PRECISION),
-    latitude: round(view.latitude, COORDINATE_PRECISION),
-    zoom: round(view.zoom, ZOOM_PRECISION),
-  };
-}
-
 function snap(value: number, step: number) {
   return Math.round(value / step) * step;
 }
@@ -78,23 +65,10 @@ function snap(value: number, step: number) {
 // station fetching declaratively driven by the routed view instead of imperative
 // viewport bookkeeping.
 export function quantizeMapViewForRequest(view: MapView): MapView {
-  return normalizeMapView({
+  return {
     longitude: snap(view.longitude, MAP_REQUEST_COORDINATE_THRESHOLD),
     latitude: snap(view.latitude, MAP_REQUEST_COORDINATE_THRESHOLD),
     zoom: snap(view.zoom, MAP_REQUEST_ZOOM_THRESHOLD),
-  });
-}
-
-export function normalizeMapBounds(bounds: MapBounds): MapBounds {
-  return {
-    northEast: [
-      round(bounds.northEast[0], COORDINATE_PRECISION),
-      round(bounds.northEast[1], COORDINATE_PRECISION),
-    ],
-    southWest: [
-      round(bounds.southWest[0], COORDINATE_PRECISION),
-      round(bounds.southWest[1], COORDINATE_PRECISION),
-    ],
   };
 }
 
@@ -102,91 +76,34 @@ export function approximateMapBoundsFromView(view: MapView): MapBounds {
   const longitudeSpan = WORLD_LONGITUDE_SPAN / 2 ** view.zoom;
   const latitudeSpan = WORLD_LATITUDE_SPAN / 2 ** view.zoom;
 
-  return normalizeMapBounds({
+  return {
     northEast: [view.longitude + longitudeSpan, view.latitude + latitudeSpan],
     southWest: [view.longitude - longitudeSpan, view.latitude - latitudeSpan],
-  });
+  };
 }
 
 export function parseMapView(queryParams?: MapQueryParams): MapView {
-  return normalizeMapView({
-    longitude: parseNumber(queryParams?.mapLng, DEFAULT_MAP_LNG),
-    latitude: parseNumber(queryParams?.mapLat, DEFAULT_MAP_LAT),
-    zoom: parseNumber(queryParams?.mapZoom, DEFAULT_MAP_ZOOM),
-  });
-}
-
-export function serializeMapView(view: MapView): Required<MapQueryParams> {
-  const normalized = normalizeMapView(view);
-
   return {
-    mapLng: normalized.longitude,
-    mapLat: normalized.latitude,
-    mapZoom: normalized.zoom,
+    longitude: parseNumber(queryParams?.longitude, DEFAULT_MAP_LNG),
+    latitude: parseNumber(queryParams?.latitude, DEFAULT_MAP_LAT),
+    zoom: parseNumber(queryParams?.zoom, DEFAULT_MAP_ZOOM),
   };
 }
 
 export function mapViewFromMap(map: MaplibreMap): MapView {
   const center = map.getCenter();
 
-  return normalizeMapView({
+  return {
     latitude: center.lat,
     longitude: center.lng,
     zoom: map.getZoom(),
-  });
-}
-
-export function mapBoundsFromMap(map: MaplibreMap): MapBounds {
-  const bounds = map.getBounds();
-  const northEast = bounds.getNorthEast();
-  const southWest = bounds.getSouthWest();
-
-  return normalizeMapBounds({
-    northEast: [northEast.lng, northEast.lat],
-    southWest: [southWest.lng, southWest.lat],
-  });
+  };
 }
 
 export function mapViewsEqual(left: MapView, right: MapView) {
-  const normalizedLeft = normalizeMapView(left);
-  const normalizedRight = normalizeMapView(right);
-
   return (
-    normalizedLeft.longitude === normalizedRight.longitude &&
-    normalizedLeft.latitude === normalizedRight.latitude &&
-    normalizedLeft.zoom === normalizedRight.zoom
+    left.longitude === right.longitude &&
+    left.latitude === right.latitude &&
+    left.zoom === right.zoom
   );
-}
-
-export function mapBoundsEqual(left: MapBounds, right: MapBounds) {
-  const normalizedLeft = normalizeMapBounds(left);
-  const normalizedRight = normalizeMapBounds(right);
-
-  return (
-    normalizedLeft.northEast[0] === normalizedRight.northEast[0] &&
-    normalizedLeft.northEast[1] === normalizedRight.northEast[1] &&
-    normalizedLeft.southWest[0] === normalizedRight.southWest[0] &&
-    normalizedLeft.southWest[1] === normalizedRight.southWest[1]
-  );
-}
-
-export function mapViewChangeRequiresStationRefetch(
-  left: MapView,
-  right: MapView
-) {
-  const normalizedLeft = normalizeMapView(left);
-  const normalizedRight = normalizeMapView(right);
-
-  return (
-    Math.abs(normalizedLeft.longitude - normalizedRight.longitude) >=
-      MAP_REQUEST_COORDINATE_THRESHOLD ||
-    Math.abs(normalizedLeft.latitude - normalizedRight.latitude) >=
-      MAP_REQUEST_COORDINATE_THRESHOLD ||
-    Math.abs(normalizedLeft.zoom - normalizedRight.zoom) >=
-      MAP_REQUEST_ZOOM_THRESHOLD
-  );
-}
-
-export function isMapRoute(routeName: string | undefined) {
-  return routeName === 'map' || routeName?.startsWith('map.') || false;
 }

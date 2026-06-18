@@ -11,7 +11,6 @@ import StationSyncToggle from './sync-toggle';
 import { t } from 'ember-intl';
 import {
   parseMapView,
-  serializeMapView,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -44,7 +43,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @action
   close() {
     this.router.transitionTo('map', {
-      queryParams: serializeMapView(this.mapView),
+      queryParams: this.mapView,
     });
   }
 

@@ -107,10 +107,7 @@ module('Unit | Utility | station-favicon', function () {
       ),
       'it rotates around the peak rotation centre'
     );
-    assert.true(
-      svg.includes(peak.faviconViewBox),
-      'it uses the peak favicon viewBox'
-    );
+    assert.true(svg.includes(peak.viewBox), 'it uses the peak viewBox');
   });
 
   test('it resolves wind-band colours to concrete values', function (assert) {

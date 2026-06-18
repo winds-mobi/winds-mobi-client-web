@@ -237,9 +237,9 @@ module('Acceptance | nearby route', function (hooks) {
     await settled();
 
     const params = new URL(currentURL(), 'https://winds.mobi').searchParams;
-    assert.strictEqual(params.get('mapLat'), '46.521');
-    assert.strictEqual(params.get('mapLng'), '6.632');
-    assert.strictEqual(params.get('mapZoom'), '10');
+    assert.strictEqual(params.get('latitude'), '46.521');
+    assert.strictEqual(params.get('longitude'), '6.632');
+    assert.strictEqual(params.get('zoom'), '10');
   });
 
   test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {

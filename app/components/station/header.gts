@@ -12,10 +12,7 @@ import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import {
-  serializeMapView,
-  STATION_FOCUS_ZOOM,
-} from 'winds-mobi-client-web/utils/map-view';
+import { FOCUS_ZOOM } from 'winds-mobi-client-web/utils/map-view';
 import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
@@ -46,11 +43,11 @@ export default class StationHeader extends Component<StationHeaderSignature> {
   // Query params that focus the map on this station — shared with the navbar
   // search so clicking a name behaves like selecting a search result (#47).
   get focusQueryParams() {
-    return serializeMapView({
+    return {
       latitude: this.args.station.latitude,
       longitude: this.args.station.longitude,
-      zoom: STATION_FOCUS_ZOOM,
-    });
+      zoom: FOCUS_ZOOM,
+    };
   }
 
   <template>

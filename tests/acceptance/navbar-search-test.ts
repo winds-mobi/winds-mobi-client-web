@@ -165,7 +165,7 @@ module('Acceptance | navbar search', function (hooks) {
   test('it searches from the desktop navbar and recenters on the selected station at zoom 10', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
+    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
     await waitUntil(() => find('[data-test-navbar-search-results]'));
@@ -194,9 +194,9 @@ module('Acceptance | navbar search', function (hooks) {
     await settled();
 
     assert.deepEqual(currentSearchParams(), {
-      mapLat: '46.68084',
-      mapLng: '7.82554',
-      mapZoom: '10',
+      latitude: '46.68084',
+      longitude: '7.82554',
+      zoom: '10',
     });
   });
 
@@ -205,7 +205,7 @@ module('Acceptance | navbar search', function (hooks) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     nearbyLocation.coordinates = undefined;
 
-    await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
+    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(() => countSearchRequests(store.calls) > 0);
 
@@ -232,9 +232,9 @@ module('Acceptance | navbar search', function (hooks) {
     await settled();
 
     assert.deepEqual(currentSearchParams(), {
-      mapLat: '46.68084',
-      mapLng: '7.82554',
-      mapZoom: '10',
+      latitude: '46.68084',
+      longitude: '7.82554',
+      zoom: '10',
     });
   });
 
@@ -255,7 +255,7 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it clears the search field and closes the results after selecting a station', async function (assert) {
-    await visit('/map?mapLat=46.54321&mapLng=8.12345&mapZoom=9.5');
+    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitUntil(() =>
       find('[data-test-navbar-search-result="holfuy-1850"]')
