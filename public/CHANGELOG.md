@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.6.0 - 2026-06-18
 
 ### Changed
 
@@ -11,7 +11,7 @@
 
 - Choosing a page from the mobile menu could occasionally reload the whole app instead of navigating within it; it now always navigates in place.
 
-## v.0.5.0 - 2026-06-18
+## v0.5.0 - 2026-06-18
 
 ### Added
 
