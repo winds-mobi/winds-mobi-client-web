@@ -44,6 +44,11 @@ pinned in `engines`.
 Do **not** run lint or tests while iterating unless the user asks. Verify only as the final pre-push step:
 run `pnpm lint` (or targeted `pnpm lint:format`) plus the relevant `test:ember:dev` tests for what changed.
 
+Do **not** spin up headless-browser/screenshot rigs (chromium-cli, raw `chromium --headless`, Playwright, etc.)
+to visually verify a UI change — this app's map/canvas-heavy UI doesn't render meaningfully in that path, and
+it burns time on tooling rather than the change. Run `pnpm lint` and the relevant tests, then describe what
+changed and ask the user to check it in their own browser via `pnpm start`.
+
 ## Architecture
 
 ### Data flow: builders → store.request → handlers → schema-record

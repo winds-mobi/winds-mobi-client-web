@@ -214,6 +214,7 @@ export default class Map extends Component<MapSignature> {
 
   get initOptions(): MapInitOptions {
     return {
+      attributionControl: { compact: true },
       bearing: 0,
       center: [this.mapView.longitude, this.mapView.latitude] as [
         number,

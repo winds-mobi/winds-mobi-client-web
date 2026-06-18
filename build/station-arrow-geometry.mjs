@@ -235,9 +235,7 @@ function gustsShape(svg) {
     const cy = attr(circle[0], 'cy');
     const r = attr(circle[0], 'r');
     if ([cx, cy, r].some((v) => v === undefined)) {
-      throw new Error(
-        `<circle id="gusts"> is missing cx/cy/r: ${circle[0]}`,
-      );
+      throw new Error(`<circle id="gusts"> is missing cx/cy/r: ${circle[0]}`);
     }
     return { d: circlePath(cx, cy, r), cx, cy };
   }
@@ -323,10 +321,9 @@ function applyTransforms(fns, [x, y]) {
 // `scale(-1,1)` on mirrored shapes) is applied to land in the SVG's root
 // coordinate space.
 function centerPoint(svg) {
-  const tag = (
-    svg.match(/<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*\/>/) ??
-    svg.match(/<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*>/)
-  )?.[0];
+  const tag = (svg.match(
+    /<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*\/>/,
+  ) ?? svg.match(/<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*>/))?.[0];
   if (!tag) {
     throw new Error(
       'SVG has no id="center" marker (expected an Inkscape arc/ellipse or a <circle id="center"> marking the rotation centre)',
@@ -369,7 +366,6 @@ export function geometryFromSvg(svg) {
   // consistent size that fills the frame.
   const bodySubs = parsePath(rawPath);
   const body = boxOf(bodySubs);
-  const bw = body.maxX - body.minX;
   const bh = body.maxY - body.minY;
 
   // Gusts shape, drawn behind the arrow as the gusts hub.
@@ -384,9 +380,13 @@ export function geometryFromSvg(svg) {
   const hubX = round2(centreX * k);
   const hubY = round2(centreY * k);
 
-  // Favicon viewBox: a square centred on the hub (the rotation centre), sized to
-  // the farthest the arrow reaches from the hub so it can't clip at any rotation,
-  // plus a little for the outline stroke.
+  // The viewBox is a square centred on the hub (the rotation centre), sized to
+  // the farthest the arrow reaches from the hub so it can't clip at any
+  // rotation, plus a little for the outline stroke. Every consumer (the on-map
+  // marker, the favicon, the settings preview) rotates the arrow about the hub
+  // in place, so the hub has to be the centre of the square those rotations
+  // happen inside — that's also what keeps a "selected" ring drawn around the
+  // square concentric with the actual rotation point.
   const reach = Math.max(
     Math.hypot(body.minX - centreX, body.minY - centreY),
     Math.hypot(body.minX - centreX, body.maxY - centreY),
@@ -397,9 +397,8 @@ export function geometryFromSvg(svg) {
 
   return {
     path: scalePath(rawPath, k),
-    viewBox: [body.minX, body.minY, bw, bh].map((n) => round2(n * k)).join(' '),
+    viewBox: `${round2(hubX - half)} ${round2(hubY - half)} ${half * 2} ${half * 2}`,
     rotationCentre: `${hubX} ${hubY}`,
     gustsPath: scalePath(gusts.d, k),
-    faviconViewBox: `${round2(hubX - half)} ${round2(hubY - half)} ${half * 2} ${half * 2}`,
   };
 }

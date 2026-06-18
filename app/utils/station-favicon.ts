@@ -45,7 +45,7 @@ export function stationFaviconDataUri(station: Station): string {
       : `<path d="${geometry.gustsPath}" fill="${resolveColour(gustsColour)}"/>`;
 
   const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.faviconViewBox}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="${geometry.viewBox}">` +
     `<g transform="rotate(${direction + ARROW_DIRECTION_OFFSET} ${geometry.rotationCentre})">` +
     hub +
     `<path d="${geometry.path}" fill="${fill}" paint-order="stroke" stroke="${MARKER_PLAIN_OUTLINE_COLOUR}" stroke-linecap="round" stroke-linejoin="round" stroke-width="${MARKER_OUTLINE_WIDTH}"/>` +
