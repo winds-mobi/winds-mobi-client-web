@@ -355,6 +355,13 @@ export default class Map extends Component<MapSignature> {
     });
   }
 
+  // Cached so the reference is stable across re-renders (stations loading, each
+  // refresh tick): the declarative `<map.call @func="flyTo">` re-fires only when
+  // this reference changes, so it now fires only on a real routed-view change
+  // rather than on every render — otherwise its repeated calls fight the
+  // `easeTo` running in `handleMapResize`. Invalidates when `mapView` (the routed
+  // query params) changes, which is exactly when the map should move.
+  @cached
   get flyToOptions() {
     return {
       center: [this.mapView.longitude, this.mapView.latitude] as [
