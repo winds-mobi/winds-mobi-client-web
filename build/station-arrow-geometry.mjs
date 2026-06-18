@@ -10,10 +10,20 @@
 //     outline width however the drawing happened to be framed.
 //   • The gusts disc is marked id="gusts": a <circle id="gusts" cx cy r/> or (what
 //     Inkscape produces when you label a blob) a translated <g id="gusts"> wrapping
-//     a path. Its centre is the rotation/anchor point — the marker rotates the
-//     arrow about the hub. If absent, the path's last subpath (the hole) is used.
+//     a path. It's drawn behind the arrow as the gusts hub.
+//   • The rotation/anchor point — what the marker rotates the arrow about — is the
+//     midpoint of the element marked id="center" (an Inkscape ellipse/arc, which
+//     Inkscape saves as a <path sodipodi:type="arc" sodipodi:cx sodipodi:cy …>, or
+//     a plain <circle id="center" cx cy r/>). Any transform on that element (e.g.
+//     Inkscape's stray `scale(-1,1)` on mirrored shapes) is applied to get its
+//     position in the SVG's root coordinate space.
+//
+// None of these markers are optional, and there is no fallback if one is missing
+// or malformed — the build fails with a descriptive error instead, so a botched
+// edit to the SVG is caught immediately rather than silently shipping a wrong
+// rotation centre or hub.
 
-// --- minimal path parsing, only used for the hub fallback ----------------------
+// --- minimal path parsing -------------------------------------------------------
 
 function tokenize(d) {
   return d.match(/[MmCcLlZzHhVv]|-?\d*\.?\d+(?:e-?\d+)?/g) ?? [];
@@ -214,52 +224,145 @@ function translateOf(tag) {
 }
 
 // The gusts shape, marked id="gusts": its absolute path `d` (in the SVG's root
-// units) and its centre. Supports a plain <circle id="gusts" cx cy r/> or — what
-// Inkscape produces when you label a blob — a <g id="gusts" transform="translate(…)">
-// wrapping a path, whose translate is baked into the returned `d`. Returns null
-// when there is no gusts marker (caller then falls back to the path's hole).
+// units) and its centre. Supports a plain <circle id="gusts" cx cy r/>, a bare
+// <path id="gusts" d="…">, or — what Inkscape produces when you label a blob —
+// a <g id="gusts" transform="translate(…)"> wrapping a path, whose translate is
+// baked into the returned `d`.
 function gustsShape(svg) {
   const circle = svg.match(/<(?:circle|ellipse)\b[^>]*\bid="gusts"[^>]*>/);
   if (circle) {
     const cx = attr(circle[0], 'cx');
     const cy = attr(circle[0], 'cy');
     const r = attr(circle[0], 'r');
-    if (![cx, cy, r].some((v) => v === undefined)) {
-      return { d: circlePath(cx, cy, r), cx, cy };
+    if ([cx, cy, r].some((v) => v === undefined)) {
+      throw new Error(
+        `<circle id="gusts"> is missing cx/cy/r: ${circle[0]}`,
+      );
     }
+    return { d: circlePath(cx, cy, r), cx, cy };
+  }
+
+  const path = svg.match(/<path\b[^>]*\bid="gusts"[^>]*>/);
+  if (path) {
+    const d = path[0].match(/\bd="([^"]+)"/)?.[1];
+    if (!d) {
+      throw new Error(`<path id="gusts"> has no d attribute: ${path[0]}`);
+    }
+    const subpaths = parsePath(d);
+    const box = boxOf(subpaths);
+    return {
+      d: d.trim().replace(/\s+/g, ' '),
+      cx: (box.minX + box.maxX) / 2,
+      cy: (box.minY + box.maxY) / 2,
+    };
   }
 
   const group = svg.match(/<g\b([^>]*\bid="gusts"[^>]*)>([\s\S]*?)<\/g>/);
-  if (group) {
-    const [tx, ty] = translateOf(group[1]);
-    const inner = group[2].match(/<path\b[^>]*\bd="([^"]+)"/);
-    if (inner) {
-      const subpaths = parsePath(inner[1]);
-      const box = boxOf(subpaths);
-      return {
-        d: serializeAbs(subpaths, (x, y) => [x + tx, y + ty]),
-        cx: (box.minX + box.maxX) / 2 + tx,
-        cy: (box.minY + box.maxY) / 2 + ty,
-      };
-    }
+  if (!group) {
+    throw new Error(
+      'SVG has no id="gusts" marker (expected a <circle id="gusts">, a <path id="gusts">, or a <g id="gusts"> wrapping a <path>)',
+    );
   }
-  return null;
+  const [tx, ty] = translateOf(group[1]);
+  const inner = group[2].match(/<path\b[^>]*\bd="([^"]+)"/);
+  if (!inner) {
+    throw new Error('<g id="gusts"> does not wrap a <path> with a d attribute');
+  }
+  const subpaths = parsePath(inner[1]);
+  const box = boxOf(subpaths);
+  return {
+    d: serializeAbs(subpaths, (x, y) => [x + tx, y + ty]),
+    cx: (box.minX + box.maxX) / 2 + tx,
+    cy: (box.minY + box.maxY) / 2 + ty,
+  };
 }
 
-// The arrow body path, marked id="wind". Falls back to the only non-gusts <path>
-// so a single-path SVG (no explicit ids) still works.
+const attrColon = (tag, ns, name) => {
+  const m = tag.match(new RegExp(`\\b${ns}:${name}="([^"]+)"`));
+  return m ? parseFloat(m[1]) : undefined;
+};
+
+// `transform="translate(…) scale(…) …"` → the listed [kind, a, b] functions, in
+// document order. Only translate/scale appear on hand-authored arrow shapes.
+function parseTransformList(tag) {
+  const t = tag.match(/\btransform="([^"]+)"/)?.[1];
+  if (!t) return [];
+  const fns = [];
+  const re = /(translate|scale)\(\s*(-?[\d.eE]+)(?:[\s,]+(-?[\d.eE]+))?\s*\)/g;
+  let m;
+  while ((m = re.exec(t))) {
+    fns.push({
+      kind: m[1],
+      a: parseFloat(m[2]),
+      b: m[3] !== undefined ? parseFloat(m[3]) : undefined,
+    });
+  }
+  return fns;
+}
+
+// Map a point through a parsed transform list. `transform="T1 T2"` composes as
+// M = T1·T2, so a local point is transformed by the rightmost function first.
+function applyTransforms(fns, [x, y]) {
+  for (let i = fns.length - 1; i >= 0; i--) {
+    const f = fns[i];
+    if (f.kind === 'translate') {
+      x += f.a;
+      y += f.b ?? 0;
+    } else {
+      x *= f.a;
+      y *= f.b ?? f.a;
+    }
+  }
+  return [x, y];
+}
+
+// The rotation centre, marked id="center": Inkscape saves an ellipse/arc drawn
+// with its centre-point tool as a <path sodipodi:type="arc" sodipodi:cx
+// sodipodi:cy …>, so that's tried first; a plain <circle id="center" cx cy r/>
+// is read from its cx/cy. The element's own `transform` (Inkscape adds a stray
+// `scale(-1,1)` on mirrored shapes) is applied to land in the SVG's root
+// coordinate space.
+function centerPoint(svg) {
+  const tag = (
+    svg.match(/<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*\/>/) ??
+    svg.match(/<(?:path|circle|ellipse)\b[^>]*\bid="center"[^>]*>/)
+  )?.[0];
+  if (!tag) {
+    throw new Error(
+      'SVG has no id="center" marker (expected an Inkscape arc/ellipse or a <circle id="center"> marking the rotation centre)',
+    );
+  }
+
+  const scx = attrColon(tag, 'sodipodi', 'cx');
+  const scy = attrColon(tag, 'sodipodi', 'cy');
+  const local =
+    scx !== undefined && scy !== undefined
+      ? [scx, scy]
+      : [attr(tag, 'cx'), attr(tag, 'cy')];
+  if (local.some((v) => v === undefined)) {
+    throw new Error(
+      `id="center" element has no sodipodi:cx/cy or cx/cy: ${tag}`,
+    );
+  }
+
+  return applyTransforms(parseTransformList(tag), local);
+}
+
+// The arrow body path, marked id="wind".
 function bodyPath(svg) {
-  const tags = svg.match(/<path\b[^>]*>/g) ?? [];
-  const tag =
-    tags.find((t) => /\bid="wind"/.test(t)) ??
-    tags.find((t) => !/\bid="gusts"|label="gusts"/.test(t));
-  const d = tag?.match(/\bd="([^"]+)"/)?.[1];
-  return d ? d.trim().replace(/\s+/g, ' ') : '';
+  const tag = svg.match(/<path\b[^>]*\bid="wind"[^>]*>/)?.[0];
+  if (!tag) {
+    throw new Error('SVG has no <path id="wind"> body');
+  }
+  const d = tag.match(/\bd="([^"]+)"/)?.[1];
+  if (!d) {
+    throw new Error(`<path id="wind"> has no d attribute: ${tag}`);
+  }
+  return d.trim().replace(/\s+/g, ' ');
 }
 
 export function geometryFromSvg(svg) {
   const rawPath = bodyPath(svg);
-  if (!rawPath) throw new Error('SVG has no <path> body');
 
   // The arrow's own bounding box is the "base arrow size" — the SVG page/viewBox
   // is ignored, so however the author framed the drawing the marker renders at a
@@ -269,34 +372,26 @@ export function geometryFromSvg(svg) {
   const bw = body.maxX - body.minX;
   const bh = body.maxY - body.minY;
 
-  // Gusts shape + its centre (the centre is the rotation/anchor point — the
-  // marker rotates the arrow about the station's hub). Falls back to the body's
-  // last subpath (the punched-out hole) when there is no id="gusts" marker.
-  let gusts = gustsShape(svg);
-  if (!gusts) {
-    const last = bodySubs[bodySubs.length - 1];
-    const box = subpathBox(last);
-    gusts = {
-      d: serializeAbs([last], (x, y) => [x, y]),
-      cx: (box.minX + box.maxX) / 2,
-      cy: (box.minY + box.maxY) / 2,
-    };
-  }
+  // Gusts shape, drawn behind the arrow as the gusts hub.
+  const gusts = gustsShape(svg);
+
+  // The rotation centre: the dedicated id="center" marker.
+  const [centreX, centreY] = centerPoint(svg);
 
   // Normalise so the arrow's bounding box is the canonical height — every arrow
   // then shares one coordinate scale (and one on-screen size and outline width).
   const k = CANONICAL_VIEW_HEIGHT / bh;
-  const hubX = round2(gusts.cx * k);
-  const hubY = round2(gusts.cy * k);
+  const hubX = round2(centreX * k);
+  const hubY = round2(centreY * k);
 
   // Favicon viewBox: a square centred on the hub (the rotation centre), sized to
   // the farthest the arrow reaches from the hub so it can't clip at any rotation,
   // plus a little for the outline stroke.
   const reach = Math.max(
-    Math.hypot(body.minX - gusts.cx, body.minY - gusts.cy),
-    Math.hypot(body.minX - gusts.cx, body.maxY - gusts.cy),
-    Math.hypot(body.maxX - gusts.cx, body.minY - gusts.cy),
-    Math.hypot(body.maxX - gusts.cx, body.maxY - gusts.cy),
+    Math.hypot(body.minX - centreX, body.minY - centreY),
+    Math.hypot(body.minX - centreX, body.maxY - centreY),
+    Math.hypot(body.maxX - centreX, body.minY - centreY),
+    Math.hypot(body.maxX - centreX, body.maxY - centreY),
   );
   const half = Math.ceil((reach + bh * 0.06) * k);
 
