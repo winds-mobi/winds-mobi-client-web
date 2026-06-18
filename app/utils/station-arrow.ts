@@ -37,19 +37,13 @@ export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
 export const MIN_MARKER_SCALE = 0.5;
 
 // Once a reading reaches this age it sits at the size floor; everything older
-// stays there. Readings shrink along a cubic ease-in between fresh and this age.
+// stays there. Readings shrink linearly between fresh and this age.
 const MARKER_FULLY_SHRUNK_AGE = 30 * 60 * 1000;
 
-// The shrink follows `progress^EXPONENT`, so a higher exponent keeps the arrow
-// near-full-size early and concentrates the shrink near the end. Cubic (3) holds
-// the first ~third of the window almost full size then falls away quickly, giving
-// the target feel: ≈1.0 at 10 min, ≈0.85 at 20 min, dropping to the floor by 30.
-const MARKER_SHRINK_EXPONENT = 3;
-
-// Scale for a reading of the given age (epoch ms): full size when fresh, holding
-// near-full-size for the first several minutes and then shrinking faster toward
-// MIN_MARKER_SCALE as it nears MARKER_FULLY_SHRUNK_AGE. Future or unknown
-// timestamps are treated as fully fresh.
+// Scale for a reading of the given age (epoch ms): full size when fresh, shrinking
+// linearly to MIN_MARKER_SCALE at MARKER_FULLY_SHRUNK_AGE (≈1/2 size at 30 min)
+// and holding the floor for anything older. Future or unknown timestamps are
+// treated as fully fresh.
 export function scaleForReadingAge(timestamp: number): number {
   if (!Number.isFinite(timestamp)) {
     return 1;
@@ -61,8 +55,7 @@ export function scaleForReadingAge(timestamp: number): number {
   }
 
   const progress = Math.min(1, age / MARKER_FULLY_SHRUNK_AGE);
-  const shrink = progress ** MARKER_SHRINK_EXPONENT;
-  return 1 - (1 - MIN_MARKER_SCALE) * shrink;
+  return 1 - (1 - MIN_MARKER_SCALE) * progress;
 }
 
 // A reading older than a day is drawn grey rather than in its wind-speed colour.
