@@ -37,8 +37,8 @@ settings:
     label: Make old data's arrows smaller
     description: >-
       Shrink each wind arrow the older its last reading is, so fresh stations
-      stand out and stale ones recede. Recent readings stay full size; the
-      oldest never shrink below half size.
+      stand out and stale ones recede. Arrows scale linearly from full size
+      now down to half size at 30 minutes, and never shrink below half size.
   syncGraphsByDefault:
     label: Sync wind & air graphs
     description: >-
