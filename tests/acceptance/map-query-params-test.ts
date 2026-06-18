@@ -98,13 +98,13 @@ module('Acceptance | map query params', function (hooks) {
   test('it uses the URL view for the initial map and station request', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
     await waitUntil(() => countStationRequests(store.calls) > 0);
 
     assertCurrentMapUrl(assert, {
-      mapLat: '46.54321',
-      mapLng: '8.12345',
-      mapZoom: '9.5',
+      latitude: '46.54321',
+      longitude: '8.12345',
+      zoom: '9.5',
     });
     assert.true(
       store.calls.some(
@@ -122,7 +122,7 @@ module('Acceptance | map query params', function (hooks) {
   test('it force refreshes stations from the navbar button', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
     await waitUntil(() => countStationRequests(store.calls) > 0);
     await settled();
 
@@ -144,7 +144,7 @@ module('Acceptance | map query params', function (hooks) {
 
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    await visit('/map?mapLng=8.12345&mapLat=46.54321&mapZoom=9.5');
+    await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
 
     const initialStationRequestCount = countStationRequests(store.calls);
 

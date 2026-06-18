@@ -11,9 +11,9 @@ import {
   <LinkTo
     @route="map"
     @query={{hash
-      mapLat=DEFAULT_MAP_LAT
-      mapLng=DEFAULT_MAP_LNG
-      mapZoom=DEFAULT_MAP_ZOOM
+      latitude=DEFAULT_MAP_LAT
+      longitude=DEFAULT_MAP_LNG
+      zoom=DEFAULT_MAP_ZOOM
     }}
     class="flex flex-shrink-0 items-center gap-2"
     data-test-navbar-logo

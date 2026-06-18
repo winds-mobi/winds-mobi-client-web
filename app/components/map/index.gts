@@ -37,12 +37,11 @@ import {
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
   approximateMapBoundsFromView,
-  INITIAL_LOCATION_ZOOM,
+  FOCUS_ZOOM,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
   quantizeMapViewForRequest,
-  serializeMapView,
   type MapQueryParams,
   type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
@@ -124,7 +123,7 @@ export default class Map extends Component<MapSignature> {
     // on every fix. `animate: false` makes it settle instantly so the initial
     // auto-center (and any later manual click) draws straight at the user's
     // location rather than animating a pan/zoom in from the default view (#55).
-    fitBoundsOptions: { maxZoom: INITIAL_LOCATION_ZOOM, animate: false },
+    fitBoundsOptions: { maxZoom: FOCUS_ZOOM, animate: false },
     showAccuracyCircle: true,
     showUserLocation: true,
     // Locate on demand rather than continuously tracking — we recenter the routed
@@ -255,11 +254,11 @@ export default class Map extends Component<MapSignature> {
     // the panel shrinks the map container and MapLibre re-centers on that point
     // when it resizes, so the station stays centered regardless of timing (#52).
     void this.router.transitionTo('map.station', station.id, {
-      queryParams: serializeMapView({
+      queryParams: {
         longitude: station.longitude,
         latitude: station.latitude,
         zoom: this.mapView.zoom,
-      }),
+      },
     });
   }
 
@@ -297,11 +296,11 @@ export default class Map extends Component<MapSignature> {
     this.nearbyLocation.updateFromPosition(event);
 
     this.router.replaceWith({
-      queryParams: serializeMapView({
+      queryParams: {
         longitude: event.coords.longitude,
         latitude: event.coords.latitude,
-        zoom: INITIAL_LOCATION_ZOOM,
-      }),
+        zoom: FOCUS_ZOOM,
+      },
     });
   }
 
@@ -327,7 +326,7 @@ export default class Map extends Component<MapSignature> {
     }
 
     this.router.replaceWith({
-      queryParams: serializeMapView(view),
+      queryParams: view,
     });
   }
 
