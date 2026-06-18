@@ -23,7 +23,7 @@ export const MARKER_OUTLINE_WIDTH = '12';
 
 // The arrow artwork points north (up) at rotation 0. Wind `direction` is the
 // compass bearing the wind blows *from*, and the arrow should point where it
-// blows *to*, so the marker rotates it by `direction + 180`.
+// blows *to*.
 export const ARROW_DIRECTION_OFFSET = 180;
 
 export function stationArrowGeometry(isPeak: boolean): StationArrowGeometry {
