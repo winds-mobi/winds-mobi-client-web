@@ -247,12 +247,11 @@ export default class Map extends Component<MapSignature> {
 
   @action
   stationSelected(station: Station) {
-    // Recenter the routed view on the clicked station (keeping the current zoom,
-    // so it's a smooth pan) — the declarative fly-to then pans the map and the
-    // station ends up centered in the map area that remains beside the detail
-    // panel. Centering on the station's geographic coordinate is resize-robust:
-    // the panel shrinks the map container and MapLibre re-centers on that point
-    // when it resizes, so the station stays centered regardless of timing (#52).
+    // Recenter the routed view on the clicked station, keeping the current zoom.
+    // The declarative fly-to pans there; because opening the panel shrinks the
+    // map container, `handleMapResize` re-asserts this view once the container
+    // settles so the station ends up centered in the area beside the panel,
+    // not the pre-panel one (#52, #61).
     void this.router.transitionTo('map.station', station.id, {
       queryParams: {
         longitude: station.longitude,
@@ -331,6 +330,20 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
+  handleMapResize(event: { target: MaplibreMap }) {
+    // Re-assert the routed view whenever the container changes size — notably
+    // when the detail panel opens (or closes) and reflows the flex layout,
+    // shrinking the map. MapLibre keeps the center pinned across a resize, but
+    // the fly-to that *set* that center ran against the pre-panel size; the map's
+    // own `resize` event is the only signal that fires once the container has
+    // actually settled (a route transition resolves before layout/resize, which
+    // is why sequencing the camera move on the transition raced and failed — #61).
+    // Re-centering on the routed view is idempotent, so unrelated resizes (window
+    // resize, the initial canvas settle) are no-ops.
+    event.target.jumpTo(this.flyToOptions);
+  }
+
+  @action
   handleTerrainChange(event: { target: MaplibreMap }) {
     if (!event.target.getTerrain() || event.target.getPitch() >= 70) {
       return;
@@ -371,6 +384,7 @@ export default class Map extends Component<MapSignature> {
         />
 
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
+        <map.on @event="resize" @action={{this.handleMapResize}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />
         <map.control
           @control={{this.navigationControl}}
