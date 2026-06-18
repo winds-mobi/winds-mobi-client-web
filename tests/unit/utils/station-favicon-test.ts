@@ -1,6 +1,10 @@
 import { module, test } from 'qunit';
 import { Type } from '@warp-drive/core/types/symbols';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
+import {
+  ARROW_DIRECTION_OFFSET,
+  stationArrowGeometry,
+} from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 const BASE_STATION: Station = {
@@ -30,6 +34,11 @@ function decode(dataUri: string): string {
   return decodeURIComponent(payload ?? '');
 }
 
+// How many <path> elements the SVG draws (one per arrow body, plus the hub disc).
+function pathCount(svg: string): number {
+  return svg.match(/<path/g)?.length ?? 0;
+}
+
 module('Unit | Utility | station-favicon', function () {
   test('it builds an svg data uri rotated to the wind direction', function (assert) {
     const dataUri = stationFaviconDataUri(BASE_STATION);
@@ -40,16 +49,14 @@ module('Unit | Utility | station-favicon', function () {
     );
 
     const svg = decode(dataUri);
+    const geometry = stationArrowGeometry(false);
 
     assert.true(svg.includes('<svg'), 'it contains an svg root');
     assert.true(
-      svg.includes('rotate(240 -80 100)'),
+      svg.includes(
+        `rotate(${240 + ARROW_DIRECTION_OFFSET} ${geometry.rotationCentre})`
+      ),
       'it rotates the arrow to the wind direction around the regular centre'
-    );
-    assert.strictEqual(
-      svg.match(/<path/g)?.length,
-      1,
-      'it draws the arrow as a single path'
     );
     assert.true(
       svg.includes('stroke="rgb(0, 0, 0)"'),
@@ -58,10 +65,19 @@ module('Unit | Utility | station-favicon', function () {
   });
 
   test('it lights the hub when gusts fall in a higher wind band', function (assert) {
-    // speed 12 (wind-15 band) vs gusts 18 (wind-20 band) → hub recoloured.
+    // speed 12 (wind-15 band) vs gusts 18 (wind-20 band) → a gust-coloured disc
+    // is drawn behind the arrow, so the svg holds the arrow body plus the hub.
     const svg = decode(stationFaviconDataUri(BASE_STATION));
 
-    assert.true(svg.includes('<circle'), 'it draws a gusts hub disc');
+    assert.true(
+      svg.includes(stationArrowGeometry(false).gustsPath),
+      'it draws the gusts hub disc'
+    );
+    assert.strictEqual(
+      pathCount(svg),
+      2,
+      'it draws the arrow body and the hub disc'
+    );
   });
 
   test('it omits the hub when gusts share the average wind band', function (assert) {
@@ -72,20 +88,27 @@ module('Unit | Utility | station-favicon', function () {
       })
     );
 
-    assert.false(svg.includes('<circle'), 'a same-band gust adds no hub disc');
+    assert.strictEqual(
+      pathCount(svg),
+      1,
+      'a same-band gust adds no hub disc, leaving just the arrow body'
+    );
   });
 
   test('it uses the peak geometry for peak stations', function (assert) {
     const svg = decode(
       stationFaviconDataUri({ ...BASE_STATION, isPeak: true })
     );
+    const peak = stationArrowGeometry(true);
 
     assert.true(
-      svg.includes('rotate(240 0 20)'),
+      svg.includes(
+        `rotate(${240 + ARROW_DIRECTION_OFFSET} ${peak.rotationCentre})`
+      ),
       'it rotates around the peak rotation centre'
     );
     assert.true(
-      svg.includes('-220 -200 440 440'),
+      svg.includes(peak.faviconViewBox),
       'it uses the peak favicon viewBox'
     );
   });

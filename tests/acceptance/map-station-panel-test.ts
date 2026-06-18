@@ -422,7 +422,9 @@ module('Acceptance | map station panel', function (hooks) {
       )
       .hasAttribute(
         'href',
-        /rotate\(240/,
+        // direction 240 + the 180° arrow offset (the arrow points where the
+        // wind blows *to*).
+        /rotate\(420/,
         "the favicon arrow points to the station's wind direction"
       );
 
