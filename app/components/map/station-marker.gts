@@ -108,7 +108,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-10 w-10 overflow-visible"
+        class="h-16 w-16 overflow-visible"
         viewBox={{this.viewBox}}
       >
         <g transform={{this.markerTransform}}>
