@@ -19,6 +19,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/.vscode
     labels:
       - dev.orbstack.domains=ui.winds-mobi-client-web.orb.local
       - dev.orbstack.http-port=4200
