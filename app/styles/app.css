@@ -9,6 +9,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Sink the selected station marker's disc below every other marker, so it
+   never paints over — or steals clicks from — a neighbouring station's arrow
+   when markers overlap on the map. */
+.maplibregl-marker:has([data-selected='true']) {
+  z-index: -1;
+}
+
 @theme {
   --color-wind-05: rgb(9 179 0);
   --color-wind-10: rgb(0 179 71);
