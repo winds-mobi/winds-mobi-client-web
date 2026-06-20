@@ -8,6 +8,7 @@ import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/s
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseGraphSync from 'winds-mobi-client-web/components/settings/showcase/graph-sync';
+import SettingsShowcaseNearbyCompactList from 'winds-mobi-client-web/components/settings/showcase/nearby-compact-list';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
@@ -61,6 +62,12 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
               <SettingsShowcaseGraphSync
                 @enabled={{row.enabled}}
                 @onChange={{row.update}}
+              />
+            </SettingsRow>
+
+            <SettingsRow @settings={{this.settings}} @name="nearbyCompactList">
+              <SettingsShowcaseNearbyCompactList
+                @enabled={{this.settings.nearbyCompactList}}
               />
             </SettingsRow>
           </dl>

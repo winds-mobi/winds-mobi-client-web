@@ -16,6 +16,7 @@ const STORAGE_KEYS = [
   'settings.showGustsOutline',
   'settings.shrinkOldData',
   'settings.syncGraphsByDefault',
+  'settings.nearbyCompactList',
 ];
 
 module('Acceptance | settings route', function (hooks) {
@@ -30,7 +31,7 @@ module('Acceptance | settings route', function (hooks) {
     STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
-  test('it shows the four preferences, on by default', async function (assert) {
+  test('it shows the five preferences, on by default except the compact nearby list', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -38,6 +39,7 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="syncGraphsByDefault"]').isChecked();
+    assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
   });
 
   test('toggling a preference persists it to local storage', async function (assert) {
@@ -58,6 +60,28 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.strictEqual(
       window.localStorage.getItem('settings.showGustsOutline'),
+      null,
+      'restoring the default clears the stored override'
+    );
+  });
+
+  test('toggling the compact nearby list preference persists it to local storage', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="nearbyCompactList"]');
+
+    assert.dom('[data-test-setting="nearbyCompactList"]').isChecked();
+    assert.strictEqual(
+      window.localStorage.getItem('settings.nearbyCompactList'),
+      'true',
+      'the non-default preference is written to local storage'
+    );
+
+    await click('[data-test-setting="nearbyCompactList"]');
+
+    assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
+    assert.strictEqual(
+      window.localStorage.getItem('settings.nearbyCompactList'),
       null,
       'restoring the default clears the stored override'
     );

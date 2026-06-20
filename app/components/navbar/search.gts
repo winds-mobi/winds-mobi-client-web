@@ -16,7 +16,7 @@ import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
-import { FOCUS_ZOOM } from 'winds-mobi-client-web/utils/map-view';
+import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
 import {
   type RequestResponse,
   responseData,
@@ -187,11 +187,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
 
   @action
   selectStation(station: Station) {
-    const queryParams = {
-      latitude: station.latitude,
-      longitude: station.longitude,
-      zoom: FOCUS_ZOOM,
-    };
+    const queryParams = focusQueryParamsFor(station);
 
     this.resetSearch();
 

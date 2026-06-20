@@ -11,6 +11,20 @@ export const DEFAULT_MAP_ZOOM = 7;
 // station name, nearby card). A comfortable regional area rather than a wide
 // country-level or street-level view (see issues #32, #47).
 export const FOCUS_ZOOM = 10;
+// Query params that focus the map on a single station — shared by every
+// station-focusing entry point (search result, station name, nearby card/row)
+// so they all land on the same zoom (#47).
+export function focusQueryParamsFor(station: {
+  latitude: number;
+  longitude: number;
+}) {
+  return {
+    latitude: station.latitude,
+    longitude: station.longitude,
+    zoom: FOCUS_ZOOM,
+  };
+}
+
 const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 

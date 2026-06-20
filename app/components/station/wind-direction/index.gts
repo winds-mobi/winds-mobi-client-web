@@ -5,6 +5,7 @@ import WindDirectionGraph from './graph';
 export interface WindDirectionSignature {
   Args: {
     data: History[];
+    hideAxisLabels?: boolean;
   };
   Blocks: {
     default: [];
@@ -12,5 +13,7 @@ export interface WindDirectionSignature {
   Element: null;
 }
 export default class WindDirection extends Component<WindDirectionSignature> {
-  <template><WindDirectionGraph @data={{@data}} /></template>
+  <template>
+    <WindDirectionGraph @data={{@data}} @hideAxisLabels={{@hideAxisLabels}} />
+  </template>
 }

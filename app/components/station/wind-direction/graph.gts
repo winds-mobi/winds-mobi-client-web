@@ -8,6 +8,7 @@ import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 export interface WindDirectionGraphSignature {
   Args: {
     data: History[];
+    hideAxisLabels?: boolean;
   };
   Blocks: {
     default: [];
@@ -46,6 +47,12 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       pane: {
         size: '99%',
       },
+      // Omit `xAxis` entirely rather than setting it to `undefined` — Polar's
+      // shallow merge spreads override keys over defaults, so an explicit
+      // `undefined` would clobber the default xAxis instead of falling back to it.
+      ...(this.args.hideAxisLabels
+        ? { xAxis: { labels: { enabled: false } } }
+        : {}),
       yAxis: {
         min: minTimestamp,
         max: now,

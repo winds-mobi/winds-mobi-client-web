@@ -109,6 +109,32 @@ export default class Polar extends Component<PolarSignature> {
             },
           },
         },
+        {
+          // Thumbnail size (e.g. a compact nearby-list row): the N/E/S/W
+          // labels have no room to render legibly, so drop them entirely and
+          // let the polar pane fill almost the whole box as a plain dot scatter.
+          condition: {
+            maxWidth: 90,
+          },
+          chartOptions: {
+            pane: {
+              size: '98%',
+            },
+            plotOptions: {
+              series: {
+                lineWidth: 1,
+                marker: {
+                  radius: 2,
+                },
+              },
+            },
+            xAxis: {
+              labels: {
+                enabled: false,
+              },
+            },
+          },
+        },
       ],
     },
   };

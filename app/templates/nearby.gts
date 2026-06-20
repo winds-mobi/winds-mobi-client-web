@@ -5,14 +5,19 @@ import type { Future } from '@warp-drive/core/request';
 import { Request } from '@warp-drive/ember';
 import { pageTitle } from 'ember-page-title';
 import { action } from '@ember/object';
+import { fn } from '@ember/helper';
 import { Button } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
+import GridFour from 'ember-phosphor-icons/components/ph-grid-four';
+import GridNine from 'ember-phosphor-icons/components/ph-grid-nine';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
+import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { locationErrorTranslationKey } from 'winds-mobi-client-web/utils/location-error-translation-key';
 
@@ -30,6 +35,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service declare intl: IntlService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare mapRefresh: MapRefreshService;
+  @service declare settings: SettingsService;
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
 
@@ -93,22 +99,70 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     await this.nearbyLocation.requestCurrentPosition();
   }
 
+  @action
+  setCompactList(compact: boolean) {
+    this.settings.nearbyCompactList = compact;
+  }
+
   <template>
     {{pageTitle (t "nearby.title")}}
 
     <section class="min-h-0 flex-1 overflow-y-auto bg-slate-200">
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.nearbyLocation.hasCoordinates}}
+          <div class="flex justify-end gap-2">
+            <Button
+              aria-label={{t "nearby.view.card"}}
+              aria-pressed={{if this.settings.nearbyCompactList "false" "true"}}
+              data-test-nearby-view-toggle="card"
+              @appearance={{if
+                this.settings.nearbyCompactList
+                "outlined"
+                "default"
+              }}
+              @size="sm"
+              @onPress={{fn this.setCompactList false}}
+            >
+              <GridFour @size={{16}} />
+            </Button>
+
+            <Button
+              aria-label={{t "nearby.view.compact"}}
+              aria-pressed={{if this.settings.nearbyCompactList "true" "false"}}
+              data-test-nearby-view-toggle="compact"
+              @appearance={{if
+                this.settings.nearbyCompactList
+                "default"
+                "outlined"
+              }}
+              @size="sm"
+              @onPress={{fn this.setCompactList true}}
+            >
+              <GridNine @size={{16}} />
+            </Button>
+          </div>
+
           <Request @request={{this.stationsRequest}}>
             <:content as |result|>
-              <div
-                class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(22rem,1fr))]"
-                data-test-nearby-stations
-              >
-                {{#each result.data as |station|}}
-                  <StationNearbyCard @station={{station}} />
-                {{/each}}
-              </div>
+              {{#if this.settings.nearbyCompactList}}
+                <div
+                  class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(11rem,1fr))]"
+                  data-test-nearby-stations-compact
+                >
+                  {{#each result.data as |station|}}
+                    <StationCompactCard @station={{station}} />
+                  {{/each}}
+                </div>
+              {{else}}
+                <div
+                  class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(22rem,1fr))]"
+                  data-test-nearby-stations
+                >
+                  {{#each result.data as |station|}}
+                    <StationNearbyCard @station={{station}} />
+                  {{/each}}
+                </div>
+              {{/if}}
             </:content>
 
             <:loading>
