@@ -86,9 +86,10 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     const base =
       'block cursor-pointer rounded-full p-1 transition focus:outline-none';
 
-    // Selected: a grey disc + ring framing the arrow so it stands out on the map.
+    // Selected: a grey disc + ring hugging the arrow so it stands out without
+    // spilling into neighbouring markers' clickable area.
     return this.args.isSelected
-      ? `${base} bg-slate-400/40 ring-2 ring-slate-500/70`
+      ? `${base} bg-slate-400/40 ring-1 ring-inset ring-slate-500/70`
       : base;
   }
 
@@ -102,6 +103,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       type="button"
       aria-label={{@station.name}}
       class={{this.buttonClass}}
+      data-selected={{if @isSelected "true"}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
       {{on "click" this.handleSelect}}
