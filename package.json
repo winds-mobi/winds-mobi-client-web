@@ -49,6 +49,7 @@
     "@embroider/vite": "^1.1.2",
     "@eslint/js": "^9.23.0",
     "@frontile/buttons": "0.17.0-beta.25",
+    "@frontile/collections": "0.17.0-beta.25",
     "@frontile/forms": "0.17.0-beta.25",
     "@frontile/notifications": "0.17.0-beta.25",
     "@frontile/overlays": "0.17.0-beta.25",
