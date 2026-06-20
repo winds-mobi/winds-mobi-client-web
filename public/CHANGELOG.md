@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.1 - 2026-06-20
+
+### Fixed
+
+- The highlight ring around a selected station marker now fits closer to its arrow and no longer overlaps nearby stations' arrows, so they stay easy to click.
+
 ## v0.6.0 - 2026-06-18
 
 ### Changed
