@@ -17,7 +17,7 @@ export interface NavbarSignature {
   Element: null;
 }
 
-// eslint-disable-next-line ember/no-empty-glimmer-component-classes
+
 export default class Navbar extends Component<NavbarSignature> {
   @service declare mapRefresh: MapRefreshService;
 
@@ -31,14 +31,11 @@ export default class Navbar extends Component<NavbarSignature> {
           <NavbarLogo />
 
           {{! Desktop: navigation centered between the logo and the right group. }}
-          <div class="hidden md:flex md:flex-1 md:justify-center">
+          <div class="flex flex-1 justify-center">
             <NavbarMenuDesktop />
           </div>
 
-          {{! Search: full width on mobile, compact and right-aligned on desktop. }}
-          <div class="min-w-0 flex-1 md:w-40 md:flex-none">
-            <NavbarSearch data-test-navbar-search="navbar" />
-          </div>
+          <NavbarSearch data-test-navbar-search="navbar" />
 
           <NavbarRefreshControl />
 

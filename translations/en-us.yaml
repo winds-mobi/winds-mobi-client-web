@@ -12,7 +12,6 @@ navigation:
   help: Help
   search:
     label: Search stations
-    placeholder: Search
     loading: Searching stations…
     empty: No stations found.
 
@@ -101,7 +100,6 @@ map:
   legend:
     windSpeed: wind [km/h]
   refresh:
-    label: Refresh
     ariaLabel: Refresh map and station data
     sinceLast: '{value} since last refresh'
 

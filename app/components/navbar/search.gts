@@ -222,7 +222,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   }
 
   <template>
-    <div ...attributes class="w-full">
+    <div ...attributes class="w-32">
       <Popover
         @isOpen={{this.isPopoverOpen}}
         @onOpenChange={{this.handleOpenChange}}
@@ -235,19 +235,17 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
           <FrontileInput
             aria-label={{t "navigation.search.label"}}
             autocomplete="off"
-            class="w-full"
+            class="w-full h-12"
             data-test-navbar-search-input
             name="station-search"
-            placeholder={{t "navigation.search.placeholder"}}
             @onInput={{this.handleInput}}
-            @size="sm"
             @type="search"
             @value={{this.query}}
             {{on "focus" this.handleFocus}}
             {{on "keydown" this.handleKeydown}}
           >
             <:startContent>
-              <Binoculars @size={{14}} />
+              <Binoculars />
             </:startContent>
           </FrontileInput>
           {{! template-lint-enable no-passed-in-event-handlers }}
