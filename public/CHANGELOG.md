@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.2 - 2026-06-20
+
+### Fixed
+
+- The previous fix for the selected station's highlight ring could hide its arrow entirely on the map. The arrow now always stays visible while neighbouring stations still take priority for clicks where markers overlap.
+
 ## v0.6.1 - 2026-06-20
 
 ### Fixed

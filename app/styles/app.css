@@ -9,11 +9,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Sink the selected station marker's disc below every other marker, so it
-   never paints over — or steals clicks from — a neighbouring station's arrow
-   when markers overlap on the map. */
-.maplibregl-marker:has([data-selected='true']) {
-  z-index: -1;
+/* Markers are siblings of the map canvas itself, so a negative z-index on the
+   selected marker would sink it below the canvas too (hiding the arrow), not
+   just below other markers. Instead, lift every *other* marker above it: the
+   selected marker keeps its natural (auto) level just above the canvas — still
+   visible — while unselected markers paint above it, so their clickable area
+   always wins over the selected disc when markers overlap. */
+.maplibregl-marker:not(:has([data-selected='true'])) {
+  z-index: 1;
 }
 
 @theme {
