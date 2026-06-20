@@ -17,7 +17,6 @@ export interface NavbarSignature {
   Element: null;
 }
 
-
 export default class Navbar extends Component<NavbarSignature> {
   @service declare mapRefresh: MapRefreshService;
 

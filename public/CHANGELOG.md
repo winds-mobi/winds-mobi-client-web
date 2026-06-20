@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6.3 - 2026-06-21
+
+### Changed
+
+- Refreshed the top navigation bar: the desktop menu now centers across the full available width, the search box is a compact fixed-width field instead of stretching on mobile, and the refresh and mobile-menu buttons are simpler icon-only controls with a consistent height.
+
 ## v0.6.2 - 2026-06-20
 
 ### Fixed

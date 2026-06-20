@@ -41,7 +41,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
       class="h-12"
       ...attributes
     >
-        <ArrowClockwise data-refresh-icon />
+      <ArrowClockwise data-refresh-icon />
     </Button>
   </template>
 }
