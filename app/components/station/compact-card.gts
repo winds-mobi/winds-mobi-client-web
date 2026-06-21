@@ -4,7 +4,6 @@ import { service } from '@ember/service';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
-import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -89,7 +88,6 @@ export default class StationCompactCard extends Component<StationCompactCardSign
 
         <dl class="m-0">
           <StationMetaItem
-            @icon={{ClockCounterClockwise}}
             @label={{t "station.meta.updated"}}
             class="text-[11px] text-slate-500"
           >
