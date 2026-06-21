@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.11 - 2026-06-21
+
+### Changed
+
+- The "last updated" colour fade now starts with a brighter, more vivid gold for just-in readings, instead of the previous muted dark gold.
+
 ## v0.7.10 - 2026-06-21
 
 ### Changed
