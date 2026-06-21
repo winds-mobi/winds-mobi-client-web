@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.5 - 2026-06-21
+
+### Changed
+
+- Relative "last updated" minutes now show as "5m ago" (matching hours/days/etc.) instead of "5 min ago".
+
 ## v0.7.4 - 2026-06-21
 
 ### Changed
