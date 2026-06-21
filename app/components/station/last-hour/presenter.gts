@@ -3,9 +3,9 @@ import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
-import ArrowDown from 'ember-phosphor-icons/components/ph-arrow-down';
-import ArrowUp from 'ember-phosphor-icons/components/ph-arrow-up';
-import Crosshair from 'ember-phosphor-icons/components/ph-crosshair';
+import ArrowLineDown from 'ember-phosphor-icons/components/ph-arrow-line-down';
+import ArrowLineUp from 'ember-phosphor-icons/components/ph-arrow-line-up';
+import ArrowsInLineVertical from 'ember-phosphor-icons/components/ph-arrows-in-line-vertical';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from '../wind-direction';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -112,7 +112,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
             class="m-0 flex items-center gap-0.5
               {{this.lastHourMinimumValueClass}}"
           >
-            <ArrowDown @size={{14}} />
+            <ArrowLineDown @size={{14}} />
             <span>{{this.lastHourMinimumLabel}}</span>
           </dd>
 
@@ -123,7 +123,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
             class="m-0 flex items-center gap-0.5
               {{this.lastHourMeanValueClass}}"
           >
-            <Crosshair @size={{14}} />
+            <ArrowsInLineVertical @size={{14}} />
             <span>{{this.lastHourMeanLabel}}</span>
           </dd>
 
@@ -134,7 +134,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
             class="m-0 flex items-center gap-0.5
               {{this.lastHourMaximumValueClass}}"
           >
-            <ArrowUp @size={{14}} />
+            <ArrowLineUp @size={{14}} />
             <span>{{this.lastHourMaximumLabel}}</span>
           </dd>
 

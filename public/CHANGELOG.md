@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.16 - 2026-06-21
+
+### Changed
+
+- The "Last hour" min/mean/max row now uses clearer line-style arrow icons (arrow-line-down, arrows-in-line-vertical, arrow-line-up) instead of plain arrows and a crosshair.
+
 ## v0.7.15 - 2026-06-21
 
 ### Changed
