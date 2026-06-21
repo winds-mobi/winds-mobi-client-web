@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.12 - 2026-06-21
+
+### Added
+
+- The Help page now shows the "Data freshness colours" legend, explaining how the gold-to-grey colour of a station's "updated" time maps to how old the reading is.
+
 ## v0.7.11 - 2026-06-21
 
 ### Changed

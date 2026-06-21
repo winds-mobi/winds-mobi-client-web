@@ -78,6 +78,9 @@ help:
   colors:
     title: Map marker colours
     description: Winds.mobi reuses this shared wind palette for wind speed and gusts across station markers, the last-hour wind rose, and the wind history chart so stronger conditions stay easy to read everywhere.
+  freshness:
+    title: Data freshness colours
+    description: The "updated" time in a station's header and nearby cards fades from glowing gold to grey as a reading ages, so you can tell at a glance how recent the data is.
   providers:
     title: Data providers
     description: Winds.mobi aggregates station data from multiple provider networks. The provider name in each station header links back to the original source when available.
