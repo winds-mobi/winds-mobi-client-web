@@ -20,11 +20,6 @@ export default class SettingsService extends Service {
   @trackedInLocalStorage({ keyName: 'settings.shrinkOldData' })
   shrinkOldData = true;
 
-  // Whether a freshly opened station panel starts with its wind and air graphs
-  // synced. The per-panel switch remains the live override for that session.
-  @trackedInLocalStorage({ keyName: 'settings.syncGraphsByDefault' })
-  syncGraphsByDefault = true;
-
   // Show the /nearby stations list as dense rows instead of full cards, so
   // more stations fit on screen without scrolling (#64).
   @trackedInLocalStorage({ keyName: 'settings.nearbyCompactList' })
@@ -39,7 +34,6 @@ export type BooleanSettingKey =
   | 'faviconFollowsStation'
   | 'showGustsOutline'
   | 'shrinkOldData'
-  | 'syncGraphsByDefault'
   | 'nearbyCompactList';
 
 declare module '@ember/service' {

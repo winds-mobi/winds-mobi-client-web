@@ -113,8 +113,8 @@ don't reintroduce imperative view bookkeeping.
 Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `help`; `index` redirects to `map`.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `map-refresh`
-(ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `time-series-sync`
-(keeps multiple Highcharts x-axes in sync), `nearby-location` (geolocation + Permissions API state machine).
+(ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
+(geolocation + Permissions API state machine).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 

@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { concat, hash } from '@ember/helper';
+import { concat } from '@ember/helper';
 import { t } from 'ember-intl';
 import { Switch } from '@frontile/forms';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -12,9 +12,7 @@ export interface SettingsRowSignature {
     name: BooleanSettingKey;
   };
   Blocks: {
-    // The live preview for this setting, handed the current value and the same
-    // persist action the switch uses (graph-sync's preview drives it too).
-    default: [{ enabled: boolean; update: (value: boolean) => void }];
+    default: [];
   };
   Element: HTMLDivElement;
 }
@@ -49,7 +47,7 @@ export default class SettingsRow extends Component<SettingsRowSignature> {
           @description={{t (concat "settings." @name ".description")}}
         />
       </div>
-      {{yield (hash enabled=this.enabled update=this.update)}}
+      {{yield}}
     </div>
   </template>
 }

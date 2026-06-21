@@ -7,14 +7,12 @@ import StationHeader from './header';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
-import StationSyncToggle from './sync-toggle';
 import { t } from 'ember-intl';
 import {
   parseMapView,
   type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import type TimeSeriesSyncService from 'winds-mobi-client-web/services/time-series-sync';
 
 export interface StationIndexSignature {
   Args: {
@@ -28,7 +26,6 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
-  @service declare timeSeriesSync: TimeSeriesSyncService;
 
   get mapView() {
     return parseMapView(
@@ -36,20 +33,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
     );
   }
 
-  get isTimeSeriesSyncEnabled() {
-    return this.timeSeriesSync.isSyncEnabled;
-  }
-
   @action
   close() {
     this.router.transitionTo('map', {
       queryParams: this.mapView,
     });
-  }
-
-  @action
-  toggleTimeSeriesSync(isSelected: boolean) {
-    this.timeSeriesSync.setSyncEnabled(isSelected);
   }
 
   <template>
@@ -81,12 +69,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <StationSummary @station={{@station}} />
             <StationWind @stationId={{@station.id}} />
             <StationAir @stationId={{@station.id}} />
-            <div class="flex">
-              <StationSyncToggle
-                @isSelected={{this.isTimeSeriesSyncEnabled}}
-                @onChange={{this.toggleTimeSeriesSync}}
-              />
-            </div>
           </div>
         {{/if}}
       </div>
