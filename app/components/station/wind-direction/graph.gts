@@ -76,8 +76,8 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
         hour: 'numeric',
         minute: 'numeric',
         hour12: false,
-      })} ${this.intl.formatNumber(elm.temperature, {
-        format: 'temperature',
+      })} ${this.intl.formatNumber(elm.speed, {
+        format: 'windSpeed',
       })}`,
     }));
   }

@@ -108,7 +108,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           class="m-0 flex items-baseline justify-between text-base font-semibold md:text-lg"
         >
           <dt class="sr-only">{{t "wind.minimum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5">
+          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.minimum"}}>
             <ArrowLineDown @size={{14}} class="text-slate-400" />
             <span
               class={{this.lastHourMinimumValueClass}}
@@ -116,7 +116,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           </dd>
 
           <dt class="sr-only">{{t "wind.mean"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5">
+          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.mean"}}>
             <ArrowsInLineVertical @size={{14}} class="text-slate-400" />
             <span
               class={{this.lastHourMeanValueClass}}
@@ -124,7 +124,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           </dd>
 
           <dt class="sr-only">{{t "wind.maximum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5">
+          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.maximum"}}>
             <ArrowLineUp @size={{14}} class="text-slate-400" />
             <span
               class={{this.lastHourMaximumValueClass}}
