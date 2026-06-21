@@ -1,15 +1,11 @@
-import type { ComponentLike } from '@glint/template';
 import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import MapTrifold from 'ember-phosphor-icons/components/ph-map-trifold';
 import Gear from 'ember-phosphor-icons/components/ph-gear';
 import Lifebuoy from 'ember-phosphor-icons/components/ph-lifebuoy';
+import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 export interface NavbarMenuItem {
-  icon: ComponentLike<{
-    Args: {
-      size?: number;
-    };
-  }>;
+  icon: IconComponent;
   labelKey: string;
   route: 'help' | 'map' | 'nearby' | 'settings';
 }

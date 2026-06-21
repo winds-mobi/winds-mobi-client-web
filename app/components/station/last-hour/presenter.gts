@@ -59,21 +59,19 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   }
 
   get lastHourMaximumValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMaximumSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMaximumSpeed);
   }
 
   get lastHourMeanValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMeanSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMeanSpeed);
   }
 
   get lastHourMinimumValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMinimumSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMinimumSpeed);
+  }
+
+  private windClassFor(speed: number | undefined) {
+    return this.hasHistory ? windToTextClass(speed) : undefined;
   }
 
   <template>

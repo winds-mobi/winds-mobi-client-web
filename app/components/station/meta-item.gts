@@ -1,12 +1,8 @@
-import type { ComponentLike } from '@glint/template';
+import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 export interface StationMetaItemSignature {
   Args: {
-    icon?: ComponentLike<{
-      Args: {
-        size?: number;
-      };
-    }>;
+    icon?: IconComponent;
     label: string;
   };
   Blocks: {

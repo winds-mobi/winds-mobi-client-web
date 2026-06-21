@@ -1,8 +1,8 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import type { IntlService } from 'ember-intl';
-import type { ComponentLike } from '@glint/template';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
+import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 type MetricValue = number | string | null | undefined;
 type StationMetricFormat =
@@ -20,11 +20,7 @@ export interface StationMetricCardSignature {
     format?: StationMetricFormat;
     // When given, the icon replaces the visible label (kept sr-only for
     // screen readers); the card otherwise keeps its usual full-width layout.
-    icon?: ComponentLike<{
-      Args: {
-        size?: number;
-      };
-    }>;
+    icon?: IconComponent;
     label: string;
     labelClass?: string;
     value?: MetricValue;
