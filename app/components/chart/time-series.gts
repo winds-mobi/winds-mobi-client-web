@@ -36,6 +36,15 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     credits: {
       enabled: false,
     },
+    // ember-highcharts always imports the accessibility module, but its
+    // keyboard-navigation point proxies can throw ("Invalid value for <rect>
+    // attribute y=NaN") on series with null/gap points (see
+    // utils/chart-series.ts, which intentionally emits null for missing
+    // readings). This chart's data is also available via the metric cards
+    // and tooltips, so the a11y module isn't adding real value here.
+    accessibility: {
+      enabled: false,
+    },
     chart: {
       height: 272,
       reflow: true,

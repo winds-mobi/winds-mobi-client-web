@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.7.20 - 2026-06-21
+
+### Added
+
+- The "Last hour" wind-direction chart's points now show gusts too: the outline stays the wind-speed colour, and the center switches to the gusts colour only when gusts fall in a different wind band, matching the map marker's outline/hub convention.
+
+### Fixed
+
+- Fixed a console error ("Invalid value for `<rect>` attribute y=NaN") that could occur on stations with sparse or gapped history data, by disabling the chart accessibility module that ember-highcharts loads by default.
+
 ## v0.7.19 - 2026-06-21
 
 ### Changed
