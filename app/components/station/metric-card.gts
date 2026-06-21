@@ -88,7 +88,7 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
   <template>
     {{#if this.hasValue}}
       <div
-        class="rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5"
+        class="flex items-baseline justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5"
         ...attributes
       >
         <dt
@@ -98,7 +98,7 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
           {{@label}}
         </dt>
         <dd
-          class="mt-0.5 text-base font-semibold leading-tight md:mt-1.5 md:text-lg
+          class="text-right text-base font-semibold leading-tight md:text-lg
             {{if @valueClass @valueClass}}"
         >
           {{this.formattedValue}}

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.7.8 - 2026-06-21
+
+### Changed
+
+- The temperature value in the station detail sidebar's "Now" card is now coloured with the same violet-to-red scale used by the `Air` history chart, instead of plain text.
+- The "Now" card's value widgets (wind speed, gusts, direction, temperature, humidity, pressure, rain) are now single-line and more compact, with the label on the left and the value right-aligned, instead of stacking the label above the value.
+
 ## v0.7.7 - 2026-06-21
 
 ### Added

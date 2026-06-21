@@ -1,18 +1,9 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
 import TimeSeries from '../../chart/time-series';
+import { temperatureColourZones } from 'winds-mobi-client-web/helpers/temperature-to-colour';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
-
-const TEMPERATURE_ZONES = [
-  { color: '#c4b5fd', value: -10 },
-  { color: '#7dd3fc', value: 0 },
-  { color: '#1d4ed8', value: 10 },
-  { color: '#16a34a', value: 20 },
-  { color: '#eab308', value: 30 },
-  { color: '#f97316', value: 40 },
-  { color: '#dc2626' },
-];
 
 export interface StationAirContentSignature {
   Args: {
@@ -50,7 +41,7 @@ export default class StationAirContent extends Component<StationAirContentSignat
           valueSuffix: '°C',
         },
         zoneAxis: 'y',
-        zones: TEMPERATURE_ZONES,
+        zones: temperatureColourZones(),
       },
       {
         name: 'Humidity',

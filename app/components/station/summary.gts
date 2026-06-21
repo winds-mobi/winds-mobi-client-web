@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { t } from 'ember-intl';
+import { temperatureToTextClass } from 'winds-mobi-client-web/helpers/temperature-to-colour';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import StationLastHour from './last-hour';
 import StationMetricCard from './metric-card';
@@ -27,6 +28,10 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
   get gustsValueClass() {
     return windToTextClass(this.reading.gusts);
+  }
+
+  get temperatureValueClass() {
+    return temperatureToTextClass(this.reading.temperature);
   }
 
   <template>
@@ -58,6 +63,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
               @format="temperature"
               @label={{t "air.temperature"}}
               @value={{this.reading.temperature}}
+              @valueClass={{this.temperatureValueClass}}
             />
 
             <StationMetricCard
