@@ -11,44 +11,44 @@ module('Unit | Utility | reading-freshness', function () {
       'just-in readings get the darkest gold'
     );
     assert.strictEqual(
-      textClassForReadingAge(now - 4 * 60 * 1000),
+      textClassForReadingAge(now - 1.5 * 60 * 1000),
       'text-fresh-1',
-      '4 minutes old'
+      '1.5 minutes old'
     );
     assert.strictEqual(
-      textClassForReadingAge(now - 8 * 60 * 1000),
+      textClassForReadingAge(now - 3 * 60 * 1000),
       'text-fresh-2',
-      '8 minutes old'
+      '3 minutes old'
+    );
+    assert.strictEqual(
+      textClassForReadingAge(now - 5 * 60 * 1000),
+      'text-fresh-3',
+      '5 minutes old'
+    );
+    assert.strictEqual(
+      textClassForReadingAge(now - 10 * 60 * 1000),
+      'text-fresh-4',
+      '10 minutes old'
     );
     assert.strictEqual(
       textClassForReadingAge(now - 15 * 60 * 1000),
-      'text-fresh-3',
+      'text-fresh-5',
       '15 minutes old'
     );
     assert.strictEqual(
       textClassForReadingAge(now - 30 * 60 * 1000),
-      'text-fresh-4',
+      'text-fresh-6',
       '30 minutes old'
     );
     assert.strictEqual(
       textClassForReadingAge(now - 60 * 60 * 1000),
-      'text-fresh-5',
-      '1 hour old'
-    );
-    assert.strictEqual(
-      textClassForReadingAge(now - 2 * 60 * 60 * 1000),
-      'text-fresh-6',
-      '2 hours old'
-    );
-    assert.strictEqual(
-      textClassForReadingAge(now - 12 * 60 * 60 * 1000),
       'text-fresh-7',
-      '12 hours old'
+      'exactly 1 hour old'
     );
     assert.strictEqual(
-      textClassForReadingAge(now - 25 * 60 * 60 * 1000),
+      textClassForReadingAge(now - 90 * 60 * 1000),
       'text-fresh-8',
-      'stale (24h+) readings get the same grey as stale map markers'
+      'data older than 1 hour is flat grey'
     );
   });
 
