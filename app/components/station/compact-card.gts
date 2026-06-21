@@ -6,7 +6,6 @@ import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
-import MapPin from 'ember-phosphor-icons/components/ph-map-pin';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
@@ -78,7 +77,7 @@ export default class StationCompactCard extends Component<StationCompactCardSign
 
           <dl class="m-0">
             <StationMetaItem
-              @icon={{if @station.isPeak Mountains MapPin}}
+              @icon={{if @station.isPeak Mountains}}
               @label={{t "station.meta.altitude"}}
               class="text-xs text-slate-500"
             >
@@ -88,26 +87,26 @@ export default class StationCompactCard extends Component<StationCompactCardSign
           </dl>
         </div>
 
-        <dl class="m-0 flex flex-col gap-1">
-          <div class="flex items-baseline gap-1.5">
-            <dt class="text-[11px] text-slate-500">{{t "wind.speed"}}</dt>
-            <dd
-              class="m-0 text-base font-semibold leading-none
-                {{this.speedValueClass}}"
-            >
-              {{this.windSpeedLabel}}
-            </dd>
-          </div>
+        <dl class="m-0 flex items-baseline gap-1">
+          <dt class="sr-only">{{t "wind.speed"}}</dt>
+          <dd
+            class="m-0 text-[1.5rem] font-semibold leading-none
+              {{this.speedValueClass}}"
+          >
+            {{this.windSpeedLabel}}
+          </dd>
 
-          <div class="flex items-baseline gap-1.5">
-            <dt class="text-[11px] text-slate-500">{{t "wind.gusts"}}</dt>
-            <dd
-              class="m-0 text-base font-semibold leading-none
-                {{this.gustsValueClass}}"
-            >
-              {{this.gustsLabel}}
-            </dd>
-          </div>
+          <span aria-hidden="true" class="text-slate-400">/</span>
+
+          <dt class="sr-only">{{t "wind.gusts"}}</dt>
+          <dd
+            class="m-0 text-base font-semibold leading-none
+              {{this.gustsValueClass}}"
+          >
+            {{this.gustsLabel}}
+          </dd>
+
+          <dd class="m-0 text-xs text-slate-500">km/h</dd>
         </dl>
 
         <dl class="m-0">
