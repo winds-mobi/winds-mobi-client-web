@@ -4,13 +4,13 @@ export interface ReadingFreshnessLegendBand {
 }
 
 // Text-colour bands for a reading's "updated" time: glowing gold when just
-// in, through dark gold, fading to grey as the reading ages. Everything
-// past 1 hour is flat grey (matching STALE_STATION_COLOUR in
+// in, through dark gold, fading to grey as the reading ages. Thresholds
+// follow the Fibonacci sequence in minutes (1/2/3/5/8/13/21/34/55, skipping
+// the repeated leading 1), with anything older than 55 minutes landing on
+// the final flat-grey band -- matching STALE_STATION_COLOUR in
 // app/utils/station-arrow.ts, so stale text and stale map markers agree on
-// what "grey" means) -- a hand-collected reading an hour old is just stale,
-// so the gradient's resolution is spent entirely on the first hour, where
-// the map's 2-minute refresh cycle means there's real variation to show.
-// Classes come from the --color-fresh-* tokens in app/styles/app.css.
+// what "grey" means. Classes come from the --color-fresh-* tokens in
+// app/styles/app.css.
 const READING_FRESHNESS_BANDS: {
   maxAgeMs: number;
   backgroundClass: string;
@@ -27,39 +27,44 @@ const READING_FRESHNESS_BANDS: {
     textClass: 'text-fresh-1',
   },
   {
-    maxAgeMs: 4 * 60 * 1000,
+    maxAgeMs: 3 * 60 * 1000,
     backgroundClass: 'bg-fresh-2',
     textClass: 'text-fresh-2',
   },
   {
-    maxAgeMs: 7 * 60 * 1000,
+    maxAgeMs: 5 * 60 * 1000,
     backgroundClass: 'bg-fresh-3',
     textClass: 'text-fresh-3',
   },
   {
-    maxAgeMs: 12 * 60 * 1000,
+    maxAgeMs: 8 * 60 * 1000,
     backgroundClass: 'bg-fresh-4',
     textClass: 'text-fresh-4',
   },
   {
-    maxAgeMs: 20 * 60 * 1000,
+    maxAgeMs: 13 * 60 * 1000,
     backgroundClass: 'bg-fresh-5',
     textClass: 'text-fresh-5',
   },
   {
-    maxAgeMs: 35 * 60 * 1000,
+    maxAgeMs: 21 * 60 * 1000,
     backgroundClass: 'bg-fresh-6',
     textClass: 'text-fresh-6',
   },
   {
-    maxAgeMs: 60 * 60 * 1000,
+    maxAgeMs: 34 * 60 * 1000,
     backgroundClass: 'bg-fresh-7',
     textClass: 'text-fresh-7',
   },
   {
-    maxAgeMs: Infinity,
+    maxAgeMs: 55 * 60 * 1000,
     backgroundClass: 'bg-fresh-8',
     textClass: 'text-fresh-8',
+  },
+  {
+    maxAgeMs: Infinity,
+    backgroundClass: 'bg-fresh-9',
+    textClass: 'text-fresh-9',
   },
 ];
 

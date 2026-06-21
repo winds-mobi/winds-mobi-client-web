@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.14 - 2026-06-21
+
+### Changed
+
+- The "last updated" colour fade now steps through Fibonacci-spaced ages (1/2/3/5/8/13/21/34/55 minutes) before going flat grey past 55 minutes, instead of the previous evenly-bunched minute steps.
+
 ## v0.7.13 - 2026-06-21
 
 ### Changed
