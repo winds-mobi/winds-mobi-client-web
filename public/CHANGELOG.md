@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.3 - 2026-06-21
+
+### Changed
+
+- The compact nearby-stations grid now always shows at least two columns, even on the narrowest phone screens, instead of collapsing to a single column.
+
 ## v0.7.2 - 2026-06-21
 
 ### Changed
