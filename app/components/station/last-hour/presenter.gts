@@ -1,7 +1,11 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
+import { service } from '@ember/service';
 import { t } from 'ember-intl';
-import StationMetricCard from '../metric-card';
+import type { IntlService } from 'ember-intl';
+import ArrowDown from 'ember-phosphor-icons/components/ph-arrow-down';
+import ArrowUp from 'ember-phosphor-icons/components/ph-arrow-up';
+import Crosshair from 'ember-phosphor-icons/components/ph-crosshair';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from '../wind-direction';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -17,6 +21,8 @@ export interface StationLastHourContentSignature {
 }
 
 export default class StationLastHourContent extends Component<StationLastHourContentSignature> {
+  @service declare intl: IntlService;
+
   @cached
   get lastHourHistory() {
     return this.args.history;
@@ -69,34 +75,72 @@ export default class StationLastHourContent extends Component<StationLastHourCon
       : undefined;
   }
 
+  get lastHourMinimumLabel() {
+    return this.hasHistory
+      ? this.intl.formatNumber(this.lastHourMinimumSpeed, {
+          format: 'integer',
+        })
+      : undefined;
+  }
+
+  get lastHourMeanLabel() {
+    return this.hasHistory
+      ? this.intl.formatNumber(this.lastHourMeanSpeed, { format: 'integer' })
+      : undefined;
+  }
+
+  get lastHourMaximumLabel() {
+    return this.hasHistory
+      ? this.intl.formatNumber(this.lastHourMaximumSpeed, {
+          format: 'integer',
+        })
+      : undefined;
+  }
+
   <template>
     <div class="grid gap-2 md:gap-3">
       <div class="min-w-0 w-full aspect-square">
         <WindDirection @data={{this.lastHourHistory}} />
       </div>
 
-      <dl class="m-0 grid gap-1 md:gap-2">
-        <StationMetricCard
-          @format="windSpeed"
-          @label={{t "wind.maximum"}}
-          @value={{this.lastHourMaximumSpeed}}
-          @valueClass={{this.lastHourMaximumValueClass}}
-        />
+      {{#if this.hasHistory}}
+        <dl
+          class="m-0 flex items-baseline justify-center gap-1 text-sm font-semibold"
+        >
+          <dt class="sr-only">{{t "wind.minimum"}}</dt>
+          <dd
+            class="m-0 flex items-center gap-0.5
+              {{this.lastHourMinimumValueClass}}"
+          >
+            <ArrowDown @size={{14}} />
+            <span>{{this.lastHourMinimumLabel}}</span>
+          </dd>
 
-        <StationMetricCard
-          @format="windSpeed"
-          @label={{t "wind.mean"}}
-          @value={{this.lastHourMeanSpeed}}
-          @valueClass={{this.lastHourMeanValueClass}}
-        />
+          <span aria-hidden="true" class="text-slate-400">/</span>
 
-        <StationMetricCard
-          @format="windSpeed"
-          @label={{t "wind.minimum"}}
-          @value={{this.lastHourMinimumSpeed}}
-          @valueClass={{this.lastHourMinimumValueClass}}
-        />
-      </dl>
+          <dt class="sr-only">{{t "wind.mean"}}</dt>
+          <dd
+            class="m-0 flex items-center gap-0.5
+              {{this.lastHourMeanValueClass}}"
+          >
+            <Crosshair @size={{14}} />
+            <span>{{this.lastHourMeanLabel}}</span>
+          </dd>
+
+          <span aria-hidden="true" class="text-slate-400">/</span>
+
+          <dt class="sr-only">{{t "wind.maximum"}}</dt>
+          <dd
+            class="m-0 flex items-center gap-0.5
+              {{this.lastHourMaximumValueClass}}"
+          >
+            <ArrowUp @size={{14}} />
+            <span>{{this.lastHourMaximumLabel}}</span>
+          </dd>
+
+          <dd class="m-0 text-xs text-slate-500">km/h</dd>
+        </dl>
+      {{/if}}
     </div>
   </template>
 }
