@@ -28,6 +28,6 @@ module('Unit | Helper | time-ago', function (hooks) {
   test('it formats relative text through ember-intl', function (this: TestContext, assert) {
     const intl = this.owner.lookup('service:intl') as IntlService;
 
-    assert.strictEqual(renderTimeAgoText(intl, 600), 'in 10 minutes');
+    assert.strictEqual(renderTimeAgoText(intl, 600), 'in 10 min');
   });
 });

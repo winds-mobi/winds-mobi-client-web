@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.4 - 2026-06-21
+
+### Changed
+
+- Relative "last updated" times (in the station detail header and compact nearby cards) now use shorter unit abbreviations, e.g. "5 min ago" and "2h ago" instead of "5 minutes ago" and "2 hours ago".
+
 ## v0.7.3 - 2026-06-21
 
 ### Changed
