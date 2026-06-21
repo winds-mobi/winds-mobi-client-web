@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.2 - 2026-06-21
+
+### Changed
+
+- On compact nearby cards, the wind speed/gusts line now sits above the wind-direction thumbnail in the right column instead of in the left text column, keeping it visually grouped with the direction it describes.
+
 ## v0.7.1 - 2026-06-21
 
 ### Changed
