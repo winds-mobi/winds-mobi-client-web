@@ -105,37 +105,30 @@ export default class StationLastHourContent extends Component<StationLastHourCon
 
       {{#if this.hasHistory}}
         <dl
-          class="m-0 flex items-baseline justify-center gap-1 text-sm font-semibold"
+          class="m-0 flex items-baseline justify-between text-base font-semibold md:text-lg"
         >
           <dt class="sr-only">{{t "wind.minimum"}}</dt>
-          <dd
-            class="m-0 flex items-center gap-0.5
-              {{this.lastHourMinimumValueClass}}"
-          >
-            <ArrowLineDown @size={{14}} />
-            <span>{{this.lastHourMinimumLabel}}</span>
+          <dd class="m-0 flex items-center gap-0.5">
+            <ArrowLineDown @size={{14}} class="text-slate-400" />
+            <span
+              class={{this.lastHourMinimumValueClass}}
+            >{{this.lastHourMinimumLabel}}</span>
           </dd>
-
-          <span aria-hidden="true" class="text-slate-400">/</span>
 
           <dt class="sr-only">{{t "wind.mean"}}</dt>
-          <dd
-            class="m-0 flex items-center gap-0.5
-              {{this.lastHourMeanValueClass}}"
-          >
-            <ArrowsInLineVertical @size={{14}} />
-            <span>{{this.lastHourMeanLabel}}</span>
+          <dd class="m-0 flex items-center gap-0.5">
+            <ArrowsInLineVertical @size={{14}} class="text-slate-400" />
+            <span
+              class={{this.lastHourMeanValueClass}}
+            >{{this.lastHourMeanLabel}}</span>
           </dd>
 
-          <span aria-hidden="true" class="text-slate-400">/</span>
-
           <dt class="sr-only">{{t "wind.maximum"}}</dt>
-          <dd
-            class="m-0 flex items-center gap-0.5
-              {{this.lastHourMaximumValueClass}}"
-          >
-            <ArrowLineUp @size={{14}} />
-            <span>{{this.lastHourMaximumLabel}}</span>
+          <dd class="m-0 flex items-center gap-0.5">
+            <ArrowLineUp @size={{14}} class="text-slate-400" />
+            <span
+              class={{this.lastHourMaximumValueClass}}
+            >{{this.lastHourMaximumLabel}}</span>
           </dd>
 
           <dd class="m-0 text-xs text-slate-500">km/h</dd>
