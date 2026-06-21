@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.7.22 - 2026-06-21
+
+### Added
+
+- A new "Use icons for labels" setting: when on, each value in the "Now" and "Last hour" cards shows a small icon instead of its text label.
+
+### Changed
+
+- Reverted the "Last hour" card's minimum/mean/maximum wind speeds back to three separate labelled rows, undoing the earlier single-line layout.
+- The "Now" card's row spacing now matches "Last hour"'s tighter spacing.
+- The "Now" card's wind speed metric is now labelled "Wind" instead of "Speed".
+- Restored the clock icon next to the "updated" relative time in the station header and compact nearby cards.
+
 ## v0.7.21 - 2026-06-21
 
 ### Fixed
