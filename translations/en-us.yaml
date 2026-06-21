@@ -137,7 +137,7 @@ station:
   air: Air
 
 wind:
-  speed: Speed
+  speed: Wind
   gusts: Gusts
   direction: Direction
   timestamp: 'Time'
