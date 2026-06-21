@@ -5,6 +5,7 @@ import HelpChangelog from 'winds-mobi-client-web/components/help/changelog';
 import HelpLiveStation from 'winds-mobi-client-web/components/help/live-station';
 import MapLegend from 'winds-mobi-client-web/components/map/legend';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
+import { readingFreshnessLegendBands } from 'winds-mobi-client-web/utils/reading-freshness';
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 interface HelpTemplateSignature {
@@ -31,6 +32,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
   providers = PROVIDERS;
 
   legendBands = windLegendBands();
+  freshnessLegendBands = readingFreshnessLegendBands();
 
   <template>
     {{pageTitle (t "help.title")}}
@@ -119,7 +121,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
           </StationSectionCard>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-6 lg:grid-cols-3">
           <StationSectionCard @title={{t "help.colors.title"}}>
             <div class="grid gap-4">
               <p class="text-sm leading-6 text-slate-600">
@@ -131,6 +133,36 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                   @bands={{this.legendBands}}
                   @title={{t "map.legend.windSpeed"}}
                 />
+              </div>
+            </div>
+          </StationSectionCard>
+
+          <StationSectionCard @title={{t "help.freshness.title"}}>
+            <div class="grid gap-4">
+              <p class="text-sm leading-6 text-slate-600">
+                {{t "help.freshness.description"}}
+              </p>
+              <div
+                class="relative min-h-32 rounded-lg bg-slate-50 p-4"
+                data-test-help-freshness-legend
+              >
+                <p
+                  class="mb-2 text-[10px] font-semibold uppercase leading-tight tracking-[0.1em] text-slate-500"
+                >
+                  {{t "station.meta.updated"}}
+                </p>
+                <ul class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  {{#each this.freshnessLegendBands as |band|}}
+                    <li class="flex items-center gap-1.5">
+                      <span
+                        aria-hidden="true"
+                        class="size-3 shrink-0 rounded-full ring-1 ring-black/10
+                          {{band.backgroundClass}}"
+                      ></span>
+                      <span class="text-xs text-slate-600">{{band.label}}</span>
+                    </li>
+                  {{/each}}
+                </ul>
               </div>
             </div>
           </StationSectionCard>
