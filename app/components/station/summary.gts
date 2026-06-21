@@ -1,11 +1,21 @@
 import Component from '@glimmer/component';
+import { service } from '@ember/service';
 import { t } from 'ember-intl';
+import type { IntlService } from 'ember-intl';
+import CloudRain from 'ember-phosphor-icons/components/ph-cloud-rain';
+import Drop from 'ember-phosphor-icons/components/ph-drop';
+import Gauge from 'ember-phosphor-icons/components/ph-gauge';
+import Thermometer from 'ember-phosphor-icons/components/ph-thermometer';
 import { temperatureToTextClass } from 'winds-mobi-client-web/helpers/temperature-to-colour';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import StationLastHour from './last-hour';
 import StationMetricCard from './metric-card';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import StationSectionCard from './section-card';
+
+function hasValue(value: number | undefined): value is number {
+  return Number.isFinite(value);
+}
 
 export interface StationSummarySignature {
   Args: {
@@ -18,6 +28,8 @@ export interface StationSummarySignature {
 }
 
 export default class StationSummary extends Component<StationSummarySignature> {
+  @service declare intl: IntlService;
+
   get reading() {
     return this.args.station.last;
   }
@@ -32,6 +44,48 @@ export default class StationSummary extends Component<StationSummarySignature> {
 
   get temperatureValueClass() {
     return temperatureToTextClass(this.reading.temperature);
+  }
+
+  get hasTemperature() {
+    return hasValue(this.reading.temperature);
+  }
+
+  get hasHumidity() {
+    return hasValue(this.reading.humidity);
+  }
+
+  get hasPressure() {
+    return hasValue(this.reading.pressure);
+  }
+
+  get hasRain() {
+    return hasValue(this.reading.rain);
+  }
+
+  get temperatureLabel() {
+    return this.hasTemperature
+      ? this.intl.formatNumber(this.reading.temperature, {
+          format: 'integer',
+        })
+      : undefined;
+  }
+
+  get humidityLabel() {
+    return this.hasHumidity
+      ? this.intl.formatNumber(this.reading.humidity, { format: 'integer' })
+      : undefined;
+  }
+
+  get pressureLabel() {
+    return this.hasPressure
+      ? this.intl.formatNumber(this.reading.pressure, { format: 'integer' })
+      : undefined;
+  }
+
+  get rainLabel() {
+    return this.hasRain
+      ? this.intl.formatNumber(this.reading.rain, { format: 'rainfall' })
+      : undefined;
   }
 
   <template>
@@ -58,31 +112,64 @@ export default class StationSummary extends Component<StationSummarySignature> {
               @label={{t "wind.direction"}}
               @value={{this.reading.direction}}
             />
+          </dl>
 
-            <StationMetricCard
-              @format="temperature"
-              @label={{t "air.temperature"}}
-              @value={{this.reading.temperature}}
-              @valueClass={{this.temperatureValueClass}}
-            />
+          <dl
+            class="m-0 mt-2 flex items-baseline justify-between text-base font-semibold md:mt-3 md:text-lg"
+          >
+            {{#if this.hasTemperature}}
+              <dt class="sr-only">{{t "air.temperature"}}</dt>
+              <dd
+                class="m-0 flex items-baseline gap-0.5"
+                title={{t "air.temperature"}}
+              >
+                <Thermometer class="text-black" />
+                <span
+                  class={{this.temperatureValueClass}}
+                >{{this.temperatureLabel}}</span>
+                <span
+                  class="text-[0.5em] font-normal text-slate-500"
+                >&deg;C</span>
+              </dd>
+            {{/if}}
 
-            <StationMetricCard
-              @format="humidity"
-              @label={{t "air.humidity"}}
-              @value={{this.reading.humidity}}
-            />
+            {{#if this.hasHumidity}}
+              <dt class="sr-only">{{t "air.humidity"}}</dt>
+              <dd
+                class="m-0 flex items-baseline gap-0.5"
+                title={{t "air.humidity"}}
+              >
+                <Drop class="text-black" />
+                <span>{{this.humidityLabel}}</span>
+                <span class="text-[0.5em] font-normal text-slate-500">%</span>
+              </dd>
+            {{/if}}
 
-            <StationMetricCard
-              @format="pressure"
-              @label={{t "air.pressure"}}
-              @value={{this.reading.pressure}}
-            />
+            {{#if this.hasPressure}}
+              <dt class="sr-only">{{t "air.pressure"}}</dt>
+              <dd
+                class="m-0 flex items-baseline gap-0.5"
+                title={{t "air.pressure"}}
+              >
+                <Gauge class="text-black" />
+                <span>{{this.pressureLabel}}</span>
+                <span class="text-[0.5em] font-normal text-slate-500">hPa</span>
+              </dd>
+            {{/if}}
 
-            <StationMetricCard
-              @format="rainfall"
-              @label={{t "air.rain"}}
-              @value={{this.reading.rain}}
-            />
+            {{#if this.hasRain}}
+              <dt class="sr-only">{{t "air.rain"}}</dt>
+              <dd
+                class="m-0 flex items-baseline gap-0.5"
+                title={{t "air.rain"}}
+              >
+                <CloudRain class="text-black" />
+                <span>{{this.rainLabel}}</span>
+                <span
+                  class="text-[0.5em] font-normal text-slate-500"
+                >l/m&sup2;</span>
+              </dd>
+            {{/if}}
           </dl>
         </StationSectionCard>
 

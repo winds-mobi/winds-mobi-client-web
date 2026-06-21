@@ -108,30 +108,37 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           class="m-0 flex items-baseline justify-between text-base font-semibold md:text-lg"
         >
           <dt class="sr-only">{{t "wind.minimum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.minimum"}}>
-            <ArrowLineDown @size={{14}} class="text-slate-400" />
+          <dd
+            class="m-0 flex items-baseline gap-0.5"
+            title={{t "wind.minimum"}}
+          >
+            <ArrowLineDown class="text-black" />
             <span
               class={{this.lastHourMinimumValueClass}}
             >{{this.lastHourMinimumLabel}}</span>
+            <span class="text-[0.5em] font-normal text-slate-500">km/h</span>
           </dd>
 
           <dt class="sr-only">{{t "wind.mean"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.mean"}}>
-            <ArrowsInLineVertical @size={{14}} class="text-slate-400" />
+          <dd class="m-0 flex items-baseline gap-0.5" title={{t "wind.mean"}}>
+            <ArrowsInLineVertical class="text-black" />
             <span
               class={{this.lastHourMeanValueClass}}
             >{{this.lastHourMeanLabel}}</span>
+            <span class="text-[0.5em] font-normal text-slate-500">km/h</span>
           </dd>
 
           <dt class="sr-only">{{t "wind.maximum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.maximum"}}>
-            <ArrowLineUp @size={{14}} class="text-slate-400" />
+          <dd
+            class="m-0 flex items-baseline gap-0.5"
+            title={{t "wind.maximum"}}
+          >
+            <ArrowLineUp class="text-black" />
             <span
               class={{this.lastHourMaximumValueClass}}
             >{{this.lastHourMaximumLabel}}</span>
+            <span class="text-[0.5em] font-normal text-slate-500">km/h</span>
           </dd>
-
-          <dd class="m-0 text-xs text-slate-500">km/h</dd>
         </dl>
       {{/if}}
     </div>

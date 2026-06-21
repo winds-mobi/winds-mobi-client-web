@@ -60,10 +60,15 @@ module(
         .map((element) => element.textContent?.trim())
         .filter(Boolean);
 
+      assert.strictEqual(valueText.length, 3, 'one value per min/mean/max');
+      assert.true(
+        valueText.every((text) => /km\/h$/.test(text ?? '')),
+        'each value carries its own km/h unit'
+      );
       assert.deepEqual(
-        valueText,
-        ['7', '12', '18', 'km/h'],
-        'shows minimum, mean, and maximum in that order, with the unit shown once at the end'
+        valueText.map((text) => text?.replace(/\s*km\/h$/, '')),
+        ['7', '12', '18'],
+        'shows minimum, mean, and maximum in that order'
       );
       assert.dom('dl dt:nth-of-type(1)').hasText('Minimum');
       assert.dom('dl dt:nth-of-type(2)').hasText('Mean');
