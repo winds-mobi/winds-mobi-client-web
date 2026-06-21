@@ -1,6 +1,5 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
-import { fn } from '@ember/helper';
 import { on } from '@ember/modifier';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
@@ -8,8 +7,10 @@ import { cached, tracked } from '@glimmer/tracking';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { rawTimeout, task } from 'ember-concurrency';
+import { Listbox } from '@frontile/collections';
 import { Input as FrontileInput } from '@frontile/forms';
 import { Popover } from '@frontile/overlays';
+import { ref } from '@frontile/utilities';
 import { t } from 'ember-intl';
 import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -37,9 +38,11 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
 
-  @tracked activeResultIndex = 0;
+  @tracked activeKey?: string;
   @tracked isOpen = false;
   @tracked query = '';
+
+  triggerRef = ref<HTMLInputElement>();
 
   updateDebouncedQuery = task({ restartable: true }, async (value: string) => {
     const trimmedValue = value.trim();
@@ -88,22 +91,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
       : [];
   }
 
-  get clampedActiveResultIndex() {
-    if (this.results.length === 0) {
-      return -1;
-    }
-
-    return Math.min(this.activeResultIndex, this.results.length - 1);
-  }
-
-  get activeStation() {
-    if (this.clampedActiveResultIndex < 0) {
-      return undefined;
-    }
-
-    return this.results[this.clampedActiveResultIndex];
-  }
-
   get isLoading() {
     return (
       this.hasEnoughCharacters &&
@@ -128,19 +115,38 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
     return this.isOpen && this.hasEnoughCharacters;
   }
 
-  isActiveResult = (index: number) => {
-    return index === this.clampedActiveResultIndex;
+  // Schema-record `Station`s throw on access to fields outside their schema
+  // (e.g. `.key`), so Listbox's default key/label derivation can't run
+  // directly against them — wrap each result in a plain object instead.
+  get listboxItems() {
+    return this.results.map((station) => ({
+      key: station.id,
+      label: station.name,
+      station,
+    }));
+  }
+
+  isActiveResult = (key: string) => {
+    return key === this.activeKey;
+  };
+
+  itemClass = (key: string) => {
+    const base = 'rounded-xl px-3 py-2.5 gap-3 transition';
+
+    return this.isActiveResult(key)
+      ? `${base} bg-slate-100 text-slate-950`
+      : `${base} text-slate-700 hover:bg-slate-50 hover:text-slate-950`;
   };
 
   private resetSearch() {
     this.query = '';
     this.isOpen = false;
+    this.activeKey = undefined;
   }
 
   @action
   handleInput(value: string) {
     this.query = value;
-    this.activeResultIndex = 0;
     this.isOpen = this.hasEnoughCharacters;
 
     void this.updateDebouncedQuery.perform(value);
@@ -159,50 +165,23 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   }
 
   @action
-  activateResult(index: number) {
-    this.activeResultIndex = index;
+  handleEscapeKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      this.isOpen = false;
+    }
   }
 
   @action
-  handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      this.isOpen = false;
-      return;
-    }
+  setActiveKey(key?: string) {
+    this.activeKey = key;
+  }
 
-    if (!this.isPopoverOpen) {
-      return;
-    }
+  @action
+  selectStationByKey(key: string) {
+    const station = this.results.find((result) => result.id === key);
 
-    if (event.key === 'ArrowDown') {
-      if (this.results.length === 0) {
-        return;
-      }
-
-      event.preventDefault();
-      this.activeResultIndex =
-        this.activeResultIndex >= this.results.length - 1
-          ? 0
-          : this.activeResultIndex + 1;
-      return;
-    }
-
-    if (event.key === 'ArrowUp') {
-      if (this.results.length === 0) {
-        return;
-      }
-
-      event.preventDefault();
-      this.activeResultIndex =
-        this.activeResultIndex <= 0
-          ? this.results.length - 1
-          : this.activeResultIndex - 1;
-      return;
-    }
-
-    if (event.key === 'Enter' && this.activeStation) {
-      event.preventDefault();
-      this.selectStation(this.activeStation);
+    if (station) {
+      this.selectStation(station);
     }
   }
 
@@ -222,7 +201,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   }
 
   <template>
-    <div ...attributes class="w-full">
+    <div ...attributes class="w-32">
       <Popover
         @isOpen={{this.isPopoverOpen}}
         @onOpenChange={{this.handleOpenChange}}
@@ -235,19 +214,18 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
           <FrontileInput
             aria-label={{t "navigation.search.label"}}
             autocomplete="off"
-            class="w-full"
+            class="w-full h-12"
             data-test-navbar-search-input
             name="station-search"
-            placeholder={{t "navigation.search.placeholder"}}
             @onInput={{this.handleInput}}
-            @size="sm"
             @type="search"
             @value={{this.query}}
+            {{this.triggerRef.setup}}
             {{on "focus" this.handleFocus}}
-            {{on "keydown" this.handleKeydown}}
+            {{on "keydown" this.handleEscapeKeydown}}
           >
             <:startContent>
-              <Binoculars @size={{14}} />
+              <Binoculars />
             </:startContent>
           </FrontileInput>
           {{! template-lint-enable no-passed-in-event-handlers }}
@@ -271,23 +249,30 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
                 {{t "navigation.search.loading"}}
               </p>
             {{else if this.results.length}}
-              <ul
+              <Listbox
+                @items={{this.listboxItems}}
+                @elementToAddKeyboardEvents={{this.triggerRef.current}}
+                @onAction={{this.selectStationByKey}}
+                @onActiveItemChange={{this.setActiveKey}}
                 aria-label={{t "navigation.search.label"}}
                 data-test-navbar-search-results
-                role="listbox"
                 class="max-h-80 overflow-y-auto p-1"
               >
-                {{#each this.results as |station index|}}
-                  <li role="presentation">
-                    <NavbarSearchResult
-                      @isActive={{this.isActiveResult index}}
-                      @onActivate={{fn this.activateResult index}}
-                      @onSelect={{fn this.selectStation station}}
-                      @station={{station}}
-                    />
-                  </li>
-                {{/each}}
-              </ul>
+                <:item as |l|>
+                  <l.Item
+                    @key={{l.key}}
+                    @class={{this.itemClass l.key}}
+                    aria-selected={{if
+                      (this.isActiveResult l.key)
+                      "true"
+                      "false"
+                    }}
+                    data-test-navbar-search-result={{l.key}}
+                  >
+                    <NavbarSearchResult @station={{l.item.station}} />
+                  </l.Item>
+                </:item>
+              </Listbox>
             {{else if this.hasNoResults}}
               <p
                 data-test-navbar-search-empty

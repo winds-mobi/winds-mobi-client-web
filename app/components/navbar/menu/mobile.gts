@@ -44,10 +44,10 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
         aria-label={{t "navigation.menu"}}
         data-test-navbar-mobile-menu-button
         @appearance="outlined"
-        @class="px-2.5"
+        class="h-12"
         @onPress={{this.open}}
       >
-        <List @size={{18}} />
+        <List />
       </Button>
 
       {{#if this.isOpen}}

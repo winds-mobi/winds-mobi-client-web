@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import { on } from '@ember/modifier';
 import { service } from '@ember/service';
 import type IntlService from 'ember-intl';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
@@ -9,26 +8,14 @@ import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface NavbarSearchResultSignature {
   Args: {
-    isActive: boolean;
-    onActivate: () => void;
-    onSelect: () => void;
     station: Station;
   };
-  Element: HTMLButtonElement;
+  Element: HTMLDivElement;
 }
 
 export default class NavbarSearchResult extends Component<NavbarSearchResultSignature> {
   @service declare intl: IntlService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
-
-  get buttonClass() {
-    return [
-      'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition',
-      this.args.isActive
-        ? 'bg-slate-100 text-slate-950'
-        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950',
-    ].join(' ');
-  }
 
   get windBand() {
     return windBandForSpeed(this.args.station.last.speed);
@@ -43,15 +30,7 @@ export default class NavbarSearchResult extends Component<NavbarSearchResultSign
   }
 
   <template>
-    <button
-      aria-selected={{if @isActive "true" "false"}}
-      class={{this.buttonClass}}
-      data-test-navbar-search-result={{@station.id}}
-      role="option"
-      type="button"
-      {{on "click" @onSelect}}
-      {{on "mousemove" @onActivate}}
-    >
+    <div ...attributes class="flex w-full items-center justify-between gap-3">
       <span class="min-w-0">
         <span class="block truncate text-sm font-semibold">
           {{@station.name}}
@@ -85,6 +64,6 @@ export default class NavbarSearchResult extends Component<NavbarSearchResultSign
         ></span>
         {{this.windSpeedLabel}}
       </span>
-    </button>
+    </div>
   </template>
 }

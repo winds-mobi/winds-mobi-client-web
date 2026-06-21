@@ -36,17 +36,12 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
     <Button
       aria-label={{t "map.refresh.ariaLabel"}}
       data-test-navbar-refresh
-      @appearance="outlined"
-      @size="sm"
       @onPress={{this.handleRefresh}}
+      @appearance="outlined"
+      class="h-12"
       ...attributes
     >
-      <span class="inline-flex items-center gap-1.5">
-        <span data-refresh-icon class="inline-flex">
-          <ArrowClockwise @size={{16}} />
-        </span>
-        <span>{{t "map.refresh.label"}}</span>
-      </span>
+      <ArrowClockwise data-refresh-icon />
     </Button>
   </template>
 }
