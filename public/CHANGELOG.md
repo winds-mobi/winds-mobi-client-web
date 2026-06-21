@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.7.19 - 2026-06-21
+
+### Changed
+
+- Hovering a "Last hour" min/mean/max icon now shows a tooltip naming it (Minimum/Mean/Maximum).
+- The "Last hour" wind-direction chart's hover tooltip now shows each sample's wind speed instead of its temperature, since this is a wind chart.
+
 ## v0.7.18 - 2026-06-21
 
 ### Changed
