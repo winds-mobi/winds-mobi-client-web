@@ -2,7 +2,7 @@ import type { ComponentLike } from '@glint/template';
 
 export interface StationMetaItemSignature {
   Args: {
-    icon: ComponentLike<{
+    icon?: ComponentLike<{
       Args: {
         size?: number;
       };
@@ -19,7 +19,9 @@ export interface StationMetaItemSignature {
   <div class="flex items-center gap-1.5">
     <dt class="sr-only">{{@label}}</dt>
     <dd class="m-0 inline-flex items-center gap-1.5" ...attributes>
-      <@icon @size={{14}} class="text-slate-400" />
+      {{#if @icon}}
+        <@icon @size={{14}} class="text-slate-400" />
+      {{/if}}
       {{yield}}
     </dd>
   </div>

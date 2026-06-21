@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.1 - 2026-06-21
+
+### Changed
+
+- Compact nearby cards now show wind speed and gusts as a single "speed / gusts km/h" line (speed shown larger) instead of two separate labeled rows, and only peak (take-off site) stations show a mountain icon next to their altitude — other stations show altitude with no icon, on both the compact cards and the station header.
+
 ## v0.7.0 - 2026-06-21
 
 ### Added
