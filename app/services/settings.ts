@@ -24,6 +24,11 @@ export default class SettingsService extends Service {
   // more stations fit on screen without scrolling (#64).
   @trackedInLocalStorage({ keyName: 'settings.nearbyCompactList' })
   nearbyCompactList = false;
+
+  // Replace the Now/Last hour cards' text labels with small icons, so each
+  // value shrinks to fit its content instead of stretching full width.
+  @trackedInLocalStorage({ keyName: 'settings.useIconLabels' })
+  useIconLabels = false;
 }
 
 // The boolean preferences, named so the settings UI can drive each one through a
@@ -34,7 +39,8 @@ export type BooleanSettingKey =
   | 'faviconFollowsStation'
   | 'showGustsOutline'
   | 'shrinkOldData'
-  | 'nearbyCompactList';
+  | 'nearbyCompactList'
+  | 'useIconLabels';
 
 declare module '@ember/service' {
   interface Registry {

@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import type { IntlService } from 'ember-intl';
+import type { ComponentLike } from '@glint/template';
 import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 
 type MetricValue = number | string | null | undefined;
@@ -17,6 +18,13 @@ type StationMetricFormat =
 export interface StationMetricCardSignature {
   Args: {
     format?: StationMetricFormat;
+    // When given, the icon replaces the visible label (kept sr-only for
+    // screen readers); the card otherwise keeps its usual full-width layout.
+    icon?: ComponentLike<{
+      Args: {
+        size?: number;
+      };
+    }>;
     label: string;
     labelClass?: string;
     value?: MetricValue;
@@ -88,19 +96,21 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
   <template>
     {{#if this.hasValue}}
       <div
-        class="flex items-baseline justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5"
+        class="flex items-baseline justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 text-base font-semibold ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5 md:text-lg"
         ...attributes
       >
-        <dt
-          class="text-[11px] font-medium leading-tight text-slate-500 md:text-xs
-            {{if @labelClass @labelClass}}"
-        >
-          {{@label}}
-        </dt>
-        <dd
-          class="text-right text-base font-semibold leading-tight md:text-lg
-            {{if @valueClass @valueClass}}"
-        >
+        {{#if @icon}}
+          <dt class="sr-only">{{@label}}</dt>
+          <@icon class="text-black" />
+        {{else}}
+          <dt
+            class="text-[11px] font-medium leading-tight text-slate-500 md:text-xs
+              {{if @labelClass @labelClass}}"
+          >
+            {{@label}}
+          </dt>
+        {{/if}}
+        <dd class="text-right leading-tight {{if @valueClass @valueClass}}">
           {{this.formattedValue}}
         </dd>
       </div>

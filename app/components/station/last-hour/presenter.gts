@@ -1,7 +1,12 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
+import { service } from '@ember/service';
 import { t } from 'ember-intl';
+import ArrowLineDown from 'ember-phosphor-icons/components/ph-arrow-line-down';
+import ArrowLineUp from 'ember-phosphor-icons/components/ph-arrow-line-up';
+import ArrowsInLineVertical from 'ember-phosphor-icons/components/ph-arrows-in-line-vertical';
 import StationMetricCard from '../metric-card';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from '../wind-direction';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -17,6 +22,8 @@ export interface StationLastHourContentSignature {
 }
 
 export default class StationLastHourContent extends Component<StationLastHourContentSignature> {
+  @service declare settings: SettingsService;
+
   @cached
   get lastHourHistory() {
     return this.args.history;
@@ -81,6 +88,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           @label={{t "wind.maximum"}}
           @value={{this.lastHourMaximumSpeed}}
           @valueClass={{this.lastHourMaximumValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowLineUp}}
         />
 
         <StationMetricCard
@@ -88,6 +96,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           @label={{t "wind.mean"}}
           @value={{this.lastHourMeanSpeed}}
           @valueClass={{this.lastHourMeanValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowsInLineVertical}}
         />
 
         <StationMetricCard
@@ -95,6 +104,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
           @label={{t "wind.minimum"}}
           @value={{this.lastHourMinimumSpeed}}
           @valueClass={{this.lastHourMinimumValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowLineDown}}
         />
       </dl>
     </div>

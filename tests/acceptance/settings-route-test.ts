@@ -16,6 +16,7 @@ const STORAGE_KEYS = [
   'settings.showGustsOutline',
   'settings.shrinkOldData',
   'settings.nearbyCompactList',
+  'settings.useIconLabels',
 ];
 
 module('Acceptance | settings route', function (hooks) {
@@ -30,7 +31,7 @@ module('Acceptance | settings route', function (hooks) {
     STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
-  test('it shows the four preferences, on by default except the compact nearby list', async function (assert) {
+  test('it shows the five preferences, on by default except the compact nearby list and icon labels', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -38,6 +39,7 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
+    assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
   });
 
   test('toggling a preference persists it to local storage', async function (assert) {

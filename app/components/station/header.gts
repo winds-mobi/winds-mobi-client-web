@@ -4,6 +4,7 @@ import { LinkTo } from '@ember/routing';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
+import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
@@ -75,7 +76,10 @@ export default class StationHeader extends Component<StationHeaderSignature> {
             m</span>
         </StationMetaItem>
 
-        <StationMetaItem @label={{t "station.meta.updated"}}>
+        <StationMetaItem
+          @icon={{ClockCounterClockwise}}
+          @label={{t "station.meta.updated"}}
+        >
           <span class={{this.lastReadingFreshnessClass}}>{{timeAgo
               this.lastReadingRelativeSeconds
             }}</span>

@@ -44,6 +44,12 @@ settings:
       Show nearby stations as smaller cards (name, altitude, wind, gusts, last
       update, and a small wind-direction thumbnail) instead of full-size
       cards, so more stations fit on screen without scrolling.
+  useIconLabels:
+    label: Use icons for labels
+    description: >-
+      Show a small icon instead of the text label for each value in the Now
+      and Last hour cards. Each value then only takes as much width as it
+      needs, so several fit per row instead of one per row.
 
 help:
   title: Help
