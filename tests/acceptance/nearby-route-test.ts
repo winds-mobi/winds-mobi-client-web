@@ -163,6 +163,11 @@ module('Acceptance | nearby route', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
+    window.localStorage.removeItem('settings.nearbyCompactList');
+  });
+
+  hooks.afterEach(function () {
+    window.localStorage.removeItem('settings.nearbyCompactList');
   });
 
   test('it shows the explainer and waits for the nearby location button when access is not granted yet', async function (assert) {
@@ -240,6 +245,39 @@ module('Acceptance | nearby route', function (hooks) {
     assert.strictEqual(params.get('latitude'), '46.521');
     assert.strictEqual(params.get('longitude'), '6.632');
     assert.strictEqual(params.get('zoom'), '10');
+  });
+
+  test('it switches to the compact list view and back', async function (assert) {
+    const nearbyLocation = this.owner.lookup(
+      'service:nearby-location'
+    ) as NearbyLocationService;
+
+    stubGrantedPermission(nearbyLocation);
+
+    await visit('/nearby');
+    await waitForNearbyStations();
+
+    assert.dom('[data-test-nearby-stations-compact]').doesNotExist();
+    assert
+      .dom('[data-test-nearby-station-card-compact]')
+      .doesNotExist('compact cards are not rendered in card view');
+
+    await click('[data-test-nearby-view-toggle="compact"]');
+
+    assert
+      .dom(NEARBY_STATION_CARD_SELECTOR)
+      .doesNotExist('full cards are not rendered in compact view');
+    assert
+      .dom('[data-test-nearby-station-card-compact]')
+      .exists({ count: STATION_FIXTURES.length });
+    assert
+      .dom('[data-test-nearby-station-card-compact="holfuy-1804"]')
+      .includesText('Holfuy 1804');
+
+    await click('[data-test-nearby-view-toggle="card"]');
+
+    assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
+    assert.dom('[data-test-nearby-station-card-compact]').doesNotExist();
   });
 
   test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {

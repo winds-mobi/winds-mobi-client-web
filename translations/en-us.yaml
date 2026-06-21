@@ -44,6 +44,12 @@ settings:
       Open station panels with the wind and air graphs sharing one time range,
       so zooming or panning one moves the other. You can still unlink them per
       station.
+  nearbyCompactList:
+    label: Smaller nearby cards
+    description: >-
+      Show nearby stations as smaller cards (name, altitude, wind, gusts, last
+      update, and a small wind-direction thumbnail) instead of full-size
+      cards, so more stations fit on screen without scrolling.
   preview:
     graphWind: Wind
     graphAir: Air
@@ -108,6 +114,9 @@ nearby:
   description: Use your location to find the closest stations around your current position and compare the live reading with the last hour at a glance.
   loading: Looking up the closest stations…
   requestError: Nearby stations could not be loaded right now.
+  view:
+    card: Bigger cards
+    compact: Smaller cards
   location:
     checking: Checking location access…
     locatingDescription: Trying to determine your current location…

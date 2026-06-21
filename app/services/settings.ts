@@ -24,6 +24,11 @@ export default class SettingsService extends Service {
   // synced. The per-panel switch remains the live override for that session.
   @trackedInLocalStorage({ keyName: 'settings.syncGraphsByDefault' })
   syncGraphsByDefault = true;
+
+  // Show the /nearby stations list as dense rows instead of full cards, so
+  // more stations fit on screen without scrolling (#64).
+  @trackedInLocalStorage({ keyName: 'settings.nearbyCompactList' })
+  nearbyCompactList = false;
 }
 
 // The boolean preferences, named so the settings UI can drive each one through a
@@ -34,7 +39,8 @@ export type BooleanSettingKey =
   | 'faviconFollowsStation'
   | 'showGustsOutline'
   | 'shrinkOldData'
-  | 'syncGraphsByDefault';
+  | 'syncGraphsByDefault'
+  | 'nearbyCompactList';
 
 declare module '@ember/service' {
   interface Registry {
