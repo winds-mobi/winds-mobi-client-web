@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.18 - 2026-06-21
+
+### Changed
+
+- The "Last hour" min/mean/max row now spreads its values evenly across the card's width instead of clustering them in the centre, only the numbers are coloured by wind speed (the icons stay a neutral grey), and the value text now matches the size used in the "Now" card's speed/gusts/direction values.
+
 ## v0.7.17 - 2026-06-21
 
 ### Removed
