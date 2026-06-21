@@ -87,6 +87,18 @@ export default class StationCompactCard extends Component<StationCompactCardSign
           </dl>
         </div>
 
+        <dl class="m-0">
+          <StationMetaItem
+            @icon={{ClockCounterClockwise}}
+            @label={{t "station.meta.updated"}}
+            class="text-[11px] text-slate-500"
+          >
+            <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
+          </StationMetaItem>
+        </dl>
+      </div>
+
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col items-center gap-1">
         <dl class="m-0 flex items-baseline gap-1">
           <dt class="sr-only">{{t "wind.speed"}}</dt>
           <dd
@@ -109,22 +121,12 @@ export default class StationCompactCard extends Component<StationCompactCardSign
           <dd class="m-0 text-xs text-slate-500">km/h</dd>
         </dl>
 
-        <dl class="m-0">
-          <StationMetaItem
-            @icon={{ClockCounterClockwise}}
-            @label={{t "station.meta.updated"}}
-            class="text-[11px] text-slate-500"
-          >
-            <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
-          </StationMetaItem>
-        </dl>
-      </div>
-
-      <div class="flex min-h-0 min-w-0 flex-1 items-center justify-center">
-        <StationWindDirectionThumbnail
-          @stationId={{@station.id}}
-          class="aspect-square h-full max-h-full max-w-full"
-        />
+        <div class="flex min-h-0 w-full flex-1 items-center justify-center">
+          <StationWindDirectionThumbnail
+            @stationId={{@station.id}}
+            class="aspect-square h-full max-h-full max-w-full"
+          />
+        </div>
       </div>
     </article>
   </template>
