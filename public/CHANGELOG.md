@@ -1,12 +1,10 @@
 # Changelog
 
-## v0.6.4 - 2026-06-21
+## v0.7.0 - 2026-06-21
 
 ### Added
 
 - The Nearby stations view now has a "Smaller cards" toggle (also available in Settings) that shows a denser grid of compact cards — name, altitude, wind, gusts, last update, and a small wind-direction thumbnail — so more stations fit on screen without scrolling.
-
-## v0.6.3 - 2026-06-21
 
 ### Changed
 
