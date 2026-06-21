@@ -65,6 +65,50 @@ module(
       assert.dom('.highcharts-container').exists();
     });
 
+    test('it outlines a point in the wind-speed colour and fills it with the gusts colour only when the bands differ', async function (this: WindDirectionGraphTestContext, assert) {
+      const now = Date.now();
+
+      this.data = [
+        {
+          id: 'same-band',
+          direction: 180,
+          speed: 2,
+          gusts: 2,
+          temperature: 6,
+          humidity: 60,
+          timestamp: now - 10 * 60 * 1000,
+          [Type]: 'history',
+        },
+        {
+          id: 'different-band',
+          direction: 225,
+          speed: 2,
+          gusts: 20,
+          temperature: 7,
+          humidity: 58,
+          timestamp: now - 5 * 60 * 1000,
+          [Type]: 'history',
+        },
+      ];
+
+      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await settled();
+
+      const points = findAll('.highcharts-point');
+      const [samePoint, differentPoint] = points;
+
+      assert.strictEqual(
+        samePoint?.getAttribute('fill'),
+        samePoint?.getAttribute('stroke'),
+        'same wind-speed and gusts band: the dot is plain speed-coloured'
+      );
+      assert.notStrictEqual(
+        differentPoint?.getAttribute('fill'),
+        differentPoint?.getAttribute('stroke'),
+        'different wind-speed and gusts band: the outline is the speed colour and the fill is the gusts colour'
+      );
+    });
+
     test('it keeps rendering points in chronological order when switching stations', async function (this: WindDirectionGraphTestContext, assert) {
       const now = Date.now();
 

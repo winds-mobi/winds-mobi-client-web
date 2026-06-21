@@ -68,18 +68,32 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       return [];
     }
 
-    return data.map((elm) => ({
-      x: elm.direction,
-      y: elm.timestamp,
-      color: windToColour(elm.speed),
-      customTooltip: `${this.intl.formatTime(elm.timestamp, {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: false,
-      })} ${this.intl.formatNumber(elm.speed, {
-        format: 'windSpeed',
-      })}`,
-    }));
+    return data.map((elm) => {
+      const speedColour = windToColour(elm.speed);
+      const gustsColour = windToColour(elm.gusts);
+
+      return {
+        x: elm.direction,
+        y: elm.timestamp,
+        color: speedColour,
+        // Mirrors the map marker's outline/hub convention: the ring stays the
+        // wind-speed colour, and the center only switches to the gusts colour
+        // when gusts fall in a different wind band -- otherwise it's a plain
+        // speed-coloured dot.
+        marker: {
+          enabled: true,
+          lineColor: speedColour,
+          fillColor: gustsColour === speedColour ? speedColour : gustsColour,
+        },
+        customTooltip: `${this.intl.formatTime(elm.timestamp, {
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: false,
+        })} ${this.intl.formatNumber(elm.speed, {
+          format: 'windSpeed',
+        })}`,
+      };
+    });
   }
 
   get chartData() {
@@ -91,6 +105,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
         lineWidth: 1.5,
         marker: {
           radius: 3,
+          lineWidth: 1.5,
         },
       },
     ];

@@ -33,6 +33,15 @@ export default class Polar extends Component<PolarSignature> {
     credits: {
       enabled: false,
     },
+    // ember-highcharts always imports the accessibility module, but its
+    // keyboard-navigation point proxies can throw ("Invalid value for <rect>
+    // attribute y=NaN") on sparse scatter series (e.g. a station that only
+    // reports every 30 minutes may have just one point in the last-hour
+    // window). This chart's data is also available via the metric cards and
+    // tooltips, so the a11y module isn't adding real value here.
+    accessibility: {
+      enabled: false,
+    },
     chart: {
       polar: true,
       reflow: true,
