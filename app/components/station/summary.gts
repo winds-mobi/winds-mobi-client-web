@@ -38,7 +38,7 @@ export default class StationSummary extends Component<StationSummarySignature> {
     <section data-test-station-summary-section>
       <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
         <StationSectionCard @title={{t "station.summary.now"}}>
-          <dl class="m-0 grid gap-2 md:gap-3">
+          <dl class="m-0 grid gap-1 md:gap-2">
             <StationMetricCard
               @format="windSpeed"
               @label={{t "wind.speed"}}
