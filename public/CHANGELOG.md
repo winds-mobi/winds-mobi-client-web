@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.6 - 2026-06-21
+
+### Changed
+
+- Removed the clock icon next to the "last updated" relative time in the station header and compact nearby cards, leaving just the time text.
+
 ## v0.7.5 - 2026-06-21
 
 ### Changed
