@@ -32,10 +32,8 @@ module('Unit | Handler | station', function () {
       _id: 'holfuy-1850',
       altitude: 1850,
       name: 'Holfuy 1850',
-      last: {
-        timestamp: 1_774_341_507_000,
-        speed: 12,
-      },
+      lastTimestamp: 1_774_341_507_000,
+      lastSpeed: 12,
     });
     assert.false('providerName' in response.data.attributes);
     assert.false('providerUrl' in response.data.attributes);

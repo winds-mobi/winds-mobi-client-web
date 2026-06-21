@@ -12,38 +12,6 @@ export const LocationSchema = {
   fields: [{ name: 'coordinates', kind: 'array' }],
 } as const;
 
-// Embedded object schema: pressure (also just a shape)
-// You can later use it from another schema as
-// { name: 'pressure', kind: 'schema-object', type: 'pressure' }
-export const PressureSchema = {
-  type: 'pressure',
-  identity: null,
-  fields: [
-    { name: 'qfe', kind: 'field' },
-    { name: 'qnh', kind: 'field' },
-    { name: 'qff', kind: 'field' },
-  ],
-} as const;
-
-// Embedded object schema: reading
-// NOTE: no `withDefaults` and `identity: null` so it can safely be used
-// as `kind: 'schema-object'` from StationSchema.
-export const ReadingSchema = {
-  type: 'reading',
-  identity: null,
-  fields: [
-    // `_id` is *not* unique here, we’re just reusing it as a timestamp field
-    { name: 'timestamp', kind: 'field' },
-    { name: 'direction', kind: 'field' },
-    { name: 'speed', kind: 'field' },
-    { name: 'gusts', kind: 'field' },
-    { name: 'temperature', kind: 'field' },
-    { name: 'humidity', kind: 'field' },
-    { name: 'rain', kind: 'field' },
-    { name: 'pressure', kind: 'schema-object', type: 'pressure' },
-  ],
-} as const;
-
 export const StationSchema = withDefaults({
   type: 'station',
   fields: [
@@ -83,8 +51,23 @@ export const StationSchema = withDefaults({
     // providerUrl is normalized to a single URL string in the station handler.
     { name: 'providerUrl', kind: 'field' },
 
-    // last = embedded reading object
-    { name: 'last', kind: 'schema-object', type: 'reading' },
+    // Flat `last*` fields rather than one nested `last` object: Warp Drive's
+    // upsert merge is only one level deep, so a nested object field gets
+    // wholesale *replaced* by any later request for the same station that
+    // omits it -- e.g. the map's lean list query (fewer `last.*` keys than
+    // the station detail's `findRecord`) would otherwise wipe temperature/
+    // humidity/rain/pressure moments after the detail panel populated them.
+    // Flat top-level fields merge safely per-field instead. `last` below is
+    // a derived convenience getter so consumers keep reading `station.last.X`.
+    { name: 'lastTimestamp', kind: 'field' },
+    { name: 'lastDirection', kind: 'field' },
+    { name: 'lastSpeed', kind: 'field' },
+    { name: 'lastGusts', kind: 'field' },
+    { name: 'lastTemperature', kind: 'field' },
+    { name: 'lastHumidity', kind: 'field' },
+    { name: 'lastRain', kind: 'field' },
+    { name: 'lastPressure', kind: 'field' },
+    { name: 'last', kind: 'derived', type: 'composeReading' },
   ],
 });
 
@@ -164,20 +147,34 @@ function unwrapDerivation(
 }
 unwrapDerivation[Type] = 'unwrap';
 
+// Reassembles the flat `last*` fields (see the comment on StationSchema)
+// back into the nested shape consumers read as `station.last`.
+function composeReadingDerivation(record: RecordType): unknown {
+  if (!isRecordType(record)) {
+    return undefined;
+  }
+
+  return {
+    timestamp: record.lastTimestamp,
+    direction: record.lastDirection,
+    speed: record.lastSpeed,
+    gusts: record.lastGusts,
+    temperature: record.lastTemperature,
+    humidity: record.lastHumidity,
+    rain: record.lastRain,
+    pressure: record.lastPressure,
+  };
+}
+composeReadingDerivation[Type] = 'composeReading';
+
 export default useLegacyStore({
   linksMode: false,
   legacyRequests: true,
   modelFragments: true,
   cache: JSONAPICache,
-  schemas: [
-    PressureSchema,
-    ReadingSchema,
-    LocationSchema,
-    StationSchema,
-    HistorySchema,
-  ],
+  schemas: [LocationSchema, StationSchema, HistorySchema],
   handlers: [StationHandler, HistoryHandler],
-  derivations: [unwrapDerivation],
+  derivations: [unwrapDerivation, composeReadingDerivation],
 });
 
 declare module '@ember/service' {
