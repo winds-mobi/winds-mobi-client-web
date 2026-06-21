@@ -15,7 +15,6 @@ const STORAGE_KEYS = [
   'settings.faviconFollowsStation',
   'settings.showGustsOutline',
   'settings.shrinkOldData',
-  'settings.syncGraphsByDefault',
   'settings.nearbyCompactList',
 ];
 
@@ -31,14 +30,13 @@ module('Acceptance | settings route', function (hooks) {
     STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
-  test('it shows the five preferences, on by default except the compact nearby list', async function (assert) {
+  test('it shows the four preferences, on by default except the compact nearby list', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
     assert.dom('[data-test-setting="faviconFollowsStation"]').isChecked();
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
-    assert.dom('[data-test-setting="syncGraphsByDefault"]').isChecked();
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
   });
 

@@ -38,21 +38,12 @@ settings:
       Shrink each wind arrow the older its last reading is, so fresh stations
       stand out and stale ones recede. Arrows scale linearly from full size
       now down to half size at 30 minutes, and never shrink below half size.
-  syncGraphsByDefault:
-    label: Sync wind & air graphs
-    description: >-
-      Open station panels with the wind and air graphs sharing one time range,
-      so zooming or panning one moves the other. You can still unlink them per
-      station.
   nearbyCompactList:
     label: Smaller nearby cards
     description: >-
       Show nearby stations as smaller cards (name, altitude, wind, gusts, last
       update, and a small wind-direction thumbnail) instead of full-size
       cards, so more stations fit on screen without scrolling.
-  preview:
-    graphWind: Wind
-    graphAir: Air
 
 help:
   title: Help
@@ -142,9 +133,6 @@ station:
     now: Now
     wind: Wind
     air: Air
-  timeSeries:
-    sync: Sync
-    syncToggle: Toggle shared chart zoom sync
   wind: Wind
   air: Air
 

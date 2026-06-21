@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.17 - 2026-06-21
+
+### Removed
+
+- Removed the "Sync wind & air graphs" setting and the matching Sync toggle in the station detail panel. The feature could leak a previously viewed station's time range into the next station's wind/air graphs, causing them to occasionally open on the wrong time window instead of the default last 6 hours; removing it restores the reliable default.
+
 ## v0.7.16 - 2026-06-21
 
 ### Changed

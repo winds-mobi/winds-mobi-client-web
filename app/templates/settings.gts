@@ -7,7 +7,6 @@ import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
-import SettingsShowcaseGraphSync from 'winds-mobi-client-web/components/settings/showcase/graph-sync';
 import SettingsShowcaseNearbyCompactList from 'winds-mobi-client-web/components/settings/showcase/nearby-compact-list';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -51,17 +50,6 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             <SettingsRow @settings={{this.settings}} @name="shrinkOldData">
               <SettingsShowcaseShrink
                 @enabled={{this.settings.shrinkOldData}}
-              />
-            </SettingsRow>
-
-            <SettingsRow
-              @settings={{this.settings}}
-              @name="syncGraphsByDefault"
-              as |row|
-            >
-              <SettingsShowcaseGraphSync
-                @enabled={{row.enabled}}
-                @onChange={{row.update}}
               />
             </SettingsRow>
 
