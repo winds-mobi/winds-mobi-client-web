@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.15 - 2026-06-21
+
+### Changed
+
+- The "Last hour" card's minimum/mean/maximum wind speeds are now a single compact row (min / mean / max, each marked with a small icon instead of a text label) rather than three separate labelled rows, with the km/h unit shown once at the end.
+
 ## v0.7.14 - 2026-06-21
 
 ### Changed

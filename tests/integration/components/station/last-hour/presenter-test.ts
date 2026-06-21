@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { render, settled } from '@ember/test-helpers';
+import { findAll, render, settled } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -56,12 +56,18 @@ module(
       );
       await settled();
 
-      assert.dom(this.element).includesText('Maximum');
-      assert.dom(this.element).includesText('18 km/h');
-      assert.dom(this.element).includesText('Mean');
-      assert.dom(this.element).includesText('12 km/h');
-      assert.dom(this.element).includesText('Minimum');
-      assert.dom(this.element).includesText('7 km/h');
+      const valueText = findAll('dl dd')
+        .map((element) => element.textContent?.trim())
+        .filter(Boolean);
+
+      assert.deepEqual(
+        valueText,
+        ['7', '12', '18', 'km/h'],
+        'shows minimum, mean, and maximum in that order, with the unit shown once at the end'
+      );
+      assert.dom('dl dt:nth-of-type(1)').hasText('Minimum');
+      assert.dom('dl dt:nth-of-type(2)').hasText('Mean');
+      assert.dom('dl dt:nth-of-type(3)').hasText('Maximum');
     });
   }
 );
