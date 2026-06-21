@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.13 - 2026-06-21
+
+### Changed
+
+- The "last updated" colour fade now resolves entirely within the first hour (steps at 1/2/4/7/12/20/35/60 minutes), with anything older than an hour shown as flat grey, instead of stretching the gradient out to 24 hours.
+
 ## v0.7.12 - 2026-06-21
 
 ### Added
