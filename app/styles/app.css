@@ -30,6 +30,16 @@
   --color-wind-40: rgb(179 0 161);
   --color-wind-45: rgb(179 0 80);
   --color-wind-50: rgb(179 0 0);
+
+  /* Fades a reading's "updated" text from dark gold (just in) to grey, ending
+     at the same grey used for stale (24h+) map markers (see
+     STALE_STATION_COLOUR in app/utils/station-arrow.ts). */
+  --color-fresh-0: rgb(146 64 14);
+  --color-fresh-1: rgb(146 84 48);
+  --color-fresh-2: rgb(147 104 82);
+  --color-fresh-3: rgb(147 123 116);
+  --color-fresh-4: rgb(148 143 150);
+  --color-fresh-5: rgb(148 163 184);
 }
 
 /* stylelint-enable */

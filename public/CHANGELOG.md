@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.7 - 2026-06-21
+
+### Added
+
+- The "last updated" relative time in the station header and compact nearby cards is now coloured from dark gold (just updated) fading to grey as the reading ages, matching the grey already used for stale (24h+) map markers.
+
 ## v0.7.6 - 2026-06-21
 
 ### Changed
