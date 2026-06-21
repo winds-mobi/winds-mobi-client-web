@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.10 - 2026-06-21
+
+### Changed
+
+- The "last updated" gold-to-grey colour fade now has finer steps in the first 10-40 minutes (matching the app's 2-minute refresh cycle), so the fade is visible across nearby stations instead of nearly all of them landing on the same dark-gold colour.
+
 ## v0.7.8 - 2026-06-21
 
 ### Changed
