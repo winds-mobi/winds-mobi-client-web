@@ -2,10 +2,11 @@ import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { t } from 'ember-intl';
-import type { IntlService } from 'ember-intl';
 import ArrowLineDown from 'ember-phosphor-icons/components/ph-arrow-line-down';
 import ArrowLineUp from 'ember-phosphor-icons/components/ph-arrow-line-up';
 import ArrowsInLineVertical from 'ember-phosphor-icons/components/ph-arrows-in-line-vertical';
+import StationMetricCard from '../metric-card';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import WindDirection from '../wind-direction';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -21,7 +22,7 @@ export interface StationLastHourContentSignature {
 }
 
 export default class StationLastHourContent extends Component<StationLastHourContentSignature> {
-  @service declare intl: IntlService;
+  @service declare settings: SettingsService;
 
   @cached
   get lastHourHistory() {
@@ -58,43 +59,19 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   }
 
   get lastHourMaximumValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMaximumSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMaximumSpeed);
   }
 
   get lastHourMeanValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMeanSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMeanSpeed);
   }
 
   get lastHourMinimumValueClass() {
-    return this.hasHistory
-      ? windToTextClass(this.lastHourMinimumSpeed)
-      : undefined;
+    return this.windClassFor(this.lastHourMinimumSpeed);
   }
 
-  get lastHourMinimumLabel() {
-    return this.hasHistory
-      ? this.intl.formatNumber(this.lastHourMinimumSpeed, {
-          format: 'integer',
-        })
-      : undefined;
-  }
-
-  get lastHourMeanLabel() {
-    return this.hasHistory
-      ? this.intl.formatNumber(this.lastHourMeanSpeed, { format: 'integer' })
-      : undefined;
-  }
-
-  get lastHourMaximumLabel() {
-    return this.hasHistory
-      ? this.intl.formatNumber(this.lastHourMaximumSpeed, {
-          format: 'integer',
-        })
-      : undefined;
+  private windClassFor(speed: number | undefined) {
+    return this.hasHistory ? windToTextClass(speed) : undefined;
   }
 
   <template>
@@ -103,37 +80,31 @@ export default class StationLastHourContent extends Component<StationLastHourCon
         <WindDirection @data={{this.lastHourHistory}} />
       </div>
 
-      {{#if this.hasHistory}}
-        <dl
-          class="m-0 flex items-baseline justify-between text-base font-semibold md:text-lg"
-        >
-          <dt class="sr-only">{{t "wind.minimum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.minimum"}}>
-            <ArrowLineDown @size={{14}} class="text-slate-400" />
-            <span
-              class={{this.lastHourMinimumValueClass}}
-            >{{this.lastHourMinimumLabel}}</span>
-          </dd>
+      <dl class="m-0 grid gap-1 md:gap-2">
+        <StationMetricCard
+          @format="windSpeed"
+          @label={{t "wind.maximum"}}
+          @value={{this.lastHourMaximumSpeed}}
+          @valueClass={{this.lastHourMaximumValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowLineUp}}
+        />
 
-          <dt class="sr-only">{{t "wind.mean"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.mean"}}>
-            <ArrowsInLineVertical @size={{14}} class="text-slate-400" />
-            <span
-              class={{this.lastHourMeanValueClass}}
-            >{{this.lastHourMeanLabel}}</span>
-          </dd>
+        <StationMetricCard
+          @format="windSpeed"
+          @label={{t "wind.mean"}}
+          @value={{this.lastHourMeanSpeed}}
+          @valueClass={{this.lastHourMeanValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowsInLineVertical}}
+        />
 
-          <dt class="sr-only">{{t "wind.maximum"}}</dt>
-          <dd class="m-0 flex items-center gap-0.5" title={{t "wind.maximum"}}>
-            <ArrowLineUp @size={{14}} class="text-slate-400" />
-            <span
-              class={{this.lastHourMaximumValueClass}}
-            >{{this.lastHourMaximumLabel}}</span>
-          </dd>
-
-          <dd class="m-0 text-xs text-slate-500">km/h</dd>
-        </dl>
-      {{/if}}
+        <StationMetricCard
+          @format="windSpeed"
+          @label={{t "wind.minimum"}}
+          @value={{this.lastHourMinimumSpeed}}
+          @valueClass={{this.lastHourMinimumValueClass}}
+          @icon={{if this.settings.useIconLabels ArrowLineDown}}
+        />
+      </dl>
     </div>
   </template>
 }
