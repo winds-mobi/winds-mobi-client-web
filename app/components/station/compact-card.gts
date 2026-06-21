@@ -8,6 +8,7 @@ import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
+import { textClassForReadingAge } from 'winds-mobi-client-web/utils/reading-freshness';
 import StationMetaItem from './meta-item';
 import StationWindDirectionThumbnail from './wind-direction-thumbnail';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -41,6 +42,10 @@ export default class StationCompactCard extends Component<StationCompactCardSign
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
     );
+  }
+
+  get lastReadingFreshnessClass() {
+    return textClassForReadingAge(this.args.station.last.timestamp);
   }
 
   get focusQueryParams() {
@@ -91,7 +96,9 @@ export default class StationCompactCard extends Component<StationCompactCardSign
             @label={{t "station.meta.updated"}}
             class="text-[11px] text-slate-500"
           >
-            <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
+            <span class={{this.lastReadingFreshnessClass}}>{{timeAgo
+                this.lastReadingRelativeSeconds
+              }}</span>
           </StationMetaItem>
         </dl>
       </div>

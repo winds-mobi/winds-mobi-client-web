@@ -11,6 +11,7 @@ import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
+import { textClassForReadingAge } from 'winds-mobi-client-web/utils/reading-freshness';
 import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
@@ -36,6 +37,10 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     return Math.round(
       this.args.station.last.timestamp / 1000 - Date.now() / 1000
     );
+  }
+
+  get lastReadingFreshnessClass() {
+    return textClassForReadingAge(this.args.station.last.timestamp);
   }
 
   get focusQueryParams() {
@@ -71,7 +76,9 @@ export default class StationHeader extends Component<StationHeaderSignature> {
         </StationMetaItem>
 
         <StationMetaItem @label={{t "station.meta.updated"}}>
-          <span>{{timeAgo this.lastReadingRelativeSeconds}}</span>
+          <span class={{this.lastReadingFreshnessClass}}>{{timeAgo
+              this.lastReadingRelativeSeconds
+            }}</span>
         </StationMetaItem>
 
         {{#let this.nearbyLocation.coordinates as |coordinates|}}
