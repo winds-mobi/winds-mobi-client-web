@@ -38,8 +38,11 @@ export function timeAgoParts(seconds: number) {
 
 export function renderTimeAgoText(intl: IntlService, seconds: number) {
   const { value, unit } = timeAgoParts(seconds);
+  const text = intl.formatRelativeTime(value, { unit, style: 'narrow' });
 
-  return intl.formatRelativeTime(value, { unit });
+  // Intl's narrow style abbreviates minutes as "m", which reads too close to
+  // "month" (mo); spell it out as "min" while keeping the other units narrow.
+  return unit === 'minute' ? text.replace(/(\d)m\b/, '$1 min') : text;
 }
 
 interface TimeAgoSignature {
