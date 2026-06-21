@@ -92,7 +92,7 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
   <template>
     {{#if this.hasValue}}
       <div
-        class="flex items-baseline justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 text-base font-semibold ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5 md:text-lg"
+        class="flex items-center justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 text-base font-semibold ring-1 ring-slate-200/80 md:rounded-xl md:px-3 md:py-2.5 md:text-lg"
         ...attributes
       >
         {{#if @icon}}
