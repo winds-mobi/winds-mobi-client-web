@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.21 - 2026-06-21
+
+### Fixed
+
+- Fixed a bug where a station's temperature, humidity, rain, and pressure could flash into view and then disappear moments later when opening its detail panel. The map's background station-list refresh (which only needs wind speed/direction) was wholesale-overwriting the richer reading the panel had just loaded for the same station.
+
 ## v0.7.20 - 2026-06-21
 
 ### Added

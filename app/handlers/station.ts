@@ -99,47 +99,46 @@ function jsonApifyFields(elm: StationApiPayload) {
     attributes.providerUrl = normalizeProviderUrl(elm.url);
   }
 
+  // Flat `last*` attributes, not a nested `last` object: Warp Drive's upsert
+  // merge is one level deep, so a nested object would get wholesale replaced
+  // whenever a leaner request (e.g. the map's station-list query) omits
+  // fields the richer `findRecord` had already populated. See the matching
+  // comment on StationSchema in app/services/store.ts.
   if (hasOwn(elm, 'last') && elm.last) {
-    const last: Record<string, unknown> = {};
-
     if (hasOwn(elm.last, '_id') && elm.last._id !== undefined) {
-      last.timestamp = elm.last._id * 1000;
+      attributes.lastTimestamp = elm.last._id * 1000;
     }
 
     if (hasOwn(elm.last, 'w-dir')) {
-      last.direction = elm.last['w-dir'];
+      attributes.lastDirection = elm.last['w-dir'];
     }
 
     if (hasOwn(elm.last, 'w-avg')) {
-      last.speed = elm.last['w-avg'];
+      attributes.lastSpeed = elm.last['w-avg'];
     }
 
     if (hasOwn(elm.last, 'w-max')) {
-      last.gusts = elm.last['w-max'];
+      attributes.lastGusts = elm.last['w-max'];
     }
 
     if (hasOwn(elm.last, 'temp')) {
-      last.temperature = elm.last.temp;
+      attributes.lastTemperature = elm.last.temp;
     }
 
     if (hasOwn(elm.last, 'hum')) {
-      last.humidity = elm.last.hum;
+      attributes.lastHumidity = elm.last.hum;
     }
 
     if (hasOwn(elm.last, 'rain')) {
-      last.rain = elm.last.rain;
+      attributes.lastRain = elm.last.rain;
     }
 
     if (hasOwn(elm.last, 'pres')) {
       const pressure = normalizePressure(elm.last.pres);
 
       if (pressure !== undefined) {
-        last.pressure = pressure;
+        attributes.lastPressure = pressure;
       }
-    }
-
-    if (Object.keys(last).length > 0) {
-      attributes.last = last;
     }
   }
 
