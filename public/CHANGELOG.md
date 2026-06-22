@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.8.0 - 2026-06-22
+
+### Changed
+
+- The map's base layer now uses [OpenFreeMap](https://openfreemap.org/)'s free, worldwide vector basemap instead of a Switzerland-only raster tile server, so the map now shows the whole world, not just Switzerland.
+
+### Added
+
+- The map now shows hillshading and contour lines with elevation labels, generated in the browser from the same elevation data already used for the 3D terrain view, making it more usable for outdoor/free-flight planning.
+
 ## v0.7.22 - 2026-06-21
 
 ### Added

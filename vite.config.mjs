@@ -84,6 +84,20 @@ export default defineConfig(({ mode }) => ({
       : null,
   ].filter(Boolean),
   optimizeDeps: {
-    exclude: ['ember-page-title', 'object-inspect', 'embroider-util'],
+    exclude: [
+      'ember-page-title',
+      'object-inspect',
+      'embroider-util',
+      // @frontile/collections' Table component fails to prebundle: its
+      // precompiled templates reference `get`/`or` outside strict-mode scope,
+      // and a `@frontile/theme/src/tw.json` import esbuild can't resolve. We
+      // only use Listbox from this package, never Table, but Vite's forced
+      // dependency scan (`vite --force`, our dev script) still crawls the
+      // whole package and crashes the optimizer on it, breaking nearly every
+      // route on a fresh dev-server start (see TROUBLESHOOTING.md).
+      // Excluding it from prebundling defers resolution to per-module
+      // request time, where the unused Table component is never reached.
+      '@frontile/collections',
+    ],
   },
 }));
