@@ -15,6 +15,7 @@ import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type {
   Map as MaplibreMap,
   MapInitOptions,
+  SourceSpecification,
   StyleSpecification,
 } from 'ember-maplibre-gl';
 import {
@@ -54,36 +55,27 @@ export interface MapSignature {
   Element: null;
 }
 
-const OSM_SWISS_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osmswissstyle: {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxzoom: 19,
-      tiles: ['https://tile.osm.ch/switzerland/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      type: 'raster',
-    },
-    terrainSource: {
-      type: 'raster-dem',
-      attribution: '© Mapzen terrain tiles',
-      encoding: 'terrarium',
-      maxzoom: 15,
-      tiles: [
-        'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'osmswissstyle',
-      source: 'osmswissstyle',
-      type: 'raster',
-    },
+// Base map: OpenFreeMap's hosted "Liberty" vector style — a free, no-key,
+// worldwide OpenStreetMap basemap (https://openfreemap.org). MapLibre fetches
+// this style URL directly, so its sources, glyphs, sprite, and OSM/OpenMapTiles
+// attribution all come from OpenFreeMap. Unlike the previous inline raster style
+// it carries no DEM source, so the terrain source is attached on map load (see
+// handleMapLoaded).
+const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+
+// Worldwide elevation tiles (AWS Open Data, Terrarium encoding) powering the 3D
+// terrain toggle. Added to the style on load and referenced by the
+// TerrainControl below by this id.
+const TERRAIN_SOURCE_ID = 'terrainSource';
+const TERRAIN_SOURCE: SourceSpecification = {
+  type: 'raster-dem',
+  attribution: '© Mapzen terrain tiles',
+  encoding: 'terrarium',
+  maxzoom: 15,
+  tiles: [
+    'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
   ],
-  sky: {},
+  tileSize: 256,
 };
 
 const TEST_MAP_STYLE: StyleSpecification = {
@@ -135,7 +127,7 @@ export default class Map extends Component<MapSignature> {
     config.environment === 'test'
       ? undefined
       : new TerrainControl({
-          source: 'terrainSource',
+          source: TERRAIN_SOURCE_ID,
           exaggeration: 1,
         });
 
@@ -222,7 +214,8 @@ export default class Map extends Component<MapSignature> {
       dragRotate: true,
       maxPitch: 85,
       pitch: 0,
-      style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
+      style:
+        config.environment === 'test' ? TEST_MAP_STYLE : OPENFREEMAP_STYLE_URL,
       touchPitch: true,
       zoom: this.mapView.zoom,
     };
@@ -262,10 +255,24 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleMapLoaded() {
+  handleMapLoaded(map: MaplibreMap) {
+    // The test style is a bare background with no vector sources or terrain, and
+    // tests don't geolocate — nothing to wire up here.
+    if (config.environment === 'test') {
+      return;
+    }
+
+    // OpenFreeMap's base style carries no DEM source, so attach the terrain
+    // source the TerrainControl toggles now that the style has loaded, and
+    // restore the default atmospheric sky the previous inline style declared.
+    if (!map.getSource(TERRAIN_SOURCE_ID)) {
+      map.addSource(TERRAIN_SOURCE_ID, TERRAIN_SOURCE);
+    }
+    map.setSky({});
+
     // On a fresh load, ask the map's own geolocation for the user's position and
     // center on it; otherwise the whole-Switzerland default view stays (#32).
-    if (this.isInitialDefaultView && config.environment !== 'test') {
+    if (this.isInitialDefaultView) {
       // `mapLoaded` fires before ember-maplibre-gl renders its block and adds the
       // GeolocateControl, so the control isn't on the map yet ("triggered before
       // added to a map"). The addon documents deferring such effectful onMapLoaded
