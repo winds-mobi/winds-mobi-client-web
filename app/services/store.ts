@@ -51,14 +51,19 @@ export const StationSchema = withDefaults({
     // providerUrl is normalized to a single URL string in the station handler.
     { name: 'providerUrl', kind: 'field' },
 
-    // Flat `last*` fields rather than one nested `last` object: Warp Drive's
-    // upsert merge is only one level deep, so a nested object field gets
-    // wholesale *replaced* by any later request for the same station that
-    // omits it -- e.g. the map's lean list query (fewer `last.*` keys than
-    // the station detail's `findRecord`) would otherwise wipe temperature/
-    // humidity/rain/pressure moments after the detail panel populated them.
-    // Flat top-level fields merge safely per-field instead. `last` below is
-    // a derived convenience getter so consumers keep reading `station.last.X`.
+    // Flat `last*` fields rather than one nested `last` object. Per Warp
+    // Drive's documented cache contract (https://warp-drive.io/llms-full.txt):
+    // fields are cached by ResourceKey + FieldName with *replace* semantics --
+    // "if a field's value is an object, that object should be the full state
+    // of the field not a partial state of the field, we will not deep-merge
+    // during upsert." A nested `last` object is one field, so any later
+    // request for the same station with a smaller `last` (e.g. the map's
+    // lean list query, which only needs `last.w-dir`/`w-avg`/`w-max`) would
+    // replace it wholesale, wiping temperature/humidity/rain/pressure
+    // moments after the station detail's `findRecord` had populated them.
+    // Flat top-level fields are each their own independently-preserved field
+    // instead. `last` below is a derived convenience getter so consumers
+    // keep reading `station.last.X`.
     { name: 'lastTimestamp', kind: 'field' },
     { name: 'lastDirection', kind: 'field' },
     { name: 'lastSpeed', kind: 'field' },
