@@ -19,10 +19,12 @@ import type {
   StyleSpecification,
 } from 'ember-maplibre-gl';
 import {
+  addProtocol,
   GeolocateControl,
   NavigationControl,
   TerrainControl,
 } from 'maplibre-gl';
+import mlcontour from 'maplibre-contour';
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
@@ -63,20 +65,142 @@ export interface MapSignature {
 // handleMapLoaded).
 const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 
-// Worldwide elevation tiles (AWS Open Data, Terrarium encoding) powering the 3D
-// terrain toggle. Added to the style on load and referenced by the
-// TerrainControl below by this id.
+// Worldwide elevation tiles (AWS Open Data, Terrarium encoding). One DEM, three
+// outdoor uses, all client-side off the same tiles: the 3D terrain mesh (toggled
+// by the TerrainControl), the hillshade layer, and browser-generated contour
+// lines (maplibre-contour). OpenFreeMap's base style ships none of these, so we
+// attach them on map load (see handleMapLoaded).
+const TERRAIN_DEM_TILE_URL =
+  'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+
 const TERRAIN_SOURCE_ID = 'terrainSource';
 const TERRAIN_SOURCE: SourceSpecification = {
   type: 'raster-dem',
   attribution: '© Mapzen terrain tiles',
   encoding: 'terrarium',
   maxzoom: 15,
-  tiles: [
-    'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-  ],
+  tiles: [TERRAIN_DEM_TILE_URL],
   tileSize: 256,
 };
+
+const HILLSHADE_LAYER_ID = 'hillshade';
+const CONTOUR_SOURCE_ID = 'contourSource';
+const CONTOUR_LINE_LAYER_ID = 'contourLines';
+const CONTOUR_LABEL_LAYER_ID = 'contourLabels';
+// The vector-tile layer name maplibre-contour emits inside each generated tile.
+const CONTOUR_VECTOR_LAYER = 'contours';
+
+// maplibre-contour generates contour vector tiles in a web worker from the same
+// Terrarium DEM tiles — no extra tile hosting. The DemSource is a page-level
+// singleton: its addProtocol handler is global and only registers once, and the
+// same instance is reused if the map is torn down and rebuilt.
+let demSource: InstanceType<typeof mlcontour.DemSource> | undefined;
+
+function ensureContourDemSource() {
+  if (!demSource) {
+    demSource = new mlcontour.DemSource({
+      url: TERRAIN_DEM_TILE_URL,
+      encoding: 'terrarium',
+      maxzoom: 13,
+      worker: true,
+    });
+    demSource.setupMaplibre({ addProtocol });
+  }
+
+  return demSource;
+}
+
+// Adds hillshading and contour lines + elevation labels to a freshly-loaded map.
+// Hillshade and the contour lines go *under* the style's labels (inserted before
+// its first symbol layer) so place/road labels stay crisp on top; contour labels
+// reuse a font that's already in the style's glyphs so they're guaranteed to
+// render. Contours are zoom-gated by the thresholds below, so they only appear
+// once you've zoomed into terrain.
+function addOutdoorLayers(map: MaplibreMap) {
+  const layers = map.getStyle().layers ?? [];
+  const firstSymbol = layers.find((layer) => layer.type === 'symbol');
+  const beforeId = firstSymbol?.id;
+  const contourFont =
+    firstSymbol && 'layout' in firstSymbol
+      ? (firstSymbol.layout as { 'text-font'?: string[] })['text-font']
+      : undefined;
+
+  if (!map.getLayer(HILLSHADE_LAYER_ID)) {
+    map.addLayer(
+      {
+        id: HILLSHADE_LAYER_ID,
+        type: 'hillshade',
+        source: TERRAIN_SOURCE_ID,
+        paint: {
+          'hillshade-exaggeration': 0.3,
+          'hillshade-shadow-color': '#473b2a',
+        },
+      },
+      beforeId
+    );
+  }
+
+  if (!map.getSource(CONTOUR_SOURCE_ID)) {
+    map.addSource(CONTOUR_SOURCE_ID, {
+      type: 'vector',
+      tiles: [
+        ensureContourDemSource().contourProtocolUrl({
+          // [minor, major] metre spacing per zoom; lines appear from z11 in.
+          thresholds: {
+            11: [200, 1000],
+            12: [100, 500],
+            13: [100, 500],
+            14: [50, 250],
+            15: [20, 100],
+          },
+          elevationKey: 'ele',
+          levelKey: 'level',
+          contourLayer: CONTOUR_VECTOR_LAYER,
+        }),
+      ],
+      maxzoom: 15,
+    });
+  }
+
+  if (!map.getLayer(CONTOUR_LINE_LAYER_ID)) {
+    map.addLayer(
+      {
+        id: CONTOUR_LINE_LAYER_ID,
+        type: 'line',
+        source: CONTOUR_SOURCE_ID,
+        'source-layer': CONTOUR_VECTOR_LAYER,
+        paint: {
+          'line-color': 'rgba(80, 65, 40, 0.45)',
+          // Major contour lines (level 1) are drawn heavier than minor ones.
+          'line-width': ['match', ['get', 'level'], 1, 1.1, 0.5],
+        },
+      },
+      beforeId
+    );
+  }
+
+  if (contourFont && !map.getLayer(CONTOUR_LABEL_LAYER_ID)) {
+    map.addLayer({
+      id: CONTOUR_LABEL_LAYER_ID,
+      type: 'symbol',
+      source: CONTOUR_SOURCE_ID,
+      'source-layer': CONTOUR_VECTOR_LAYER,
+      // Only label major lines, to keep the map readable.
+      filter: ['>', ['get', 'level'], 0],
+      layout: {
+        'symbol-placement': 'line',
+        'text-size': 10,
+        'text-field': ['concat', ['to-string', ['get', 'ele']], ' m'],
+        'text-font': contourFont,
+      },
+      paint: {
+        'text-color': 'rgba(60, 48, 30, 0.9)',
+        'text-halo-color': 'rgba(255, 255, 255, 0.7)',
+        'text-halo-width': 1,
+      },
+    });
+  }
+}
 
 const TEST_MAP_STYLE: StyleSpecification = {
   version: 8,
@@ -269,6 +393,10 @@ export default class Map extends Component<MapSignature> {
       map.addSource(TERRAIN_SOURCE_ID, TERRAIN_SOURCE);
     }
     map.setSky({});
+
+    // Make the basemap outdoor-usable: hillshading + browser-generated contour
+    // lines, both from the DEM source above (see addOutdoorLayers).
+    addOutdoorLayers(map);
 
     // On a fresh load, ask the map's own geolocation for the user's position and
     // center on it; otherwise the whole-Switzerland default view stays (#32).

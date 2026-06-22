@@ -169,6 +169,12 @@ well-trodden migration. (Stadia is the exception — it can drop in as raster.)
       [app/components/map/index.gts](app/components/map/index.gts)
       (`OPENFREEMAP_STYLE_URL`). Glyphs/sprites/attribution now come from the
       hosted style.
+- [x] Make the basemap **outdoor-usable for free**: native MapLibre hillshade +
+      browser-generated contour lines/labels (`maplibre-contour`), both derived
+      client-side from the Terrarium DEM we already load — no extra tile hosting.
+      In [app/components/map/index.gts](app/components/map/index.gts)
+      (`addOutdoorLayers`). OpenFreeMap doesn't host contour/hillshade itself
+      (OpenMapTiles schema excludes them), so this is the zero-cost route.
 - [ ] Verify terrain DEM (`elevation-tiles-prod`) usage terms are fine at launch scale
       (AWS Open Data — expected yes).
 - [ ] Email Stadia Maps re: non-commercial/nonprofit eligibility (hedge / raster fallback).

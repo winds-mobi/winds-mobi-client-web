@@ -53,6 +53,9 @@ importers:
       highcharts:
         specifier: 12.5.0
         version: 12.5.0
+      maplibre-contour:
+        specifier: ^0.1.0
+        version: 0.1.0
       sharp:
         specifier: ^0.34.1
         version: 0.34.1
@@ -6417,6 +6420,9 @@ packages:
   map-visit@1.0.0:
     resolution: {integrity: sha512-4y7uGv8bd2WdM9vpQsiQNo41Ln1NvhvDRuVt0k2JZQ+ezN2uaQes7lZeZ+QQUHOLQAtDaBJ+7wCbi+ab/KFs+w==}
     engines: {node: '>=0.10.0'}
+
+  maplibre-contour@0.1.0:
+    resolution: {integrity: sha512-H8muT7JWYE4oLbFv7L2RSbIM1NOu5JxjA9P/TQqhODDnRChE8ENoDkQIWOKgfcKNU77ypLk2ggGoh4/pt4UPLA==}
 
   maplibre-gl@5.20.2:
     resolution: {integrity: sha512-0UzMWOe+GZmIUmOA99yTI1vRh15YcGnHxADVB2s+JF3etpjj2/MBCqbPEuu4BP9mLsJWJcpHH0Nzr9uuimmbuQ==}
@@ -16811,6 +16817,8 @@ snapshots:
   map-visit@1.0.0:
     dependencies:
       object-visit: 1.0.1
+
+  maplibre-contour@0.1.0: {}
 
   maplibre-gl@5.20.2:
     dependencies:

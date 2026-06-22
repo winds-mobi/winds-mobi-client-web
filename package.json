@@ -143,6 +143,7 @@
     "@warp-drive/schema-record": "5.8.0",
     "@warp-drive/utilities": "5.8.0",
     "highcharts": "12.5.0",
+    "maplibre-contour": "^0.1.0",
     "sharp": "^0.34.1"
   }
 }
