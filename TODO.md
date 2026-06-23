@@ -8,32 +8,52 @@
 
 ### 1. What we use today
 
-> **Status update:** the base layer has since been migrated to **OpenFreeMap**
-> (Option A below) in [app/components/map/index.gts](app/components/map/index.gts).
-> The table below documents the original "build & demo" setup this analysis was
-> written against.
+> **Status update:** briefly migrated to OpenFreeMap (Option A below) plus
+> client-side hillshade/contour layers, then **reverted back to SOSM's
+> `tile.osm.ch`** after actually reading SOSM's terms of service — see the
+> correction just below. The original "not acceptable" framing was an
+> unverified inference, not something we'd checked. We're back to the
+> original setup; the OpenFreeMap switch and the outdoor layers were
+> over-engineering for a problem that, on closer reading, didn't need
+> solving the way we solved it.
 
-Originally defined in [app/components/map/index.gts](app/components/map/index.gts) as `OSM_SWISS_STYLE`:
+Defined in [app/components/map/index.gts](app/components/map/index.gts) as `OSM_SWISS_STYLE`:
 
 | Layer       | Source                                                                    | Provider                                                    | Coverage             |
 | ----------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------- |
 | Base raster | `https://tile.osm.ch/switzerland/{z}/{x}/{y}.png`                         | **Swiss OpenStreetMap Association (SOSM)** community server | **Switzerland only** |
 | Terrain DEM | `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png` | **AWS Terrain Tiles** (ex-Mapzen, AWS Open Data)            | Worldwide            |
 
-Two things to flag before any launch:
+**Correction (verified directly against SOSM's terms, not by analogy to
+OSMF's policy):** the original draft of this doc claimed `tile.osm.ch` "has no
+published high-volume fair-use allowance" and compared it to OSMF's explicit
+ban on heavy use of `tile.openstreetmap.org`. That comparison was never
+actually checked against SOSM's own terms — it was an unverified inference
+presented with more confidence than was warranted. Having now read
+[SOSM's Terms of Service](https://sosm.ch/about/terms-of-service/) directly:
+there is **no stated prohibition** on third-party, commercial, or high-volume
+use. The only relevant clause is _"We retain the right to create limits on
+use and storage at our sole discretion at any time with or without notice."_
+No published quota, no commercial-use ban — just an unpublished, discretionary
+throttle. That's the same risk profile as OpenFreeMap's "no SLA" (donation/
+volunteer-run, no guarantees), not a special restriction unique to SOSM.
 
-- **The base map is Switzerland-only.** `tile.osm.ch/switzerland/...` is a regional
-  extract. "Display a map of anywhere in the world" is **not** possible with the
-  current source — this must change regardless of cost.
-- **`tile.osm.ch` is a volunteer community server, not a product.** It has no
-  published high-volume fair-use allowance and is funded by SOSM members. Pointing
-  a public, worldwide app at it would be abusing a community resource — the same
-  way the OSMF explicitly forbids heavy/commercial-scale use of
-  `tile.openstreetmap.org` ([OSMF Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/)).
-  Fine for build/demo and a Swiss-only audience; **not** an acceptable production
-  basemap. We must move off it before launch.
-- The **AWS terrain DEM is fine to keep** — it's AWS Open Data (sponsored egress),
-  worldwide, no key, no per-request bill.
+What's still true, and is the actual reason this needs revisiting before a
+**worldwide** launch (not a usage-policy question):
+
+- **The base map is Switzerland-only.** `tile.osm.ch/switzerland/...` is a
+  regional extract. "Display a map of anywhere in the world" is not possible
+  with this source. This is a coverage limitation, not a permission one —
+  and for now it's an accepted, deliberate trade-off (see status update
+  above), not an oversight.
+- SOSM's own tile-download page already suggests self-hosting for
+  sustained-high-volume use
+  ([sosm.ch/tile-download/](https://sosm.ch/tile-download/): _"you can
+  download them to either host them yourself, or use them in an offline
+  application"_) — i.e. if/when traffic grows, the off-ramp already exists
+  and matches Option B below in spirit (just Switzerland-only).
+- The **AWS terrain DEM is fine to keep** — it's AWS Open Data (sponsored
+  egress), worldwide, no key, no per-request bill.
 
 ### 2. Traffic assumption used below
 
@@ -152,9 +172,24 @@ well-trodden migration. (Stadia is the exception — it can drop in as raster.)
 
 ### 5. Recommendation
 
-1. **Now / pre-launch**: switch the base layer off `tile.osm.ch` → **OpenFreeMap
-   (Option A)**. Zero cost, zero infra, worldwide, unblocks the worldwide launch.
-   Keep the AWS terrain DEM as-is.
+> **Superseded by the status update in §1.** We tried switching to OpenFreeMap
+> (below) plus client-side hillshade/contours, then reverted: SOSM's terms
+> don't actually forbid what we feared, and `tile.osm.ch/switzerland`'s style
+> _already renders hillshading and contour lines server-side_ — confirmed
+> directly from [SOSM's tile-service page](https://sosm.ch/projects/tile-service/),
+> which describes the style as _"adapted to render for example the Mobility
+> car sharing stations or to include a hill shading and contour lines."_ The
+> entire `maplibre-contour` + native-hillshade-layer effort (§6, now reverted)
+> was solving a problem the tiles already solved for us. Kept below for when
+> worldwide coverage actually becomes the blocker.
+
+1. **When worldwide coverage is actually needed**: switch the base layer off
+   `tile.osm.ch` → **OpenFreeMap (Option A)**. Zero cost, zero infra,
+   worldwide. Keep the AWS terrain DEM as-is. Note: OpenFreeMap's vector style
+   does _not_ include hillshade/contours (OpenMapTiles schema excludes them),
+   so that move would need to either re-add them client-side or accept a
+   plainer style — re-evaluate whether that's worth it at that point, rather
+   than defaulting back into the same complexity.
 2. **If/when we want to own reliability** (NGO backing, predictable tiny budget):
    move to **self-hosted Protomaps on R2 (Option B)** — same vector style, ~$0–15/mo,
    no third-party runtime dependency. OpenFreeMap → Protomaps is a small style swap
@@ -164,22 +199,21 @@ well-trodden migration. (Stadia is the exception — it can drop in as raster.)
 
 ### 6. Follow-up tasks
 
-- [x] Replace the inline Swiss raster style with OpenFreeMap's worldwide **vector**
-      "Liberty" style URL; terrain DEM re-attached on map load. Done in
-      [app/components/map/index.gts](app/components/map/index.gts)
-      (`OPENFREEMAP_STYLE_URL`). Glyphs/sprites/attribution now come from the
-      hosted style.
-- [x] Make the basemap **outdoor-usable for free**: native MapLibre hillshade +
-      browser-generated contour lines/labels (`maplibre-contour`), both derived
-      client-side from the Terrarium DEM we already load — no extra tile hosting.
-      In [app/components/map/index.gts](app/components/map/index.gts)
-      (`addOutdoorLayers`). OpenFreeMap doesn't host contour/hillshade itself
-      (OpenMapTiles schema excludes them), so this is the zero-cost route.
+- [x] ~~Replace the inline Swiss raster style with OpenFreeMap's worldwide vector
+      "Liberty" style URL~~ — **done, then reverted.** See the §1 status
+      update and the correction above: the move solved a permission problem
+      that turned out not to exist, at the cost of losing SOSM's
+      already-baked-in hillshading/contours and gaining a `maplibre-contour`
+      dependency to claw them back. Back to `OSM_SWISS_STYLE` in
+      [app/components/map/index.gts](app/components/map/index.gts).
+- [x] ~~Make the basemap outdoor-usable for free via client-side hillshade +
+      `maplibre-contour`~~ — **reverted as unnecessary**; SOSM's tiles already
+      render hillshading and contours server-side (see §1/§5).
 - [ ] Verify terrain DEM (`elevation-tiles-prod`) usage terms are fine at launch scale
       (AWS Open Data — expected yes).
-- [ ] Email Stadia Maps re: non-commercial/nonprofit eligibility (hedge / raster fallback).
-- [ ] Decide hosting posture: rely on OpenFreeMap public vs. self-host Protomaps/R2.
-- [ ] Confirm the OpenFreeMap-provided attribution renders correctly in the
-      `AttributionControl` (OSM + OpenMapTiles + OpenFreeMap).
-- [ ] Consider self-hosting (Option B) before we depend on OpenFreeMap's public
-      instance at production traffic, since it offers no SLA.
+- [ ] Email Stadia Maps re: non-commercial/nonprofit eligibility (hedge / raster fallback) —
+      lower priority now that SOSM is confirmed fine to keep using.
+- [ ] If/when SOSM ever throttles us or worldwide coverage becomes a real
+      requirement, revisit Option A (OpenFreeMap) or B (self-hosted Protomaps/R2)
+      above — the analysis and the rationale for picking between them is
+      preserved here.
