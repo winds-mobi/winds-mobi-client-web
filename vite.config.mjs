@@ -79,6 +79,37 @@ export default defineConfig(({ mode }) => ({
           workbox: {
             navigateFallback: '/index.html',
             maximumFileSizeToCacheInBytes: 8000000,
+            runtimeCaching: [
+              {
+                // Base raster map tiles (tile.osm.ch/switzerland): roads/labels
+                // barely change, so cache aggressively rather than re-fetching
+                // tiles the user has already panned/zoomed past once.
+                urlPattern: /^https:\/\/tile\.osm\.ch\//,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'map-base-tiles',
+                  expiration: {
+                    maxEntries: 8000,
+                    maxAgeSeconds: 60 * 60 * 24 * 365,
+                  },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+              {
+                // AWS Terrarium terrain DEM tiles: elevation data is static.
+                urlPattern:
+                  /^https:\/\/s3\.amazonaws\.com\/elevation-tiles-prod\//,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'map-terrain-tiles',
+                  expiration: {
+                    maxEntries: 4000,
+                    maxAgeSeconds: 60 * 60 * 24 * 365,
+                  },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+            ],
           },
         })
       : null,
