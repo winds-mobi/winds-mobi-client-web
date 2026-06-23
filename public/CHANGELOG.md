@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.10.0 - 2026-06-23
+
+### Changed
+
+- Map and terrain tiles are now cached very aggressively in the browser (up to a year) once you've seen them, so panning back over a previously-viewed area no longer re-downloads the same tiles.
+
 ## v0.9.0 - 2026-06-23
 
 ### Changed

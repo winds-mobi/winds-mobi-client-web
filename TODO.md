@@ -10,12 +10,16 @@
 
 > **Status update:** briefly migrated to OpenFreeMap (Option A below) plus
 > client-side hillshade/contour layers, then **reverted back to SOSM's
-> `tile.osm.ch`** after actually reading SOSM's terms of service — see the
-> correction just below. The original "not acceptable" framing was an
-> unverified inference, not something we'd checked. We're back to the
-> original setup; the OpenFreeMap switch and the outdoor layers were
-> over-engineering for a problem that, on closer reading, didn't need
-> solving the way we solved it.
+> `tile.osm.ch`** for two independent reasons: (1) the ToS correction below —
+> the original "not acceptable" framing was an unverified inference we never
+> actually checked, and (2) **the client-side hillshade + `maplibre-contour`
+> layers were noticeably slow in practice** (contour generation runs in a web
+> worker decoding the DEM tiles on the fly, which is real per-tile CPU cost
+> client-side vs. SOSM's tiles where it's baked in server-side, pre-rendered,
+> and just downloaded as a flat PNG). We're back to the original setup; the
+> OpenFreeMap switch and the outdoor layers were over-engineering for a
+> problem that, on closer reading, didn't need solving the way we solved it —
+> and came with a real performance cost on top.
 
 Defined in [app/components/map/index.gts](app/components/map/index.gts) as `OSM_SWISS_STYLE`:
 
@@ -152,6 +156,27 @@ well-trodden migration. (Stadia is the exception — it can drop in as raster.)
 - **Risk**: smaller/newer ecosystem than Protomaps; public hosting is community-scale
   (donations encouraged). Good ideological fit for an NGO-backed project.
 - **Effort**: low (public) to medium (self-host).
+
+#### Option E — mapy.cz (Mapy.com) Developer API — _free up to 10M tiles/mo if listed as a public project_
+
+- **What**: Czech mapping platform's tile API (raster + vector), worldwide
+  coverage. [pricing](https://developer.mapy.com/pricing/) ·
+  [tile consumption docs](https://developer.mapy.com/rest-api-mapy-cz/function/map-tiles/map-tile-consumption/)
+- **Why it might be free for us**: a "Discounted tariff" grants **10,000,000
+  free credits/month** (1 credit = 1 tile) to projects that are freely
+  accessible to everyone, use **only** Mapy.com map data (no mixing
+  providers), display Mapy.com attribution, and are listed in their public
+  Reference Projects Catalogue. Default Basic tariff is only 250k credits/mo.
+- **Cost**: $0 up to ~10M tiles/month if we qualify and get listed; beyond
+  that, 1.60 CZK / 1,000 credits (~$0.07/1k), tiered discounts above 5M paid
+  credits. At our ~31M tiles/mo estimate that's ~21M credits over the free
+  allotment → roughly **$1,300–1,500/month** — not free at that scale.
+- **Risk**: requires exclusivity (can't combine with another provider's
+  tiles on the same map), and approval/listing in their catalogue is a
+  manual step, not automatic. Untested whether they'd actually approve a
+  Swiss/international paragliding site for the discounted tier.
+- **Effort**: medium — new vendor integration, attribution requirement,
+  approval process.
 
 #### Option D — Stadia Maps free non-commercial tier — _only if we stay strictly non-commercial_
 
