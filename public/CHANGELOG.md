@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.0 - 2026-06-23
+
+### Changed
+
+- Reverted the map's base layer back to the Swiss OpenStreetMap Association's tiles (the v0.8.0 switch to a worldwide vector basemap is reverted, along with the hillshading/contour-line layers added for it): the Swiss tiles already render hillshading and contour lines, so the added layers were redundant, and the map is back to Switzerland coverage with the simpler, original setup for now.
+
 ## v0.8.0 - 2026-06-22
 
 ### Changed
