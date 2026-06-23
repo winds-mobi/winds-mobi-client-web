@@ -16,12 +16,25 @@ pinned in `engines`.
 
 ## Authoritative external references
 
-- **Ember best practices:** use the `ember-mcp` tools (search docs, API reference, best practices) before
-  writing non-trivial Ember/Polaris code.
+- **Ember best practices:** before writing non-trivial Ember/Polaris code, or when unsure how a Frontile/Ember API
+  behaves, call the `ember-mcp` tools (`search_ember_docs`, `get_api_reference`, `get_best_practices`) **first**.
+  Do not grep/cat minified `node_modules/.pnpm/.../dist/*.js` to reverse-engineer Frontile/Ember/addon internals —
+  that's slower and less reliable than the docs tools and is a known time sink in past sessions. Only fall back to
+  reading dist files if `ember-mcp` and the package's own README/CHANGELOG come up empty.
+- **Frontile component docs/API/theming/migrations:** Frontile has no `llms.txt`; fetch the relevant markdown
+  straight from the source repo, e.g. `https://raw.githubusercontent.com/josemarluedke/frontile/main/docs/<path>.md`
+  (browse `https://github.com/josemarluedke/frontile/tree/main/docs` for the index — component docs, `theming/`,
+  `migrations/`). Check this before falling back to dist-file archaeology.
 - **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: https://warp-drive.io/llms-full.txt
 
 ## Commands
 
+- This project runs in a dev container (`compose.yaml`, service `ui`) with the correct pinned Node (`24.4.1`) and a
+  clean `node_modules`. **Run `pnpm` commands via `docker compose exec ui <cmd>`** (e.g.
+  `docker compose exec ui pnpm build`), not directly on the host. Host runs use whatever Node/pnpm and leftover
+  `node_modules` happen to be installed locally (e.g. Homebrew Node), which has produced spurious warnings — Node
+  engine-version mismatches, duplicate native `sharp-libvips` dylib warnings — that don't occur in the container and
+  are not real app issues. Confirm the container is up first with `docker compose ps`.
 - `pnpm install` — install dependencies (a `postinstall` rebuilds `sharp`).
 - `pnpm start` — Vite dev server on `0.0.0.0`, app at http://localhost:4200 (tests at `/tests`).
 - `pnpm build` — production Vite build. `pnpm ember build` for a development build.

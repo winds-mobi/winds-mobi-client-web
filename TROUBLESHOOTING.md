@@ -94,3 +94,33 @@ dependencies:` followed by an `[ERROR]` block; that's the real failure. The
 - [ ] `docker restart <container-name>` — restart cleanly (not `pkill`).
 - [ ] If a specific unused package/component is named in the error, exclude it
       in `vite.config.mjs`'s `optimizeDeps.exclude` rather than fighting it.
+
+## A single request 504s with header `504 Outdated Request` (everything else loads fine)
+
+**Symptom:** the page itself loads (`/` returns `200`), but one specific
+`/node_modules/.vite/deps/...` request 504s. Checking the response headers
+(`curl -i`) shows `HTTP/1.1 504 Outdated Request` — not a generic timeout.
+
+**What's actually happening:** this is Vite's own deliberate cache-invalidation
+signal, not a crash. Editing `vite.config.mjs` (or `package.json`/the lockfile)
+makes Vite restart the dev server and re-run its dependency optimizer, which
+gets a new internal "batch" identity. Any browser tab that's had Vite's HMR
+client connected since _before_ the restart may still be holding module URLs
+from the previous batch; Vite answers those specific stale requests with `504
+Outdated Request` to force a reload, rather than serving a mismatched module.
+
+Confirm it's this, not the crash scenario above, by checking:
+
+- the response header is literally `504 Outdated Request` (the crash scenario
+  is a plain `504` with no such reason, since OrbStack's proxy is what's
+  timing out there, not Vite itself), and
+- `docker logs --tail 80 <container-name>` shows a clean recent restart/
+  re-optimize with no `[ERROR]`, and the requested file actually exists under
+  `node_modules/.vite/deps/` in the container.
+
+### Fix
+
+Just **hard-refresh the browser tab** (or close and reopen it). The dev
+server is healthy; the tab is the only thing out of date. Vite's HMR client
+normally does this reload automatically, but a tab that's been idle a long
+time, or whose websocket dropped, can miss the signal.
