@@ -1,9 +1,7 @@
 import Component from '@glimmer/component';
 import { LinkTo } from '@ember/routing';
-import { service } from '@ember/service';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
-import type { IntlService } from 'ember-intl';
 import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
@@ -25,8 +23,6 @@ export interface StationCompactCardSignature {
 }
 
 export default class StationCompactCard extends Component<StationCompactCardSignature> {
-  @service declare intl: IntlService;
-
   get reading() {
     return this.args.station.last;
   }
@@ -51,14 +47,6 @@ export default class StationCompactCard extends Component<StationCompactCardSign
 
   get focusQueryParams() {
     return focusQueryParamsFor(this.args.station);
-  }
-
-  get windSpeedLabel() {
-    return this.intl.formatNumber(this.reading.speed, { format: 'integer' });
-  }
-
-  get gustsLabel() {
-    return this.intl.formatNumber(this.reading.gusts, { format: 'integer' });
   }
 
   <template>
@@ -112,7 +100,7 @@ export default class StationCompactCard extends Component<StationCompactCardSign
             class="m-0 text-[1.5rem] font-semibold leading-none
               {{this.speedValueClass}}"
           >
-            {{this.windSpeedLabel}}
+            {{formatNumber this.reading.speed format="integer"}}
           </dd>
 
           <span aria-hidden="true" class="text-slate-400">/</span>
@@ -122,7 +110,7 @@ export default class StationCompactCard extends Component<StationCompactCardSign
             class="m-0 text-base font-semibold leading-none
               {{this.gustsValueClass}}"
           >
-            {{this.gustsLabel}}
+            {{formatNumber this.reading.gusts format="integer"}}
           </dd>
 
           <dd class="m-0 text-xs text-slate-500">km/h</dd>

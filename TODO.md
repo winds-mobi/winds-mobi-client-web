@@ -132,16 +132,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Low impact / polish
 
-### 13. Trivial formatting getters and `String(intl.t())` wrapping
-
-- **Where:** [app/components/station/compact-card.gts](app/components/station/compact-card.gts)
-  (`windSpeedLabel`/`gustsLabel` wrap `intl.formatNumber(..., {format:'integer'})`
-  while the same file formats altitude via the `{{formatNumber}}` helper in the
-  template — two ways to do one thing); [app/templates/nearby.gts](app/templates/nearby.gts)
-  wraps `intl.t(...)` in `String(...)` three times.
-- **Fix:** Prefer the `{{formatNumber}}` helper in-template and drop the getters;
-  drop the unnecessary `String()` wrapping.
-
 ### 14. `lastHourMeanSpeed` actually computes the median
 
 - **Where:** [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts).
@@ -164,8 +154,8 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **4** (logs/dead comment), **8**,
-   **13** — small, isolated, easy to verify.
+1. Quick, low-risk deletions first: items **4** (logs/dead comment), **8** —
+   small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
 3. Then the structural DRY win **2** (per-card reading getters).
 4. Then reactivity correctness **9** and **10**.

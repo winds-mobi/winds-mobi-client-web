@@ -114,7 +114,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
 
   get locationMessage() {
     if (this.nearbyLocation.isRequestingLocation) {
-      return String(this.intl.t('nearby.location.locatingDescription'));
+      return this.intl.t('nearby.location.locatingDescription');
     }
 
     const errorKey = locationErrorTranslationKey(
@@ -123,10 +123,10 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     );
 
     if (errorKey) {
-      return String(this.intl.t(errorKey));
+      return this.intl.t(errorKey);
     }
 
-    return String(this.intl.t('nearby.description'));
+    return this.intl.t('nearby.description');
   }
 
   get shouldShowLocationPrompt() {
