@@ -95,17 +95,20 @@ In components, read responses through the `<Request>` component or `getRequestSt
 
 Map center/zoom are route query params on [app/controllers/map.ts](app/controllers/map.ts) (`mapLng`/`mapLat`/
 `mapZoom`), making views shareable and refresh-stable. [app/utils/map-view.ts](app/utils/map-view.ts) is the single
-source of map math: parse/serialize/normalize views and bounds, equality checks, and `quantizeMapViewForRequest`
-(snaps the view to the refetch thresholds so sub-threshold pans don't refetch). The map component syncs query params →
-MapLibre declaratively (fly-to from state) rather than imperatively writing back mid-interaction. Keep this direction;
-don't reintroduce imperative view bookkeeping.
+source of map math: parse/serialize/normalize views, equality checks, `boundsFromMap` (reads MapLibre's `getBounds`),
+and `roundBoundsForRequest` (snaps the captured bounds to the refetch grid so sub-threshold pans don't refetch). The map
+component syncs query params → MapLibre declaratively (fly-to from state) rather than imperatively writing back
+mid-interaction. Keep this direction; don't reintroduce imperative view bookkeeping.
 
 **The two directions, and why `moveend` only writes back for user gestures** (learned the hard way — don't undo this):
 
-- **URL → map → request.** The `request` getter derives its bounds from `quantizeMapViewForRequest(mapView)`, and a
-  declarative `<map.call @func="flyTo">` flies the map to the routed view whenever it changes (deep link, search
-  select, logo reset, locate). The request is _only_ a function of the routed view, so anything that should refetch
-  must change the query params.
+- **URL → map → request.** A declarative `<map.call @func="flyTo">` flies the map to the routed view whenever it
+  changes (deep link, search select, logo reset, locate). The station **request follows the live map, not the URL**:
+  `captureBounds` reads `map.getBounds()` on the map's `idle` event into a tracked `requestBounds` (rounded via
+  `roundBoundsForRequest`, deduped), and the `request` getter derives from that — so it covers exactly what's on screen,
+  including pitched/rotated views, and a resize or any settle refetches without the query params changing. `mapQuery`
+  caps the result at 470. Capturing on `idle` (not `moveend`) is deliberate: `idle` fires _after_ render, so writing
+  `requestBounds` can't hit the backtracking assertion the `moveend` guard below avoids.
 - **map → URL only on user gestures.** `handleMoveEnd` calls `router.replaceWith` **only when `event.originalEvent` is
   set** (a real pan/zoom). It must _not_ write back on programmatic moves, because:
   - the initial/style-driven settle reports a slightly different view (notably in tests) and would drift the URL; and

@@ -1,16 +1,14 @@
 # Changelog
 
-## v0.12.0 - 2026-06-24
-
-### Fixed
-
-- The map now loads wind stations across the whole visible area. The requested region was sized for a fixed ~1024px-wide map regardless of your screen, so on larger or wider maps stations near the edges weren't fetched until you panned toward them.
-
 ## v0.11.0 - 2026-06-24
 
 ### Changed
 
 - The refresh button in the top bar now spins for as long as station data is actually loading — whether from a manual refresh, the automatic refresh, or panning/zooming the map to a new area — instead of playing a fixed one-off spin on each click.
+
+### Fixed
+
+- The map now loads wind stations across the whole visible area. The requested region was sized for a fixed ~1024px-wide map regardless of your screen, so on larger or wider maps stations near the edges weren't fetched until you panned toward them.
 
 ## v0.10.0 - 2026-06-23
 
