@@ -114,7 +114,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 ### 8. Pointless passthrough component & getters
 
 - **Where:** [app/components/station/wind-direction/index.gts](app/components/station/wind-direction/index.gts)
-  forwards its args verbatim to `WindDirectionGraph` and adds nothing (it is *not*
+  forwards its args verbatim to `WindDirectionGraph` and adds nothing (it is _not_
   a `<Request>` fetcher, so it isn't the documented index/presenter split). Both
   callers could import the graph directly.
   [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts)
