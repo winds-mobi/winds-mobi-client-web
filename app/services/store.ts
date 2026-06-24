@@ -76,7 +76,7 @@ export const StationSchema = withDefaults({
   ],
 });
 
-// This one can stay as a resource schema (if you’re fetching histories as records)
+// History is a resource schema: its records are fetched and cached by id.
 export const HistorySchema = withDefaults({
   type: 'history',
   fields: [

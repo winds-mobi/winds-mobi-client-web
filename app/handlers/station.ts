@@ -164,7 +164,7 @@ const StationHandler: Handler = {
 
       // JSON-API requires us to have IDs
       // Timestamps should be unique-enough
-      const contedWithIds = Array.isArray(content)
+      const contentWithIds = Array.isArray(content)
         ? content.map((elm) => jsonApifyFields(elm))
         : jsonApifyFields(content);
 
@@ -172,7 +172,7 @@ const StationHandler: Handler = {
         links: {
           self: context.request.url,
         },
-        data: contedWithIds,
+        data: contentWithIds,
       };
 
       return jsonApiLikeData as T;

@@ -80,7 +80,7 @@ const HistoryHandler: Handler = {
       // The historic API returns newest-first rows, but the app consumes
       // history in chronological order for charting and the last-hour graph.
 
-      const contedWithIds = Array.isArray(content)
+      const contentWithIds = Array.isArray(content)
         ? content.map((elm) => renameFields(elm, stationId)).reverse()
         : renameFields(content, stationId);
 
@@ -88,7 +88,7 @@ const HistoryHandler: Handler = {
         links: {
           self: context.request.url,
         },
-        data: contedWithIds,
+        data: contentWithIds,
       };
 
       return jsonApiLikeData as T;

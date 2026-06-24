@@ -150,14 +150,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Decide intended statistic; rename the getter (and/or fix the maths and
   label) so name and behaviour agree.
 
-### 15. Stale scaffolding comments / typos
-
-- **Where:** [app/services/store.ts](app/services/store.ts) has leftover
-  conversational scaffolding comments ("This one can stay as a resource schema…",
-  "if you're fetching histories as records"); `contedWithIds` typo in both handlers
-  (see item 4).
-- **Fix:** Tidy comments to describe the code as-is; fix typos.
-
 ### 16. Verify the un-imported `Handler` type
 
 - **Where:** [app/handlers/station.ts](app/handlers/station.ts),
@@ -172,8 +164,8 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **8**,
-   **13**, **15** — small, isolated, easy to verify.
+1. Quick, low-risk deletions first: items **4** (logs/dead comment), **8**,
+   **13** — small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
 3. Then the structural DRY win **2** (per-card reading getters).
 4. Then reactivity correctness **9** and **10**.
