@@ -1,4 +1,4 @@
-import type { NextFn } from '@warp-drive/core/request';
+import type { Handler, NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
 
 export interface Response {

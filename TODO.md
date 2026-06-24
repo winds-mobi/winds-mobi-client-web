@@ -140,16 +140,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Decide intended statistic; rename the getter (and/or fix the maths and
   label) so name and behaviour agree.
 
-### 16. Verify the un-imported `Handler` type
-
-- **Where:** [app/handlers/station.ts](app/handlers/station.ts),
-  [app/handlers/history.ts](app/handlers/history.ts) annotate
-  `const XHandler: Handler` but `Handler` is never imported and no local/global
-  declaration was found.
-- **Fix:** Confirm it resolves under glint; if it's an implicit global/any, import
-  the real `Handler`/`CacheHandler` type from `@warp-drive/core` and annotate
-  explicitly.
-
 ---
 
 ## Suggested sequencing
