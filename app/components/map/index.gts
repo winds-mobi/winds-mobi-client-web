@@ -3,13 +3,10 @@ import { array } from '@ember/helper';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
-import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached, tracked } from '@glimmer/tracking';
-import type { RequestState } from '@warp-drive/core/reactive';
-import { modifier } from 'ember-modifier';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
@@ -29,6 +26,8 @@ import MapLegend, {
   type WindLegendBand,
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
+import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import {
@@ -105,51 +104,6 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
-interface BackgroundRefreshSignature {
-  Element: Element;
-  Args: {
-    Positional: [Date | undefined, () => void];
-  };
-}
-
-// Calls `refresh` whenever the shared map-refresh service ticks. `lastRefresh` is
-// undefined until the first tick, and the initial request is already current, so
-// the guard skips the initial install and fires only on real refresh ticks.
-const backgroundRefreshOnTick = modifier<BackgroundRefreshSignature>(
-  (_element, [lastRefresh, refresh]) => {
-    if (lastRefresh) {
-      refresh();
-    }
-  }
-);
-
-interface CommitResolvedSignature {
-  Element: Element;
-  Args: {
-    Positional: [
-      RequestState<RequestResponse<Station[]>> | undefined,
-      (stations: Station[]) => void,
-    ];
-  };
-}
-
-// Latches the last successfully-loaded stations so markers stay on the map while
-// a new bounds query (a pan/zoom that crosses the refetch threshold) is in
-// flight. WarpDrive has no "keep previous data" across a query change: when the
-// routed view changes, the `request` getter mints a new Future whose state is
-// pending with `value: null`, so deriving markers purely from it would blink
-// every marker off until the new set resolves. This commits each successful
-// result via the bound action; `stations` renders the live value when resolved
-// and falls back to the last committed set while pending. Only ever sees the
-// *current* request state, so a superseded view's late resolution can't commit.
-const commitResolvedStations = modifier<CommitResolvedSignature>(
-  (_element, [state, commit]) => {
-    if (state?.isSuccess) {
-      commit(responseData(state.value));
-    }
-  }
-);
-
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -220,24 +174,38 @@ export default class Map extends Component<MapSignature> {
     return quantizeMapViewForRequest(this.mapView);
   }
 
-  // Keyed only on the routed view, so the Future is stable across refresh ticks.
-  // The 2-minute refresh reloads this same request in the background (see
-  // `backgroundRefresh`) instead of recreating it, which keeps the resolved
-  // stations on screen — recreating the Future would drop back to a pending state
-  // and blink every marker off and on.
+  // Recreated when the routed view changes (pan/zoom past a threshold) or the
+  // shared refresh tick fires — touching `lastRefresh` makes each tick refetch.
+  // No `backgroundReload`, so a reload is a real pending request that `loadingProbe`
+  // (and the navbar spinner) reflects; the latch keeps the previous markers on
+  // screen meanwhile, and refetches return the same cached record identities so
+  // markers update in place rather than remounting.
   @cached
   get request(): Future<RequestResponse<Station[]>> | undefined {
     const bounds = approximateMapBoundsFromView(this.requestView);
 
-    const options = mapQuery<Station>('station', bounds, {
-      backgroundReload: true,
-    });
+    // Read so each refresh tick invalidates this getter and refetches.
+    this.mapRefresh.lastRefresh;
+
+    const options = mapQuery<Station>('station', bounds);
 
     return this.requestStore.request<RequestResponse<Station[]>>(options);
   }
 
   get requestState() {
     return this.request ? getRequestState(this.request) : undefined;
+  }
+
+  // Reports to the shared refresh service whether the map is currently loading,
+  // so the navbar refresh control can spin while this request is in flight.
+  loadingProbe = (): boolean => {
+    return this.requestState?.isPending === true;
+  };
+
+  // True only on the first load, when there are no previous markers to keep on
+  // screen — shows the loading placeholder then; later refreshes keep the markers.
+  get isInitialLoad(): boolean {
+    return this.loadingProbe() && this.lastStations.length === 0;
   }
 
   // Last successfully-loaded stations, committed by `commitResolvedStations` on
@@ -257,18 +225,6 @@ export default class Map extends Component<MapSignature> {
       ? responseData(this.requestState.value)
       : this.lastStations;
   }
-
-  // Background-reload the station list in place on each shared refresh tick, which
-  // refreshes the cached readings the markers render reactively without swapping
-  // the Future — so nothing blinks. `refresh()` throws on a still-pending request,
-  // so skip until the first load resolves.
-  backgroundRefresh = () => {
-    const state = this.requestState;
-
-    if (state && !state.isPending) {
-      void state.refresh();
-    }
-  };
 
   get legendBands(): WindLegendBand[] {
     return windLegendBands();
@@ -419,13 +375,9 @@ export default class Map extends Component<MapSignature> {
     <div
       data-test-map-container
       class="relative h-full w-full"
-      {{backgroundRefreshOnTick this.mapRefresh.lastRefresh this.backgroundRefresh}}
       {{commitResolvedStations this.requestState this.commitStations}}
+      {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
     >
-      <Request @request={{this.request}}>
-        <:content></:content>
-      </Request>
-
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"
@@ -481,7 +433,9 @@ export default class Map extends Component<MapSignature> {
         />
       </MapLibreGL>
 
-      {{#if this.requestState?.isPending}}
+      {{#if this.isInitialLoad}}
+        {{! only on the first load; later refreshes keep the markers on screen and
+        spin the navbar refresh control instead of covering the map }}
         <div
           class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
         >

@@ -1,10 +1,14 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { TrackedSet } from 'tracked-built-ins';
 import { rawTimeout, task } from 'ember-concurrency';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 const DEFAULT_COUNTDOWN_TICK_MS = 1 * 1000;
+
+// A request site reports whether it is currently loading.
+type LoadingProbe = () => boolean;
 
 export default class MapRefreshService extends Service {
   @tracked lastRefresh?: Date;
@@ -15,6 +19,29 @@ export default class MapRefreshService extends Service {
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
   private activeConsumers = 0;
+
+  // Loading probes registered by request sites (the map, nearby, …). The refresh
+  // itself is already broadcast to every site via `lastRefresh`; this lets the
+  // navbar refresh control spin while *any* registered request is in flight,
+  // without coupling the control to where those requests live. A `TrackedSet` so
+  // registering/unregistering a site re-evaluates `isRefreshing` reactively.
+  private loadingProbes = new TrackedSet<LoadingProbe>();
+
+  // Returns an unregister function for the modifier's teardown.
+  registerLoadingProbe = (probe: LoadingProbe): (() => void) => {
+    this.loadingProbes.add(probe);
+
+    return () => {
+      this.loadingProbes.delete(probe);
+    };
+  };
+
+  // True while any registered request reports itself in flight. Reading each probe
+  // consumes that site's tracked request state, so this re-evaluates whenever any
+  // site starts or finishes loading.
+  get isRefreshing(): boolean {
+    return [...this.loadingProbes].some((probe) => probe());
+  }
 
   refreshLoop = task({ restartable: true }, async () => {
     while (this.isActive) {
