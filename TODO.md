@@ -68,16 +68,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   `wind-direction/graph` (or fold graph up a level). Use `@args.history` directly
   and remove the passthrough getter.
 
-### 9. `map-refresh` indirection and untracked counter
-
-- **Where:** [app/services/map-refresh.ts](app/services/map-refresh.ts).
-- **Problem:** `resetSchedule()` only calls `resetCountdown()` — dead indirection.
-  `activeConsumers` is a plain (untracked) field, but `isActive` derives from it
-  and is read by reactive consumers; CLAUDE.md: reactive state the template/getters
-  depend on must be `@tracked`.
-- **Fix:** Inline `resetSchedule`, and make `activeConsumers` `@tracked` (or derive
-  active state from a tracked source) so `isActive`/countdown stay reactive.
-
 ### 10. One-time-setup flag in `nearby-location`
 
 - **Where:** [app/services/nearby-location.ts](app/services/nearby-location.ts)
@@ -127,7 +117,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 1. Quick, low-risk deletions first: item **8** — small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
 3. Then the structural DRY win **2** (per-card reading getters).
-4. Then reactivity correctness **9** and **10**.
+4. Then reactivity correctness **10**.
 5. Finally the remaining medium/polish items.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside

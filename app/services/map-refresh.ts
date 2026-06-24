@@ -18,7 +18,7 @@ export default class MapRefreshService extends Service {
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
-  private activeConsumers = 0;
+  @tracked private activeConsumers = 0;
 
   // Loading probes registered by request sites (the map, nearby, …). The refresh
   // itself is already broadcast to every site via `lastRefresh`; this lets the
@@ -105,7 +105,7 @@ export default class MapRefreshService extends Service {
       return;
     }
 
-    this.resetSchedule();
+    this.resetCountdown();
     void this.refreshLoop.perform();
   }
 
@@ -131,12 +131,8 @@ export default class MapRefreshService extends Service {
     }
 
     this.noteRefresh();
-    this.resetSchedule();
-    void this.refreshLoop.perform();
-  }
-
-  private resetSchedule() {
     this.resetCountdown();
+    void this.refreshLoop.perform();
   }
 
   private resetCountdown() {
