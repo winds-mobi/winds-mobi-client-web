@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.11.0 - 2026-06-24
+
+### Changed
+
+- The refresh button in the top bar now spins for as long as station data is actually loading — whether from a manual refresh, the automatic refresh, or panning/zooming the map to a new area — instead of playing a fixed one-off spin on each click.
+
 ## v0.10.0 - 2026-06-23
 
 ### Changed

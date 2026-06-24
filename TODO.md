@@ -8,22 +8,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## High impact
 
-### 1. Imperative `@tracked stations` written from inside a getter
-
-- **Where:** [app/components/map/index.gts](app/components/map/index.gts) (`@tracked stations`, the `request` getter's `void request.then(... this.stations = responseData(result))`).
-- **Problem:** Writing request results back into a tracked field from a `.then()`
-  inside a getter is exactly the "write temporal state back after an `await` to
-  mirror a request lifecycle" pattern CLAUDE.md forbids. The getter also has a
-  side effect (kicks off `.then`), which is surprising.
-- **Fix:** Derive markers from request state, e.g.
-  `get stations() { return this.requestState?.isSuccess ? responseData(this.requestState.value) : []; }`
-  and drop the `@tracked stations` field and the `.then` block. **Caveat:** if the
-  imperative write exists to keep the *previous* stations on screen during a
-  `backgroundReload` refresh (so markers don't flash away), confirm that first —
-  if so, derive from the last successful value and document the intent, rather
-  than keeping the hand-rolled stale-result guard.
-
-### 2. Three near-identical station-section fetchers
+### 1. Three near-identical station-section fetchers
 
 - **Where:** [app/components/station/wind/index.gts](app/components/station/wind/index.gts),
   [app/components/station/air/index.gts](app/components/station/air/index.gts),
@@ -40,7 +25,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   few lines each. Keep the per-section `keys` (documented in CLAUDE.md) as the
   only knob.
 
-### 3. Duplicated per-card "reading" getters
+### 2. Duplicated per-card "reading" getters
 
 - **Where:** [app/components/station/header.gts](app/components/station/header.gts),
   [app/components/station/compact-card.gts](app/components/station/compact-card.gts),
@@ -59,7 +44,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   - For the wind value classes, prefer calling `windToTextClass` from the
     template, or share a tiny presenter if the markup is also shared.
 
-### 4. `RequestStore` cast hack duplicated across files
+### 3. `RequestStore` cast hack duplicated across files
 
 - **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
   [app/templates/nearby.gts](app/templates/nearby.gts) both define a local
@@ -74,7 +59,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   Registry, then delete both local `RequestStore` types and the `as unknown as`
   casts.
 
-### 5. Debug logging + duplicated envelope logic in handlers
+### 4. Debug logging + duplicated envelope logic in handlers
 
 - **Where:** [app/handlers/station.ts](app/handlers/station.ts),
   [app/handlers/history.ts](app/handlers/history.ts).
@@ -94,7 +79,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   comment, fix the `contedWithIds` → `contentWithIds` typo, and standardise on one
   presence check.
 
-### 6. Hardcoded UI string bypasses i18n
+### 5. Hardcoded UI string bypasses i18n
 
 - **Where:** [app/components/map/index.gts](app/components/map/index.gts) — the
   `Loading stations…` overlay text is inline, not a translation.
@@ -106,7 +91,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Medium impact
 
-### 7. `wind-to-colour` colour table is heavily repetitive
+### 6. `wind-to-colour` colour table is heavily repetitive
 
 - **Where:** [app/helpers/wind-to-colour.ts](app/helpers/wind-to-colour.ts) `COLORS`.
 - **Problem:** Each entry repeats `backgroundClass: 'bg-wind-NN'`,
@@ -116,7 +101,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Define entries as `{ token: 'wind-05', max: 5 }` and derive
   `backgroundClass`/`color`/`key`/`textClass` from `token`. Drop the dead fallback.
 
-### 8. Redundant `{{if @x @x}}` template idiom
+### 7. Redundant `{{if @x @x}}` template idiom
 
 - **Where:** [app/components/station/section-card.gts](app/components/station/section-card.gts),
   [app/components/station/metric-card.gts](app/components/station/metric-card.gts)
@@ -126,7 +111,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   a class string.
 - **Fix:** Replace with `{{@titleClass}}` / `{{@labelClass}}` / `{{@valueClass}}`.
 
-### 9. Pointless passthrough component & getters
+### 8. Pointless passthrough component & getters
 
 - **Where:** [app/components/station/wind-direction/index.gts](app/components/station/wind-direction/index.gts)
   forwards its args verbatim to `WindDirectionGraph` and adds nothing (it is *not*
@@ -138,7 +123,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   `wind-direction/graph` (or fold graph up a level). Use `@args.history` directly
   and remove the passthrough getter.
 
-### 10. `map-refresh` indirection and untracked counter
+### 9. `map-refresh` indirection and untracked counter
 
 - **Where:** [app/services/map-refresh.ts](app/services/map-refresh.ts).
 - **Problem:** `resetSchedule()` only calls `resetCountdown()` — dead indirection.
@@ -148,7 +133,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Inline `resetSchedule`, and make `activeConsumers` `@tracked` (or derive
   active state from a tracked source) so `isActive`/countdown stay reactive.
 
-### 11. One-time-setup flag in `nearby-location`
+### 10. One-time-setup flag in `nearby-location`
 
 - **Where:** [app/services/nearby-location.ts](app/services/nearby-location.ts)
   `#hasSyncedPermissionState`.
@@ -158,7 +143,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   `permissionState === 'checking'` already represents "never synced", so it can
   self-disarm without a separate flag.
 
-### 12. Chart presenter option/series duplication
+### 11. Chart presenter option/series duplication
 
 - **Where:** [app/components/station/wind/presenter.gts](app/components/station/wind/presenter.gts),
   [app/components/station/air/presenter.gts](app/components/station/air/presenter.gts).
@@ -170,7 +155,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   [app/utils/highcharts-options.ts](app/utils/highcharts-options.ts) and a
   `seriesFor(history, key)` helper that fixes the timestamp accessor.
 
-### 13. `mapView` getter duplicated
+### 12. `mapView` getter duplicated
 
 - **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
   [app/components/station/index.gts](app/components/station/index.gts) both define
@@ -182,7 +167,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Low impact / polish
 
-### 14. Trivial formatting getters and `String(intl.t())` wrapping
+### 13. Trivial formatting getters and `String(intl.t())` wrapping
 
 - **Where:** [app/components/station/compact-card.gts](app/components/station/compact-card.gts)
   (`windSpeedLabel`/`gustsLabel` wrap `intl.formatNumber(..., {format:'integer'})`
@@ -192,7 +177,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Prefer the `{{formatNumber}}` helper in-template and drop the getters;
   drop the unnecessary `String()` wrapping.
 
-### 15. `lastHourMeanSpeed` actually computes the median
+### 14. `lastHourMeanSpeed` actually computes the median
 
 - **Where:** [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts).
 - **Problem:** The getter named `…MeanSpeed` sorts and takes the middle element —
@@ -200,15 +185,15 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Decide intended statistic; rename the getter (and/or fix the maths and
   label) so name and behaviour agree.
 
-### 16. Stale scaffolding comments / typos
+### 15. Stale scaffolding comments / typos
 
 - **Where:** [app/services/store.ts](app/services/store.ts) has leftover
   conversational scaffolding comments ("This one can stay as a resource schema…",
   "if you're fetching histories as records"); `contedWithIds` typo in both handlers
-  (see item 5).
+  (see item 4).
 - **Fix:** Tidy comments to describe the code as-is; fix typos.
 
-### 17. Verify the un-imported `Handler` type
+### 16. Verify the un-imported `Handler` type
 
 - **Where:** [app/handlers/station.ts](app/handlers/station.ts),
   [app/handlers/history.ts](app/handlers/history.ts) annotate
@@ -222,11 +207,11 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **5** (logs/dead comment/typo), **6**,
-   **8**, **9**, **14**, **16** — small, isolated, easy to verify.
-2. Then the shared-typing fix **4** (unblocks cleaner call sites).
-3. Then the structural DRY wins **2** and **3** (biggest line reduction).
-4. Then reactivity correctness **1**, **10**, **11**.
+1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **5**,
+   **7**, **8**, **13**, **15** — small, isolated, easy to verify.
+2. Then the shared-typing fix **3** (unblocks cleaner call sites).
+3. Then the structural DRY wins **1** and **2** (biggest line reduction).
+4. Then reactivity correctness **9** and **10**.
 5. Finally the remaining medium/polish items.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
