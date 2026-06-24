@@ -28,6 +28,7 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
+import measureElement from 'winds-mobi-client-web/modifiers/measure-element';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import {
@@ -36,7 +37,7 @@ import {
 } from 'winds-mobi-client-web/utils/request-response';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
-  approximateMapBoundsFromView,
+  mapBoundsFromView,
   FOCUS_ZOOM,
   mapViewsEqual,
   mapViewFromMap,
@@ -174,19 +175,43 @@ export default class Map extends Component<MapSignature> {
     return quantizeMapViewForRequest(this.mapView);
   }
 
-  // Recreated when the routed view changes (pan/zoom past a threshold) or the
-  // shared refresh tick fires — touching `lastRefresh` makes each tick refetch.
-  // No `backgroundReload`, so a reload is a real pending request that `loadingProbe`
-  // (and the navbar spinner) reflects; the latch keeps the previous markers on
-  // screen meanwhile, and refetches return the same cached record identities so
-  // markers update in place rather than remounting.
+  // The map container's pixel size, measured by the `measureElement` modifier.
+  // The request box is derived from it so it covers exactly what the map shows
+  // (rather than a fixed ~1024px-wide box that under-fetched larger maps).
+  @tracked private viewport?: { width: number; height: number };
+
+  setViewport = (width: number, height: number) => {
+    if (this.viewport?.width === width && this.viewport?.height === height) {
+      return;
+    }
+
+    this.viewport = { width, height };
+  };
+
+  // Recreated when the routed view changes (pan/zoom past a threshold), the map
+  // is resized, or the shared refresh tick fires — touching `lastRefresh` makes
+  // each tick refetch. No `backgroundReload`, so a reload is a real pending
+  // request that `loadingProbe` (and the navbar spinner) reflects; the latch keeps
+  // the previous markers on screen meanwhile, and refetches return the same cached
+  // record identities so markers update in place rather than remounting.
   @cached
   get request(): Future<RequestResponse<Station[]>> | undefined {
-    const bounds = approximateMapBoundsFromView(this.requestView);
+    const viewport = this.viewport;
+
+    // Hold the request until the container is measured, so the box matches the
+    // real viewport on the first fetch instead of a guessed size.
+    if (!viewport) {
+      return undefined;
+    }
 
     // Read so each refresh tick invalidates this getter and refetches.
     this.mapRefresh.lastRefresh;
 
+    const bounds = mapBoundsFromView(
+      this.requestView,
+      viewport.width,
+      viewport.height
+    );
     const options = mapQuery<Station>('station', bounds);
 
     return this.requestStore.request<RequestResponse<Station[]>>(options);
@@ -375,6 +400,7 @@ export default class Map extends Component<MapSignature> {
     <div
       data-test-map-container
       class="relative h-full w-full"
+      {{measureElement this.setViewport}}
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
     >

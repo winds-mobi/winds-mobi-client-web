@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.12.0 - 2026-06-24
+
+### Fixed
+
+- The map now loads wind stations across the whole visible area. The requested region was sized for a fixed ~1024px-wide map regardless of your screen, so on larger or wider maps stations near the edges weren't fetched until you panned toward them.
+
 ## v0.11.0 - 2026-06-24
 
 ### Changed

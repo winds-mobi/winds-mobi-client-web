@@ -28,8 +28,9 @@ export function focusQueryParamsFor(station: {
 const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
 const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
 
-const WORLD_LONGITUDE_SPAN = 360;
-const WORLD_LATITUDE_SPAN = 170;
+// MapLibre defines zoom against a 512px world tile, so the whole 360° of
+// longitude spans `MAP_TILE_SIZE * 2 ** zoom` pixels at a given zoom.
+const MAP_TILE_SIZE = 512;
 
 type MapCoordinate = [number, number];
 
@@ -86,13 +87,45 @@ export function quantizeMapViewForRequest(view: MapView): MapView {
   };
 }
 
-export function approximateMapBoundsFromView(view: MapView): MapBounds {
-  const longitudeSpan = WORLD_LONGITUDE_SPAN / 2 ** view.zoom;
-  const latitudeSpan = WORLD_LATITUDE_SPAN / 2 ** view.zoom;
+// Normalised Web-Mercator Y for a latitude: 0 at the top of the world, 1 at the
+// bottom (the projection MapLibre uses).
+function latitudeToMercatorY(latitude: number): number {
+  const latitudeRadians = (latitude * Math.PI) / 180;
+  return (1 - Math.asinh(Math.tan(latitudeRadians)) / Math.PI) / 2;
+}
+
+function mercatorYToLatitude(y: number): number {
+  return (Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180) / Math.PI;
+}
+
+// The geographic bounds actually visible for a routed view in a viewport of the
+// given pixel size — the same Web-Mercator math MapLibre's own `getBounds` uses.
+// The earlier heuristic spanned a fixed `360 / 2 ** zoom` degrees regardless of
+// the map's real width, so it matched only a ~1024px-wide viewport and
+// under-fetched the edges of any larger map (the request box looked smaller than
+// the map shows). Deriving from the measured viewport size fixes that, while
+// keeping the request a function of the routed view (center/zoom) plus the
+// container's pixel dimensions.
+export function mapBoundsFromView(
+  view: MapView,
+  viewportWidth: number,
+  viewportHeight: number
+): MapBounds {
+  const worldSize = MAP_TILE_SIZE * 2 ** view.zoom;
+  const halfWidthDegrees = ((viewportWidth / 2) * 360) / worldSize;
+
+  const centerY = latitudeToMercatorY(view.latitude);
+  const halfHeightY = viewportHeight / 2 / worldSize;
 
   return {
-    northEast: [view.longitude + longitudeSpan, view.latitude + latitudeSpan],
-    southWest: [view.longitude - longitudeSpan, view.latitude - latitudeSpan],
+    northEast: [
+      view.longitude + halfWidthDegrees,
+      mercatorYToLatitude(centerY - halfHeightY),
+    ],
+    southWest: [
+      view.longitude - halfWidthDegrees,
+      mercatorYToLatitude(centerY + halfHeightY),
+    ],
   };
 }
 
