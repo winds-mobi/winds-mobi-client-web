@@ -465,7 +465,7 @@ export default class Map extends Component<MapSignature> {
         <div
           class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
         >
-          Loading stations…
+          {{t "map.loadingStations"}}
         </div>
       {{/if}}
     </div>
