@@ -7,7 +7,8 @@ import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
-import { cached } from '@glimmer/tracking';
+import { cached, tracked } from '@glimmer/tracking';
+import type { RequestState } from '@warp-drive/core/reactive';
 import { modifier } from 'ember-modifier';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
@@ -122,6 +123,33 @@ const backgroundRefreshOnTick = modifier<BackgroundRefreshSignature>(
   }
 );
 
+interface CommitResolvedSignature {
+  Element: Element;
+  Args: {
+    Positional: [
+      RequestState<RequestResponse<Station[]>> | undefined,
+      (stations: Station[]) => void,
+    ];
+  };
+}
+
+// Latches the last successfully-loaded stations so markers stay on the map while
+// a new bounds query (a pan/zoom that crosses the refetch threshold) is in
+// flight. WarpDrive has no "keep previous data" across a query change: when the
+// routed view changes, the `request` getter mints a new Future whose state is
+// pending with `value: null`, so deriving markers purely from it would blink
+// every marker off until the new set resolves. This commits each successful
+// result via the bound action; `stations` renders the live value when resolved
+// and falls back to the last committed set while pending. Only ever sees the
+// *current* request state, so a superseded view's late resolution can't commit.
+const commitResolvedStations = modifier<CommitResolvedSignature>(
+  (_element, [state, commit]) => {
+    if (state?.isSuccess) {
+      commit(responseData(state.value));
+    }
+  }
+);
+
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
@@ -212,14 +240,22 @@ export default class Map extends Component<MapSignature> {
     return this.request ? getRequestState(this.request) : undefined;
   }
 
-  // Markers derive from the current request's state rather than a tracked field
-  // written from a `.then` callback. Because `request` is cached on the routed
-  // view, `requestState` always reflects the Future for the current view, so a
-  // response from a superseded view can't win (what the old stale guard handled).
+  // Last successfully-loaded stations, committed by `commitResolvedStations` on
+  // each resolve. Holds the markers on screen while a new bounds query loads.
+  @tracked private lastStations: Station[] = [];
+
+  commitStations = (stations: Station[]) => {
+    this.lastStations = stations;
+  };
+
+  // Render the current request's value once it resolves, otherwise fall back to
+  // the last loaded set so panning/zooming to new bounds doesn't blink markers
+  // off while the new Future is pending. Because `request` is cached on the
+  // routed view, `requestState` always reflects the Future for the current view.
   get stations(): Station[] {
     return this.requestState?.isSuccess
       ? responseData(this.requestState.value)
-      : [];
+      : this.lastStations;
   }
 
   // Background-reload the station list in place on each shared refresh tick, which
@@ -384,6 +420,7 @@ export default class Map extends Component<MapSignature> {
       data-test-map-container
       class="relative h-full w-full"
       {{backgroundRefreshOnTick this.mapRefresh.lastRefresh this.backgroundRefresh}}
+      {{commitResolvedStations this.requestState this.commitStations}}
     >
       <Request @request={{this.request}}>
         <:content></:content>
