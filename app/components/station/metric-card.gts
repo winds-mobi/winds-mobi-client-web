@@ -101,12 +101,12 @@ export default class StationMetricCard extends Component<StationMetricCardSignat
         {{else}}
           <dt
             class="text-[11px] font-medium leading-tight text-slate-500 md:text-xs
-              {{if @labelClass @labelClass}}"
+              {{@labelClass}}"
           >
             {{@label}}
           </dt>
         {{/if}}
-        <dd class="text-right leading-tight {{if @valueClass @valueClass}}">
+        <dd class="text-right leading-tight {{@valueClass}}">
           {{this.formattedValue}}
         </dd>
       </div>

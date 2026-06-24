@@ -76,16 +76,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 - **Fix:** Define entries as `{ token: 'wind-05', max: 5 }` and derive
   `backgroundClass`/`color`/`key`/`textClass` from `token`. Drop the dead fallback.
 
-### 7. Redundant `{{if @x @x}}` template idiom
-
-- **Where:** [app/components/station/section-card.gts](app/components/station/section-card.gts),
-  [app/components/station/metric-card.gts](app/components/station/metric-card.gts)
-  (`{{if @titleClass @titleClass}}`, `{{if @labelClass @labelClass}}`,
-  `{{if @valueClass @valueClass}}`).
-- **Problem:** `{{if x x}}` is just `x` — a falsy value already renders nothing in
-  a class string.
-- **Fix:** Replace with `{{@titleClass}}` / `{{@labelClass}}` / `{{@valueClass}}`.
-
 ### 8. Pointless passthrough component & getters
 
 - **Where:** [app/components/station/wind-direction/index.gts](app/components/station/wind-direction/index.gts)
@@ -182,8 +172,8 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **7**,
-   **8**, **13**, **15** — small, isolated, easy to verify.
+1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **8**,
+   **13**, **15** — small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
 3. Then the structural DRY win **2** (per-card reading getters).
 4. Then reactivity correctness **9** and **10**.
