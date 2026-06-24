@@ -1,244 +1,233 @@
-# TODO
+# TODO — code cleanup plan
 
-## Map tile provider analysis (launch readiness)
+A prioritised plan to make the app cleaner, DRYer, and more idiomatic per the
+conventions in [CLAUDE.md](CLAUDE.md). Each item lists the bad pattern, where it
+lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
-> Context: non-commercial project, no revenue taken, possibly NGO-backed, but we
-> do **not** want to pay to run the service. Currently in "build & demo" phase.
-> Goal: a worldwide basemap we can run sustainably for ~free at real traffic.
+---
 
-### 1. What we use today
+## High impact
 
-> **Status update:** briefly migrated to OpenFreeMap (Option A below) plus
-> client-side hillshade/contour layers, then **reverted back to SOSM's
-> `tile.osm.ch`** for two independent reasons: (1) the ToS correction below —
-> the original "not acceptable" framing was an unverified inference we never
-> actually checked, and (2) **the client-side hillshade + `maplibre-contour`
-> layers were noticeably slow in practice** (contour generation runs in a web
-> worker decoding the DEM tiles on the fly, which is real per-tile CPU cost
-> client-side vs. SOSM's tiles where it's baked in server-side, pre-rendered,
-> and just downloaded as a flat PNG). We're back to the original setup; the
-> OpenFreeMap switch and the outdoor layers were over-engineering for a
-> problem that, on closer reading, didn't need solving the way we solved it —
-> and came with a real performance cost on top.
+### 1. Imperative `@tracked stations` written from inside a getter
 
-Defined in [app/components/map/index.gts](app/components/map/index.gts) as `OSM_SWISS_STYLE`:
+- **Where:** [app/components/map/index.gts](app/components/map/index.gts) (`@tracked stations`, the `request` getter's `void request.then(... this.stations = responseData(result))`).
+- **Problem:** Writing request results back into a tracked field from a `.then()`
+  inside a getter is exactly the "write temporal state back after an `await` to
+  mirror a request lifecycle" pattern CLAUDE.md forbids. The getter also has a
+  side effect (kicks off `.then`), which is surprising.
+- **Fix:** Derive markers from request state, e.g.
+  `get stations() { return this.requestState?.isSuccess ? responseData(this.requestState.value) : []; }`
+  and drop the `@tracked stations` field and the `.then` block. **Caveat:** if the
+  imperative write exists to keep the *previous* stations on screen during a
+  `backgroundReload` refresh (so markers don't flash away), confirm that first —
+  if so, derive from the last successful value and document the intent, rather
+  than keeping the hand-rolled stale-result guard.
 
-| Layer       | Source                                                                    | Provider                                                    | Coverage             |
-| ----------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------- |
-| Base raster | `https://tile.osm.ch/switzerland/{z}/{x}/{y}.png`                         | **Swiss OpenStreetMap Association (SOSM)** community server | **Switzerland only** |
-| Terrain DEM | `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png` | **AWS Terrain Tiles** (ex-Mapzen, AWS Open Data)            | Worldwide            |
+### 2. Three near-identical station-section fetchers
 
-**Correction (verified directly against SOSM's terms, not by analogy to
-OSMF's policy):** the original draft of this doc claimed `tile.osm.ch` "has no
-published high-volume fair-use allowance" and compared it to OSMF's explicit
-ban on heavy use of `tile.openstreetmap.org`. That comparison was never
-actually checked against SOSM's own terms — it was an unverified inference
-presented with more confidence than was warranted. Having now read
-[SOSM's Terms of Service](https://sosm.ch/about/terms-of-service/) directly:
-there is **no stated prohibition** on third-party, commercial, or high-volume
-use. The only relevant clause is _"We retain the right to create limits on
-use and storage at our sole discretion at any time with or without notice."_
-No published quota, no commercial-use ban — just an unpublished, discretionary
-throttle. That's the same risk profile as OpenFreeMap's "no SLA" (donation/
-volunteer-run, no guarantees), not a special restriction unique to SOSM.
+- **Where:** [app/components/station/wind/index.gts](app/components/station/wind/index.gts),
+  [app/components/station/air/index.gts](app/components/station/air/index.gts),
+  [app/components/station/last-hour/index.gts](app/components/station/last-hour/index.gts).
+- **Problem:** All three are the same boilerplate — same services, an identical
+  `historyRequest` `@cached` getter (touch `mapRefresh.lastRefresh`, call
+  `historyQuery` with `DURATION`/`HISTORY_KEYS`, `backgroundReload: true`), and the
+  same `<Request>`/`<:content>`/`<:loading>`/`<:error>` shape rendering a presenter
+  with `EMPTY_HISTORY` fallbacks. They differ only in: `data-test` attribute,
+  title key, `DURATION`, `HISTORY_KEYS`, and the presenter component.
+- **Fix:** Extract a single `StationHistorySection` component that takes
+  `@stationId`, `@title`, `@duration`, `@keys`, `@testId`, and yields the history
+  (or accepts the presenter via a block/arg). The three sections collapse to a
+  few lines each. Keep the per-section `keys` (documented in CLAUDE.md) as the
+  only knob.
 
-What's still true, and is the actual reason this needs revisiting before a
-**worldwide** launch (not a usage-policy question):
+### 3. Duplicated per-card "reading" getters
 
-- **The base map is Switzerland-only.** `tile.osm.ch/switzerland/...` is a
-  regional extract. "Display a map of anywhere in the world" is not possible
-  with this source. This is a coverage limitation, not a permission one —
-  and for now it's an accepted, deliberate trade-off (see status update
-  above), not an oversight.
-- SOSM's own tile-download page already suggests self-hosting for
-  sustained-high-volume use
-  ([sosm.ch/tile-download/](https://sosm.ch/tile-download/): _"you can
-  download them to either host them yourself, or use them in an offline
-  application"_) — i.e. if/when traffic grows, the off-ramp already exists
-  and matches Option B below in spirit (just Switzerland-only).
-- The **AWS terrain DEM is fine to keep** — it's AWS Open Data (sponsored
-  egress), worldwide, no key, no per-request bill.
+- **Where:** [app/components/station/header.gts](app/components/station/header.gts),
+  [app/components/station/compact-card.gts](app/components/station/compact-card.gts),
+  [app/components/station/summary.gts](app/components/station/summary.gts).
+- **Problem:** The same getters are copy-pasted across cards:
+  - `lastReadingRelativeSeconds` (`station.last.timestamp / 1000 - Date.now() / 1000`) — header + compact-card (identical).
+  - `lastReadingFreshnessClass`, `focusQueryParams` — header + compact-card (identical).
+  - `reading` (`station.last`), `speedValueClass`/`gustsValueClass` (`windToTextClass(...)`) — summary + compact-card.
+- **Fix:**
+  - Move the relative-seconds math behind the time formatting: add a `time-ago`
+    helper variant (or a `reading-freshness` util) that takes an absolute ms
+    timestamp, so callers stop hand-rolling `timestamp/1000 - Date.now()/1000`.
+  - `focusQueryParams` is just `focusQueryParamsFor(@station)` — call the util
+    directly in the template (`@query={{focusQueryParamsFor @station}}`) and drop
+    the getter (CLAUDE.md: no trivial passthrough getters).
+  - For the wind value classes, prefer calling `windToTextClass` from the
+    template, or share a tiny presenter if the markup is also shared.
 
-### 2. Traffic assumption used below
+### 4. `RequestStore` cast hack duplicated across files
 
-"1 map view per second, sustained, anywhere in the world":
+- **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
+  [app/templates/nearby.gts](app/templates/nearby.gts) both define a local
+  `type RequestStore = { request<T>(...) }` and do `this.store as unknown as RequestStore`.
+- **Problem:** The `store` service type
+  (`typeof import('.../services/store').default`) doesn't surface a typed generic
+  `request<T>()`, so two call sites cast through `unknown`. Repeated type
+  laundering is a smell and defeats the builders' typed return values.
+- **Fix:** Type the store once so `.request<T>(builder(...))` is callable without
+  casting — e.g. export a typed store interface from
+  [app/services/store.ts](app/services/store.ts) and use it in the service
+  Registry, then delete both local `RequestStore` types and the `as unknown as`
+  casts.
 
-- `1 × 3600 × 24 × 30 = ~2.6 million map views / month`
-- Raster 256px full-screen map ≈ **10–16 tile requests per view**
-  (MapTiler's own figure: [tile requests vs sessions](https://docs.maptiler.com/guides/maps-apis/maps-platform/tile-requests-and-map-sessions-compared/)).
-  Mid estimate ~12 → **~31 million raster tile requests / month**
-  (range ~26M–39M).
-- Bandwidth: raster PNG ~20–40 KB/tile → **~0.9–1.2 TB / month** of tile data.
-- If we switch to **vector** tiles instead: ~4 requests/view → ~10M requests/month,
-  smaller origin egress thanks to heavy CDN caching.
+### 5. Debug logging + duplicated envelope logic in handlers
 
-Takeaway: 1 view/s sustained is **serious** traffic (~2.6M views/mo). This is well
-past every commercial free tier.
+- **Where:** [app/handlers/station.ts](app/handlers/station.ts),
+  [app/handlers/history.ts](app/handlers/history.ts).
+- **Problem:**
+  - Both have `console.log('...request().catch()', { e })` then rethrow —
+    leftover debug logging in production; the `try/catch` exists only to log.
+  - Both repeat the same JSON:API envelope construction (`links.self` + `data`,
+    `Array.isArray(content) ? content.map(...) : single`), including the same
+    `contedWithIds` typo (copy-paste).
+  - [app/handlers/history.ts](app/handlers/history.ts) line 3 has a dead
+    commented import referencing a different project
+    (`the-mountains-are-calling/services/settings`).
+  - The two handlers test "absent field" differently — station uses a `hasOwn`
+    helper, history uses `'key' in elm` + non-null assertions — for the same job.
+- **Fix:** Extract a shared `toJsonApiEnvelope(url, content, mapFn)` helper, drop
+  the pointless try/catch (or replace with real error handling), remove the dead
+  comment, fix the `contedWithIds` → `contentWithIds` typo, and standardise on one
+  presence check.
 
-### 3. Pricing of the commercial pay-per-use providers (the "if we did nothing smart" cost)
+### 6. Hardcoded UI string bypasses i18n
 
-#### MapTiler — [pricing](https://www.maptiler.com/cloud/pricing/)
+- **Where:** [app/components/map/index.gts](app/components/map/index.gts) — the
+  `Loading stations…` overlay text is inline, not a translation.
+- **Problem:** CLAUDE.md: all UI strings live in
+  [translations/en-us.yaml](translations/en-us.yaml). This one drifts outside it.
+- **Fix:** Add a key (e.g. `map.loadingStations`) and render via `{{t}}`.
 
-| Plan      | Price   | Included                                      | Overage                                  |
-| --------- | ------- | --------------------------------------------- | ---------------------------------------- |
-| Free      | $0      | 5,000 sessions **or** 100,000 API requests/mo | none — service pauses                    |
-| Flex      | $25/mo  | 25k sessions / 500k requests                  | $2 / 1k sessions, $0.10 / 1k requests    |
-| Unlimited | $295/mo | 300k sessions / 5M requests                   | $1.50 / 1k sessions, $0.08 / 1k requests |
-| Custom    | quote   | negotiated                                    | enterprise                               |
+---
 
-- **Free tier = ~100k tile requests/month.** At our load (~31M) we'd blow through
-  that in **~1 day**, then the map stops loading.
-- We use **raster XYZ** tiles → MapTiler bills by **API requests**. At ~31M/mo on
-  the Unlimited plan: `$295 + (31M − 5M)/1000 × $0.08 ≈ $295 + $2,080 = ~$2,375/month`.
-- Switching to vector doesn't help on MapTiler — it then bills by **sessions**
-  (~2.6M/mo): `$295 + (2.6M − 300k)/1000 × $1.50 ≈ ~$3,750/month`.
-- **Realistic MapTiler bill at 1 view/s: ~$2,000–4,000/month.** Enterprise could
-  negotiate down, but this is firmly "no" for a no-revenue project.
+## Medium impact
 
-#### For reference (not OSM-leaning, not recommended)
+### 7. `wind-to-colour` colour table is heavily repetitive
 
-- **Mapbox / Google**: same ballpark or worse; Google ~$3,600 for 10M tiles per the
-  [Bonito Tech write-up](https://bonitotech.com/2024/03/19/how-we-reduced-our-mapping-costs-by-90-using-protomaps-and-cloudflare/).
+- **Where:** [app/helpers/wind-to-colour.ts](app/helpers/wind-to-colour.ts) `COLORS`.
+- **Problem:** Each entry repeats `backgroundClass: 'bg-wind-NN'`,
+  `color: 'var(--color-wind-NN)'`, `key: 'wind-NN'`, `textClass: 'text-wind-NN'` —
+  all derivable from one token. `windBandForSpeed` also has an unreachable
+  `?? { ... }` fallback duplicating the last band (the array is never empty).
+- **Fix:** Define entries as `{ token: 'wind-05', max: 5 }` and derive
+  `backgroundClass`/`color`/`key`/`textClass` from `token`. Drop the dead fallback.
 
-**Conclusion for §3: pay-per-tile at this scale is ~thousands/month. Not viable.
-We want one of the §4 options.**
+### 8. Redundant `{{if @x @x}}` template idiom
 
-### 4. The free / near-free options (recommended)
+- **Where:** [app/components/station/section-card.gts](app/components/station/section-card.gts),
+  [app/components/station/metric-card.gts](app/components/station/metric-card.gts)
+  (`{{if @titleClass @titleClass}}`, `{{if @labelClass @labelClass}}`,
+  `{{if @valueClass @valueClass}}`).
+- **Problem:** `{{if x x}}` is just `x` — a falsy value already renders nothing in
+  a class string.
+- **Fix:** Replace with `{{@titleClass}}` / `{{@labelClass}}` / `{{@valueClass}}`.
 
-All of the genuinely-free OSM options below serve **vector** tiles, which means a
-one-time app change: replace our single raster layer with a vector MapLibre style
-(glyphs + sprites + layer styling). MapLibre supports this natively; it's a known,
-well-trodden migration. (Stadia is the exception — it can drop in as raster.)
+### 9. Pointless passthrough component & getters
 
-#### Option A — OpenFreeMap (public instance) — _easiest, $0, zero infra_
+- **Where:** [app/components/station/wind-direction/index.gts](app/components/station/wind-direction/index.gts)
+  forwards its args verbatim to `WindDirectionGraph` and adds nothing (it is *not*
+  a `<Request>` fetcher, so it isn't the documented index/presenter split). Both
+  callers could import the graph directly.
+  [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts)
+  has `@cached get lastHourHistory()` that just returns `this.args.history`.
+- **Fix:** Delete the `wind-direction/index.gts` wrapper and point callers at
+  `wind-direction/graph` (or fold graph up a level). Use `@args.history` directly
+  and remove the passthrough getter.
 
-- **What**: free public vector-tile hosting of the whole planet, by Zsolt Erő.
-  [openfreemap.org](https://openfreemap.org/) · [GitHub](https://github.com/hyperknot/openfreemap)
-- **Why it's free for us**: explicitly _"completely free with no limits on the number
-  of map views or requests… no registration, no API keys, no cookies."_ Commercial
-  use is allowed too. Funded by donations; designed to be self-sustainable.
-- **Cost**: **$0**, no account.
-- **Coverage**: worldwide.
-- **Risk**: single maintainer, donation-funded, **no SLA / no support guarantee**
-  (their words). Mitigation: it's fully open-source incl. the deploy scripts and they
-  publish weekly full-planet downloads — so if it ever disappears we can self-host the
-  exact same thing (→ Option B) with no app change.
-- **Effort**: low — point the style at their hosted style URL.
+### 10. `map-refresh` indirection and untracked counter
 
-#### Option B — Self-host Protomaps PMTiles on Cloudflare R2 — _we own it, ~$0–15/mo_
+- **Where:** [app/services/map-refresh.ts](app/services/map-refresh.ts).
+- **Problem:** `resetSchedule()` only calls `resetCountdown()` — dead indirection.
+  `activeConsumers` is a plain (untracked) field, but `isActive` derives from it
+  and is read by reactive consumers; CLAUDE.md: reactive state the template/getters
+  depend on must be `@tracked`.
+- **Fix:** Inline `resetSchedule`, and make `activeConsumers` `@tracked` (or derive
+  active state from a tracked source) so `isActive`/countdown stay reactive.
 
-- **What**: a single `.pmtiles` planet file on Cloudflare R2 + a tiny Worker.
-  [Protomaps](https://protomaps.com/) · [Cloudflare deploy guide](https://docs.protomaps.com/deploy/cloudflare) ·
-  [cost calculator](https://docs.protomaps.com/deploy/cost)
-- **Why it's ~free for us**: **R2 has no bandwidth/egress fees** — only per-request +
-  storage. A whole-planet tileset is ~100–130 GB. Real reports:
-  - _"~130 GB global tileset in R2 + workers = $3/month"_
-  - _"first month $1.67, next month likely $0"_
-  - _"10M tile requests/month ≈ $11 on R2 vs ~$3,600 Google"_
-    ([Bonito Tech](https://bonitotech.com/2024/03/19/how-we-reduced-our-mapping-costs-by-90-using-protomaps-and-cloudflare/),
-    [Pinball Map](https://blog.pinballmap.com/2024/11/05/protomaps-tile-hosting/))
-  - Workers free tier is 100k req/day; paid is $5/mo incl. 10M req. If we ever
-    region-limit the tileset we can sit largely in R2's free tier.
-- **Cost**: **~$0–15/month** even at our load; we control reliability entirely.
-- **Risk**: low/medium — we run it. Need periodic planet rebuilds (or use Protomaps'
-  prebuilt daily planet). Best fit if an **NGO can absorb a tiny, predictable bill**
-  and we want no third-party runtime dependency.
-- **Effort**: medium — one-time setup + a refresh cron.
+### 11. One-time-setup flag in `nearby-location`
 
-#### Option C — VersaTiles — _FLOSS, NGO-oriented, self-host or public_
+- **Where:** [app/services/nearby-location.ts](app/services/nearby-location.ts)
+  `#hasSyncedPermissionState`.
+- **Problem:** An untracked private boolean gating one-time setup is the
+  "imperative bookkeeping to remember have-I-done-this" pattern CLAUDE.md calls out.
+- **Fix:** Derive the "not yet synced" condition from existing state — the initial
+  `permissionState === 'checking'` already represents "never synced", so it can
+  self-disarm without a separate flag.
 
-- **What**: fully FLOSS tile stack (generate / serve / render), Shortbread schema.
-  [versatiles.org](https://versatiles.org/)
-- **Why it's free for us**: _"no API keys, no usage fees, no tracking"_; explicitly
-  aimed at _"newsrooms, NGOs, developers, and public institutions."_ Free public tiles
-  or fully self-hostable.
-- **Cost**: **$0** public, or self-host.
-- **Risk**: smaller/newer ecosystem than Protomaps; public hosting is community-scale
-  (donations encouraged). Good ideological fit for an NGO-backed project.
-- **Effort**: low (public) to medium (self-host).
+### 12. Chart presenter option/series duplication
 
-#### Option E — mapy.cz (Mapy.com) Developer API — _free up to 10M tiles/mo if listed as a public project_
+- **Where:** [app/components/station/wind/presenter.gts](app/components/station/wind/presenter.gts),
+  [app/components/station/air/presenter.gts](app/components/station/air/presenter.gts).
+- **Problem:** The `yAxis` blocks repeat the same defaults (`endOnTick`,
+  `maxPadding`, `minPadding`, `softMin`, `startOnTick`, `tickAmount`, label style),
+  and `chartData` repeats `buildTimeSeriesData(history, e => e.timestamp, e => e.X)`
+  per series with the identical timestamp accessor.
+- **Fix:** Extract a `defaultYAxis(overrides)` helper in
+  [app/utils/highcharts-options.ts](app/utils/highcharts-options.ts) and a
+  `seriesFor(history, key)` helper that fixes the timestamp accessor.
 
-- **What**: Czech mapping platform's tile API (raster + vector), worldwide
-  coverage. [pricing](https://developer.mapy.com/pricing/) ·
-  [tile consumption docs](https://developer.mapy.com/rest-api-mapy-cz/function/map-tiles/map-tile-consumption/)
-- **Why it might be free for us**: a "Discounted tariff" grants **10,000,000
-  free credits/month** (1 credit = 1 tile) to projects that are freely
-  accessible to everyone, use **only** Mapy.com map data (no mixing
-  providers), display Mapy.com attribution, and are listed in their public
-  Reference Projects Catalogue. Default Basic tariff is only 250k credits/mo.
-- **Cost**: $0 up to ~10M tiles/month if we qualify and get listed; beyond
-  that, 1.60 CZK / 1,000 credits (~$0.07/1k), tiered discounts above 5M paid
-  credits. At our ~31M tiles/mo estimate that's ~21M credits over the free
-  allotment → roughly **$1,300–1,500/month** — not free at that scale.
-- **Risk**: requires exclusivity (can't combine with another provider's
-  tiles on the same map), and approval/listing in their catalogue is a
-  manual step, not automatic. Untested whether they'd actually approve a
-  Swiss/international paragliding site for the discounted tier.
-- **Effort**: medium — new vendor integration, attribution requirement,
-  approval process.
+### 13. `mapView` getter duplicated
 
-#### Option D — Stadia Maps free non-commercial tier — _only if we stay strictly non-commercial_
+- **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
+  [app/components/station/index.gts](app/components/station/index.gts) both define
+  `get mapView()` = `parseMapView(router.currentRoute?.queryParams)`.
+- **Fix:** Extract a small shared helper/util (e.g. `currentMapView(router)`) in
+  [app/utils/map-view.ts](app/utils/map-view.ts) and reuse.
 
-- **What**: OSM-based vector **and raster** tiles (raster = smaller app change).
-  [pricing](https://stadiamaps.com/pricing/) · [limits](https://docs.stadiamaps.com/limits/) ·
-  [FAQ on commercial use](https://stadiamaps.com/faqs/)
-- **Why it _might_ be free for us**: free tier covers _"development, evaluation, and
-  non-commercial use (including academic)."_ A genuinely non-commercial, ad-free,
-  NGO-run public service is plausibly eligible — **but** their definition of commercial
-  includes _"generates revenue (including via advertising)"_ and _"use by a for-profit
-  organization."_ So: only if we never monetize. **Action: email them and confirm
-  eligibility in writing** before relying on it.
-- **Cost**: $0 if eligible; monthly-credit limits apply (verify the cap fits ~31M
-  raster requests — likely needs their nonprofit/community arrangement).
-- **Risk**: terms interpretation; free tier has request caps. Upside: can be a
-  **drop-in raster** replacement (least code change).
-- **Effort**: low.
+---
 
-### 5. Recommendation
+## Low impact / polish
 
-> **Superseded by the status update in §1.** We tried switching to OpenFreeMap
-> (below) plus client-side hillshade/contours, then reverted: SOSM's terms
-> don't actually forbid what we feared, and `tile.osm.ch/switzerland`'s style
-> _already renders hillshading and contour lines server-side_ — confirmed
-> directly from [SOSM's tile-service page](https://sosm.ch/projects/tile-service/),
-> which describes the style as _"adapted to render for example the Mobility
-> car sharing stations or to include a hill shading and contour lines."_ The
-> entire `maplibre-contour` + native-hillshade-layer effort (§6, now reverted)
-> was solving a problem the tiles already solved for us. Kept below for when
-> worldwide coverage actually becomes the blocker.
+### 14. Trivial formatting getters and `String(intl.t())` wrapping
 
-1. **When worldwide coverage is actually needed**: switch the base layer off
-   `tile.osm.ch` → **OpenFreeMap (Option A)**. Zero cost, zero infra,
-   worldwide. Keep the AWS terrain DEM as-is. Note: OpenFreeMap's vector style
-   does _not_ include hillshade/contours (OpenMapTiles schema excludes them),
-   so that move would need to either re-add them client-side or accept a
-   plainer style — re-evaluate whether that's worth it at that point, rather
-   than defaulting back into the same complexity.
-2. **If/when we want to own reliability** (NGO backing, predictable tiny budget):
-   move to **self-hosted Protomaps on R2 (Option B)** — same vector style, ~$0–15/mo,
-   no third-party runtime dependency. OpenFreeMap → Protomaps is a small style swap
-   because both are vector.
-3. **Parallel, low-effort hedge**: email **Stadia (Option D)** to see if they'll grant
-   us free non-commercial/nonprofit access — if yes, it's the least code change (raster).
+- **Where:** [app/components/station/compact-card.gts](app/components/station/compact-card.gts)
+  (`windSpeedLabel`/`gustsLabel` wrap `intl.formatNumber(..., {format:'integer'})`
+  while the same file formats altitude via the `{{formatNumber}}` helper in the
+  template — two ways to do one thing); [app/templates/nearby.gts](app/templates/nearby.gts)
+  wraps `intl.t(...)` in `String(...)` three times.
+- **Fix:** Prefer the `{{formatNumber}}` helper in-template and drop the getters;
+  drop the unnecessary `String()` wrapping.
 
-### 6. Follow-up tasks
+### 15. `lastHourMeanSpeed` actually computes the median
 
-- [x] ~~Replace the inline Swiss raster style with OpenFreeMap's worldwide vector
-      "Liberty" style URL~~ — **done, then reverted.** See the §1 status
-      update and the correction above: the move solved a permission problem
-      that turned out not to exist, at the cost of losing SOSM's
-      already-baked-in hillshading/contours and gaining a `maplibre-contour`
-      dependency to claw them back. Back to `OSM_SWISS_STYLE` in
-      [app/components/map/index.gts](app/components/map/index.gts).
-- [x] ~~Make the basemap outdoor-usable for free via client-side hillshade +
-      `maplibre-contour`~~ — **reverted as unnecessary**; SOSM's tiles already
-      render hillshading and contours server-side (see §1/§5).
-- [ ] Verify terrain DEM (`elevation-tiles-prod`) usage terms are fine at launch scale
-      (AWS Open Data — expected yes).
-- [ ] Email Stadia Maps re: non-commercial/nonprofit eligibility (hedge / raster fallback) —
-      lower priority now that SOSM is confirmed fine to keep using.
-- [ ] If/when SOSM ever throttles us or worldwide coverage becomes a real
-      requirement, revisit Option A (OpenFreeMap) or B (self-hosted Protomaps/R2)
-      above — the analysis and the rationale for picking between them is
-      preserved here.
+- **Where:** [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts).
+- **Problem:** The getter named `…MeanSpeed` sorts and takes the middle element —
+  that's the median, not the mean. Misleading name (and the label is `wind.mean`).
+- **Fix:** Decide intended statistic; rename the getter (and/or fix the maths and
+  label) so name and behaviour agree.
+
+### 16. Stale scaffolding comments / typos
+
+- **Where:** [app/services/store.ts](app/services/store.ts) has leftover
+  conversational scaffolding comments ("This one can stay as a resource schema…",
+  "if you're fetching histories as records"); `contedWithIds` typo in both handlers
+  (see item 5).
+- **Fix:** Tidy comments to describe the code as-is; fix typos.
+
+### 17. Verify the un-imported `Handler` type
+
+- **Where:** [app/handlers/station.ts](app/handlers/station.ts),
+  [app/handlers/history.ts](app/handlers/history.ts) annotate
+  `const XHandler: Handler` but `Handler` is never imported and no local/global
+  declaration was found.
+- **Fix:** Confirm it resolves under glint; if it's an implicit global/any, import
+  the real `Handler`/`CacheHandler` type from `@warp-drive/core` and annotate
+  explicitly.
+
+---
+
+## Suggested sequencing
+
+1. Quick, low-risk deletions first: items **5** (logs/dead comment/typo), **6**,
+   **8**, **9**, **14**, **16** — small, isolated, easy to verify.
+2. Then the shared-typing fix **4** (unblocks cleaner call sites).
+3. Then the structural DRY wins **2** and **3** (biggest line reduction).
+4. Then reactivity correctness **1**, **10**, **11**.
+5. Finally the remaining medium/polish items.
+
+Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
+the dev container — `docker compose exec ui …`), per CLAUDE.md.
