@@ -8,7 +8,7 @@ import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached } from '@glimmer/tracking';
-import { tracked } from '@glimmer/tracking';
+import { modifier } from 'ember-modifier';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
@@ -104,14 +104,30 @@ type RequestStore = {
   request<T>(request: unknown): Future<T>;
 };
 
+interface BackgroundRefreshSignature {
+  Element: Element;
+  Args: {
+    Positional: [Date | undefined, () => void];
+  };
+}
+
+// Calls `refresh` whenever the shared map-refresh service ticks. `lastRefresh` is
+// undefined until the first tick, and the initial request is already current, so
+// the guard skips the initial install and fires only on real refresh ticks.
+const backgroundRefreshOnTick = modifier<BackgroundRefreshSignature>(
+  (_element, [lastRefresh, refresh]) => {
+    if (lastRefresh) {
+      refresh();
+    }
+  }
+);
+
 export default class Map extends Component<MapSignature> {
   @service
   declare store: typeof import('winds-mobi-client-web/services/store').default;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
-
-  @tracked stations: Station[] = [];
 
   private navigationControl = new NavigationControl({
     showCompass: true,
@@ -176,36 +192,47 @@ export default class Map extends Component<MapSignature> {
     return quantizeMapViewForRequest(this.mapView);
   }
 
+  // Keyed only on the routed view, so the Future is stable across refresh ticks.
+  // The 2-minute refresh reloads this same request in the background (see
+  // `backgroundRefresh`) instead of recreating it, which keeps the resolved
+  // stations on screen — recreating the Future would drop back to a pending state
+  // and blink every marker off and on.
   @cached
   get request(): Future<RequestResponse<Station[]>> | undefined {
     const bounds = approximateMapBoundsFromView(this.requestView);
-
-    this.mapRefresh.lastRefresh;
 
     const options = mapQuery<Station>('station', bounds, {
       backgroundReload: true,
     });
 
-    const request =
-      this.requestStore.request<RequestResponse<Station[]>>(options);
-
-    void request.then((result) => {
-      // Ignore a stale response: if the routed view changed while this request
-      // was in flight, `this.request` is now a different (cached) Future and its
-      // own result will set the stations.
-      if (this.request !== request) {
-        return;
-      }
-
-      this.stations = responseData(result);
-    });
-
-    return request;
+    return this.requestStore.request<RequestResponse<Station[]>>(options);
   }
 
   get requestState() {
     return this.request ? getRequestState(this.request) : undefined;
   }
+
+  // Markers derive from the current request's state rather than a tracked field
+  // written from a `.then` callback. Because `request` is cached on the routed
+  // view, `requestState` always reflects the Future for the current view, so a
+  // response from a superseded view can't win (what the old stale guard handled).
+  get stations(): Station[] {
+    return this.requestState?.isSuccess
+      ? responseData(this.requestState.value)
+      : [];
+  }
+
+  // Background-reload the station list in place on each shared refresh tick, which
+  // refreshes the cached readings the markers render reactively without swapping
+  // the Future — so nothing blinks. `refresh()` throws on a still-pending request,
+  // so skip until the first load resolves.
+  backgroundRefresh = () => {
+    const state = this.requestState;
+
+    if (state && !state.isPending) {
+      void state.refresh();
+    }
+  };
 
   get legendBands(): WindLegendBand[] {
     return windLegendBands();
@@ -353,7 +380,11 @@ export default class Map extends Component<MapSignature> {
   }
 
   <template>
-    <div data-test-map-container class="relative h-full w-full">
+    <div
+      data-test-map-container
+      class="relative h-full w-full"
+      {{backgroundRefreshOnTick this.mapRefresh.lastRefresh this.backgroundRefresh}}
+    >
       <Request @request={{this.request}}>
         <:content></:content>
       </Request>
