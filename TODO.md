@@ -8,23 +8,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## High impact
 
-### 1. Three near-identical station-section fetchers
-
-- **Where:** [app/components/station/wind/index.gts](app/components/station/wind/index.gts),
-  [app/components/station/air/index.gts](app/components/station/air/index.gts),
-  [app/components/station/last-hour/index.gts](app/components/station/last-hour/index.gts).
-- **Problem:** All three are the same boilerplate — same services, an identical
-  `historyRequest` `@cached` getter (touch `mapRefresh.lastRefresh`, call
-  `historyQuery` with `DURATION`/`HISTORY_KEYS`, `backgroundReload: true`), and the
-  same `<Request>`/`<:content>`/`<:loading>`/`<:error>` shape rendering a presenter
-  with `EMPTY_HISTORY` fallbacks. They differ only in: `data-test` attribute,
-  title key, `DURATION`, `HISTORY_KEYS`, and the presenter component.
-- **Fix:** Extract a single `StationHistorySection` component that takes
-  `@stationId`, `@title`, `@duration`, `@keys`, `@testId`, and yields the history
-  (or accepts the presenter via a block/arg). The three sections collapse to a
-  few lines each. Keep the per-section `keys` (documented in CLAUDE.md) as the
-  only knob.
-
 ### 2. Duplicated per-card "reading" getters
 
 - **Where:** [app/components/station/header.gts](app/components/station/header.gts),
@@ -78,14 +61,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   the pointless try/catch (or replace with real error handling), remove the dead
   comment, fix the `contedWithIds` → `contentWithIds` typo, and standardise on one
   presence check.
-
-### 5. Hardcoded UI string bypasses i18n
-
-- **Where:** [app/components/map/index.gts](app/components/map/index.gts) — the
-  `Loading stations…` overlay text is inline, not a translation.
-- **Problem:** CLAUDE.md: all UI strings live in
-  [translations/en-us.yaml](translations/en-us.yaml). This one drifts outside it.
-- **Fix:** Add a key (e.g. `map.loadingStations`) and render via `{{t}}`.
 
 ---
 
@@ -207,10 +182,10 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **5**,
-   **7**, **8**, **13**, **15** — small, isolated, easy to verify.
+1. Quick, low-risk deletions first: items **4** (logs/dead comment/typo), **7**,
+   **8**, **13**, **15** — small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
-3. Then the structural DRY wins **1** and **2** (biggest line reduction).
+3. Then the structural DRY win **2** (per-card reading getters).
 4. Then reactivity correctness **9** and **10**.
 5. Finally the remaining medium/polish items.
 
