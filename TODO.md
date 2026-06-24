@@ -42,26 +42,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   Registry, then delete both local `RequestStore` types and the `as unknown as`
   casts.
 
-### 4. Debug logging + duplicated envelope logic in handlers
-
-- **Where:** [app/handlers/station.ts](app/handlers/station.ts),
-  [app/handlers/history.ts](app/handlers/history.ts).
-- **Problem:**
-  - Both have `console.log('...request().catch()', { e })` then rethrow —
-    leftover debug logging in production; the `try/catch` exists only to log.
-  - Both repeat the same JSON:API envelope construction (`links.self` + `data`,
-    `Array.isArray(content) ? content.map(...) : single`), including the same
-    `contedWithIds` typo (copy-paste).
-  - [app/handlers/history.ts](app/handlers/history.ts) line 3 has a dead
-    commented import referencing a different project
-    (`the-mountains-are-calling/services/settings`).
-  - The two handlers test "absent field" differently — station uses a `hasOwn`
-    helper, history uses `'key' in elm` + non-null assertions — for the same job.
-- **Fix:** Extract a shared `toJsonApiEnvelope(url, content, mapFn)` helper, drop
-  the pointless try/catch (or replace with real error handling), remove the dead
-  comment, fix the `contedWithIds` → `contentWithIds` typo, and standardise on one
-  presence check.
-
 ---
 
 ## Medium impact
@@ -144,8 +124,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: items **4** (logs/dead comment), **8** —
-   small, isolated, easy to verify.
+1. Quick, low-risk deletions first: item **8** — small, isolated, easy to verify.
 2. Then the shared-typing fix **3** (unblocks cleaner call sites).
 3. Then the structural DRY win **2** (per-card reading getters).
 4. Then reactivity correctness **9** and **10**.
