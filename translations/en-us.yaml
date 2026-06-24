@@ -103,7 +103,6 @@ help:
     error: The changelog could not be loaded right now.
 
 map:
-  loadingStations: Loading stations…
   legend:
     windSpeed: wind [km/h]
   refresh:

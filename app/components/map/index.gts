@@ -227,12 +227,6 @@ export default class Map extends Component<MapSignature> {
     return this.requestState?.isPending === true;
   };
 
-  // True only on the first load, when there are no previous markers to keep on
-  // screen — shows the loading placeholder then; later refreshes keep the markers.
-  get isInitialLoad(): boolean {
-    return this.loadingProbe() && this.lastStations.length === 0;
-  }
-
   // Last successfully-loaded stations, committed by `commitResolvedStations` on
   // each resolve. Holds the markers on screen while a new bounds query loads.
   @tracked private lastStations: Station[] = [];
@@ -458,16 +452,6 @@ export default class Map extends Component<MapSignature> {
           @title={{t "map.legend.windSpeed"}}
         />
       </MapLibreGL>
-
-      {{#if this.isInitialLoad}}
-        {{! only on the first load; later refreshes keep the markers on screen and
-        spin the navbar refresh control instead of covering the map }}
-        <div
-          class="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm"
-        >
-          {{t "map.loadingStations"}}
-        </div>
-      {{/if}}
     </div>
   </template>
 }
