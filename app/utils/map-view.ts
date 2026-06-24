@@ -25,12 +25,9 @@ export function focusQueryParamsFor(station: {
   };
 }
 
+// Captured request bounds are snapped to this grid so sub-threshold panning
+// resolves to the same value and doesn't trigger a refetch.
 const MAP_REQUEST_COORDINATE_THRESHOLD = 0.01;
-const MAP_REQUEST_ZOOM_THRESHOLD = 0.25;
-
-// MapLibre defines zoom against a 512px world tile, so the whole 360° of
-// longitude spans `MAP_TILE_SIZE * 2 ** zoom` pixels at a given zoom.
-const MAP_TILE_SIZE = 512;
 
 type MapCoordinate = [number, number];
 
@@ -74,59 +71,49 @@ function snap(value: number, step: number) {
   return Math.round(value / step) * step;
 }
 
-// Snap a view to the station-refetch thresholds so that small map movements
-// resolve to the same value. The map request is derived from this, which lets
-// sub-threshold panning update the URL without triggering a refetch — keeping
-// station fetching declaratively driven by the routed view instead of imperative
-// viewport bookkeeping.
-export function quantizeMapViewForRequest(view: MapView): MapView {
+// The geographic bounds currently visible on the map, read from MapLibre's own
+// `getBounds` (the exact viewport in lng/lat). The station request is derived from
+// this rather than from the routed center/zoom, so it always covers what's
+// actually on screen — including when the map is pitched or rotated. The query's
+// `limit` (see `mapQuery`) caps how many stations come back when a pitched view
+// reaches far toward the horizon.
+export function boundsFromMap(map: MaplibreMap): MapBounds {
+  const bounds = map.getBounds();
+  const northEast = bounds.getNorthEast();
+  const southWest = bounds.getSouthWest();
+
   return {
-    longitude: snap(view.longitude, MAP_REQUEST_COORDINATE_THRESHOLD),
-    latitude: snap(view.latitude, MAP_REQUEST_COORDINATE_THRESHOLD),
-    zoom: snap(view.zoom, MAP_REQUEST_ZOOM_THRESHOLD),
+    northEast: [northEast.lng, northEast.lat],
+    southWest: [southWest.lng, southWest.lat],
   };
 }
 
-// Normalised Web-Mercator Y for a latitude: 0 at the top of the world, 1 at the
-// bottom (the projection MapLibre uses).
-function latitudeToMercatorY(latitude: number): number {
-  const latitudeRadians = (latitude * Math.PI) / 180;
-  return (1 - Math.asinh(Math.tan(latitudeRadians)) / Math.PI) / 2;
-}
-
-function mercatorYToLatitude(y: number): number {
-  return (Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180) / Math.PI;
-}
-
-// The geographic bounds actually visible for a routed view in a viewport of the
-// given pixel size — the same Web-Mercator math MapLibre's own `getBounds` uses.
-// The earlier heuristic spanned a fixed `360 / 2 ** zoom` degrees regardless of
-// the map's real width, so it matched only a ~1024px-wide viewport and
-// under-fetched the edges of any larger map (the request box looked smaller than
-// the map shows). Deriving from the measured viewport size fixes that, while
-// keeping the request a function of the routed view (center/zoom) plus the
-// container's pixel dimensions.
-export function mapBoundsFromView(
-  view: MapView,
-  viewportWidth: number,
-  viewportHeight: number
-): MapBounds {
-  const worldSize = MAP_TILE_SIZE * 2 ** view.zoom;
-  const halfWidthDegrees = ((viewportWidth / 2) * 360) / worldSize;
-
-  const centerY = latitudeToMercatorY(view.latitude);
-  const halfHeightY = viewportHeight / 2 / worldSize;
-
+// Snap bounds to the refetch grid so small map movements resolve to the same
+// value and don't trigger a refetch.
+export function roundBoundsForRequest(bounds: MapBounds): MapBounds {
   return {
     northEast: [
-      view.longitude + halfWidthDegrees,
-      mercatorYToLatitude(centerY - halfHeightY),
+      snap(bounds.northEast[0], MAP_REQUEST_COORDINATE_THRESHOLD),
+      snap(bounds.northEast[1], MAP_REQUEST_COORDINATE_THRESHOLD),
     ],
     southWest: [
-      view.longitude - halfWidthDegrees,
-      mercatorYToLatitude(centerY + halfHeightY),
+      snap(bounds.southWest[0], MAP_REQUEST_COORDINATE_THRESHOLD),
+      snap(bounds.southWest[1], MAP_REQUEST_COORDINATE_THRESHOLD),
     ],
   };
+}
+
+export function mapBoundsEqual(left?: MapBounds, right?: MapBounds): boolean {
+  if (!left || !right) {
+    return left === right;
+  }
+
+  return (
+    left.northEast[0] === right.northEast[0] &&
+    left.northEast[1] === right.northEast[1] &&
+    left.southWest[0] === right.southWest[0] &&
+    left.southWest[1] === right.southWest[1]
+  );
 }
 
 export function parseMapView(queryParams?: MapQueryParams): MapView {
