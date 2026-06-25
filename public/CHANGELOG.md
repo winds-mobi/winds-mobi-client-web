@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- A locate button (crosshair icon) now appears in the top bar next to the refresh button. Tap it to find your current position — the map flies to it and a pulsing blue dot marks your location. The button outline turns blue and the icon fills in while your location is known.
+- On return visits where you have previously granted location access, the map automatically centres on your position when it loads.
+
 ## v0.11.1 - 2026-06-25
 
 ### Fixed

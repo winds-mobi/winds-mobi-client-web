@@ -5,6 +5,7 @@ import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-ref
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
+import NavbarLocateControl from './locate-control';
 import NavbarRefreshControl from './refresh-control';
 import NavbarMenuDesktop from './menu/desktop';
 import NavbarMenuMobile from './menu/mobile';
@@ -36,6 +37,7 @@ export default class Navbar extends Component<NavbarSignature> {
 
           <NavbarSearch data-test-navbar-search="navbar" />
 
+          <NavbarLocateControl />
           <NavbarRefreshControl />
 
           <NavbarMenuMobile />
