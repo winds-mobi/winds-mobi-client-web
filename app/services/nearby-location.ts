@@ -30,7 +30,6 @@ export default class NearbyLocationService extends Service {
   @tracked requestState: NearbyRequestState = 'idle';
 
   #permissionStatus?: PermissionStatus;
-  #hasSyncedPermissionState = false;
 
   get hasCoordinates() {
     return this.coordinates !== undefined;
@@ -77,11 +76,9 @@ export default class NearbyLocationService extends Service {
   }
 
   async syncPermissionState() {
-    if (this.#hasSyncedPermissionState) {
+    if (this.permissionState !== 'checking') {
       return;
     }
-
-    this.#hasSyncedPermissionState = true;
 
     if (!this.#hasGeolocationSupport()) {
       this.permissionState = 'unsupported';
