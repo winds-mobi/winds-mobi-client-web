@@ -4,7 +4,10 @@ import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type {
+  Station,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached, tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
@@ -15,36 +18,29 @@ import type {
   MapInitOptions,
   StyleSpecification,
 } from 'ember-maplibre-gl';
-import {
-  GeolocateControl,
-  NavigationControl,
-  TerrainControl,
-} from 'maplibre-gl';
+import { NavigationControl, TerrainControl } from 'maplibre-gl';
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
   type WindLegendBand,
 } from 'winds-mobi-client-web/components/map/legend';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
+import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import {
-  type RequestResponse,
-  responseData,
-} from 'winds-mobi-client-web/utils/request-response';
-import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
+import { responseData } from 'winds-mobi-client-web/utils/request-response';
+import { requestAndFly } from 'winds-mobi-client-web/utils/locate';
 import {
   boundsFromMap,
   roundBoundsForRequest,
   mapBoundsEqual,
-  FOCUS_ZOOM,
+  currentMapView,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
   type MapBounds,
-  type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
@@ -101,13 +97,8 @@ const TEST_MAP_STYLE: StyleSpecification = {
   ],
 };
 
-type RequestStore = {
-  request<T>(request: unknown): Future<T>;
-};
-
 export default class Map extends Component<MapSignature> {
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
@@ -116,20 +107,6 @@ export default class Map extends Component<MapSignature> {
     showCompass: true,
     visualizePitch: true,
   });
-  private geolocateControl = new GeolocateControl({
-    positionOptions: DEFAULT_POSITION_OPTIONS,
-    // The control's own `_updateCamera` runs `fitBounds(..., fitBoundsOptions)`
-    // on every fix. `animate: false` makes it settle instantly so the initial
-    // auto-center (and any later manual click) draws straight at the user's
-    // location rather than animating a pan/zoom in from the default view (#55).
-    fitBoundsOptions: { maxZoom: FOCUS_ZOOM, animate: false },
-    showAccuracyCircle: true,
-    showUserLocation: true,
-    // Locate on demand rather than continuously tracking — we recenter the routed
-    // view from the `geolocate` event, and tracking would fight manual panning.
-    trackUserLocation: false,
-  });
-
   private terrainControl =
     config.environment === 'test'
       ? undefined
@@ -139,9 +116,7 @@ export default class Map extends Component<MapSignature> {
         });
 
   get mapView() {
-    return parseMapView(
-      this.router.currentRoute?.queryParams as MapQueryParams | undefined
-    );
+    return currentMapView(this.router);
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).
@@ -164,10 +139,6 @@ export default class Map extends Component<MapSignature> {
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
   };
-
-  private get requestStore(): RequestStore {
-    return this.store as unknown as RequestStore;
-  }
 
   // The map's current visible bounds in lng/lat, captured from MapLibre's own
   // `getBounds` whenever the map settles (the `idle` event) and snapped to the
@@ -194,7 +165,7 @@ export default class Map extends Component<MapSignature> {
   // rather than remounting. `mapQuery` caps the result at 470 stations, which
   // bounds the fetch even when a pitched view reaches far toward the horizon.
   @cached
-  get request(): Future<RequestResponse<Station[]>> | undefined {
+  get request(): Future<{ data: Station[] }> | undefined {
     const bounds = this.requestBounds;
 
     // Hold the request until the map reports its first bounds (the initial
@@ -206,9 +177,9 @@ export default class Map extends Component<MapSignature> {
     // Read so each refresh tick invalidates this getter and refetches.
     this.mapRefresh.lastRefresh;
 
-    const options = mapQuery<Station>('station', bounds);
-
-    return this.requestStore.request<RequestResponse<Station[]>>(options);
+    return this.store.request<{ data: Station[] }>(
+      mapQuery<Station>('station', bounds)
+    );
   }
 
   get requestState() {
@@ -273,6 +244,14 @@ export default class Map extends Component<MapSignature> {
     };
   }
 
+  get userLocationMarkerOptions() {
+    return {
+      anchor: 'center' as const,
+      pitchAlignment: 'viewport' as const,
+      rotationAlignment: 'viewport' as const,
+    };
+  }
+
   markerPosition(station: Station): [number, number] {
     return [station.longitude, station.latitude];
   }
@@ -294,44 +273,14 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  handleMapLoaded() {
-    // On a fresh load, ask the map's own geolocation for the user's position and
-    // center on it; otherwise the whole-Switzerland default view stays (#32).
-    if (this.isInitialDefaultView && config.environment !== 'test') {
-      // `mapLoaded` fires before ember-maplibre-gl renders its block and adds the
-      // GeolocateControl, so the control isn't on the map yet ("triggered before
-      // added to a map"). The addon documents deferring such effectful onMapLoaded
-      // work to the next frame, by which point the control is attached.
-      requestAnimationFrame(() => this.geolocateControl.trigger());
-    }
-  }
+  async handleMapLoaded() {
+    // On a fresh load with the default Switzerland view, acquire location
+    // silently if permission is already granted (no prompt) and fly to it.
+    // The user's own pan or the locate button handle everything else.
+    if (!this.isInitialDefaultView || config.environment === 'test') return;
+    if (this.nearbyLocation.permissionState !== 'granted') return;
 
-  @action
-  handleGeolocateStart() {
-    this.nearbyLocation.beginLocationRequest();
-  }
-
-  @action
-  handleGeolocate(event: GeolocationPosition) {
-    // MapLibre fires `new Event('geolocate', position)`, which spreads the
-    // GeolocationPosition fields (coords, timestamp) onto the event itself — there
-    // is no `event.data`. The geolocate fly is programmatic (skipped by
-    // handleMoveEnd), so center the routed view on the located position here — this
-    // is what refetches stations around the user.
-    this.nearbyLocation.updateFromPosition(event);
-
-    this.router.replaceWith({
-      queryParams: {
-        longitude: event.coords.longitude,
-        latitude: event.coords.latitude,
-        zoom: FOCUS_ZOOM,
-      },
-    });
-  }
-
-  @action
-  handleGeolocateError(event: GeolocationPositionError) {
-    this.nearbyLocation.updateFromError(event);
+    await requestAndFly(this.nearbyLocation, this.router);
   }
 
   @action
@@ -411,20 +360,20 @@ export default class Map extends Component<MapSignature> {
           @control={{this.navigationControl}}
           @position="bottom-right"
         />
-        <map.control
-          @control={{this.geolocateControl}}
-          @position="top-right"
-          as |control|
-        >
-          <control.on
-            @event="trackuserlocationstart"
-            @action={{this.handleGeolocateStart}}
-          />
-          <control.on @event="geolocate" @action={{this.handleGeolocate}} />
-          <control.on @event="error" @action={{this.handleGeolocateError}} />
-        </map.control>
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
+        {{/if}}
+
+        {{#if this.nearbyLocation.coordinates}}
+          <map.marker
+            @initOptions={{this.userLocationMarkerOptions}}
+            @lngLat={{array
+              this.nearbyLocation.coordinates.longitude
+              this.nearbyLocation.coordinates.latitude
+            }}
+          >
+            <MapUserLocationMarker />
+          </map.marker>
         {{/if}}
 
         {{#each this.stations as |station|}}

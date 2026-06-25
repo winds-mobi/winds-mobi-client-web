@@ -3,7 +3,10 @@ import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type {
+  Station,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 import StationAir from 'winds-mobi-client-web/components/station/air';
 import StationHeader from 'winds-mobi-client-web/components/station/header';
 import StationSummary from 'winds-mobi-client-web/components/station/summary';
@@ -20,8 +23,7 @@ export interface HelpLiveStationSignature {
 }
 
 export default class HelpLiveStation extends Component<HelpLiveStationSignature> {
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
 
   @cached
   get stationRequest() {

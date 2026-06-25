@@ -108,16 +108,7 @@ export function windBandForSpeed(speed: number) {
     }
   }
 
-  return (
-    WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1] ?? {
-      backgroundClass: 'bg-wind-50',
-      color: 'var(--color-wind-50)',
-      key: 'wind-50',
-      max: Infinity,
-      min: 45,
-      textClass: 'text-wind-50',
-    }
-  );
+  return WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1]!;
 }
 
 export function windToBackgroundClass(speed: number) {

@@ -105,6 +105,8 @@ help:
 map:
   legend:
     windSpeed: wind [km/h]
+  locate:
+    ariaLabel: Show my location on the map
   refresh:
     ariaLabel: Refresh map and station data
     sinceLast: '{value} since last refresh'

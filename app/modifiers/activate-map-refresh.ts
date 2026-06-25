@@ -10,10 +10,10 @@ interface ActivateMapRefreshSignature {
 
 const activateMapRefresh = modifier<ActivateMapRefreshSignature>(
   (_element, [mapRefresh]) => {
-    mapRefresh.activate();
+    const token = mapRefresh.activate();
 
     return () => {
-      mapRefresh.deactivate();
+      mapRefresh.deactivate(token);
     };
   }
 );

@@ -1,6 +1,6 @@
-import type { NextFn } from '@warp-drive/core/request';
+import type { Handler, NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
-// import type { Pin } from 'the-mountains-are-calling/services/settings';
+import { toJsonApiEnvelope } from './json-api';
 
 export interface Response {
   content: HistoryApiPayload[];
@@ -70,32 +70,20 @@ const HistoryHandler: Handler = {
       return next(context.request);
     }
 
-    try {
-      const { content } = (await next(context.request)) as Response;
-      const stationId = extractHistoricStationId(context.request.url);
+    const { content } = (await next(context.request)) as Response;
+    const stationId = extractHistoricStationId(context.request.url);
 
-      // JSON-API requires us to have IDs
-      // Historic timestamps are only unique within a station,
-      // so cache identity must include the station id.
-      // The historic API returns newest-first rows, but the app consumes
-      // history in chronological order for charting and the last-hour graph.
+    // JSON-API requires us to have IDs
+    // Historic timestamps are only unique within a station,
+    // so cache identity must include the station id.
+    // The historic API returns newest-first rows, but the app consumes
+    // history in chronological order for charting and the last-hour graph.
 
-      const contedWithIds = Array.isArray(content)
-        ? content.map((elm) => renameFields(elm, stationId)).reverse()
-        : renameFields(content, stationId);
+    const contentWithIds = Array.isArray(content)
+      ? content.map((elm) => renameFields(elm, stationId)).reverse()
+      : renameFields(content, stationId);
 
-      const jsonApiLikeData = {
-        links: {
-          self: context.request.url,
-        },
-        data: contedWithIds,
-      };
-
-      return jsonApiLikeData as T;
-    } catch (e) {
-      console.log('HistoryHandler.request().catch()', { e });
-      throw e;
-    }
+    return toJsonApiEnvelope<T>(context.request.url, contentWithIds);
   },
 };
 

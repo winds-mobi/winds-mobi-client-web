@@ -54,7 +54,6 @@ module(
       await render(
         hbs`<Station::LastHour::Presenter @history={{this.history}} />`
       );
-      await settled();
 
       assert.dom(this.element).includesText('Maximum');
       assert.dom(this.element).includesText('18 km/h');

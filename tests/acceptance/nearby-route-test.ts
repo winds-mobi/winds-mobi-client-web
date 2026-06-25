@@ -172,9 +172,7 @@ module('Acceptance | nearby route', function (hooks) {
 
   test('it shows the explainer and waits for the nearby location button when access is not granted yet', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubPromptPermission(nearbyLocation);
 
@@ -187,9 +185,7 @@ module('Acceptance | nearby route', function (hooks) {
 
   test('it requests location after the user uses the nearby location button and then loads nearby stations', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubPromptPermission(nearbyLocation);
     nearbyLocation.requestCurrentPosition = async () => {
@@ -212,9 +208,7 @@ module('Acceptance | nearby route', function (hooks) {
 
   test('it skips the button when geolocation permission is already granted', async function (assert) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
 
@@ -228,9 +222,7 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it opens the map zoomed to a station when its name is clicked', async function (assert) {
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
 
@@ -248,9 +240,7 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it switches to the compact list view and back', async function (assert) {
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
 
@@ -284,9 +274,7 @@ module('Acceptance | nearby route', function (hooks) {
     this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
 
     const store = this.owner.lookup('service:store') as FakeStoreService;
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
 

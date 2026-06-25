@@ -76,7 +76,7 @@ export const StationSchema = withDefaults({
   ],
 });
 
-// This one can stay as a resource schema (if you’re fetching histories as records)
+// History is a resource schema: its records are fetched and cached by id.
 export const HistorySchema = withDefaults({
   type: 'history',
   fields: [
@@ -172,7 +172,7 @@ function composeReadingDerivation(record: RecordType): unknown {
 }
 composeReadingDerivation[Type] = 'composeReading';
 
-export default useLegacyStore({
+const AppStore = useLegacyStore({
   linksMode: false,
   legacyRequests: true,
   modelFragments: true,
@@ -182,8 +182,15 @@ export default useLegacyStore({
   derivations: [unwrapDerivation, composeReadingDerivation],
 });
 
+// The store *instance* type — exposes the generic `request<RT>(builder): Future<RT>`,
+// unlike `typeof AppStore` (the class), so injecting `store: StoreService` lets call
+// sites call `this.store.request(...)` without casting through `unknown`.
+export type StoreService = InstanceType<typeof AppStore>;
+
+export default AppStore;
+
 declare module '@ember/service' {
   interface Registry {
-    store: typeof import('winds-mobi-client-web/services/store').default;
+    store: StoreService;
   }
 }

@@ -1,16 +1,13 @@
 import { modifier } from 'ember-modifier';
 import type { RequestState } from '@warp-drive/core/reactive';
 import type { Station } from 'winds-mobi-client-web/services/store';
-import {
-  responseData,
-  type RequestResponse,
-} from 'winds-mobi-client-web/utils/request-response';
+import { responseData } from 'winds-mobi-client-web/utils/request-response';
 
 interface CommitResolvedStationsSignature {
   Element: Element;
   Args: {
     Positional: [
-      RequestState<RequestResponse<Station[]>> | undefined,
+      RequestState<{ data: Station[] }> | undefined,
       (stations: Station[]) => void,
     ];
   };

@@ -16,7 +16,14 @@ export type NearbyLocationErrorCode =
   | 'unsupported'
   | 'unknown';
 
-type NearbyPermissionState = PermissionState | 'checking' | 'unsupported';
+// 'checking' = initial state, no query attempted yet
+// 'syncing'  = navigator.permissions.query in flight (synchronous gate so a
+//              concurrent call during the async gap can't re-enter)
+type NearbyPermissionState =
+  | PermissionState
+  | 'checking'
+  | 'syncing'
+  | 'unsupported';
 type NearbyRequestState = 'idle' | 'requesting' | 'ready' | 'error';
 
 const GEOLOCATION_PERMISSION_DENIED = 1;
@@ -30,14 +37,15 @@ export default class NearbyLocationService extends Service {
   @tracked requestState: NearbyRequestState = 'idle';
 
   #permissionStatus?: PermissionStatus;
-  #hasSyncedPermissionState = false;
 
   get hasCoordinates() {
     return this.coordinates !== undefined;
   }
 
   get isCheckingPermission() {
-    return this.permissionState === 'checking';
+    return (
+      this.permissionState === 'checking' || this.permissionState === 'syncing'
+    );
   }
 
   get isRequestingLocation() {
@@ -77,11 +85,13 @@ export default class NearbyLocationService extends Service {
   }
 
   async syncPermissionState() {
-    if (this.#hasSyncedPermissionState) {
+    if (this.permissionState !== 'checking') {
       return;
     }
 
-    this.#hasSyncedPermissionState = true;
+    // Transition synchronously before the first await so any concurrent call
+    // during the async gap is blocked by the guard above.
+    this.permissionState = 'syncing';
 
     if (!this.#hasGeolocationSupport()) {
       this.permissionState = 'unsupported';

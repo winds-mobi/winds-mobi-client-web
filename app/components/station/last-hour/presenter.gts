@@ -8,7 +8,7 @@ import ArrowsInLineVertical from 'ember-phosphor-icons/components/ph-arrows-in-l
 import StationMetricCard from '../metric-card';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import WindDirection from '../wind-direction';
+import WindDirectionGraph from '../wind-direction/graph';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 export interface StationLastHourContentSignature {
@@ -25,17 +25,12 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   @service declare settings: SettingsService;
 
   @cached
-  get lastHourHistory() {
-    return this.args.history;
-  }
-
-  @cached
   get lastHourSpeeds() {
-    return this.lastHourHistory.map((record) => record.speed);
+    return this.args.history.map((record) => record.speed);
   }
 
   get hasHistory() {
-    return this.lastHourHistory.length > 0;
+    return this.args.history.length > 0;
   }
 
   get lastHourMinimumSpeed() {
@@ -47,11 +42,9 @@ export default class StationLastHourContent extends Component<StationLastHourCon
       return undefined;
     }
 
-    const sortedSpeeds = [...this.lastHourSpeeds].sort((left, right) => {
-      return left - right;
-    });
+    const total = this.lastHourSpeeds.reduce((sum, speed) => sum + speed, 0);
 
-    return sortedSpeeds[Math.floor(sortedSpeeds.length / 2)];
+    return total / this.lastHourSpeeds.length;
   }
 
   get lastHourMaximumSpeed() {
@@ -77,7 +70,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   <template>
     <div class="grid gap-2 md:gap-3">
       <div class="min-w-0 w-full aspect-square">
-        <WindDirection @data={{this.lastHourHistory}} />
+        <WindDirectionGraph @data={{@history}} />
       </div>
 
       <dl class="m-0 grid gap-1 md:gap-2">

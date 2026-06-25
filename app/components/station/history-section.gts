@@ -4,7 +4,10 @@ import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import StationSectionCard from './section-card';
-import type { History } from 'winds-mobi-client-web/services/store';
+import type {
+  History,
+  StoreService,
+} from 'winds-mobi-client-web/services/store';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
 export interface StationHistorySectionSignature {
@@ -30,8 +33,7 @@ const EMPTY_HISTORY: History[] = [];
 // The three sections (wind, air, last-hour) differ only in title, duration, keys,
 // and presenter — see CLAUDE.md for the per-section keys.
 export default class StationHistorySection extends Component<StationHistorySectionSignature> {
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
   @service declare mapRefresh: MapRefreshService;
 
   @cached

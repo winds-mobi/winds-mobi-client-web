@@ -18,7 +18,16 @@ export default class MapRefreshService extends Service {
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
-  private activeConsumers = 0;
+  // Reactive surface: each activate() call returns a unique symbol token; isActive
+  // derives from this set's size. TrackedSet.add/delete are pure writes (they dirty
+  // the tag without consuming it), so the modifier's install callback can call
+  // activate() without triggering a read-then-write backtracking assertion.
+  private consumers = new TrackedSet<symbol>();
+
+  // Untracked shadow count used only for the start/stop decisions inside
+  // activate()/deactivate(). Kept in sync with consumers.size but never read
+  // inside a tracked computation, so the ++ / -- operations are safe.
+  private consumerCount = 0;
 
   // Loading probes registered by request sites (the map, nearby, …). The refresh
   // itself is already broadcast to every site via `lastRefresh`; this lets the
@@ -95,28 +104,34 @@ export default class MapRefreshService extends Service {
   }
 
   get isActive() {
-    return this.activeConsumers > 0;
+    return this.consumers.size > 0;
   }
 
-  activate() {
-    this.activeConsumers++;
+  // Returns a token the caller must pass back to deactivate().
+  activate(): symbol {
+    const token = Symbol();
+    this.consumers.add(token); // pure write — no read, no backtracking risk
+    this.consumerCount++;
 
-    if (this.activeConsumers > 1) {
-      return;
+    if (this.consumerCount > 1) {
+      return token;
     }
 
-    this.resetSchedule();
+    this.resetCountdown();
     void this.refreshLoop.perform();
+
+    return token;
   }
 
-  deactivate() {
-    if (this.activeConsumers === 0) {
+  deactivate(token: symbol) {
+    if (this.consumerCount === 0) {
       return;
     }
 
-    this.activeConsumers--;
+    this.consumers.delete(token); // pure write
+    this.consumerCount--;
 
-    if (this.activeConsumers > 0) {
+    if (this.consumerCount > 0) {
       return;
     }
 
@@ -131,12 +146,8 @@ export default class MapRefreshService extends Service {
     }
 
     this.noteRefresh();
-    this.resetSchedule();
-    void this.refreshLoop.perform();
-  }
-
-  private resetSchedule() {
     this.resetCountdown();
+    void this.refreshLoop.perform();
   }
 
   private resetCountdown() {

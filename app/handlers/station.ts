@@ -1,5 +1,6 @@
-import type { NextFn } from '@warp-drive/core/request';
+import type { Handler, NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
+import { toJsonApiEnvelope } from './json-api';
 
 export interface Response {
   content: StationApiPayload[];
@@ -159,27 +160,15 @@ const StationHandler: Handler = {
       return next(context.request);
     }
 
-    try {
-      const { content } = (await next(context.request)) as Response;
+    const { content } = (await next(context.request)) as Response;
 
-      // JSON-API requires us to have IDs
-      // Timestamps should be unique-enough
-      const contedWithIds = Array.isArray(content)
-        ? content.map((elm) => jsonApifyFields(elm))
-        : jsonApifyFields(content);
+    // JSON-API requires us to have IDs
+    // Timestamps should be unique-enough
+    const contentWithIds = Array.isArray(content)
+      ? content.map((elm) => jsonApifyFields(elm))
+      : jsonApifyFields(content);
 
-      const jsonApiLikeData = {
-        links: {
-          self: context.request.url,
-        },
-        data: contedWithIds,
-      };
-
-      return jsonApiLikeData as T;
-    } catch (e) {
-      console.log('StationHandler.request().catch()', { e });
-      throw e;
-    }
+    return toJsonApiEnvelope<T>(context.request.url, contentWithIds);
   },
 };
 

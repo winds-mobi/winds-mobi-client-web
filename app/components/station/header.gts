@@ -8,7 +8,9 @@ import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-coun
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
-import timeAgo from 'winds-mobi-client-web/helpers/time-ago';
+import timeAgo, {
+  relativeSecondsFromTimestamp,
+} from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
@@ -34,20 +36,6 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     );
   }
 
-  get lastReadingRelativeSeconds() {
-    return Math.round(
-      this.args.station.last.timestamp / 1000 - Date.now() / 1000
-    );
-  }
-
-  get lastReadingFreshnessClass() {
-    return textClassForReadingAge(this.args.station.last.timestamp);
-  }
-
-  get focusQueryParams() {
-    return focusQueryParamsFor(this.args.station);
-  }
-
   <template>
     <div class="min-w-0">
       <h2 class="min-w-0">
@@ -55,7 +43,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           data-test-station-title
           @route="map.station"
           @model={{@station.id}}
-          @query={{this.focusQueryParams}}
+          @query={{focusQueryParamsFor @station}}
           title={{t "station.showOnMap"}}
           class="block truncate text-xl font-bold text-slate-950 underline decoration-transparent underline-offset-3 transition hover:decoration-slate-300"
         >
@@ -80,8 +68,10 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           @icon={{ClockCounterClockwise}}
           @label={{t "station.meta.updated"}}
         >
-          <span class={{this.lastReadingFreshnessClass}}>{{timeAgo
-              this.lastReadingRelativeSeconds
+          <span
+            class={{textClassForReadingAge @station.last.timestamp}}
+          >{{timeAgo
+              (relativeSecondsFromTimestamp @station.last.timestamp)
             }}</span>
         </StationMetaItem>
 

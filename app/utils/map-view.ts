@@ -1,4 +1,5 @@
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
+import type RouterService from '@ember/routing/router-service';
 
 // Whole-Switzerland overview: the default when no view is in the URL and the
 // user's location is unavailable (see issue #32).
@@ -122,6 +123,14 @@ export function parseMapView(queryParams?: MapQueryParams): MapView {
     latitude: parseNumber(queryParams?.latitude, DEFAULT_MAP_LAT),
     zoom: parseNumber(queryParams?.zoom, DEFAULT_MAP_ZOOM),
   };
+}
+
+// The routed view parsed from the router's current query params — the `mapView`
+// getter shared by the map and station-panel components.
+export function currentMapView(router: RouterService): MapView {
+  return parseMapView(
+    router.currentRoute?.queryParams as MapQueryParams | undefined
+  );
 }
 
 export function mapViewFromMap(map: MaplibreMap): MapView {

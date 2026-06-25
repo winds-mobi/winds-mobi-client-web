@@ -305,7 +305,7 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it keeps the current map view when transitioning to another station', async function (assert) {
-    const router = this.owner.lookup('service:router') as RouterService;
+    const router = this.owner.lookup('service:router');
 
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
     void router.transitionTo('map.station', 'holfuy-2222', {
@@ -328,7 +328,7 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it keeps the panel shell mounted while the next station loads', async function (this: MapStationPanelTestContext, assert) {
-    const router = this.owner.lookup('service:router') as RouterService;
+    const router = this.owner.lookup('service:router');
     const deferredRequest = createDeferredRequest();
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
@@ -367,6 +367,8 @@ module('Acceptance | map station panel', function (hooks) {
     const store = this.owner.lookup('service:store') as FakeStoreService;
 
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+
+    await waitUntil(() => countStationListRequests(store.calls) > 0);
 
     const initialStationListRequests = countStationListRequests(store.calls);
     const initialStationDetailRequests = countStationDetailRequests(

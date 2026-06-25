@@ -64,7 +64,7 @@ function lastHourRequestUrl(stationId: string) {
     {
       backgroundReload: true,
     }
-  ).url!;
+  ).url;
 }
 
 function renderedPointSignature() {
@@ -179,7 +179,6 @@ module('Integration | Component | station/last-hour', function (hooks) {
     this.stationId = 'station-a';
 
     await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
-    await settled();
 
     const stationAInitialPoints = renderedPointSignature();
     const stationAInitialGraph = renderedGraphSignature();

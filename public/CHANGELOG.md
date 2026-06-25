@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- A locate button (crosshair icon) now appears in the top bar next to the refresh button. Tap it to find your current position — the map flies to it and a pulsing blue dot marks your location. The button outline turns blue and the icon fills in while your location is known.
+- On return visits where you have previously granted location access, the map automatically centres on your position when it loads.
+
+## v0.11.1 - 2026-06-25
+
+### Fixed
+
+- The "Mean" wind speed in the "Last hour" card now shows the arithmetic mean of the hour's readings instead of the median. The two values look similar for steady winds but can diverge when the wind was gusty or variable.
+
 ## v0.11.0 - 2026-06-24
 
 ### Changed

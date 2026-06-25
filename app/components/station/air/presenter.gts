@@ -3,7 +3,10 @@ import { cached } from '@glimmer/tracking';
 import TimeSeries from '../../chart/time-series';
 import { temperatureColourZones } from 'winds-mobi-client-web/helpers/temperature-to-colour';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import { buildTimeSeriesData } from 'winds-mobi-client-web/utils/chart-series';
+import {
+  defaultYAxis,
+  seriesFor,
+} from 'winds-mobi-client-web/utils/highcharts-options';
 
 export interface StationAirContentSignature {
   Args: {
@@ -18,16 +21,8 @@ export interface StationAirContentSignature {
 export default class StationAirContent extends Component<StationAirContentSignature> {
   @cached
   get chartData() {
-    const temperature = buildTimeSeriesData(
-      this.args.history,
-      (elm) => elm.timestamp,
-      (elm) => elm.temperature
-    );
-    const humidity = buildTimeSeriesData(
-      this.args.history,
-      (elm) => elm.timestamp,
-      (elm) => elm.humidity
-    );
+    const temperature = seriesFor(this.args.history, 'temperature');
+    const humidity = seriesFor(this.args.history, 'humidity');
 
     return [
       {
@@ -69,44 +64,15 @@ export default class StationAirContent extends Component<StationAirContentSignat
   get chartOptions() {
     return {
       yAxis: [
-        {
-          endOnTick: false,
-          title: {
-            text: null,
-          },
-          labels: {
-            format: '{value:.0f}°C',
-            style: {
-              fontSize: '12px',
-            },
-          },
-          maxPadding: 0.04,
-          minPadding: 0.02,
-          opposite: false,
-          softMin: 0,
-          startOnTick: false,
+        defaultYAxis({
+          labels: { format: '{value:.0f}°C' },
           style: { color: 'red' },
-          tickAmount: 5,
-        },
-        {
-          endOnTick: false,
-          title: {
-            text: null,
-          },
-          labels: {
-            format: '{value:.0f}%',
-            style: {
-              fontSize: '12px',
-            },
-          },
-          maxPadding: 0.04,
-          minPadding: 0.02,
-          softMin: 0,
-          startOnTick: false,
-          style: { color: 'skyblue' },
-          tickAmount: 5,
+        }),
+        defaultYAxis({
+          labels: { format: '{value:.0f}%' },
           opposite: true,
-        },
+          style: { color: 'skyblue' },
+        }),
       ],
     };
   }

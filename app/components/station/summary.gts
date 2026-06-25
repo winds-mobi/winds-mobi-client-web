@@ -29,22 +29,6 @@ export interface StationSummarySignature {
 export default class StationSummary extends Component<StationSummarySignature> {
   @service declare settings: SettingsService;
 
-  get reading() {
-    return this.args.station.last;
-  }
-
-  get speedValueClass() {
-    return windToTextClass(this.reading.speed);
-  }
-
-  get gustsValueClass() {
-    return windToTextClass(this.reading.gusts);
-  }
-
-  get temperatureValueClass() {
-    return temperatureToTextClass(this.reading.temperature);
-  }
-
   <template>
     <section data-test-station-summary-section>
       <div class="grid grid-cols-2 items-stretch gap-1.5 md:gap-3">
@@ -53,52 +37,52 @@ export default class StationSummary extends Component<StationSummarySignature> {
             <StationMetricCard
               @format="windSpeed"
               @label={{t "wind.speed"}}
-              @value={{this.reading.speed}}
-              @valueClass={{this.speedValueClass}}
+              @value={{@station.last.speed}}
+              @valueClass={{windToTextClass @station.last.speed}}
               @icon={{if this.settings.useIconLabels Wind}}
             />
 
             <StationMetricCard
               @format="windSpeed"
               @label={{t "wind.gusts"}}
-              @value={{this.reading.gusts}}
-              @valueClass={{this.gustsValueClass}}
+              @value={{@station.last.gusts}}
+              @valueClass={{windToTextClass @station.last.gusts}}
               @icon={{if this.settings.useIconLabels ArrowLineUp}}
             />
 
             <StationMetricCard
               @format="azimuth"
               @label={{t "wind.direction"}}
-              @value={{this.reading.direction}}
+              @value={{@station.last.direction}}
               @icon={{if this.settings.useIconLabels Compass}}
             />
 
             <StationMetricCard
               @format="temperature"
               @label={{t "air.temperature"}}
-              @value={{this.reading.temperature}}
-              @valueClass={{this.temperatureValueClass}}
+              @value={{@station.last.temperature}}
+              @valueClass={{temperatureToTextClass @station.last.temperature}}
               @icon={{if this.settings.useIconLabels Thermometer}}
             />
 
             <StationMetricCard
               @format="humidity"
               @label={{t "air.humidity"}}
-              @value={{this.reading.humidity}}
+              @value={{@station.last.humidity}}
               @icon={{if this.settings.useIconLabels Drop}}
             />
 
             <StationMetricCard
               @format="pressure"
               @label={{t "air.pressure"}}
-              @value={{this.reading.pressure}}
+              @value={{@station.last.pressure}}
               @icon={{if this.settings.useIconLabels Gauge}}
             />
 
             <StationMetricCard
               @format="rainfall"
               @label={{t "air.rain"}}
-              @value={{this.reading.rain}}
+              @value={{@station.last.rain}}
               @icon={{if this.settings.useIconLabels CloudRain}}
             />
           </dl>
