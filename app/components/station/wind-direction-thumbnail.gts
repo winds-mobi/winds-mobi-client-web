@@ -3,7 +3,7 @@ import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
-import WindDirection from './wind-direction';
+import WindDirectionGraph from './wind-direction/graph';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
@@ -54,15 +54,21 @@ export default class StationWindDirectionThumbnail extends Component<StationWind
     <div class="min-h-0 min-w-0" ...attributes>
       <Request @request={{this.historyRequest}}>
         <:content as |result|>
-          <WindDirection @data={{result.data}} @hideAxisLabels={{true}} />
+          <WindDirectionGraph @data={{result.data}} @hideAxisLabels={{true}} />
         </:content>
 
         <:loading>
-          <WindDirection @data={{EMPTY_HISTORY}} @hideAxisLabels={{true}} />
+          <WindDirectionGraph
+            @data={{EMPTY_HISTORY}}
+            @hideAxisLabels={{true}}
+          />
         </:loading>
 
         <:error>
-          <WindDirection @data={{EMPTY_HISTORY}} @hideAxisLabels={{true}} />
+          <WindDirectionGraph
+            @data={{EMPTY_HISTORY}}
+            @hideAxisLabels={{true}}
+          />
         </:error>
       </Request>
     </div>

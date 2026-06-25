@@ -63,18 +63,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   band). Deriving only `color`/`key` from a token while keeping the two class
   strings literal is possible but marginal.
 
-### 8. Pointless passthrough component & getters
-
-- **Where:** [app/components/station/wind-direction/index.gts](app/components/station/wind-direction/index.gts)
-  forwards its args verbatim to `WindDirectionGraph` and adds nothing (it is _not_
-  a `<Request>` fetcher, so it isn't the documented index/presenter split). Both
-  callers could import the graph directly.
-  [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts)
-  has `@cached get lastHourHistory()` that just returns `this.args.history`.
-- **Fix:** Delete the `wind-direction/index.gts` wrapper and point callers at
-  `wind-direction/graph` (or fold graph up a level). Use `@args.history` directly
-  and remove the passthrough getter.
-
 ### 10. One-time-setup flag in `nearby-location`
 
 - **Where:** [app/services/nearby-location.ts](app/services/nearby-location.ts)
@@ -109,11 +97,11 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. Quick, low-risk deletions first: item **8** — small, isolated, easy to verify.
-2. Then the shared-typing fix **3** (unblocks cleaner call sites).
-3. Then the structural DRY win **2** (per-card reading getters).
-4. Then reactivity correctness **10**.
-5. Finally the remaining medium/polish items.
+1. The shared-typing fix **3** (unblocks cleaner call sites).
+2. The structural DRY win **2** (per-card reading getters).
+3. Reactivity correctness **10**.
+4. The remaining items: **6** (only the dead fallback is safe — see its caveat),
+   **11**, **12**.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
 the dev container — `docker compose exec ui …`), per CLAUDE.md.
