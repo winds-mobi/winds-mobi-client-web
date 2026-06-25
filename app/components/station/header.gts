@@ -70,7 +70,9 @@ export default class StationHeader extends Component<StationHeaderSignature> {
         >
           <span
             class={{textClassForReadingAge @station.last.timestamp}}
-          >{{timeAgo (relativeSecondsFromTimestamp @station.last.timestamp)}}</span>
+          >{{timeAgo
+              (relativeSecondsFromTimestamp @station.last.timestamp)
+            }}</span>
         </StationMetaItem>
 
         {{#let this.nearbyLocation.coordinates as |coordinates|}}

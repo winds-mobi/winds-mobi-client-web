@@ -151,9 +151,7 @@ module('Acceptance | navbar search', function (hooks) {
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
 
-    const nearbyLocation = this.owner.lookup(
-      'service:nearby-location'
-    ) as NearbyLocationService;
+    const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     nearbyLocation.coordinates = {
       accuracy: 10,
@@ -243,7 +241,6 @@ module('Acceptance | navbar search', function (hooks) {
 
     await visit('/map');
     await fillIn('[data-test-navbar-search="navbar"] input', 'l');
-    await settled();
 
     assert.strictEqual(countSearchRequests(store.calls), 0);
 

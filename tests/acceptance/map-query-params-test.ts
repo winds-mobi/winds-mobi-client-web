@@ -131,7 +131,6 @@ module('Acceptance | map query params', function (hooks) {
     assert.dom('[data-test-navbar-refresh]').exists();
 
     await click('[data-test-navbar-refresh]');
-    await settled();
 
     assert.strictEqual(
       countStationRequests(store.calls),

@@ -28,7 +28,6 @@ module(
       this.data = [];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
-      await settled();
 
       assert.dom('.highcharts-container').exists();
     });
@@ -60,7 +59,6 @@ module(
       ];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
-      await settled();
 
       assert.dom('.highcharts-container').exists();
     });
@@ -92,7 +90,6 @@ module(
       ];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
-      await settled();
 
       const points = findAll('.highcharts-point');
       const [samePoint, differentPoint] = points;
@@ -146,7 +143,6 @@ module(
       ];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
-      await settled();
 
       const firstStationInitialPoints = renderedPointSignature();
       const firstStationInitialGraph = renderedGraphSignature();

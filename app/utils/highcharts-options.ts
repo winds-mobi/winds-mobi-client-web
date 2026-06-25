@@ -32,10 +32,20 @@ export function defaultYAxis(overrides: YAxisOverrides = {}) {
   };
 }
 
-type NumericHistoryKey = 'direction' | 'speed' | 'gusts' | 'temperature' | 'humidity' | 'rain';
+type NumericHistoryKey =
+  | 'direction'
+  | 'speed'
+  | 'gusts'
+  | 'temperature'
+  | 'humidity'
+  | 'rain';
 
 export function seriesFor(history: History[], key: NumericHistoryKey) {
-  return buildTimeSeriesData(history, (elm) => elm.timestamp, (elm) => elm[key]);
+  return buildTimeSeriesData(
+    history,
+    (elm) => elm.timestamp,
+    (elm) => elm[key]
+  );
 }
 
 export function mergeChartOptions<T extends ChartOptions>(
