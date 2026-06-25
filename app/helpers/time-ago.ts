@@ -18,6 +18,10 @@ const TIME_AGO_UNITS: TimeAgoUnit[] = [
   { limit: Infinity, unit: 'year', divisor: 31557600 },
 ];
 
+export function relativeSecondsFromTimestamp(ms: number): number {
+  return Math.round(ms / 1000 - Date.now() / 1000);
+}
+
 export function timeAgoParts(seconds: number) {
   const absSeconds = Math.abs(seconds);
 
