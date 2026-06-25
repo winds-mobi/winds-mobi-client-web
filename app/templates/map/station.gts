@@ -9,7 +9,10 @@ import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
-import type { Station as StationModel } from 'winds-mobi-client-web/services/store.js';
+import type {
+  Station as StationModel,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 
 interface MapStationTemplateSignature {
   Args: {
@@ -19,8 +22,7 @@ interface MapStationTemplateSignature {
 
 export default class MapStationTemplate extends Component<MapStationTemplateSignature> {
   @service declare router: RouterService;
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
 

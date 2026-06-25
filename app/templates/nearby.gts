@@ -20,11 +20,11 @@ import StationCompactCard from 'winds-mobi-client-web/components/station/compact
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
-import type { Station } from 'winds-mobi-client-web/services/store';
-import {
-  responseData,
-  type RequestResponse,
-} from 'winds-mobi-client-web/utils/request-response';
+import type {
+  Station,
+  StoreService,
+} from 'winds-mobi-client-web/services/store';
+import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import { locationErrorTranslationKey } from 'winds-mobi-client-web/utils/location-error-translation-key';
 
 interface NearbyTemplateSignature {
@@ -33,10 +33,6 @@ interface NearbyTemplateSignature {
   };
 }
 
-type RequestStore = {
-  request<T>(request: unknown): Future<T>;
-};
-
 const NEARBY_LIMIT = 10;
 
 export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
@@ -44,19 +40,14 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
-
-  private get requestStore(): RequestStore {
-    return this.store as unknown as RequestStore;
-  }
+  @service declare store: StoreService;
 
   // Recreated when the located coordinates change or the shared refresh tick fires
   // — touching `lastRefresh` makes each tick refetch. No `backgroundReload`, so a
   // reload is a real pending request that `loadingProbe` (and the navbar spinner)
   // reflects; the latch keeps the previous cards on screen meanwhile.
   @cached
-  get stationsRequest(): Future<RequestResponse<Station[]>> | undefined {
+  get stationsRequest(): Future<{ data: Station[] }> | undefined {
     const coordinates = this.nearbyLocation.coordinates;
 
     if (!coordinates) {
@@ -66,7 +57,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     // Read so each refresh tick invalidates this getter and refetches.
     this.mapRefresh.lastRefresh;
 
-    return this.requestStore.request<RequestResponse<Station[]>>(
+    return this.store.request<{ data: Station[] }>(
       nearbyQuery<Station>(
         'station',
         coordinates.latitude,

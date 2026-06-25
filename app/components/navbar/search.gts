@@ -13,7 +13,10 @@ import { Popover } from '@frontile/overlays';
 import { ref } from '@frontile/utilities';
 import { t } from 'ember-intl';
 import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type {
+  Station,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
@@ -35,8 +38,7 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
   @service declare router: RouterService;
   @service('nearby-location')
   declare nearbyLocation: NearbyLocationService;
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
 
   @tracked activeKey?: string;
   @tracked isOpen = false;

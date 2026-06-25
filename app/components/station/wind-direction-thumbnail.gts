@@ -4,7 +4,10 @@ import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import WindDirectionGraph from './wind-direction/graph';
-import type { History } from 'winds-mobi-client-web/services/store.js';
+import type {
+  History,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 
 export interface StationWindDirectionThumbnailSignature {
@@ -27,8 +30,7 @@ const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
 // rather than sharing `StationLastHour`'s request, since the two render in
 // different contexts and never appear together for the same station.
 export default class StationWindDirectionThumbnail extends Component<StationWindDirectionThumbnailSignature> {
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
   @service declare mapRefresh: MapRefreshService;
 
   @cached

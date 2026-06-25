@@ -27,21 +27,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   - For the wind value classes, prefer calling `windToTextClass` from the
     template, or share a tiny presenter if the markup is also shared.
 
-### 3. `RequestStore` cast hack duplicated across files
-
-- **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
-  [app/templates/nearby.gts](app/templates/nearby.gts) both define a local
-  `type RequestStore = { request<T>(...) }` and do `this.store as unknown as RequestStore`.
-- **Problem:** The `store` service type
-  (`typeof import('.../services/store').default`) doesn't surface a typed generic
-  `request<T>()`, so two call sites cast through `unknown`. Repeated type
-  laundering is a smell and defeats the builders' typed return values.
-- **Fix:** Type the store once so `.request<T>(builder(...))` is callable without
-  casting — e.g. export a typed store interface from
-  [app/services/store.ts](app/services/store.ts) and use it in the service
-  Registry, then delete both local `RequestStore` types and the `as unknown as`
-  casts.
-
 ---
 
 ## Medium impact
@@ -72,10 +57,9 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Suggested sequencing
 
-1. The shared-typing fix **3** (unblocks cleaner call sites).
-2. The structural DRY win **2** (per-card reading getters).
-3. Reactivity correctness **10**.
-4. The remaining item: **11**.
+1. The structural DRY win **2** (per-card reading getters).
+2. Reactivity correctness **10**.
+3. The remaining item: **11**.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
 the dev container — `docker compose exec ui …`), per CLAUDE.md.

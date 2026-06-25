@@ -172,7 +172,7 @@ function composeReadingDerivation(record: RecordType): unknown {
 }
 composeReadingDerivation[Type] = 'composeReading';
 
-export default useLegacyStore({
+const AppStore = useLegacyStore({
   linksMode: false,
   legacyRequests: true,
   modelFragments: true,
@@ -182,8 +182,15 @@ export default useLegacyStore({
   derivations: [unwrapDerivation, composeReadingDerivation],
 });
 
+// The store *instance* type — exposes the generic `request<RT>(builder): Future<RT>`,
+// unlike `typeof AppStore` (the class), so injecting `store: StoreService` lets call
+// sites call `this.store.request(...)` without casting through `unknown`.
+export type StoreService = InstanceType<typeof AppStore>;
+
+export default AppStore;
+
 declare module '@ember/service' {
   interface Registry {
-    store: typeof import('winds-mobi-client-web/services/store').default;
+    store: StoreService;
   }
 }

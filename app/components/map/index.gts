@@ -4,7 +4,10 @@ import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
-import type { Station } from 'winds-mobi-client-web/services/store.js';
+import type {
+  Station,
+  StoreService,
+} from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { cached, tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
@@ -30,10 +33,7 @@ import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resol
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import {
-  type RequestResponse,
-  responseData,
-} from 'winds-mobi-client-web/utils/request-response';
+import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import {
   boundsFromMap,
@@ -101,13 +101,8 @@ const TEST_MAP_STYLE: StyleSpecification = {
   ],
 };
 
-type RequestStore = {
-  request<T>(request: unknown): Future<T>;
-};
-
 export default class Map extends Component<MapSignature> {
-  @service
-  declare store: typeof import('winds-mobi-client-web/services/store').default;
+  @service declare store: StoreService;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
@@ -163,10 +158,6 @@ export default class Map extends Component<MapSignature> {
     return station.id === this.selectedStationId;
   };
 
-  private get requestStore(): RequestStore {
-    return this.store as unknown as RequestStore;
-  }
-
   // The map's current visible bounds in lng/lat, captured from MapLibre's own
   // `getBounds` whenever the map settles (the `idle` event) and snapped to the
   // refetch grid. Reading the live bounds means the request always covers what's
@@ -192,7 +183,7 @@ export default class Map extends Component<MapSignature> {
   // rather than remounting. `mapQuery` caps the result at 470 stations, which
   // bounds the fetch even when a pitched view reaches far toward the horizon.
   @cached
-  get request(): Future<RequestResponse<Station[]>> | undefined {
+  get request(): Future<{ data: Station[] }> | undefined {
     const bounds = this.requestBounds;
 
     // Hold the request until the map reports its first bounds (the initial
@@ -204,9 +195,9 @@ export default class Map extends Component<MapSignature> {
     // Read so each refresh tick invalidates this getter and refetches.
     this.mapRefresh.lastRefresh;
 
-    const options = mapQuery<Station>('station', bounds);
-
-    return this.requestStore.request<RequestResponse<Station[]>>(options);
+    return this.store.request<{ data: Station[] }>(
+      mapQuery<Station>('station', bounds)
+    );
   }
 
   get requestState() {
