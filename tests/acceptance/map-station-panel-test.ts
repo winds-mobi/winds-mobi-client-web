@@ -368,6 +368,8 @@ module('Acceptance | map station panel', function (hooks) {
 
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
 
+    await waitUntil(() => countStationListRequests(store.calls) > 0);
+
     const initialStationListRequests = countStationListRequests(store.calls);
     const initialStationDetailRequests = countStationDetailRequests(
       store.calls,

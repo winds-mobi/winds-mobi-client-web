@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { find, findAll, render, settled } from '@ember/test-helpers';
+import { find, findAll, render, settled, waitUntil } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -90,6 +90,8 @@ module(
       ];
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+
+      await waitUntil(() => findAll('.highcharts-point').length >= 2);
 
       const points = findAll('.highcharts-point');
       const [samePoint, differentPoint] = points;
