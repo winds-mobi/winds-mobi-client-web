@@ -46,15 +46,22 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Medium impact
 
-### 6. `wind-to-colour` colour table is heavily repetitive
+### 6. `wind-to-colour` colour table is repetitive (mostly load-bearing)
 
 - **Where:** [app/helpers/wind-to-colour.ts](app/helpers/wind-to-colour.ts) `COLORS`.
 - **Problem:** Each entry repeats `backgroundClass: 'bg-wind-NN'`,
-  `color: 'var(--color-wind-NN)'`, `key: 'wind-NN'`, `textClass: 'text-wind-NN'` —
-  all derivable from one token. `windBandForSpeed` also has an unreachable
-  `?? { ... }` fallback duplicating the last band (the array is never empty).
-- **Fix:** Define entries as `{ token: 'wind-05', max: 5 }` and derive
-  `backgroundClass`/`color`/`key`/`textClass` from `token`. Drop the dead fallback.
+  `color: 'var(--color-wind-NN)'`, `key: 'wind-NN'`, `textClass: 'text-wind-NN'`.
+  `windBandForSpeed` also has an unreachable `?? { ... }` fallback duplicating the
+  last band (the array is never empty).
+- **Caveat (verified — don't redo this):** the `bg-wind-NN`/`text-wind-NN` strings
+  **cannot** be built from a token via template literals. Tailwind v4 only emits a
+  utility when its content scanner sees the literal class string, so deriving them
+  drops `bg-wind-05…50`/`text-wind-*` from the built CSS (only ones that also appear
+  literally elsewhere, e.g. `bg-wind-20` in the nav menus, survive). They must stay
+  literal (or be safelisted via `@source inline(...)`).
+- **Fix (what's actually safe):** drop the dead `?? {...}` fallback (return the last
+  band). Deriving only `color`/`key` from a token while keeping the two class
+  strings literal is possible but marginal.
 
 ### 8. Pointless passthrough component & getters
 

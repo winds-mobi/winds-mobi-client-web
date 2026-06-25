@@ -226,6 +226,14 @@ state, route models, and query params.
   for partial matches. For non-assertion queries — `waitUntil` predicates, or collecting values for a `deepEqual` —
   use the `@ember/test-helpers` `find`/`findAll` helpers, never `document.querySelector*`.
 
+### Refactoring & cleanup
+
+- When you spot a refactoring / DRY / simplification opportunity outside the task you were asked to do, **add it as a
+  plan to [TODO.md](TODO.md)** — where it lives, the problem, the proposed fix — rather than acting on it inline. Work
+  the TODO items only when asked, one focused commit each, and **vet each plan before executing** it: apparent
+  repetition can be load-bearing (e.g. `bg-wind-NN`/`text-wind-NN` strings must stay literal so Tailwind's content
+  scanner emits those utilities — deriving them from a token drops them from the built CSS).
+
 ### Changelog
 
 - Keep [CHANGELOG.md](CHANGELOG.md) user-facing: shipped behavior, visible improvements, notable fixes. Omit internal
