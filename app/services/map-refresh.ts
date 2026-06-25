@@ -18,7 +18,7 @@ export default class MapRefreshService extends Service {
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
-  @tracked private activeConsumers = 0;
+  private activeConsumers = 0;
 
   // Loading probes registered by request sites (the map, nearby, …). The refresh
   // itself is already broadcast to every site via `lastRefresh`; this lets the
