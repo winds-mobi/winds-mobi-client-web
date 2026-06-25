@@ -100,18 +100,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ---
 
-## Low impact / polish
-
-### 14. `lastHourMeanSpeed` actually computes the median
-
-- **Where:** [app/components/station/last-hour/presenter.gts](app/components/station/last-hour/presenter.gts).
-- **Problem:** The getter named `…MeanSpeed` sorts and takes the middle element —
-  that's the median, not the mean. Misleading name (and the label is `wind.mean`).
-- **Fix:** Decide intended statistic; rename the getter (and/or fix the maths and
-  label) so name and behaviour agree.
-
----
-
 ## Suggested sequencing
 
 1. Quick, low-risk deletions first: item **8** — small, isolated, easy to verify.

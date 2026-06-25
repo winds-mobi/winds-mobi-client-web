@@ -47,11 +47,9 @@ export default class StationLastHourContent extends Component<StationLastHourCon
       return undefined;
     }
 
-    const sortedSpeeds = [...this.lastHourSpeeds].sort((left, right) => {
-      return left - right;
-    });
+    const total = this.lastHourSpeeds.reduce((sum, speed) => sum + speed, 0);
 
-    return sortedSpeeds[Math.floor(sortedSpeeds.length / 2)];
+    return total / this.lastHourSpeeds.length;
   }
 
   get lastHourMaximumSpeed() {
