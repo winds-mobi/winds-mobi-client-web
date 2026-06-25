@@ -46,23 +46,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 
 ## Medium impact
 
-### 6. `wind-to-colour` colour table is repetitive (mostly load-bearing)
-
-- **Where:** [app/helpers/wind-to-colour.ts](app/helpers/wind-to-colour.ts) `COLORS`.
-- **Problem:** Each entry repeats `backgroundClass: 'bg-wind-NN'`,
-  `color: 'var(--color-wind-NN)'`, `key: 'wind-NN'`, `textClass: 'text-wind-NN'`.
-  `windBandForSpeed` also has an unreachable `?? { ... }` fallback duplicating the
-  last band (the array is never empty).
-- **Caveat (verified — don't redo this):** the `bg-wind-NN`/`text-wind-NN` strings
-  **cannot** be built from a token via template literals. Tailwind v4 only emits a
-  utility when its content scanner sees the literal class string, so deriving them
-  drops `bg-wind-05…50`/`text-wind-*` from the built CSS (only ones that also appear
-  literally elsewhere, e.g. `bg-wind-20` in the nav menus, survive). They must stay
-  literal (or be safelisted via `@source inline(...)`).
-- **Fix (what's actually safe):** drop the dead `?? {...}` fallback (return the last
-  band). Deriving only `color`/`key` from a token while keeping the two class
-  strings literal is possible but marginal.
-
 ### 10. One-time-setup flag in `nearby-location`
 
 - **Where:** [app/services/nearby-location.ts](app/services/nearby-location.ts)
@@ -92,8 +75,7 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 1. The shared-typing fix **3** (unblocks cleaner call sites).
 2. The structural DRY win **2** (per-card reading getters).
 3. Reactivity correctness **10**.
-4. The remaining items: **6** (only the dead fallback is safe — see its caveat)
-   and **11**.
+4. The remaining item: **11**.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
 the dev container — `docker compose exec ui …`), per CLAUDE.md.
