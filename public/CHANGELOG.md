@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.11.1 - 2026-06-25
+
+### Fixed
+
+- The "Mean" wind speed in the "Last hour" card now shows the arithmetic mean of the hour's readings instead of the median. The two values look similar for steady winds but can diverge when the wind was gusty or variable.
+
 ## v0.11.0 - 2026-06-24
 
 ### Changed
