@@ -85,14 +85,6 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
   [app/utils/highcharts-options.ts](app/utils/highcharts-options.ts) and a
   `seriesFor(history, key)` helper that fixes the timestamp accessor.
 
-### 12. `mapView` getter duplicated
-
-- **Where:** [app/components/map/index.gts](app/components/map/index.gts) and
-  [app/components/station/index.gts](app/components/station/index.gts) both define
-  `get mapView()` = `parseMapView(router.currentRoute?.queryParams)`.
-- **Fix:** Extract a small shared helper/util (e.g. `currentMapView(router)`) in
-  [app/utils/map-view.ts](app/utils/map-view.ts) and reuse.
-
 ---
 
 ## Suggested sequencing
@@ -100,8 +92,8 @@ lives, why it's a problem, and the proposed fix. Ordered roughly by impact.
 1. The shared-typing fix **3** (unblocks cleaner call sites).
 2. The structural DRY win **2** (per-card reading getters).
 3. Reactivity correctness **10**.
-4. The remaining items: **6** (only the dead fallback is safe — see its caveat),
-   **11**, **12**.
+4. The remaining items: **6** (only the dead fallback is safe — see its caveat)
+   and **11**.
 
 Verify each with `pnpm lint` and the relevant `test:ember:dev` tests (run inside
 the dev container — `docker compose exec ui …`), per CLAUDE.md.

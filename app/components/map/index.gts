@@ -39,12 +39,12 @@ import {
   boundsFromMap,
   roundBoundsForRequest,
   mapBoundsEqual,
+  currentMapView,
   FOCUS_ZOOM,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
   type MapBounds,
-  type MapQueryParams,
 } from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
@@ -139,9 +139,7 @@ export default class Map extends Component<MapSignature> {
         });
 
   get mapView() {
-    return parseMapView(
-      this.router.currentRoute?.queryParams as MapQueryParams | undefined
-    );
+    return currentMapView(this.router);
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).

@@ -8,10 +8,7 @@ import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
 import { t } from 'ember-intl';
-import {
-  parseMapView,
-  type MapQueryParams,
-} from 'winds-mobi-client-web/utils/map-view';
+import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationIndexSignature {
@@ -28,9 +25,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
 
   get mapView() {
-    return parseMapView(
-      this.router.currentRoute?.queryParams as MapQueryParams | undefined
-    );
+    return currentMapView(this.router);
   }
 
   @action
