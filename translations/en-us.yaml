@@ -1,6 +1,19 @@
 application:
   name: winds.mobi
 
+auth:
+  signIn:
+    google: Sign in with Google
+    facebook: Sign in with Facebook
+  callback:
+    title: Signing in
+    pending: Signing you in…
+    failedTitle: Sign-in failed
+    failed: >-
+      The sign-in link has expired or was already used. Please try signing in
+      again.
+    backToMap: Back to the map
+
 common:
   close: Close
 
