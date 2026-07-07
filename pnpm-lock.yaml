@@ -222,6 +222,9 @@ importers:
       ember-resolver:
         specifier: ^13.1.0
         version: 13.1.0(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
+      ember-simple-auth:
+        specifier: ^8.3.1
+        version: 8.3.1(@ember/test-helpers@4.0.5(@babel/core@7.28.4)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))))(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
       ember-source:
         specifier: ~6.3.0
         version: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))
@@ -4662,6 +4665,12 @@ packages:
       '@glint/template':
         optional: true
 
+  ember-cookies@1.4.1:
+    resolution: {integrity: sha512-9uDgVQ27YGhRXSy2DO7pTd/NxVvXWBkRTFNGIhaW2tXTk9pD7q7Wp93pLzjiX38mtm4nwl/qdB28ZJ8PgfcWPw==}
+    engines: {node: '>= 16.*'}
+    peerDependencies:
+      ember-source: '>=6.0 || >=4.0'
+
   ember-css-transitions@4.5.0:
     resolution: {integrity: sha512-ZOj1Oa0T2IdBHOgjhJdM4Kx97mo9XdIfHDR5COskMB5iPoE6oI9i4M2gtG7QgicS2Epc7t2xUuD/NIT4ujbjUA==}
 
@@ -4776,6 +4785,15 @@ packages:
   ember-router-generator@2.0.0:
     resolution: {integrity: sha512-89oVHVJwmLDvGvAUWgS87KpBoRhy3aZ6U0Ql6HOmU4TrPkyaa8pM0W81wj9cIwjYprcQtN9EwzZMHnq46+oUyw==}
     engines: {node: 8.* || 10.* || >= 12}
+
+  ember-simple-auth@8.3.1:
+    resolution: {integrity: sha512-n0nKTJwvLC3Aoz29mWu9SJW6uKP8/zY5kUU1Akbml4HFXaTIMQP6zMLfqEcxpUd90tIDXflPN+gu1++vI1qOfg==}
+    peerDependencies:
+      '@ember/test-helpers': '>=4 || >= 3 || > 2.7'
+      ember-source: '>=6.0 || >=4.0'
+    peerDependenciesMeta:
+      '@ember/test-helpers':
+        optional: true
 
   ember-source@6.3.0:
     resolution: {integrity: sha512-lxnMhK70lWN6UPIpSmfF/XGmTdfMaf14+rcZJXafr5KgridaQht7rZwcq2IEf/wJxnsjzKSYlw5y8qAXIBt1QQ==}
@@ -14732,6 +14750,13 @@ snapshots:
       - '@babel/core'
       - supports-color
 
+  ember-cookies@1.4.1(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))):
+    dependencies:
+      '@embroider/addon-shim': 1.10.2
+      ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))
+    transitivePeerDependencies:
+      - supports-color
+
   ember-css-transitions@4.5.0(@babel/core@7.28.4)(@glint/template@1.5.2)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))):
     dependencies:
       '@ember/test-waiters': 4.1.0(@glint/template@1.5.2)
@@ -14916,6 +14941,18 @@ snapshots:
       '@babel/traverse': 7.28.4
       recast: 0.18.10
     transitivePeerDependencies:
+      - supports-color
+
+  ember-simple-auth@8.3.1(@ember/test-helpers@4.0.5(@babel/core@7.28.4)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))))(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))):
+    dependencies:
+      '@ember/test-waiters': 4.1.0(@glint/template@1.7.7)
+      '@embroider/addon-shim': 1.10.2
+      ember-cookies: 1.4.1(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
+      ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3))
+    optionalDependencies:
+      '@ember/test-helpers': 4.0.5(@babel/core@7.28.4)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
+    transitivePeerDependencies:
+      - '@glint/template'
       - supports-color
 
   ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)):
