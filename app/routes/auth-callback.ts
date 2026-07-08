@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
+import type RouterService from '@ember/routing/router-service';
 import type SessionService from 'winds-mobi-client-web/services/session';
 
 export interface AuthCallbackModel {
@@ -11,10 +12,11 @@ interface AuthCallbackParams {
 }
 
 // Landing target of the OAuth flow: winds-mobi-admin redirects here with a
-// single-use `?ott=` (30 s TTL). Exchanging it authenticates the session,
-// whose handleAuthentication then redirects away; the template only renders
-// for the brief pending moment or when the exchange failed.
+// single-use `?ott=` (30 s TTL). Exchanging it authenticates the session and
+// redirects to the map; the template only renders for the brief pending
+// moment or when the exchange failed.
 export default class AuthCallbackRoute extends Route {
+  @service declare router: RouterService;
   @service declare session: SessionService;
 
   queryParams = {
@@ -30,10 +32,13 @@ export default class AuthCallbackRoute extends Route {
 
     try {
       await this.session.authenticate('authenticator:winds-mobi', ott);
-
-      return { failed: false };
     } catch {
       return { failed: true };
     }
+
+    // replaceWith so back never returns to the consumed one-time token.
+    this.router.replaceWith('map');
+
+    return { failed: false };
   }
 }

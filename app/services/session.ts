@@ -6,11 +6,11 @@ export type SessionData = {
 };
 
 export default class SessionService extends BaseSessionService<SessionData> {
-  // After a successful login (the /auth/callback OTT exchange) land on the
-  // map; a transition intercepted by requireAuthentication is retried first.
-  override handleAuthentication() {
-    super.handleAuthentication('map');
-  }
+  // The auth-callback route owns the post-login redirect. ESA's default
+  // (transition to a fixed route on every authenticationSucceeded) would
+  // also fire for cross-tab session sync and for test-helper logins that
+  // happen before routing starts — neither should move the current route.
+  override handleAuthentication() {}
 }
 
 declare module '@ember/service' {
