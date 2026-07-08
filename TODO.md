@@ -93,7 +93,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - [ ] Service registry typing for `session` if ESA's own types don't provide it.
 - [ ] New route `auth-callback` (path `/auth/callback`, add to
       [app/router.ts](app/router.ts)): reads the `ott` query param, `await
-    session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
+  session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
       Failure state (expired/used OTT — it's single-use, 30 s): show a short error with a
       "try signing in again" link. Template `app/templates/auth-callback.gts`.
 - [ ] Login initiation = plain full-page links (no popup):
@@ -119,7 +119,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
       (cheap, always consistent).
 - [ ] `app/handlers/profile.ts` — reshape the raw payload into JSON:API:
       `{type: 'profile', id: <_id>, attributes: {displayName ← 'display-name', picture,
-    favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
+  favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
       We don't need `user-info` — skip it.
 - [ ] [app/services/store.ts](app/services/store.ts): add `ProfileSchema`
       (`displayName`, `picture`, `favorites: string[]`) + exported `Profile` type; register
@@ -174,6 +174,26 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - [ ] `CHANGELOG.md`: user-facing entry (sign in with Google/Facebook, favourite stations
       view, star toggle).
 - [ ] Final verification: `pnpm lint` + relevant `pnpm test:ember:dev` filters.
+
+## Deferred cleanups spotted during implementation
+
+- **Profile request getter is triplicated** — `app/components/navbar/auth.gts`,
+  `app/components/station/header.gts`, and `app/templates/favorites.gts` each carry the
+  same `@cached profileRequest` + `profile` getter pair (session-gated
+  `store.request(profileQuery())` unwrap). Once a third consumer pattern settles, extract a
+  shared reactive helper (e.g. a `getProfile(store, session)` util returning the request
+  state) — but vet that a shared cached request doesn't break the per-consumer refetch
+  semantics after favorites mutations.
+- **Flaky integration test (pre-existing)** — `Integration | Component |
+station/wind-direction/graph: it outlines a point…` fails depending on wall-clock time
+  (verified failing identically on `dd3cbf3` while passing earlier the same day). Its
+  `waitUntil(() => findAll('.highcharts-point').length >= 2)` never sees the points at
+  certain times. Investigate the history-timestamp windowing in the graph vs `Date.now()`.
+- **Map-refresh acceptance tests can't run in the dev container** — the 5 map
+  query-param/refresh tests need the map's `idle` event, which never fires because headless
+  Chromium in the container has no WebGL (`--disable-software-rasterizer`). Consider a
+  SwiftShader-enabled browser config for local runs, or skip-guard the tests when WebGL is
+  unavailable.
 
 ## Risks / open questions
 

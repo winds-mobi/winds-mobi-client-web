@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Sign in with your Google or Facebook account from the new account menu in the top bar. Signing in connects the app to your winds.mobi profile; your avatar and name appear in the menu while signed in.
+- A new Favourites view in the navigation shows the favourite stations from your profile as live cards — the same format as the nearby view — auto-refreshing with the rest of the app and always in your profile's order.
+- A star on the station panel header lets you add or remove that station from your favourites while signed in.
+
 ## v0.12.0 - 2026-06-25
 
 ### Added
