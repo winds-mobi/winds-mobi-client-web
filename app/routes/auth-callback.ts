@@ -1,10 +1,13 @@
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
-import type Transition from '@ember/routing/transition';
 import type SessionService from 'winds-mobi-client-web/services/session';
 
 export interface AuthCallbackModel {
   failed: boolean;
+}
+
+interface AuthCallbackParams {
+  ott?: string;
 }
 
 // Landing target of the OAuth flow: winds-mobi-admin redirects here with a
@@ -14,8 +17,12 @@ export interface AuthCallbackModel {
 export default class AuthCallbackRoute extends Route {
   @service declare session: SessionService;
 
-  override async model(transition: Transition): Promise<AuthCallbackModel> {
-    const ott = transition.to?.queryParams['ott'];
+  queryParams = {
+    ott: { refreshModel: false },
+  };
+
+  override async model(params: AuthCallbackParams): Promise<AuthCallbackModel> {
+    const { ott } = params;
 
     if (typeof ott !== 'string' || ott.length === 0) {
       return { failed: true };
