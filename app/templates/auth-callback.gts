@@ -1,8 +1,8 @@
 import { LinkTo } from '@ember/routing';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import AuthSignInLinks from 'winds-mobi-client-web/components/auth/sign-in-links';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
-import { signInUrl } from 'winds-mobi-client-web/utils/user-api';
 import type { AuthCallbackModel } from 'winds-mobi-client-web/routes/auth-callback';
 import type { TOC } from '@ember/component/template-only';
 
@@ -29,21 +29,7 @@ const AuthCallbackTemplate: TOC<AuthCallbackTemplateSignature> = <template>
             </p>
 
             <div class="mt-4 flex flex-wrap items-center gap-2">
-              <a
-                data-test-auth-retry="google"
-                href={{signInUrl "google"}}
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
-              >
-                {{t "auth.signIn.google"}}
-              </a>
-
-              <a
-                data-test-auth-retry="facebook"
-                href={{signInUrl "facebook"}}
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
-              >
-                {{t "auth.signIn.facebook"}}
-              </a>
+              <AuthSignInLinks />
 
               <LinkTo
                 @route="map"

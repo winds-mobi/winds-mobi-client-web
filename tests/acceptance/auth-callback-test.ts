@@ -49,13 +49,13 @@ module('Acceptance | auth callback', function (hooks) {
     assert.dom('[data-test-auth-callback-error]').exists();
     assert.dom('[data-test-auth-callback-pending]').doesNotExist();
     assert
-      .dom('[data-test-auth-retry="google"]')
+      .dom('[data-test-auth-sign-in="google"]')
       .hasAttribute(
         'href',
         /^https:\/\/winds\.mobi\/user\/google\/oauth2callback\/\?next=.+%2Fauth%2Fcallback$/
       );
     assert
-      .dom('[data-test-auth-retry="facebook"]')
+      .dom('[data-test-auth-sign-in="facebook"]')
       .hasAttribute(
         'href',
         /^https:\/\/winds\.mobi\/user\/facebook\/oauth2callback\/\?next=/

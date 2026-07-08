@@ -17,5 +17,7 @@ export type SignInProvider = 'facebook' | 'google';
 export function signInUrl(provider: SignInProvider): string {
   const next = `${window.location.origin}/auth/callback`;
 
-  return userApiUrl(`${provider}/oauth2callback/?next=${encodeURIComponent(next)}`);
+  return userApiUrl(
+    `${provider}/oauth2callback/?next=${encodeURIComponent(next)}`
+  );
 }
