@@ -3,6 +3,7 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import NavbarAuth from './auth';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
 import NavbarLocateControl from './locate-control';
@@ -39,6 +40,8 @@ export default class Navbar extends Component<NavbarSignature> {
 
           <NavbarLocateControl />
           <NavbarRefreshControl />
+
+          <NavbarAuth />
 
           <NavbarMenuMobile />
         </div>

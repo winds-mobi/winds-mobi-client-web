@@ -2,6 +2,9 @@ application:
   name: winds.mobi
 
 auth:
+  menu:
+    label: Account
+    signOut: Sign out
   signIn:
     google: Sign in with Google
     facebook: Sign in with Facebook
@@ -157,6 +160,9 @@ nearby:
 station:
   lastPickup: Last pickup
   showOnMap: Show on map
+  favorite:
+    add: Add to favourites
+    remove: Remove from favourites
   meta:
     altitude: Altitude
     updated: Updated

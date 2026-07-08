@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, visit, waitUntil } from '@ember/test-helpers';
+import { findAll, visit, waitFor, waitUntil } from '@ember/test-helpers';
 import { authenticateSession } from 'ember-simple-auth/test-support';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
@@ -133,7 +133,9 @@ module('Acceptance | favorites route', function (hooks) {
     await waitUntil(() => findAll(FAVORITES_CARD_SELECTOR).length === 2);
 
     assert.dom('[data-test-favorites-signed-out]').doesNotExist();
-    assert.strictEqual(countProfileRequests(store.calls), 1);
+    // The navbar account menu fetches the profile too — assert presence,
+    // not an exact count.
+    assert.true(countProfileRequests(store.calls) >= 1);
     assert.true(countStationRequests(store.calls) > 0);
 
     const titles = findAll(
@@ -158,7 +160,7 @@ module('Acceptance | favorites route', function (hooks) {
     await authenticateSession();
     await visit('/favorites');
 
-    await waitUntil(() => countProfileRequests(store.calls) === 1);
+    await waitFor('[data-test-favorites-empty]');
 
     assert.dom('[data-test-favorites-empty]').exists();
     assert.dom(FAVORITES_CARD_SELECTOR).doesNotExist();
