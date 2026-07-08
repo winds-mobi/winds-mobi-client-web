@@ -17,10 +17,22 @@ auth:
 common:
   close: Close
 
+favorites:
+  title: Favourite stations
+  loading: Loading your favourite stations…
+  requestError: Your favourite stations could not be loaded right now.
+  empty: >-
+    Your profile has no favourite stations yet. Stations you star show up
+    here with their live readings.
+  signedOut: >-
+    Sign in to see the favourite stations from your winds.mobi profile and
+    compare their live readings at a glance.
+
 navigation:
   menu: Menu
   map: Map
   nearby: Nearby
+  favorites: Favourites
   settings: Settings
   help: Help
   search:

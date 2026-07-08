@@ -1,7 +1,31 @@
 import { module, test } from 'qunit';
-import { searchQuery } from 'winds-mobi-client-web/builders/station';
+import {
+  favoritesQuery,
+  searchQuery,
+} from 'winds-mobi-client-web/builders/station';
 
 module('Unit | Builder | station', function () {
+  test('favoritesQuery fetches exactly the given station ids', function (assert) {
+    const request = favoritesQuery('station', ['holfuy-1850', 'jdc-1001']) as {
+      url: string;
+    };
+    const url = new URL(request.url, 'https://winds.mobi');
+
+    assert.deepEqual(url.searchParams.getAll('ids').sort(), [
+      'holfuy-1850',
+      'jdc-1001',
+    ]);
+    assert.strictEqual(url.searchParams.get('limit'), '2');
+    assert.false(
+      url.searchParams.has('is-highest-duplicates-rating'),
+      'the user picked these exact stations — no duplicates filtering'
+    );
+    assert.true(
+      url.searchParams.getAll('keys').includes('short'),
+      'the default station keys are requested'
+    );
+  });
+
   test('searchQuery builds a lightweight repeated-keys station search URL', function (assert) {
     const request = searchQuery('station', ' leh ') as { url: string };
     const url = new URL(request.url, 'https://winds.mobi');

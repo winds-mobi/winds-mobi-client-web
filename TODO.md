@@ -11,14 +11,14 @@ The station API (`https://winds.mobi/api/2.3`, Swagger at
 Auth and profiles live in [winds-mobi-admin](https://github.com/winds-mobi/winds-mobi-admin)
 (Django + DRF), served under `https://winds.mobi/user/`:
 
-| Endpoint | Method | Purpose |
-| --- | --- | --- |
-| `/user/google/oauth2callback/` | GET | No `code` param → redirects to Google consent; with `code` → completes OAuth |
-| `/user/facebook/oauth2callback/` | GET | Same, for Facebook (Graph API v12.0) |
-| `/user/login/` | POST | `{ott}` (or `{username,password}`) → `{token}` (JWT) |
-| `/user/profile/` | GET | Profile: `favorites[]`, `picture`, `display-name`, `_id`, `user-info` |
-| `/user/profile/` | DELETE | Delete account |
-| `/user/profile/favorites/<station_id>/` | POST / DELETE | Add / remove a favourite (204, empty body) |
+| Endpoint                                | Method        | Purpose                                                                      |
+| --------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `/user/google/oauth2callback/`          | GET           | No `code` param → redirects to Google consent; with `code` → completes OAuth |
+| `/user/facebook/oauth2callback/`        | GET           | Same, for Facebook (Graph API v12.0)                                         |
+| `/user/login/`                          | POST          | `{ott}` (or `{username,password}`) → `{token}` (JWT)                         |
+| `/user/profile/`                        | GET           | Profile: `favorites[]`, `picture`, `display-name`, `_id`, `user-info`        |
+| `/user/profile/`                        | DELETE        | Delete account                                                               |
+| `/user/profile/favorites/<station_id>/` | POST / DELETE | Add / remove a favourite (204, empty body)                                   |
 
 The login flow (from `winds_mobi_user/views.py`, `google_views.py`, `oauth2_callback.html`):
 
@@ -78,15 +78,12 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - [ ] `pnpm add -D ember-simple-auth` (verify it lands in the Vite build cleanly; if it
       fights the build, fall back to a small hand-rolled `session` service — tracked token +
       localStorage — but try ESA first).
-- [ ] `app/authenticators/winds-mobi.ts` — custom authenticator:
-      - `authenticate(ott)`: POST `https://winds.mobi/user/login/` with `{ott}`
-        (`Content-Type: application/json`), resolve `{token}`; decode the JWT payload
-        (plain `atob` on the middle segment, no crypto needed) and keep `exp`/`username` in
-        the session data.
-      - `restore(data)`: resolve iff `data.token` exists and `exp` is in the future.
-      - Note: this is the one deliberate exception to "no `fetch()` in app code" — a one-off
-        token exchange is auth plumbing, not resource data, and keeping it inside the
-        authenticator keeps Warp Drive out of the auth lifecycle.
+- [ ] `app/authenticators/winds-mobi.ts` — custom authenticator: - `authenticate(ott)`: POST `https://winds.mobi/user/login/` with `{ott}`
+      (`Content-Type: application/json`), resolve `{token}`; decode the JWT payload
+      (plain `atob` on the middle segment, no crypto needed) and keep `exp`/`username` in
+      the session data. - `restore(data)`: resolve iff `data.token` exists and `exp` is in the future. - Note: this is the one deliberate exception to "no `fetch()` in app code" — a one-off
+      token exchange is auth plumbing, not resource data, and keeping it inside the
+      authenticator keeps Warp Drive out of the auth lifecycle.
 - [ ] `app/utils/auth-token.ts` — tiny module-scope holder (`getAuthToken()` /
       `setAuthToken()`); the authenticator (and application-route session events) mirror the
       current token into it. This exists because Warp Drive handlers are registered at module
@@ -96,7 +93,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - [ ] Service registry typing for `session` if ESA's own types don't provide it.
 - [ ] New route `auth-callback` (path `/auth/callback`, add to
       [app/router.ts](app/router.ts)): reads the `ott` query param, `await
-      session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
+    session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
       Failure state (expired/used OTT — it's single-use, 30 s): show a short error with a
       "try signing in again" link. Template `app/templates/auth-callback.gts`.
 - [ ] Login initiation = plain full-page links (no popup):
@@ -114,17 +111,15 @@ sync via storage events, invalidation handling, and `test-support` for free.
       `Authorization: JWT ${getAuthToken()}` added to headers; otherwise pass through
       untouched. On a 401 from a user endpoint, surface an error the UI maps to
       `session.invalidate()` (expired 30-day JWT).
-- [ ] `app/builders/profile.ts`:
-      - `fetchProfile()` — GET `https://winds.mobi/user/profile/` (absolute URL; this host
-        is *not* the `setBuildURLConfig` api/2.3 base), `op: 'findRecord'`-style request for
-        the single `profile` resource.
-      - `addFavorite(stationId)` / `removeFavorite(stationId)` — POST / DELETE
-        `https://winds.mobi/user/profile/favorites/${stationId}/`. 204 empty body → the
-        cache can't self-update; callers refetch the profile after a successful mutation
-        (cheap, always consistent).
+- [ ] `app/builders/profile.ts`: - `fetchProfile()` — GET `https://winds.mobi/user/profile/` (absolute URL; this host
+      is _not_ the `setBuildURLConfig` api/2.3 base), `op: 'findRecord'`-style request for
+      the single `profile` resource. - `addFavorite(stationId)` / `removeFavorite(stationId)` — POST / DELETE
+      `https://winds.mobi/user/profile/favorites/${stationId}/`. 204 empty body → the
+      cache can't self-update; callers refetch the profile after a successful mutation
+      (cheap, always consistent).
 - [ ] `app/handlers/profile.ts` — reshape the raw payload into JSON:API:
       `{type: 'profile', id: <_id>, attributes: {displayName ← 'display-name', picture,
-      favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
+    favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
       We don't need `user-info` — skip it.
 - [ ] [app/services/store.ts](app/services/store.ts): add `ProfileSchema`
       (`displayName`, `picture`, `favorites: string[]`) + exported `Profile` type; register
@@ -138,25 +133,19 @@ sync via storage events, invalidation handling, and `test-support` for free.
 ## Phase 3 — UI
 
 - [ ] **Navbar auth menu** (extend [app/components/navbar/](app/components/navbar/), reuse
-      the existing menu/Frontile dropdown patterns):
-      - Signed out: "Sign in" entry opening Google / Facebook options (brand-appropriate
-        buttons or simple labelled items; ember-phosphor-icons has Google/Facebook logos).
-      - Signed in: avatar from `picture` + `displayName`; menu items → Favourites route,
-        Sign out.
+      the existing menu/Frontile dropdown patterns): - Signed out: "Sign in" entry opening Google / Facebook options (brand-appropriate
+      buttons or simple labelled items; ember-phosphor-icons has Google/Facebook logos). - Signed in: avatar from `picture` + `displayName`; menu items → Favourites route,
+      Sign out.
 - [ ] **Favourites route** — `this.route('favorites')` in router +
       `app/templates/favorites.gts`, modelled on
       [app/templates/nearby.gts](app/templates/nearby.gts) (same section cards, compact/card
       toggle can be shared or skipped initially, `commitResolvedStations` +
-      `registerLoadingProbe` for refresh integration):
-      - Derive the station request from the profile's `favorites` ids: new
-        `favoritesQuery(ids)` in [app/builders/station.ts](app/builders/station.ts) —
-        `query('station', { ids, keys: defaultStationQueryKeys, limit: ids.length })`
-        (`arrayFormat: 'repeat'` already the builder default).
-      - The API does not guarantee `ids` order — sort results client-side to the profile's
-        favourites order.
-      - States: signed-out prompt (sign-in CTA), empty favourites explainer, loading, error —
-        mirror nearby's state handling.
-      - Auto-refresh via `mapRefresh` ticks like nearby.
+      `registerLoadingProbe` for refresh integration): - Derive the station request from the profile's `favorites` ids: new
+      `favoritesQuery(ids)` in [app/builders/station.ts](app/builders/station.ts) —
+      `query('station', { ids, keys: defaultStationQueryKeys, limit: ids.length })`
+      (`arrayFormat: 'repeat'` already the builder default). - The API does not guarantee `ids` order — sort results client-side to the profile's
+      favourites order. - States: signed-out prompt (sign-in CTA), empty favourites explainer, loading, error —
+      mirror nearby's state handling. - Auto-refresh via `mapRefresh` ticks like nearby.
 - [ ] **Star toggle** on the station detail header
       ([app/components/station/header.gts](app/components/station/header.gts)); rendered only
       when authenticated. Filled/outlined `PhStar` reflecting membership in
@@ -191,7 +180,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - **Backend coordination**: Phase 0 needs a winds-mobi-admin PR + deploy. Everything except
   the live callback hop can proceed with a copied JWT meanwhile.
 - **Facebook**: the backend pins Graph API **v12.0**, long past Meta's sunset window —
-  verify Facebook login still works on the *old* site before investing in the FB button; if
+  verify Facebook login still works on the _old_ site before investing in the FB button; if
   broken, ship Google-only and hide FB behind the same menu until the backend is updated.
 - **Old-client compatibility**: the Phase 0 change must keep the template fallback intact.
 - **Token lifetime**: 30-day JWT, no refresh mechanism — on expiry the profile request 401s;
