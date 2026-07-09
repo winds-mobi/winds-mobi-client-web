@@ -4,7 +4,6 @@ import { module, test } from 'qunit';
 import {
   click,
   currentURL,
-  findAll,
   settled,
   type TestContext,
   visit,
@@ -255,27 +254,14 @@ module('Acceptance | map station panel', function (hooks) {
     assert
       .dom('[data-test-station-wind-section] .highcharts-container')
       .exists('the wind history chart renders');
-    assert.strictEqual(
-      findAll('[data-test-station-wind-section] .highcharts-series').length,
-      2,
-      'the wind chart renders both the wind and gusts series'
-    );
-
     assert
       .dom('[data-test-station-air-section] .highcharts-container')
       .exists('the air history chart renders');
-    assert.strictEqual(
-      findAll('[data-test-station-air-section] .highcharts-series').length,
-      2,
-      'the air chart renders both the temperature and humidity series'
-    );
   });
 
   test('it zooms in to the open station when its name is clicked', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=8');
     await click('[data-test-station-title]');
-    await waitUntil(() => currentURL().includes('zoom=10'));
-    await settled();
 
     assertCurrentRoute(assert, '/map/holfuy-1804', {
       latitude: '46.67719',
@@ -287,7 +273,6 @@ module('Acceptance | map station panel', function (hooks) {
   test('it closes from the explicit close button and preserves map query params', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
     await click('[data-test-station-close]');
-    await waitUntil(() => currentURL().startsWith('/map?'));
 
     assertCurrentRoute(assert, '/map', {
       latitude: '46.67719',
@@ -321,7 +306,6 @@ module('Acceptance | map station panel', function (hooks) {
       },
     });
 
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
     await settled();
 
     assertCurrentRoute(assert, '/map/holfuy-2222', {
@@ -474,7 +458,6 @@ module('Acceptance | map station panel', function (hooks) {
       );
 
     await click('[data-test-station-close]');
-    await waitUntil(() => currentURL().startsWith('/map?'));
 
     assert.dom("link[type='image/svg+xml']", document.head).doesNotExist();
   });

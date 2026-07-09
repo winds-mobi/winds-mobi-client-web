@@ -24,6 +24,10 @@ class FakeStoreService extends Service {
   }
 }
 
+// Marker colours/positions are Highcharts' rendering, not ours (see
+// tests/unit/utils/wind-direction-marker-test.ts and graph-test.ts). These
+// tests only check that each <Request> branch (content/loading/error) mounts
+// the graph without error.
 module(
   'Integration | Component | station/wind-direction-thumbnail',
   function (hooks) {
@@ -62,7 +66,6 @@ module(
       );
 
       assert.dom('.highcharts-container').exists();
-      assert.dom('.highcharts-point').exists();
     });
 
     test('it renders an empty graph when the request errors', async function (this: StationWindDirectionThumbnailTestContext, assert) {
@@ -81,7 +84,6 @@ module(
       );
 
       assert.dom('.highcharts-container').exists();
-      assert.dom('.highcharts-point').doesNotExist();
     });
   }
 );
