@@ -163,9 +163,6 @@ station:
   favorite:
     add: Add to favourites
     remove: Remove from favourites
-  favorite:
-    add: Add to favourites
-    remove: Remove from favourites
   meta:
     altitude: Altitude
     updated: Updated

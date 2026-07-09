@@ -93,7 +93,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
 - [ ] Service registry typing for `session` if ESA's own types don't provide it.
 - [ ] New route `auth-callback` (path `/auth/callback`, add to
       [app/router.ts](app/router.ts)): reads the `ott` query param, `await
-  session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
+session.authenticate('authenticator:winds-mobi', ott)`, then `replaceWith('map')`.
       Failure state (expired/used OTT — it's single-use, 30 s): show a short error with a
       "try signing in again" link. Template `app/templates/auth-callback.gts`.
 - [ ] Login initiation = plain full-page links (no popup):
@@ -119,7 +119,7 @@ sync via storage events, invalidation handling, and `test-support` for free.
       (cheap, always consistent).
 - [ ] `app/handlers/profile.ts` — reshape the raw payload into JSON:API:
       `{type: 'profile', id: <_id>, attributes: {displayName ← 'display-name', picture,
-  favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
+favorites}}`. Follow the station handler's rule: omit absent attributes entirely.
       We don't need `user-info` — skip it.
 - [ ] [app/services/store.ts](app/services/store.ts): add `ProfileSchema`
       (`displayName`, `picture`, `favorites: string[]`) + exported `Profile` type; register
