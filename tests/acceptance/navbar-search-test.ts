@@ -188,8 +188,6 @@ module('Acceptance | navbar search', function (hooks) {
       .includesText('19 km/h');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1850?'));
-    await settled();
 
     assert.deepEqual(currentSearchParams(), {
       latitude: '46.68084',
@@ -226,8 +224,6 @@ module('Acceptance | navbar search', function (hooks) {
     );
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1850?'));
-    await settled();
 
     assert.deepEqual(currentSearchParams(), {
       latitude: '46.68084',
@@ -259,8 +255,6 @@ module('Acceptance | navbar search', function (hooks) {
     );
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1850?'));
-    await settled();
 
     assert.dom('[data-test-navbar-search="navbar"] input').hasValue('');
     assert.dom('[data-test-navbar-search-results]').doesNotExist();

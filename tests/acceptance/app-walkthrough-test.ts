@@ -5,7 +5,6 @@ import {
   currentURL,
   fillIn,
   find,
-  findAll,
   settled,
   visit,
   waitFor,
@@ -220,8 +219,6 @@ module('Acceptance | app walkthrough', function (hooks) {
     );
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1850?'));
-    await settled();
 
     assert.dom('[data-test-station-title]').hasText('Lehn');
     assert.dom('[data-test-station-wind-section]').exists();
@@ -229,7 +226,6 @@ module('Acceptance | app walkthrough', function (hooks) {
 
     // Close the panel; the map view is preserved.
     await click('[data-test-station-close]');
-    await waitUntil(() => currentURL().startsWith('/map?'));
 
     assert.dom('[data-test-station-panel]').doesNotExist();
 
@@ -237,15 +233,10 @@ module('Acceptance | app walkthrough', function (hooks) {
     await click('[data-test-navbar-link="nearby"]');
     assert.strictEqual(currentURL(), '/nearby');
 
-    await waitUntil(
-      () => findAll('[data-test-nearby-station-card]').length > 0
-    );
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
 
     // Open a nearby station from its card, landing back on the map.
     await click('[data-test-nearby-station-card] [data-test-station-title]');
-    await waitUntil(() => currentURL().startsWith('/map/'));
-    await settled();
 
     assert.dom('[data-test-station-panel]').exists();
 
@@ -299,9 +290,6 @@ module('Acceptance | app walkthrough', function (hooks) {
     await click('[data-test-navbar-auth-item="favorites"]');
     assert.strictEqual(currentURL(), '/favorites');
 
-    await waitUntil(
-      () => findAll('[data-test-nearby-station-card]').length === 1
-    );
     assert
       .dom('[data-test-nearby-station-card] [data-test-station-title]')
       .hasText('Holfuy 1804');
@@ -309,7 +297,6 @@ module('Acceptance | app walkthrough', function (hooks) {
     // Reopen it from the favourites card: a fresh mount, so the star
     // correctly reflects the now-favourited state.
     await click('[data-test-nearby-station-card] [data-test-station-title]');
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1804'));
     await waitFor('[data-test-station-favorite]');
 
     assert
