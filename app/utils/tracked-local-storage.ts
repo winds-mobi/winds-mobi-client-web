@@ -23,6 +23,22 @@ function cellFor<T>(key: string, seed: () => T): Cell<T> {
   return cell;
 }
 
+// Test-only escape hatch: the cell cache above is module-scope and outlives
+// any single test's `setupApplicationTest`/`setupTest` owner, so a value
+// changed in one test leaks into the next test that reads the same key —
+// even across different test files. Clears both layers: the persisted
+// `localStorage` entry (so a freshly-created cell doesn't reseed from a
+// stale value) and the in-memory cell (which otherwise never gets
+// reseeded at all, since `cellFor` only reads storage once per key, ever).
+// Call this from shared test setup instead of clearing `localStorage` per
+// key in individual test files.
+export function resetTrackedLocalStorageForTests(): void {
+  for (const key of cells.keys()) {
+    safeRemove(key);
+  }
+  cells.clear();
+}
+
 function safeGet(key: string): string | null {
   try {
     return globalThis.localStorage?.getItem(key) ?? null;

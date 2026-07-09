@@ -11,24 +11,11 @@ class FakeStoreService extends Service {
   }
 }
 
-const STORAGE_KEYS = [
-  'settings.faviconFollowsStation',
-  'settings.showGustsOutline',
-  'settings.shrinkOldData',
-  'settings.nearbyCompactList',
-  'settings.useIconLabels',
-];
-
 module('Acceptance | settings route', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
-  });
-
-  hooks.afterEach(function () {
-    STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
   test('it shows the five preferences, on by default except the compact nearby list and icon labels', async function (assert) {

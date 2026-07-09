@@ -7,6 +7,7 @@ import {
 import { setupIntl } from 'ember-intl/test-support';
 import { formats } from 'winds-mobi-client-web/ember-intl';
 import translationsForEnUs from 'virtual:ember-intl/translations/en-us';
+import { resetTrackedLocalStorageForTests } from 'winds-mobi-client-web/utils/tracked-local-storage';
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is
@@ -21,6 +22,7 @@ function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
 
     intl.addTranslations('en-us', translationsForEnUs);
     intl.setFormats(formats);
+    resetTrackedLocalStorageForTests();
   });
 
   // Additional setup for application tests can be done here.

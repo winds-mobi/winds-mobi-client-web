@@ -163,11 +163,6 @@ module('Acceptance | nearby route', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    window.localStorage.removeItem('settings.nearbyCompactList');
-  });
-
-  hooks.afterEach(function () {
-    window.localStorage.removeItem('settings.nearbyCompactList');
   });
 
   test('it shows the explainer and waits for the nearby location button when access is not granted yet', async function (assert) {
