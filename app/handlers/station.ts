@@ -1,5 +1,6 @@
 import type { Handler, NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
+import { userApiUrl } from 'winds-mobi-client-web/utils/user-api';
 import { toJsonApiEnvelope } from './json-api';
 
 export interface Response {
@@ -155,6 +156,11 @@ const StationHandler: Handler = {
     const isHistoric = /.*\/historic\//;
     const isStation = /.*\/station\//;
     const url = context.request.url || '';
+
+    // The winds-mobi-admin user API has its own handler — don't reshape it.
+    if (url.startsWith(userApiUrl(''))) {
+      return next(context.request);
+    }
 
     if (isHistoric.test(url) && !isStation.test(url)) {
       return next(context.request);

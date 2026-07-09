@@ -2,6 +2,7 @@ import { useLegacyStore } from '@warp-drive/legacy';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
+import UserHandler from 'winds-mobi-client-web/handlers/user';
 import { withDefaults } from '@warp-drive/core/reactive';
 import { Type } from '@warp-drive/core/types/symbols';
 
@@ -90,6 +91,16 @@ export const HistorySchema = withDefaults({
   ],
 });
 
+// The authenticated user's profile from the winds-mobi-admin user API.
+export const ProfileSchema = withDefaults({
+  type: 'profile',
+  fields: [
+    { name: 'displayName', kind: 'field' },
+    { name: 'picture', kind: 'field' },
+    { name: 'favorites', kind: 'array' },
+  ],
+});
+
 export type Station = {
   id: string;
   altitude: number;
@@ -111,6 +122,15 @@ export type Station = {
   };
 
   [Type]: 'station';
+};
+
+export type Profile = {
+  id: string;
+  displayName?: string;
+  picture?: string;
+  favorites: string[];
+
+  [Type]: 'profile';
 };
 
 export type History = {
@@ -177,8 +197,10 @@ const AppStore = useLegacyStore({
   legacyRequests: true,
   modelFragments: true,
   cache: JSONAPICache,
-  schemas: [LocationSchema, StationSchema, HistorySchema],
-  handlers: [StationHandler, HistoryHandler],
+  schemas: [LocationSchema, StationSchema, HistorySchema, ProfileSchema],
+  // UserHandler must run first: it owns the user-API requests (auth header
+  // + profile reshaping) before the station/history reshapers see them.
+  handlers: [UserHandler, StationHandler, HistoryHandler],
   derivations: [unwrapDerivation, composeReadingDerivation],
 });
 

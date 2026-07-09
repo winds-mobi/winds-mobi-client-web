@@ -1,9 +1,10 @@
 import Component from '@glimmer/component';
+import { cached } from '@glimmer/tracking';
 import type { History } from 'winds-mobi-client-web/services/store.js';
 import { service } from '@ember/service';
 import { type IntlService } from 'ember-intl';
 import Polar from 'winds-mobi-client-web/components/chart/polar';
-import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
+import { windDirectionMarkerColours } from 'winds-mobi-client-web/utils/wind-direction-marker';
 
 export interface WindDirectionGraphSignature {
   Args: {
@@ -33,7 +34,18 @@ function quarterHourTicks(minTimestamp: number, maxTimestamp: number) {
 export default class WindDirectionGraph extends Component<WindDirectionGraphSignature> {
   @service declare intl: IntlService;
 
+  // `@cached` keeps `chartOptions`/`points`/`chartData` returning the *same*
+  // object/array references across the repeated autotracked reads Glimmer's
+  // render pipeline performs in a single render pass. Without it, each read
+  // built a fresh object, which made `ember-highcharts` see "changed" args on
+  // every access and re-init/update the underlying chart mid-render -- the
+  // root cause of this component's flaky marker-rendering (see TODO.md).
+  // `chartOptions` reads `this.args.data` purely to opt back into
+  // recomputing when a refresh brings new history in, matching this
+  // codebase's `mapRefresh.lastRefresh`-read convention for the same purpose.
+  @cached
   get chartOptions() {
+    this.args.data;
     const now = Date.now();
     const minTimestamp = now - LAST_HOUR;
 
@@ -61,6 +73,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     };
   }
 
+  @cached
   get points() {
     const data = this.args.data ?? [];
 
@@ -69,21 +82,19 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     }
 
     return data.map((elm) => {
-      const speedColour = windToColour(elm.speed);
-      const gustsColour = windToColour(elm.gusts);
+      const { lineColor, fillColor } = windDirectionMarkerColours(
+        elm.speed,
+        elm.gusts
+      );
 
       return {
         x: elm.direction,
         y: elm.timestamp,
-        color: speedColour,
-        // Mirrors the map marker's outline/hub convention: the ring stays the
-        // wind-speed colour, and the center only switches to the gusts colour
-        // when gusts fall in a different wind band -- otherwise it's a plain
-        // speed-coloured dot.
+        color: lineColor,
         marker: {
           enabled: true,
-          lineColor: speedColour,
-          fillColor: gustsColour === speedColour ? speedColour : gustsColour,
+          lineColor,
+          fillColor,
         },
         customTooltip: `${this.intl.formatTime(elm.timestamp, {
           hour: 'numeric',
@@ -96,6 +107,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
     });
   }
 
+  @cached
   get chartData() {
     return [
       {

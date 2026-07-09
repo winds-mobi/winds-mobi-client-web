@@ -34,7 +34,7 @@ export default class SettingsRow extends Component<SettingsRowSignature> {
 
   <template>
     <div
-      class="grid items-center gap-4 py-4 sm:grid-cols-[minmax(0,1fr)_14rem]"
+      class="grid items-start gap-2 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-center sm:gap-4"
       ...attributes
     >
       <div>

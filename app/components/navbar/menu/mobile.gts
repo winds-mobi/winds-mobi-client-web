@@ -9,7 +9,8 @@ import { Drawer } from '@frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
-import { NAVBAR_MENU_ITEMS } from './items';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
+import { visibleNavbarMenuItems } from './items';
 
 export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
@@ -21,8 +22,13 @@ export interface NavbarMenuMobileSignature {
 
 export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
   @service declare router: RouterService;
+  @service declare settings: SettingsService;
 
   @tracked isOpen = false;
+
+  get visibleItems() {
+    return visibleNavbarMenuItems(this.settings.betaFeaturesEnabled);
+  }
 
   @action
   open() {
@@ -70,7 +76,7 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
 
           <drawer.Body>
             <div class="flex w-full flex-col items-stretch gap-2">
-              {{#each NAVBAR_MENU_ITEMS as |item|}}
+              {{#each this.visibleItems as |item|}}
                 <LinkTo
                   @route={{item.route}}
                   @activeClass="border-wind-20 bg-wind-20 font-semibold text-white shadow-sm hover:bg-wind-20 hover:text-white"

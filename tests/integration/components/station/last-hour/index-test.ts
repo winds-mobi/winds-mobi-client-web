@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { find, findAll, render, settled } from '@ember/test-helpers';
+import { findAll, render, settled } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -67,14 +67,11 @@ function lastHourRequestUrl(stationId: string) {
   ).url;
 }
 
-function renderedPointSignature() {
-  return findAll('.highcharts-point')
-    .map((point) => point.getAttribute('d'))
-    .filter((value): value is string => Boolean(value));
-}
-
-function renderedGraphSignature() {
-  return find('.highcharts-graph')?.getAttribute('d');
+// The min/mean/max metric cards render our own derived values (not
+// Highcharts), so they're a stable signal for "which station's data is
+// currently showing" without depending on chart rendering internals.
+function renderedMetricValues() {
+  return findAll('dd').map((dd) => dd.textContent?.trim());
 }
 
 module('Integration | Component | station/last-hour', function (hooks) {
@@ -180,11 +177,9 @@ module('Integration | Component | station/last-hour', function (hooks) {
 
     await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
 
-    const stationAInitialPoints = renderedPointSignature();
-    const stationAInitialGraph = renderedGraphSignature();
+    const stationAInitialMetrics = renderedMetricValues();
 
-    assert.true(stationAInitialPoints.length > 0);
-    assert.true(Boolean(stationAInitialGraph));
+    assert.true(stationAInitialMetrics.length > 0);
 
     this.stationId = 'station-b';
     await settled();
@@ -192,8 +187,7 @@ module('Integration | Component | station/last-hour', function (hooks) {
     this.stationId = 'station-a';
     await settled();
 
-    assert.deepEqual(renderedPointSignature(), stationAInitialPoints);
-    assert.strictEqual(renderedGraphSignature(), stationAInitialGraph);
+    assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);
 
     deferredStationBHistory.resolve({
       content: {
@@ -202,7 +196,6 @@ module('Integration | Component | station/last-hour', function (hooks) {
     });
     await settled();
 
-    assert.deepEqual(renderedPointSignature(), stationAInitialPoints);
-    assert.strictEqual(renderedGraphSignature(), stationAInitialGraph);
+    assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);
   });
 });

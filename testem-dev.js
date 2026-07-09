@@ -77,6 +77,10 @@ module.exports = {
         '--headless',
         '--disable-dev-shm-usage',
         '--disable-software-rasterizer',
+        // Same fix as testem.js: without this, the dev-container Chromium's
+        // GPU process can crash on launch and the browser never connects to
+        // testem within the timeout, failing every `test:ember:dev` run.
+        '--disable-gpu',
         '--mute-audio',
         '--remote-debugging-port=0',
         '--window-size=1440,900',

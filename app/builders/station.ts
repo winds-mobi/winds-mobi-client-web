@@ -142,6 +142,25 @@ function nearbyQuery<T>(
   );
 }
 
+// Fetches an explicit set of stations (the profile's favorites) by id.
+// No duplicates filtering: the user picked these exact stations.
+function favoritesQuery<T>(
+  type: string,
+  ids: string[],
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return query<T>(
+    type,
+    {
+      // Copy: buildQueryParams sorts array params in place for stable cache
+      // URLs, and the caller's array is the profile record's favorites.
+      ids: [...ids],
+      limit: ids.length,
+    },
+    options
+  );
+}
+
 function searchQuery<T>(
   type: string,
   search: string,
@@ -165,4 +184,11 @@ function searchQuery<T>(
   );
 }
 
-export { findRecord, mapQuery, nearbyQuery, query, searchQuery };
+export {
+  favoritesQuery,
+  findRecord,
+  mapQuery,
+  nearbyQuery,
+  query,
+  searchQuery,
+};

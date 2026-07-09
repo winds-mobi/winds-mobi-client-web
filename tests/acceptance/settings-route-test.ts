@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, visit } from '@ember/test-helpers';
+import { click, currentURL, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 
 // The settings route doesn't fetch stations, but the shared navbar is always
@@ -11,27 +11,14 @@ class FakeStoreService extends Service {
   }
 }
 
-const STORAGE_KEYS = [
-  'settings.faviconFollowsStation',
-  'settings.showGustsOutline',
-  'settings.shrinkOldData',
-  'settings.nearbyCompactList',
-  'settings.useIconLabels',
-];
-
 module('Acceptance | settings route', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
   });
 
-  hooks.afterEach(function () {
-    STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
-  });
-
-  test('it shows the five preferences, on by default except the compact nearby list and icon labels', async function (assert) {
+  test('it shows the six preferences, on by default except the compact nearby list, icon labels, and beta features', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -40,6 +27,22 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
+    assert.dom('[data-test-setting="betaFeaturesEnabled"]').isNotChecked();
+    assert
+      .dom(this.element)
+      .includesText(
+        'Beta features are early access. We do not guarantee they work correctly.'
+      );
+
+    const settingNames = findAll('[data-test-setting]').map((element) =>
+      element.getAttribute('data-test-setting')
+    );
+
+    assert.strictEqual(
+      settingNames[settingNames.length - 1],
+      'betaFeaturesEnabled',
+      'beta features is the last preference on the page'
+    );
   });
 
   test('toggling a preference persists it to local storage', async function (assert) {

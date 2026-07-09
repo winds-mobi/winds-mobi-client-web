@@ -19,6 +19,14 @@ if (typeof module !== 'undefined') {
           '--headless',
           '--disable-dev-shm-usage',
           '--disable-software-rasterizer',
+          // GitHub Actions runners have no real GPU; without this, Chromium's
+          // GPU process intermittently crashes on launch ("Network service
+          // crashed", "GpuControl.CreateCommandBuffer" errors) and the whole
+          // browser then never connects to testem within the 120s timeout,
+          // failing every test in the run rather than just the WebGL-dependent
+          // ones. Doesn't change which tests pass/fail otherwise — WebGL/map
+          // tests already can't run here regardless (see TODO.md).
+          '--disable-gpu',
           '--mute-audio',
           '--remote-debugging-port=0',
           '--window-size=1440,900',

@@ -1,13 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  click,
-  currentURL,
-  findAll,
-  settled,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
+import { click, currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
@@ -151,23 +144,11 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
   };
 }
 
-async function waitForNearbyStations() {
-  await waitUntil(
-    () =>
-      findAll(NEARBY_STATION_CARD_SELECTOR).length === STATION_FIXTURES.length
-  );
-}
-
 module('Acceptance | nearby route', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    window.localStorage.removeItem('settings.nearbyCompactList');
-  });
-
-  hooks.afterEach(function () {
-    window.localStorage.removeItem('settings.nearbyCompactList');
   });
 
   test('it shows the explainer and waits for the nearby location button when access is not granted yet', async function (assert) {
@@ -198,8 +179,6 @@ module('Acceptance | nearby route', function (hooks) {
     await visit('/nearby');
     await click(NEARBY_LOCATION_BUTTON_SELECTOR);
 
-    await waitForNearbyStations();
-
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
     assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.dom('[data-test-station-distance]').exists({ count: 2 });
@@ -213,7 +192,6 @@ module('Acceptance | nearby route', function (hooks) {
     stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitForNearbyStations();
 
     assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
     assert.dom(NEARBY_LOCATION_BUTTON_SELECTOR).doesNotExist();
@@ -227,11 +205,8 @@ module('Acceptance | nearby route', function (hooks) {
     stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitForNearbyStations();
 
     await click(`${NEARBY_STATION_CARD_SELECTOR} [data-test-station-title]`);
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-1804?'));
-    await settled();
 
     const params = new URL(currentURL(), 'https://winds.mobi').searchParams;
     assert.strictEqual(params.get('latitude'), '46.521');
@@ -245,7 +220,6 @@ module('Acceptance | nearby route', function (hooks) {
     stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitForNearbyStations();
 
     assert.dom('[data-test-nearby-stations-compact]').doesNotExist();
     assert
@@ -279,7 +253,6 @@ module('Acceptance | nearby route', function (hooks) {
     stubGrantedPermission(nearbyLocation);
 
     await visit('/nearby');
-    await waitForNearbyStations();
 
     const initialStationRequestCount = countStationRequests(store.calls);
 
@@ -287,10 +260,6 @@ module('Acceptance | nearby route', function (hooks) {
     assert.dom('[data-test-navbar-refresh]').exists();
 
     await click('[data-test-navbar-refresh]');
-
-    await waitUntil(
-      () => countStationRequests(store.calls) > initialStationRequestCount
-    );
 
     assert.true(countStationRequests(store.calls) > initialStationRequestCount);
   });
