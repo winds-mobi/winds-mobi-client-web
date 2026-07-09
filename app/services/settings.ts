@@ -51,6 +51,15 @@ export default class SettingsService extends Service {
     defaultValue: false,
   })
   useIconLabels!: boolean;
+
+  // Early access to in-development features (currently: sign-in, the
+  // favourites view, and the favourite star). Off by default — see
+  // app/templates/settings.gts for the warning shown alongside this toggle.
+  @trackedInLocalStorage({
+    keyName: 'settings.betaFeaturesEnabled',
+    defaultValue: false,
+  })
+  betaFeaturesEnabled!: boolean;
 }
 
 // The boolean preferences, named so the settings UI can drive each one through a
@@ -62,7 +71,8 @@ export type BooleanSettingKey =
   | 'showGustsOutline'
   | 'shrinkOldData'
   | 'nearbyCompactList'
-  | 'useIconLabels';
+  | 'useIconLabels'
+  | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {
   interface Registry {

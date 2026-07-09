@@ -25,6 +25,7 @@ import timeAgo, {
 } from 'winds-mobi-client-web/helpers/time-ago';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SessionService from 'winds-mobi-client-web/services/session';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
   Profile,
   Station,
@@ -48,12 +49,19 @@ export interface StationHeaderSignature {
 export default class StationHeader extends Component<StationHeaderSignature> {
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service declare session: SessionService;
+  @service declare settings: SettingsService;
   @service declare store: StoreService;
 
   get hasProviderLink() {
     return Boolean(
       this.args.station.providerName && this.args.station.providerUrl
     );
+  }
+
+  // Favouriting is a beta feature (see app/services/settings.ts): still
+  // gated on being signed in, but also hidden until beta is opted into.
+  get showFavoriteControl(): boolean {
+    return this.session.isAuthenticated && this.settings.betaFeaturesEnabled;
   }
 
   @cached
@@ -109,7 +117,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           </LinkTo>
         </h2>
 
-        {{#if this.session.isAuthenticated}}
+        {{#if this.showFavoriteControl}}
           <Button
             aria-label={{if
               this.isFavorite

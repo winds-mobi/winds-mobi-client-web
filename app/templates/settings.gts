@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import Warning from 'ember-phosphor-icons/components/ph-warning';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
@@ -27,6 +28,21 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
       <div
         class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
       >
+        <StationSectionCard
+          @title={{t "settings.betaFeaturesEnabled.label"}}
+          @titleClass="sr-only"
+          class="border-amber-300 bg-amber-50"
+        >
+          <SettingsRow @settings={{this.settings}} @name="betaFeaturesEnabled">
+            <p
+              class="flex items-start gap-1.5 text-sm font-bold text-amber-800"
+            >
+              <Warning @size={{18}} class="mt-0.5 shrink-0" />
+              {{t "settings.betaFeaturesEnabled.warning"}}
+            </p>
+          </SettingsRow>
+        </StationSectionCard>
+
         <StationSectionCard @title={{t "settings.title"}} @titleClass="sr-only">
           <p class="max-w-2xl text-sm leading-6 text-slate-600">
             {{t "settings.intro"}}

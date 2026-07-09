@@ -78,6 +78,12 @@ settings:
       Show a small icon instead of the text label for each value in the Now
       and Last hour cards. Each value then only takes as much width as it
       needs, so several fit per row instead of one per row.
+  betaFeaturesEnabled:
+    label: Enable beta features
+    description: >-
+      Turn on early access to features still in development.
+    warning: >-
+      Beta features are early access. We do not guarantee they work correctly.
 
 help:
   title: Help
