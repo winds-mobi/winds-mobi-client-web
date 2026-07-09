@@ -28,28 +28,16 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
       <div
         class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
       >
-        <StationSectionCard
-          @title={{t "settings.betaFeaturesEnabled.label"}}
-          @titleClass="sr-only"
-          class="border-amber-300 bg-amber-50"
-        >
-          <SettingsRow @settings={{this.settings}} @name="betaFeaturesEnabled">
-            <p
-              class="flex items-start gap-1.5 text-sm font-bold text-amber-800"
-            >
-              <Warning @size={{18}} class="mt-0.5 shrink-0" />
-              {{t "settings.betaFeaturesEnabled.warning"}}
-            </p>
-          </SettingsRow>
-        </StationSectionCard>
+        <p class="max-w-2xl text-sm leading-6 text-slate-600">
+          {{t "settings.intro"}}
+        </p>
 
-        <StationSectionCard @title={{t "settings.title"}} @titleClass="sr-only">
-          <p class="max-w-2xl text-sm leading-6 text-slate-600">
-            {{t "settings.intro"}}
-          </p>
-
-          <dl
-            class="mt-4 flex flex-col gap-3 sm:gap-0 sm:divide-y sm:divide-slate-200"
+        {{! Each preference is its own card so the box itself makes the
+          grouping obvious — no separator styling needed between them. }}
+        <div class="grid gap-3 sm:gap-4">
+          <StationSectionCard
+            @title={{t "settings.faviconFollowsStation.label"}}
+            @titleClass="sr-only"
           >
             <SettingsRow
               @settings={{this.settings}}
@@ -59,32 +47,72 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                 @enabled={{this.settings.faviconFollowsStation}}
               />
             </SettingsRow>
+          </StationSectionCard>
 
+          <StationSectionCard
+            @title={{t "settings.showGustsOutline.label"}}
+            @titleClass="sr-only"
+          >
             <SettingsRow @settings={{this.settings}} @name="showGustsOutline">
               <SettingsShowcaseGusts
                 @enabled={{this.settings.showGustsOutline}}
               />
             </SettingsRow>
+          </StationSectionCard>
 
+          <StationSectionCard
+            @title={{t "settings.shrinkOldData.label"}}
+            @titleClass="sr-only"
+          >
             <SettingsRow @settings={{this.settings}} @name="shrinkOldData">
               <SettingsShowcaseShrink
                 @enabled={{this.settings.shrinkOldData}}
               />
             </SettingsRow>
+          </StationSectionCard>
 
+          <StationSectionCard
+            @title={{t "settings.nearbyCompactList.label"}}
+            @titleClass="sr-only"
+          >
             <SettingsRow @settings={{this.settings}} @name="nearbyCompactList">
               <SettingsShowcaseNearbyCompactList
                 @enabled={{this.settings.nearbyCompactList}}
               />
             </SettingsRow>
+          </StationSectionCard>
 
+          <StationSectionCard
+            @title={{t "settings.useIconLabels.label"}}
+            @titleClass="sr-only"
+          >
             <SettingsRow @settings={{this.settings}} @name="useIconLabels">
               <SettingsShowcaseIconLabels
                 @enabled={{this.settings.useIconLabels}}
               />
             </SettingsRow>
-          </dl>
-        </StationSectionCard>
+          </StationSectionCard>
+
+          {{! Beta features stays last: it gates other, newer settings/
+            features rather than being a peer display preference. }}
+          <StationSectionCard
+            @title={{t "settings.betaFeaturesEnabled.label"}}
+            @titleClass="sr-only"
+            class="border-amber-300 bg-amber-50"
+          >
+            <SettingsRow
+              @settings={{this.settings}}
+              @name="betaFeaturesEnabled"
+            >
+              <p
+                class="flex items-start gap-1.5 text-sm font-bold text-amber-800"
+              >
+                <Warning @size={{18}} class="mt-0.5 shrink-0" />
+                {{t "settings.betaFeaturesEnabled.warning"}}
+              </p>
+            </SettingsRow>
+          </StationSectionCard>
+        </div>
       </div>
     </section>
   </template>

@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, visit } from '@ember/test-helpers';
+import { click, currentURL, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 
 // The settings route doesn't fetch stations, but the shared navbar is always
@@ -33,6 +33,16 @@ module('Acceptance | settings route', function (hooks) {
       .includesText(
         'Beta features are early access. We do not guarantee they work correctly.'
       );
+
+    const settingNames = findAll('[data-test-setting]').map((element) =>
+      element.getAttribute('data-test-setting')
+    );
+
+    assert.strictEqual(
+      settingNames[settingNames.length - 1],
+      'betaFeaturesEnabled',
+      'beta features is the last preference on the page'
+    );
   });
 
   test('toggling a preference persists it to local storage', async function (assert) {
