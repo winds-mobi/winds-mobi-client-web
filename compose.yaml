@@ -4,6 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile
       target: base
+    # Without a real init process as PID 1, orphaned/crashed child processes
+    # (notably headless Chromium's GPU/crashpad sub-processes spawned during
+    # `pnpm test:ember*`) never get reaped and accumulate as zombies for the
+    # life of the container. `init: true` has Docker run its own tini ahead
+    # of the entrypoint to reap them.
+    init: true
     # env_file:
     # - ./ui/.env
     # No host port publish: OrbStack routes https://ui.winds-mobi-client-web.orb.local
