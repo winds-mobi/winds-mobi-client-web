@@ -184,16 +184,35 @@ favorites}}`. Follow the station handler's rule: omit absent attributes entirely
   shared reactive helper (e.g. a `getProfile(store, session)` util returning the request
   state) — but vet that a shared cached request doesn't break the per-consumer refetch
   semantics after favorites mutations.
-- **Flaky integration test (pre-existing)** — `Integration | Component |
-station/wind-direction/graph: it outlines a point…` fails depending on wall-clock time
-  (verified failing identically on `dd3cbf3` while passing earlier the same day). Its
-  `waitUntil(() => findAll('.highcharts-point').length >= 2)` never sees the points at
-  certain times. Investigate the history-timestamp windowing in the graph vs `Date.now()`.
 - **Map-refresh acceptance tests can't run in the dev container** — the 5 map
   query-param/refresh tests need the map's `idle` event, which never fires because headless
-  Chromium in the container has no WebGL (`--disable-software-rasterizer`). Consider a
-  SwiftShader-enabled browser config for local runs, or skip-guard the tests when WebGL is
-  unavailable.
+  Chromium in the container has no WebGL (`--disable-software-rasterizer`). Skip-guarded via
+  `test.if(..., hasWebGL())` (see `tests/helpers/webgl.ts`) so they run in a real WebGL
+  environment but don't fail the suite here or in CI (neither has WebGL). Consider a
+  SwiftShader-enabled browser config if we want these to actually run in CI.
+- **`navbar/search.gts`'s debounce can't be awaited by `settled()`** — `updateDebouncedQuery`
+  uses ember-concurrency's `rawTimeout` (not `timeout`) so the 200ms debounce doesn't stall
+  every test that touches search. `rawTimeout` deliberately opts out of Ember's test-waiter
+  system, so `tests/acceptance/app-walkthrough-test.ts`'s search step still needs a real
+  `waitUntil` for the result to appear — confirmed by trying `await settled()` in its place,
+  which left the element never found. If this needs to be waiter-friendly later, consider
+  switching to `timeout()` behind a `Ember.testing`-gated short-circuit, or exposing a
+  dedicated test waiter for just this task.
+- **`await settled()` can't be dropped after a raw tracked-property mutation or manual
+  promise resolve (no `click`/`visit`/`fillIn` in between)** — tried removing it from
+  `tests/integration/components/station/last-hour/index-test.ts` (after
+  `this.stationId = 'station-b'` / `'station-a'`, and after `deferredStationBHistory.resolve(...)`).
+  The suite still passed, but for the wrong reason: with no `await` boundary, Glimmer's
+  rerender never got a chance to flush before the assertion ran, so it was comparing the
+  DOM against itself unchanged — a vacuous pass, not confirmation the async round-trip
+  settles correctly. Reverted; kept `settled()` there. The same shape (raw mutation/manual
+  resolve, no test-helper boundary) applies to `tests/acceptance/map-station-panel-test.ts`
+  (after `void router.transitionTo(...)` and after `deferredRequest.resolve(...)`) and
+  `tests/acceptance/auth-callback-test.ts` (inside the `TransitionAborted` catch) — left
+  those `settled()` calls in place rather than risk the same silent-pass problem without a
+  more thorough per-site DOM-state check. `tests/acceptance/map-query-params-test.ts`'s two
+  `settled()` calls (after `waitUntil`, not a raw mutation) are lower-risk but untested here
+  since those tests are WebGL-gated and don't run in this container.
 
 ## Risks / open questions
 
