@@ -48,7 +48,9 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             {{t "settings.intro"}}
           </p>
 
-          <dl class="mt-4 divide-y divide-slate-200">
+          <dl
+            class="mt-4 flex flex-col gap-3 sm:gap-0 sm:divide-y sm:divide-slate-200"
+          >
             <SettingsRow
               @settings={{this.settings}}
               @name="faviconFollowsStation"
