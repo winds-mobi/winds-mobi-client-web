@@ -302,6 +302,8 @@ issue)` console error in the failure output). `pnpm test:ember` (isolated build 
 
 - Keep [CHANGELOG.md](CHANGELOG.md) user-facing: shipped behavior, visible improvements, notable fixes. Omit internal
   refactors, test-only changes, and implementation details unless they directly affect users.
+- Mark beta/stable transitions with a prefix on the entry: a new beta feature gets `**🧪 Beta:**`, and when a feature
+  graduates from beta to stable (e.g. the gating toggle is removed), its entry gets `**🚀 Stable:**`.
 
 ### Don't touch
 
