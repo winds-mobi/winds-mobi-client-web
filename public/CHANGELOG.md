@@ -9,6 +9,14 @@
 - **Beta:** A star on the station panel header lets you add or remove that station from your favourites while signed in.
 - **Beta:** A new "Enable beta features" toggle in Settings (off by default) reveals the three items above.
 
+### Changed
+
+- Each preference in Settings now sits in its own card, making the grouping clearer at every screen width.
+
+### Fixed
+
+- Turning off 3D mode now flattens the map back to a top-down view instead of leaving it tilted.
+
 ## v0.12.0 - 2026-06-25
 
 ### Added
