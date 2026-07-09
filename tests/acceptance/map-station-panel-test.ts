@@ -1,5 +1,4 @@
 import Service from '@ember/service';
-import type RouterService from '@ember/routing/router-service';
 import { Type } from '@warp-drive/core/types/symbols';
 import { module, test } from 'qunit';
 import {
@@ -13,7 +12,13 @@ import {
 } from '@ember/test-helpers';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
+
+// Only the two refresh tests below depend on MapLibre's `idle` event; the
+// rest of this module exercises the panel via direct station-id fetches
+// unrelated to map bounds — see tests/helpers/webgl.ts.
+const webGLAvailable = hasWebGL();
 
 type DeferredRequest = {
   promise: Promise<{ content: { data: Station } }>;
@@ -363,76 +368,91 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
-  test('it force refreshes map and station requests from the navbar button', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+  test.if(
+    'it force refreshes map and station requests from the navbar button',
+    webGLAvailable,
+    async function (assert) {
+      const store = this.owner.lookup('service:store') as FakeStoreService;
 
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
 
-    await waitUntil(() => countStationListRequests(store.calls) > 0);
+      await waitUntil(() => countStationListRequests(store.calls) > 0);
 
-    const initialStationListRequests = countStationListRequests(store.calls);
-    const initialStationDetailRequests = countStationDetailRequests(
-      store.calls,
-      'holfuy-1804'
-    );
-    const initialHistoryRequests = countHistoryRequests(
-      store.calls,
-      'holfuy-1804'
-    );
+      const initialStationListRequests = countStationListRequests(store.calls);
+      const initialStationDetailRequests = countStationDetailRequests(
+        store.calls,
+        'holfuy-1804'
+      );
+      const initialHistoryRequests = countHistoryRequests(
+        store.calls,
+        'holfuy-1804'
+      );
 
-    await click('[data-test-navbar-refresh]');
+      await click('[data-test-navbar-refresh]');
 
-    assert.true(
-      countStationListRequests(store.calls) >= initialStationListRequests + 1
-    );
-    assert.strictEqual(
-      countStationDetailRequests(store.calls, 'holfuy-1804'),
-      initialStationDetailRequests + 1
-    );
-    assert.strictEqual(
-      countHistoryRequests(store.calls, 'holfuy-1804'),
-      initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
-    );
-  });
-
-  test('it auto refreshes map and station requests after the refresh interval', async function (assert) {
-    this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
-
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
-
-    const initialStationListRequests = countStationListRequests(store.calls);
-    const initialStationDetailRequests = countStationDetailRequests(
-      store.calls,
-      'holfuy-1804'
-    );
-    const initialHistoryRequests = countHistoryRequests(
-      store.calls,
-      'holfuy-1804'
-    );
-
-    await waitUntil(
-      () =>
-        countStationListRequests(store.calls) > initialStationListRequests &&
-        countStationDetailRequests(store.calls, 'holfuy-1804') >
-          initialStationDetailRequests &&
-        countHistoryRequests(store.calls, 'holfuy-1804') >
-          initialHistoryRequests
-    );
-
-    assert.true(
-      countStationListRequests(store.calls) >= initialStationListRequests + 1
-    );
-    assert.true(
-      countStationDetailRequests(store.calls, 'holfuy-1804') >=
+      assert.true(
+        countStationListRequests(store.calls) >= initialStationListRequests + 1
+      );
+      assert.strictEqual(
+        countStationDetailRequests(store.calls, 'holfuy-1804'),
         initialStationDetailRequests + 1
-    );
-    assert.true(
-      countHistoryRequests(store.calls, 'holfuy-1804') >=
+      );
+      assert.strictEqual(
+        countHistoryRequests(store.calls, 'holfuy-1804'),
         initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
-    );
-  });
+      );
+    }
+  );
+
+  test.if(
+    'it auto refreshes map and station requests after the refresh interval',
+    webGLAvailable,
+    async function (assert) {
+      this.owner.register(
+        'service:map-refresh',
+        ShortIntervalMapRefreshService
+      );
+
+      const store = this.owner.lookup('service:store') as FakeStoreService;
+
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      const initialStationListRequests = countStationListRequests(store.calls);
+      const initialStationDetailRequests = countStationDetailRequests(
+        store.calls,
+        'holfuy-1804'
+      );
+      const initialHistoryRequests = countHistoryRequests(
+        store.calls,
+        'holfuy-1804'
+      );
+
+      await waitUntil(
+        () =>
+          countStationListRequests(store.calls) > initialStationListRequests &&
+          countStationDetailRequests(store.calls, 'holfuy-1804') >
+            initialStationDetailRequests &&
+          countHistoryRequests(store.calls, 'holfuy-1804') >
+            initialHistoryRequests
+      );
+
+      assert.true(
+        countStationListRequests(store.calls) >= initialStationListRequests + 1
+      );
+      assert.true(
+        countStationDetailRequests(store.calls, 'holfuy-1804') >=
+          initialStationDetailRequests + 1
+      );
+      assert.true(
+        countHistoryRequests(store.calls, 'holfuy-1804') >=
+          initialHistoryRequests + STATION_HISTORY_REQUESTS_PER_REFRESH
+      );
+    }
+  );
 
   test('it shows the selected station as the browser favicon and restores it on close', async function (assert) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
