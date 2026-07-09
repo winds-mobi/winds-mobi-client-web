@@ -126,11 +126,14 @@ mid-interaction. Keep this direction; don't reintroduce imperative view bookkeep
 
 ### Routes & services
 
-Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `help`; `index` redirects to `map`.
+Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `auth-callback` (path
+`/auth/callback`), `settings`, `help`; `index` redirects to `map`.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `map-refresh`
 (ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
-(geolocation + Permissions API state machine).
+(geolocation + Permissions API state machine), `settings` (persisted display preferences, see
+[Settings persistence](#settings-persistence-tracked-local-storage) below), and ember-simple-auth's `session`
+(`app/authenticators/winds-mobi.ts`; see [TODO.md](TODO.md) for the OAuth/JWT flow this drives).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 
@@ -170,6 +173,22 @@ state, route models, and query params.
   reach for the framework surface first.
 - No startup-time hacks (app initializers, bundler aliases) to force third-party libs to work. Prefer package upgrades
   or supported integration points; stop and discuss before adding that kind of workaround.
+- **Don't reinvent the wheel — but verify before adopting.** When a new paradigm/need comes up (state persistence,
+  browser-API mocking, etc.), check whether a maintained community addon already solves it before hand-rolling. Prefer
+  it if it's a good fit: actively maintained (recent release, real download/usage numbers — compare candidates on both
+  before picking one), and — critically — **empirically verified against this app's Vite/Embroider pipeline**, not
+  assumed compatible. This stack has burned time on both outcomes:
+  - `ember-cli-mirage` was evaluated for acceptance-test fixtures and **rejected**: it's a classic (non-v2) addon
+    whose `read-modules.js` does a runtime `require()` that Rollup can't resolve as ESM — `pnpm build` fails outright,
+    not just in dev. The existing fake-`service:store`-by-URL pattern (see Testing below) remains the right tool here.
+  - `ember-tracked-local-storage` replaced this app's hand-rolled `trackedInLocalStorage` decorator (see
+    [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: also a classic addon,
+    but it builds cleanly, and its per-owner `service:tracked-local-storage` architecture is a genuine improvement
+    over the module-scope singleton the hand-rolled version used.
+  - The verification method that told these two apart: install it, exercise its actual API in a throwaway scratch
+    component/test (not just import it), then run `pnpm build` (the _production_ build, not just `pnpm test:ember`) —
+    dev-mode success alone doesn't prove the Rollup/Vite production bundle will succeed. Delete the scratch files
+    before committing either way.
 - When async coordination fits **ember-concurrency**, prefer it over manual timer/promise bookkeeping, using current
   syntax. If newer ember-concurrency APIs would require installing/upgrading, stop and tell the user first.
 - Don't add speculative component arguments as override points with no real call site. If a component has an internal
@@ -186,6 +205,26 @@ state, route models, and query params.
 - Keep service APIs small and explicit; consumers call methods/tasks rather than mutating service state ad hoc. Don't
   use services as event buses. Use `@tracked` / tracked-built-ins for reactive state.
 - Add a registry typing for every app service: `declare module '@ember/service' { interface Registry { ... } }`.
+
+### Settings persistence (tracked-local-storage)
+
+`app/services/settings.ts` persists user display preferences via `ember-tracked-local-storage`'s
+`@trackedInLocalStorage` decorator (not a hand-rolled one — see the addon-first note above). Two things that aren't
+obvious from the decorator call site:
+
+- The default value is a **decorator option** (`{ keyName, defaultValue }`), not a field initializer — the addon
+  doesn't infer it from `= true`. The stored value is omitted from `localStorage` while it equals `defaultValue`, so
+  defaults can evolve later without a migration.
+- The addon ships **no TypeScript types** (plain JS + JSDoc). `types/ember-tracked-local-storage.d.ts` is an ambient
+  declaration recovering type safety for both the decorator and the injectable `service:tracked-local-storage` it's
+  backed by (registered on `@ember/service`'s `Registry` per the convention above) — extend that file, don't scatter
+  `as any` casts, if you touch this surface.
+- **In tests, reset via the service, never raw `localStorage`.** The service owns an in-memory reactive cell per key
+  that's seeded from `localStorage` exactly once; a bare `window.localStorage.removeItem(key)` clears the persisted
+  value but leaves the cached cell stale, silently leaking a previous test's value into the next one — even across
+  files, since QUnit runs the whole suite in one page load. `tests/helpers/index.ts`'s shared setup already calls
+  `owner.lookup('service:tracked-local-storage').clear()` before every test (matching the addon's own test suite's
+  convention), so this should be automatic — don't add per-file `localStorage.removeItem` guards back.
 
 ### Station detail sections
 
@@ -204,7 +243,10 @@ state, route models, and query params.
 
 ### i18n & relative time
 
-- All UI strings live in [translations/en-us.yaml](translations/en-us.yaml); update it whenever UI text changes.
+- All UI strings live in [translations/en-us.yaml](translations/en-us.yaml); update it whenever UI text changes. A
+  duplicated top-level or nested key in this file is invalid YAML under js-yaml's strict parser and crashes the Vite
+  dev server outright (`YAMLException: duplicated mapping key`) — not a lint warning, a hard boot failure. Watch for
+  this after copy-pasting a block of translation keys.
 - Never call ember-intl `formatRelativeTime` directly in UI. Use the shared `time-ago` helper
   ([app/helpers/time-ago.ts](app/helpers/time-ago.ts)), or `renderTimeAgoText` in TS, so wording stays consistent and
   auto-switches units.
@@ -216,7 +258,12 @@ state, route models, and query params.
 ### Testing
 
 - Acceptance tests register fake store services that satisfy requests by `url` and return typed `Station`/`History`
-  fixtures (see [tests/acceptance/](tests/acceptance/)).
+  fixtures (see [tests/acceptance/](tests/acceptance/)). This is deliberate over `ember-cli-mirage` — see the
+  addon-first note above for why mirage doesn't work in this app at all (build-breaking, not just a style choice).
+  Fake-store `request()` implementations that render history sections need to branch on `request.url` (e.g.
+  `.includes('/historic/')`) and return an **array** for history vs. a single record for a station/profile fetch —
+  returning the wrong shape doesn't error at the fake-store layer, it throws deep inside Highcharts (`data.map is not
+a function`) when the chart tries to render it.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.
@@ -224,7 +271,24 @@ state, route models, and query params.
   `.getAttribute`, etc.). Assert with **qunit-dom** (`assert.dom(selector).exists()/.hasText()/.hasAttribute(...)`, and
   `assert.dom(selector, rootElement)` to scope — e.g. `document.head` for head content); `hasAttribute` accepts a regex
   for partial matches. For non-assertion queries — `waitUntil` predicates, or collecting values for a `deepEqual` —
-  use the `@ember/test-helpers` `find`/`findAll` helpers, never `document.querySelector*`.
+  use the `@ember/test-helpers` `find`/`findAll` helpers, never `document.querySelector*`. For asserting a rendered
+  string whose exact ICU/Intl unit-format output isn't worth hand-deriving (e.g. `station/metric-card`'s
+  `intl.formatNumber(..., {format: 'windSpeed'})`), capture it empirically via a throwaway debug render
+  (`console.log` the text, read it from the test-runner output, delete the debug test) rather than guessing.
+- `pnpm lint` does **not** run ESLint — `package.json` has `lint:js:fix` but no plain `lint:js`, so the `lint:*(!fix)`
+  glob in the `lint` script silently skips it. Run `npx eslint <files>` directly (via `docker compose exec ui`) to
+  actually type-check test/app `.ts`/`.gts` files; several pre-existing test files fail it today (e.g.
+  `this.owner`/`this.element` come back untyped — `no-unsafe-*` errors — whenever a test's `this` is annotated with a
+  custom context type that doesn't extend `@ember/test-helpers`'s `TestContext`; last-hour/index-test.ts is the
+  original instance of this). None of this is CI-enforced, so treat new instances as consistent-with-precedent rather
+  than blocking, but don't be surprised by them.
+- Some acceptance tests need MapLibre's `idle` event, which never fires in this dev container (no WebGL in headless
+  Chromium here) — see [TODO.md](TODO.md)'s "Map-refresh acceptance tests can't run in the dev container" note. These
+  fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions without checking
+  whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize map (likely WebGL
+issue)` console error in the failure output). `pnpm test:ember` (isolated build against a real installed Chrome) is
+  more reliable for local verification than `pnpm test:ember:dev` (headless chromium via testem-dev.js), which failed
+  to even connect the browser at all in one session here — if that happens, fall back to `pnpm test:ember`.
 
 ### Refactoring & cleanup
 
