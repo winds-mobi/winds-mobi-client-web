@@ -155,4 +155,17 @@ module('Acceptance | map query params', function (hooks) {
       countStationRequests(store.calls) >= initialStationRequestCount + 1
     );
   });
+
+  test('it resets to the default view when the logo is clicked', async function (assert) {
+    await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
+    await click('[data-test-navbar-logo]');
+    await waitUntil(() => currentURL().includes('zoom=7'));
+    await settled();
+
+    assertCurrentMapUrl(assert, {
+      latitude: '46.8011',
+      longitude: '8.2275',
+      zoom: '7',
+    });
+  });
 });
