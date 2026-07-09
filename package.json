@@ -89,6 +89,7 @@
     "ember-simple-auth": "^8.3.1",
     "ember-source": "~6.3.0",
     "ember-template-lint": "^6.1.0",
+    "ember-tracked-local-storage": "^2.0.1",
     "ember-truth-helpers": "^5.0.0",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^9.1.0",
