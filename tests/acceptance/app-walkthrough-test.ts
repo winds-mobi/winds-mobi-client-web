@@ -267,6 +267,7 @@ module('Acceptance | app walkthrough', function (hooks) {
   });
 
   test('a signed-in visitor favourites a station and finds it again in favourites', async function (assert) {
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     await authenticateSession();
 
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');

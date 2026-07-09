@@ -18,7 +18,7 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the five preferences, on by default except the compact nearby list and icon labels', async function (assert) {
+  test('it shows the six preferences, on by default except the compact nearby list, icon labels, and beta features', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -27,6 +27,12 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
+    assert.dom('[data-test-setting="betaFeaturesEnabled"]').isNotChecked();
+    assert
+      .dom(this.element)
+      .includesText(
+        'Beta features are early access. We do not guarantee they work correctly.'
+      );
   });
 
   test('toggling a preference persists it to local storage', async function (assert) {

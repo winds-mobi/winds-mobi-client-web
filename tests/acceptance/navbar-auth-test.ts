@@ -43,6 +43,7 @@ module('Acceptance | navbar auth menu', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
   });
 
   test('signed out it offers the sign-in providers', async function (assert) {

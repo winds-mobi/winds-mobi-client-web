@@ -104,6 +104,7 @@ module('Acceptance | favorites route', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
   });
 
   test('signed out it shows the sign-in prompt and requests nothing', async function (assert) {

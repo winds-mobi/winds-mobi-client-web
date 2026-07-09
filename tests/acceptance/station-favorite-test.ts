@@ -104,6 +104,7 @@ module('Acceptance | station favorite toggle', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
   });
 
   test('signed out there is no star on the station panel', async function (assert) {
