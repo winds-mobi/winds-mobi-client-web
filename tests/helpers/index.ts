@@ -50,6 +50,7 @@ function setupRenderingTest(hooks: NestedHooks, options?: SetupTestOptions) {
 
     intl.addTranslations('en-us', translationsForEnUs);
     intl.setFormats(formats);
+    resetTrackedLocalStorageForTests();
   });
 
   // Additional setup for rendering tests can be done here.
@@ -64,6 +65,7 @@ function setupTest(hooks: NestedHooks, options?: SetupTestOptions) {
 
     intl.addTranslations('en-us', translationsForEnUs);
     intl.setFormats(formats);
+    resetTrackedLocalStorageForTests();
   });
 
   // Additional setup for unit tests can be done here.
