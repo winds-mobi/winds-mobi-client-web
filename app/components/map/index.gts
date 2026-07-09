@@ -306,13 +306,24 @@ export default class Map extends Component<MapSignature> {
 
   @action
   handleTerrainChange(event: { target: MaplibreMap }) {
-    if (!event.target.getTerrain() || event.target.getPitch() >= 70) {
+    if (event.target.getTerrain()) {
+      if (event.target.getPitch() < 70) {
+        event.target.easeTo({
+          pitch: 70,
+        });
+      }
+
       return;
     }
 
-    event.target.easeTo({
-      pitch: 70,
-    });
+    // Turning 3D off via the TerrainControl button only removes the DEM
+    // source — MapLibre has no "reset to default" for pitch, so without this
+    // the map stays tilted at whatever angle terrain left it at (#100).
+    if (event.target.getPitch() !== 0) {
+      event.target.easeTo({
+        pitch: 0,
+      });
+    }
   }
 
   // Cached so the reference is stable across re-renders (stations loading, each
