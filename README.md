@@ -3,6 +3,15 @@
 This README outlines the details of collaborating on this Ember application.
 A short introduction of this app could easily go here.
 
+## Community
+
+Questions, bug reports, and feature requests are welcome on our
+[Discord server](https://discord.gg/6VU23xDv5v) — it's the easiest way to get help or discuss
+ideas if you're not comfortable with GitHub.
+
+If you're a developer, please use [GitHub Issues](https://github.com/winds-mobi/winds-mobi-client-web/issues)
+instead, so bugs and feature requests stay tracked alongside the code.
+
 ## Prerequisites
 
 You will need the following things properly installed on your computer.

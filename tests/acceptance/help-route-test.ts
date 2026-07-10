@@ -83,6 +83,9 @@ module('Acceptance | help route', function (hooks) {
     assert.dom('[data-test-station-air-section]').exists();
     assert.dom('[data-test-station-provider-link]').hasText('Holfuy');
     assert.dom('[data-test-help-changelog]').exists();
+    assert
+      .dom('[data-test-help-discord-link]')
+      .hasAttribute('href', 'https://discord.gg/6VU23xDv5v');
   });
 
   test('it navigates to help from the mobile menu without reloading the app', async function (assert) {
