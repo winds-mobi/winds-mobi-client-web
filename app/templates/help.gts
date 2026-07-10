@@ -59,6 +59,18 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                   }}</dt>
                 <dd class="mt-1">{{t "help.sections.nearbyDescription"}}</dd>
               </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "navigation.favorites"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.sections.favoritesDescription"}}</dd>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "navigation.settings"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.sections.settingsDescription"}}</dd>
+              </div>
             </dl>
           </div>
         </StationSectionCard>

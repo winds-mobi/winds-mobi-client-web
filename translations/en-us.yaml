@@ -71,10 +71,16 @@ settings:
       stand out and stale ones recede. Arrows scale linearly from full size
       now down to half size at 30 minutes, and never shrink below half size.
   nearbyCompactList:
-    label: Smaller nearby cards
+    label: Compact nearby cards
     description: >-
-      Show nearby stations as smaller cards (name, altitude, wind, gusts, last
+      Show nearby stations as compact cards (name, altitude, wind, gusts, last
       update, and a small wind-direction thumbnail) instead of full-size
+      cards, so more stations fit on screen without scrolling.
+  favoritesCompactList:
+    label: Compact favourite cards
+    description: >-
+      Show favourite stations as compact cards (name, altitude, wind, gusts,
+      last update, and a small wind-direction thumbnail) instead of full-size
       cards, so more stations fit on screen without scrolling.
   useIconLabels:
     label: Use icons for labels
@@ -91,40 +97,42 @@ settings:
 
 help:
   title: Help
-  intro: Winds.mobi helps you inspect live wind and weather stations on the map, compare nearby stations around your current position, and understand what each reading means.
+  intro: Winds.mobi shows live wind and weather stations on a map, so you can check conditions and plan your flight.
   sections:
-    mapDescription: Explore stations on the interactive map, compare marker colours, and open a station panel for more detail.
-    nearbyDescription: Use your location to load the closest stations and compare their current conditions side by side.
+    mapDescription: Browse stations on the map and open one for full detail.
+    nearbyDescription: Use your location to compare the closest stations side by side.
+    favoritesDescription: Save stations for quick access — stored in your browser, no account needed.
+    settingsDescription: Turn display preferences on or off, like gusts outline or compact cards.
   liveExample:
     title: Live station example
-    description: This live example loads the current Holfuy 1804 station so you can see the real widgets used in the app.
+    description: A live Holfuy 1804 station, so you can see the real widgets in action.
     legendTitle: What you are looking at
     items:
       headerTitle: Station header
-      headerDescription: The header shows the station name, altitude, relative update time, provider, and the distance from you when your location is available. A mountain icon next to the altitude marks a free-flight take-off site (peak); other stations show altitude with no icon.
+      headerDescription: Name, altitude, last update, provider, and distance (when your location is available). A mountain icon marks a take-off site.
       nowTitle: Now
-      nowDescription: The left summary card shows the latest reported values for wind, gusts, direction, temperature, humidity, pressure, and rain.
+      nowDescription: Latest wind, gusts, direction, temperature, humidity, pressure, and rain.
       lastHourTitle: Last hour
-      lastHourDescription: The second summary card focuses on the last hour with trend values and a compact wind-direction history.
+      lastHourDescription: Trend values and a compact wind-direction history for the last hour.
       windHistoryTitle: Wind history
-      windHistoryDescription: The wind section shows the larger historical view for wind speed, gusts, and direction over time.
+      windHistoryDescription: Wind speed, gusts, and direction over time.
       airHistoryTitle: Air history
-      airHistoryDescription: The air section shows the matching historical charts for temperature, humidity, and rain.
+      airHistoryDescription: Temperature, humidity, and rain over time.
   colors:
     title: Map marker colours
-    description: Winds.mobi reuses this shared wind palette for wind speed and gusts across station markers, the last-hour wind rose, and the wind history chart so stronger conditions stay easy to read everywhere.
+    description: The same colour scale marks wind speed and gusts on map markers, the last-hour rose, and history charts.
   freshness:
     title: Data freshness colours
-    description: The "updated" time in a station's header and nearby cards fades from glowing gold to grey as a reading ages, so you can tell at a glance how recent the data is.
+    description: The "updated" time fades from gold to grey as a reading ages — a quick way to spot stale data.
   providers:
     title: Data providers
-    description: Winds.mobi aggregates station data from multiple provider networks. The provider name in each station header links back to the original source when available.
+    description: Station data comes from multiple provider networks. Provider names link back to the source when available.
   compatibility:
     title: Compatibility
-    description: Winds.mobi is built for current desktop and mobile browsers, with the interactive map and charts working best on the latest major browser versions.
+    description: Works best in a recent desktop or mobile browser.
   privacy:
     title: Privacy
-    description: Winds.mobi uses your browser location only when you ask it to. The nearby view and distance display depend on that location, and the app does not need location access for normal map browsing.
+    description: Location is only used when you ask, for the nearby view and distances. Favourites are saved in your browser only — no account or cross-device sync.
   about:
     title: About
     description: Questions, issues, or improvement ideas are welcome.
@@ -139,7 +147,7 @@ help:
     repoDescription: For developers — browse the source or open an issue.
   changelog:
     title: Changelog
-    description: The latest shipped changes are listed below directly from the project changelog.
+    description: Recent shipped changes, straight from the project changelog.
     loading: Loading changelog…
     error: The changelog could not be loaded right now.
 
@@ -157,9 +165,6 @@ nearby:
   description: Use your location to find the closest stations around your current position and compare the live reading with the last hour at a glance.
   loading: Looking up the closest stations…
   requestError: Nearby stations could not be loaded right now.
-  view:
-    card: Bigger cards
-    compact: Smaller cards
   location:
     checking: Checking location access…
     locatingDescription: Trying to determine your current location…

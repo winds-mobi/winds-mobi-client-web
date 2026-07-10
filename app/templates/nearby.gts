@@ -5,12 +5,9 @@ import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { pageTitle } from 'ember-page-title';
 import { action } from '@ember/object';
-import { fn } from '@ember/helper';
 import { Button } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
-import GridFour from 'ember-phosphor-icons/components/ph-grid-four';
-import GridNine from 'ember-phosphor-icons/components/ph-grid-nine';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
@@ -136,11 +133,6 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     await this.nearbyLocation.requestCurrentPosition();
   }
 
-  @action
-  setCompactList(compact: boolean) {
-    this.settings.nearbyCompactList = compact;
-  }
-
   <template>
     {{pageTitle (t "nearby.title")}}
 
@@ -151,38 +143,6 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     >
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.nearbyLocation.hasCoordinates}}
-          <div class="flex justify-end gap-2">
-            <Button
-              aria-label={{t "nearby.view.card"}}
-              aria-pressed={{if this.settings.nearbyCompactList "false" "true"}}
-              data-test-nearby-view-toggle="card"
-              @appearance={{if
-                this.settings.nearbyCompactList
-                "outlined"
-                "default"
-              }}
-              @size="sm"
-              @onPress={{fn this.setCompactList false}}
-            >
-              <GridFour @size={{16}} />
-            </Button>
-
-            <Button
-              aria-label={{t "nearby.view.compact"}}
-              aria-pressed={{if this.settings.nearbyCompactList "true" "false"}}
-              data-test-nearby-view-toggle="compact"
-              @appearance={{if
-                this.settings.nearbyCompactList
-                "default"
-                "outlined"
-              }}
-              @size="sm"
-              @onPress={{fn this.setCompactList true}}
-            >
-              <GridNine @size={{16}} />
-            </Button>
-          </div>
-
           {{#if this.isError}}
             <StationSectionCard
               data-test-nearby-loading

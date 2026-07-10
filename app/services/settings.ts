@@ -44,6 +44,14 @@ export default class SettingsService extends Service {
   })
   nearbyCompactList!: boolean;
 
+  // Show the /favorites stations list as dense rows instead of full cards,
+  // mirroring nearbyCompactList.
+  @trackedInLocalStorage({
+    keyName: 'settings.favoritesCompactList',
+    defaultValue: false,
+  })
+  favoritesCompactList!: boolean;
+
   // Replace the Now/Last hour cards' text labels with small icons, so each
   // value shrinks to fit its content instead of stretching full width.
   @trackedInLocalStorage({
@@ -71,6 +79,7 @@ export type BooleanSettingKey =
   | 'showGustsOutline'
   | 'shrinkOldData'
   | 'nearbyCompactList'
+  | 'favoritesCompactList'
   | 'useIconLabels'
   | 'betaFeaturesEnabled';
 
