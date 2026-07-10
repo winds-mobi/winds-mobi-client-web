@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.15.0 - 2026-07-10
+
+### Added
+
+- A Discord link and QR code on the Help page's About section, for questions, bug reports, and feature requests — the Repository link remains for developers.
+
 ## v0.14.0 - 2026-07-10
 
 ### Changed

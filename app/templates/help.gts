@@ -205,17 +205,28 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                   }}</dt>
                 <dd class="mt-1">{{t "help.about.teamValue"}}</dd>
               </div>
-              <div class="rounded-lg bg-slate-50 p-3">
+              <div class="rounded-lg bg-slate-50 p-3" data-test-help-community>
                 <dt class="font-semibold text-slate-950">{{t
-                    "help.about.emailTitle"
+                    "help.about.communityTitle"
                   }}</dt>
-                <dd class="mt-1">
-                  <a
-                    class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-                    href="mailto:info@winds.mobi"
-                  >
-                    info@winds.mobi
-                  </a>
+                <dd class="mt-1 flex items-start gap-3">
+                  <img
+                    alt=""
+                    src="/discord-invite-qr.svg"
+                    class="size-16 shrink-0 rounded bg-white p-1 ring-1 ring-slate-200"
+                  />
+                  <span>
+                    {{t "help.about.communityDescription"}}
+                    <a
+                      data-test-help-discord-link
+                      class="block underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                      href="https://discord.gg/6VU23xDv5v"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      discord.gg/6VU23xDv5v
+                    </a>
+                  </span>
                 </dd>
               </div>
               <div class="rounded-lg bg-slate-50 p-3">
@@ -223,6 +234,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                     "help.about.repoTitle"
                   }}</dt>
                 <dd class="mt-1">
+                  <p>{{t "help.about.repoDescription"}}</p>
                   <a
                     class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
                     href="https://github.com/winds-mobi/winds-mobi-client-web"

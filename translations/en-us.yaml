@@ -130,10 +130,13 @@ help:
     description: Questions, issues, or improvement ideas are welcome.
     teamTitle: Built by
     teamValue: Michal, Fred Montet, Yann Savary
-    emailTitle: Contact
-    emailValue: info@winds.mobi
+    communityTitle: Community
+    communityDescription: >-
+      Questions, bug reports, and feature requests — join our Discord.
+      Scan the code or follow the link.
     repoTitle: Repository
     repoValue: github.com/winds-mobi/winds-mobi-client-web
+    repoDescription: For developers — browse the source or open an issue.
   changelog:
     title: Changelog
     description: The latest shipped changes are listed below directly from the project changelog.
