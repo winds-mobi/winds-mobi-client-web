@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.14.0 - 2026-07-10
+
+### Changed
+
+- **🧪 Beta:** Favouriting a station no longer requires signing in — starring a station now saves it directly in this browser, so favourites work right away and stay put across visits on this device. The favourite icon on the station panel is now a heart instead of a star.
+
+### Removed
+
+- **🧪 Beta:** Removed sign-in with Google or Facebook and the account menu, introduced in v0.13.0. Favourites no longer depend on a winds.mobi profile.
+
 ## v0.13.0 - 2026-07-09
 
 ### Added
