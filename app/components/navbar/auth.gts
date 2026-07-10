@@ -1,3 +1,7 @@
+// TODO: Remove login — this component renders the disabled sign-in/sign-out
+// account menu (see app/services/session.ts). Kept for reference; not
+// currently imported anywhere.
+/*
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
 import { action } from '@ember/object';
@@ -129,3 +133,4 @@ export default class NavbarAuth extends Component<NavbarAuthSignature> {
     </Dropdown>
   </template>
 }
+*/

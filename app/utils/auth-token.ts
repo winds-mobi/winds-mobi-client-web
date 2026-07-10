@@ -1,3 +1,5 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
 // Module-scope mirror of the session's JWT for the Warp Drive request layer:
 // handlers are registered at module scope in app/services/store.ts and have
 // no service injection, so they can't read the ember-simple-auth session

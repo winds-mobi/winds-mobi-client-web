@@ -1,3 +1,6 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Not currently registered in
+// app/services/store.ts's `handlers` array. Kept for reference/restoration.
 import type { Handler, NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
 import { getAuthToken } from 'winds-mobi-client-web/utils/auth-token';

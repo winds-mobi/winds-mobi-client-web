@@ -1,3 +1,7 @@
+// TODO: Remove login — these OAuth sign-in links back the disabled sign-in
+// feature (see app/services/session.ts). Kept for reference; not currently
+// imported anywhere.
+/*
 import { t } from 'ember-intl';
 import FacebookLogo from 'ember-phosphor-icons/components/ph-facebook-logo';
 import GoogleLogo from 'ember-phosphor-icons/components/ph-google-logo';
@@ -34,3 +38,4 @@ const AuthSignInLinks: TOC<AuthSignInLinksSignature> = <template>
 </template>;
 
 export default AuthSignInLinks;
+*/

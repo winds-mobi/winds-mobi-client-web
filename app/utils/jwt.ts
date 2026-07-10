@@ -1,3 +1,6 @@
+// TODO: Remove login — only used by app/authenticators/winds-mobi.ts, which
+// backs the disabled sign-in feature (see app/services/session.ts). Kept
+// for reference/restoration.
 export interface JwtPayload {
   username?: string;
   exp?: number;

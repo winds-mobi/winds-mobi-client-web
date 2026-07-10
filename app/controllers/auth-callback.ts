@@ -1,3 +1,7 @@
+// TODO: Remove login — paired with the unregistered auth-callback route
+// (see app/router.ts) backing the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference.
+/*
 import Controller from '@ember/controller';
 
 // Declares the `ott` query param so the router materializes it for the
@@ -7,3 +11,4 @@ export default class AuthCallbackController extends Controller {
 
   ott: string | null = null;
 }
+*/

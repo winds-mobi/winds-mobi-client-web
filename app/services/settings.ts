@@ -52,9 +52,9 @@ export default class SettingsService extends Service {
   })
   useIconLabels!: boolean;
 
-  // Early access to in-development features (currently: sign-in, the
-  // favourites view, and the favourite star). Off by default — see
-  // app/templates/settings.gts for the warning shown alongside this toggle.
+  // Early access to in-development features (currently: the favourites view
+  // and the favourite heart). Off by default — see app/templates/settings.gts
+  // for the warning shown alongside this toggle.
   @trackedInLocalStorage({
     keyName: 'settings.betaFeaturesEnabled',
     defaultValue: false,
