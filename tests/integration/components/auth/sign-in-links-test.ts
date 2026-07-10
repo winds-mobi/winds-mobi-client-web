@@ -1,3 +1,6 @@
+// TODO: Remove login — Auth::SignInLinks backs the disabled sign-in feature
+// (see app/services/session.ts). Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import { find, render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
@@ -28,3 +31,4 @@ module('Integration | Component | auth/sign-in-links', function (hooks) {
     );
   });
 });
+*/

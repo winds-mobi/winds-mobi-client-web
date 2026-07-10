@@ -1,3 +1,7 @@
+// TODO: Remove login — the auth-callback route is unregistered (see
+// app/router.ts) and backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
+/*
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
@@ -98,3 +102,4 @@ module('Acceptance | auth callback', function (hooks) {
     assert.true(this.owner.lookup('service:session').isAuthenticated);
   });
 });
+*/

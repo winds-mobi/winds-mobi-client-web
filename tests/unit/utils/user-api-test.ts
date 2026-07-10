@@ -1,3 +1,6 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import { signInUrl, userApiUrl } from 'winds-mobi-client-web/utils/user-api';
 
@@ -28,3 +31,4 @@ module('Unit | Utility | user-api', function () {
     assert.true(signInUrl('google').includes('/user/google/oauth2callback/'));
   });
 });
+*/

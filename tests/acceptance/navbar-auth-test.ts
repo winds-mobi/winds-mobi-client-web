@@ -1,3 +1,7 @@
+// TODO: Remove login — NavbarAuth is unmounted (see
+// app/components/navbar/index.gts) and backs the disabled sign-in feature
+// (see app/services/session.ts). Kept for reference/restoration.
+/*
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentRouteName, visit } from '@ember/test-helpers';
@@ -88,3 +92,4 @@ module('Acceptance | navbar auth menu', function (hooks) {
     assert.dom('[data-test-navbar-auth-avatar]').doesNotExist();
   });
 });
+*/
