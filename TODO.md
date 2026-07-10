@@ -3,6 +3,11 @@
 Recreate the old winds.mobi login and favourite-stations feature in this client.
 Branch: `feature/login-favourites`.
 
+**Status:** implemented, then the login/SSO half was disabled (kept in place, commented out
+and marked `TODO: Remove login`) once favourites moved to a device-local `localStorage` list
+(`app/services/favorites.ts`) that needs no account. This doc is kept as background for
+whoever restores sign-in; the plan below no longer reflects current behaviour for favourites.
+
 ## Background — how the existing backend actually works (research findings)
 
 The station API (`https://winds.mobi/api/2.3`, Swagger at

@@ -1,39 +1,25 @@
 import Component from '@glimmer/component';
-import { cached } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { LinkTo } from '@ember/routing';
 import { Button } from '@frontile/buttons';
-import { getRequestState } from '@warp-drive/core/reactive';
-import type { Future } from '@warp-drive/core/request';
-import { task } from 'ember-concurrency';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
 import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
+import Heart from 'ember-phosphor-icons/components/ph-heart';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
-import Star from 'ember-phosphor-icons/components/ph-star';
-import {
-  addFavorite,
-  profileQuery,
-  removeFavorite,
-} from 'winds-mobi-client-web/builders/profile';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import timeAgo, {
   relativeSecondsFromTimestamp,
 } from 'winds-mobi-client-web/helpers/time-ago';
+import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import type SessionService from 'winds-mobi-client-web/services/session';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
-import type {
-  Profile,
-  Station,
-  StoreService,
-} from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
 import { textClassForReadingAge } from 'winds-mobi-client-web/utils/reading-freshness';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import StationMetaItem from './meta-item';
 
 export interface StationHeaderSignature {
@@ -47,10 +33,9 @@ export interface StationHeaderSignature {
 }
 
 export default class StationHeader extends Component<StationHeaderSignature> {
+  @service declare favorites: FavoritesService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
-  @service declare session: SessionService;
   @service declare settings: SettingsService;
-  @service declare store: StoreService;
 
   get hasProviderLink() {
     return Boolean(
@@ -58,47 +43,20 @@ export default class StationHeader extends Component<StationHeaderSignature> {
     );
   }
 
-  // Favouriting is a beta feature (see app/services/settings.ts): still
-  // gated on being signed in, but also hidden until beta is opted into.
+  // Favouriting is a beta feature (see app/services/settings.ts): hidden
+  // until beta is opted into. No account is required — favourites persist
+  // locally (see app/services/favorites.ts).
   get showFavoriteControl(): boolean {
-    return this.session.isAuthenticated && this.settings.betaFeaturesEnabled;
-  }
-
-  @cached
-  get profileRequest(): Future<{ data: Profile }> | undefined {
-    if (!this.session.isAuthenticated) {
-      return undefined;
-    }
-
-    return this.store.request<{ data: Profile }>(profileQuery());
-  }
-
-  get profile(): Profile | undefined {
-    const state = this.profileRequest
-      ? getRequestState(this.profileRequest)
-      : undefined;
-
-    return state?.isSuccess ? responseData(state.value) : undefined;
+    return this.settings.betaFeaturesEnabled;
   }
 
   get isFavorite(): boolean {
-    return this.profile?.favorites.includes(this.args.station.id) === true;
+    return this.favorites.has(this.args.station.id);
   }
-
-  // 204s with no body, so a profile refetch updates the shared record (and
-  // with it every star and the favourites view) after the mutation lands.
-  toggleFavorite = task({ drop: true }, async () => {
-    const stationId = this.args.station.id;
-
-    await this.store.request(
-      this.isFavorite ? removeFavorite(stationId) : addFavorite(stationId)
-    );
-    await this.store.request(profileQuery());
-  });
 
   @action
   handleToggleFavorite() {
-    void this.toggleFavorite.perform();
+    this.favorites.toggle(this.args.station.id);
   }
 
   <template>
@@ -126,15 +84,14 @@ export default class StationHeader extends Component<StationHeaderSignature> {
             }}
             aria-pressed={{if this.isFavorite "true" "false"}}
             data-test-station-favorite
-            disabled={{this.toggleFavorite.isRunning}}
             @appearance="minimal"
             @size="sm"
             @onPress={{this.handleToggleFavorite}}
           >
-            <Star
+            <Heart
               @size={{20}}
               @weight={{if this.isFavorite "fill" "regular"}}
-              class={{if this.isFavorite "text-amber-500" "text-slate-400"}}
+              class={{if this.isFavorite "text-rose-500" "text-slate-400"}}
             />
           </Button>
         {{/if}}

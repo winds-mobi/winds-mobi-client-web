@@ -1,3 +1,7 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts); favorites now persist locally instead (see
+// app/services/favorites.ts). Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import { SkipCache } from '@warp-drive/core/types/request';
 import {
@@ -51,3 +55,4 @@ module('Unit | Builder | profile', function () {
     );
   });
 });
+*/

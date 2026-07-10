@@ -1,21 +1,23 @@
 application:
   name: winds.mobi
 
-auth:
-  menu:
-    label: Account
-    signOut: Sign out
-  signIn:
-    google: Sign in with Google
-    facebook: Sign in with Facebook
-  callback:
-    title: Signing in
-    pending: Signing you in…
-    failedTitle: Sign-in failed
-    failed: >-
-      The sign-in link has expired or was already used. Please try signing in
-      again.
-    backToMap: Back to the map
+# TODO: Remove login — these strings back the disabled sign-in feature (see
+# app/services/session.ts). Kept for reference/restoration.
+# auth:
+#   menu:
+#     label: Account
+#     signOut: Sign out
+#   signIn:
+#     google: Sign in with Google
+#     facebook: Sign in with Facebook
+#   callback:
+#     title: Signing in
+#     pending: Signing you in…
+#     failedTitle: Sign-in failed
+#     failed: >-
+#       The sign-in link has expired or was already used. Please try signing in
+#       again.
+#     backToMap: Back to the map
 
 common:
   close: Close
@@ -25,11 +27,13 @@ favorites:
   loading: Loading your favourite stations…
   requestError: Your favourite stations could not be loaded right now.
   empty: >-
-    Your profile has no favourite stations yet. Stations you star show up
-    here with their live readings.
-  signedOut: >-
-    Sign in to see the favourite stations from your winds.mobi profile and
-    compare their live readings at a glance.
+    You have no favourite stations yet. Stations you favourite show up here
+    with their live readings.
+  # TODO: Remove login — shown when signed out; sign-in is currently disabled
+  # (see app/services/session.ts). Kept for reference/restoration.
+  # signedOut: >-
+  #   Sign in to see the favourite stations from your winds.mobi profile and
+  #   compare their live readings at a glance.
 
 navigation:
   menu: Menu

@@ -1,3 +1,8 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts); favorites now persist locally instead (see
+// app/services/favorites.ts). Depends on the `Profile` type and
+// `ProfileSchema`, both commented out in app/services/store.ts — restore
+// those first. Kept for reference/restoration.
 import { SkipCache } from '@warp-drive/core/types/request';
 import type { QueryRequestOptions } from '@warp-drive/core/types/request';
 import { userApiUrl } from 'winds-mobi-client-web/utils/user-api';

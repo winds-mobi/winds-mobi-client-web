@@ -3,8 +3,11 @@ import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
-import NavbarAuth from './auth';
+// TODO: Remove login — SettingsService and NavbarAuth back the disabled
+// sign-in feature (see app/services/session.ts). Restore these imports
+// alongside it.
+// import type SettingsService from 'winds-mobi-client-web/services/settings';
+// import NavbarAuth from './auth';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
 import NavbarLocateControl from './locate-control';
@@ -22,7 +25,8 @@ export interface NavbarSignature {
 
 export default class Navbar extends Component<NavbarSignature> {
   @service declare mapRefresh: MapRefreshService;
-  @service declare settings: SettingsService;
+  // TODO: Remove login — settings was only injected to gate NavbarAuth.
+  // @service declare settings: SettingsService;
 
   <template>
     <nav
@@ -43,9 +47,11 @@ export default class Navbar extends Component<NavbarSignature> {
           <NavbarLocateControl />
           <NavbarRefreshControl />
 
-          {{#if this.settings.betaFeaturesEnabled}}
-            <NavbarAuth />
-          {{/if}}
+          {{!-- TODO: Remove login — NavbarAuth backs the disabled sign-in
+            feature (see app/services/session.ts). Restore alongside it.
+            {{#if this.settings.betaFeaturesEnabled}}
+              <NavbarAuth />
+            {{/if}} --}}
 
           <NavbarMenuMobile />
         </div>

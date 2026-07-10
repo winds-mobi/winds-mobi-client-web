@@ -2,7 +2,9 @@ import { useLegacyStore } from '@warp-drive/legacy';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
-import UserHandler from 'winds-mobi-client-web/handlers/user';
+// TODO: Remove login — UserHandler backs the disabled sign-in feature (see
+// app/services/session.ts). Restore this import alongside it.
+// import UserHandler from 'winds-mobi-client-web/handlers/user';
 import { withDefaults } from '@warp-drive/core/reactive';
 import { Type } from '@warp-drive/core/types/symbols';
 
@@ -91,15 +93,17 @@ export const HistorySchema = withDefaults({
   ],
 });
 
-// The authenticated user's profile from the winds-mobi-admin user API.
-export const ProfileSchema = withDefaults({
-  type: 'profile',
-  fields: [
-    { name: 'displayName', kind: 'field' },
-    { name: 'picture', kind: 'field' },
-    { name: 'favorites', kind: 'array' },
-  ],
-});
+// TODO: Remove login — the authenticated user's profile from the
+// winds-mobi-admin user API. Favourites no longer read from this; see
+// app/services/favorites.ts. Restore alongside app/services/session.ts.
+// export const ProfileSchema = withDefaults({
+//   type: 'profile',
+//   fields: [
+//     { name: 'displayName', kind: 'field' },
+//     { name: 'picture', kind: 'field' },
+//     { name: 'favorites', kind: 'array' },
+//   ],
+// });
 
 export type Station = {
   id: string;
@@ -124,14 +128,15 @@ export type Station = {
   [Type]: 'station';
 };
 
-export type Profile = {
-  id: string;
-  displayName?: string;
-  picture?: string;
-  favorites: string[];
-
-  [Type]: 'profile';
-};
+// TODO: Remove login — Profile type paired with ProfileSchema above.
+// export type Profile = {
+//   id: string;
+//   displayName?: string;
+//   picture?: string;
+//   favorites: string[];
+//
+//   [Type]: 'profile';
+// };
 
 export type History = {
   id: string;
@@ -197,10 +202,12 @@ const AppStore = useLegacyStore({
   legacyRequests: true,
   modelFragments: true,
   cache: JSONAPICache,
-  schemas: [LocationSchema, StationSchema, HistorySchema, ProfileSchema],
-  // UserHandler must run first: it owns the user-API requests (auth header
-  // + profile reshaping) before the station/history reshapers see them.
-  handlers: [UserHandler, StationHandler, HistoryHandler],
+  // TODO: Remove login — ProfileSchema was listed here; restore alongside it.
+  schemas: [LocationSchema, StationSchema, HistorySchema],
+  // TODO: Remove login — UserHandler ran first here: it owns the user-API
+  // requests (auth header + profile reshaping) and must run before the
+  // station/history reshapers see them. Restore alongside it.
+  handlers: [StationHandler, HistoryHandler],
   derivations: [unwrapDerivation, composeReadingDerivation],
 });
 

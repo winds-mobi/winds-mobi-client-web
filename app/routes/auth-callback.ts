@@ -1,3 +1,7 @@
+// TODO: Remove login — this route is unregistered (see app/router.ts) and
+// backs the disabled sign-in feature (see app/services/session.ts). Kept
+// for reference.
+/*
 import Route from '@ember/routing/route';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
@@ -42,3 +46,4 @@ export default class AuthCallbackRoute extends Route {
     return { failed: false };
   }
 }
+*/

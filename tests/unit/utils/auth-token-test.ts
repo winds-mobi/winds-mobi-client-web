@@ -1,3 +1,6 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import {
   getAuthToken,
@@ -23,3 +26,4 @@ module('Unit | Utility | auth-token', function (hooks) {
     assert.strictEqual(getAuthToken(), null);
   });
 });
+*/

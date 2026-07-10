@@ -1,3 +1,7 @@
+// TODO: Remove login — UserHandler backs the disabled sign-in feature (see
+// app/services/session.ts) and is unregistered in app/services/store.ts.
+// Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import UserHandler from 'winds-mobi-client-web/handlers/user';
 import { setAuthToken } from 'winds-mobi-client-web/utils/auth-token';
@@ -145,3 +149,4 @@ module('Unit | Handler | user', function (hooks) {
     assert.false('displayName' in response.data.attributes);
   });
 });
+*/

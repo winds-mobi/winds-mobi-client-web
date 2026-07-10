@@ -1,3 +1,7 @@
+// TODO: Remove login — paired with the unregistered auth-callback route
+// (see app/router.ts) backing the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference.
+/*
 import { LinkTo } from '@ember/routing';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
@@ -56,3 +60,4 @@ const AuthCallbackTemplate: TOC<AuthCallbackTemplateSignature> = <template>
 </template>;
 
 export default AuthCallbackTemplate;
+*/

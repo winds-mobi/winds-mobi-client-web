@@ -1,3 +1,5 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
 // The user/auth API lives in winds-mobi-admin (Django), served under
 // https://winds.mobi/user/ — a separate service from the station API
 // configured via setBuildURLConfig in app/app.ts.

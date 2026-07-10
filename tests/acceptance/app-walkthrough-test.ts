@@ -5,20 +5,15 @@ import {
   currentURL,
   fillIn,
   find,
-  settled,
   visit,
   waitFor,
   waitUntil,
 } from '@ember/test-helpers';
-import { authenticateSession } from 'ember-simple-auth/test-support';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import type {
-  History,
-  Profile,
-  Station,
-} from 'winds-mobi-client-web/services/store';
+import type { History, Station } from 'winds-mobi-client-web/services/store';
 
 // A single continuous walk through the app's main routes and interactions,
 // on top of (not instead of) the focused per-route/per-feature acceptance
@@ -115,29 +110,12 @@ const HISTORY_FIXTURES: History[] = [
 
 class FakeStoreService extends Service {
   calls: { method: string; url: string }[] = [];
-  favorites: string[] = [];
 
   request(request: FakeStoreRequest) {
     const url = request.url ?? '';
     const method = request.method ?? 'GET';
 
     this.calls.push({ method, url });
-
-    if (url.includes('/user/profile/favorites/')) {
-      return Promise.resolve({ content: null });
-    }
-
-    if (url.includes('/user/profile/')) {
-      const profile: Profile = {
-        id: 'google-123',
-        displayName: 'Michal',
-        picture: 'https://example.com/avatar.png',
-        favorites: [...this.favorites],
-        [Type]: 'profile',
-      };
-
-      return Promise.resolve({ content: { data: profile } });
-    }
 
     if (url.includes('/historic/')) {
       return Promise.resolve({ content: { data: HISTORY_FIXTURES } });
@@ -189,10 +167,6 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
       longitude: 7.9,
     };
   };
-}
-
-function favoriteMutations(calls: { method: string; url: string }[]) {
-  return calls.filter(({ url }) => url.includes('/user/profile/favorites/'));
 }
 
 module('Acceptance | app walkthrough', function (hooks) {
@@ -252,42 +226,38 @@ module('Acceptance | app walkthrough', function (hooks) {
     assert.strictEqual(currentURL(), '/help');
     assert.dom('[data-test-help-changelog]').exists();
 
-    // Never signed in, so no favorite/profile requests were made.
-    const store = this.owner.lookup('service:store') as FakeStoreService;
-    assert.strictEqual(favoriteMutations(store.calls).length, 0);
+    // No station was favourited along the way.
+    const favorites = this.owner.lookup(
+      'service:favorites'
+    ) as FavoritesService;
+
+    assert.deepEqual(favorites.stationIds, []);
   });
 
-  test('a signed-in visitor favourites a station and finds it again in favourites', async function (assert) {
+  test('a visitor favourites a station and finds it again in favourites', async function (assert) {
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
-    await authenticateSession();
 
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
     await waitFor('[data-test-station-favorite]');
 
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const favorites = this.owner.lookup(
+      'service:favorites'
+    ) as FavoritesService;
 
     assert
       .dom('[data-test-station-favorite]')
       .hasAria('pressed', 'false', 'not yet a favourite');
 
-    // Star the open station. The panel's own profile request is cached for
-    // the life of this mount (see the header component's `@cached
-    // profileRequest`), so — same as station-favorite-test.ts — we assert
-    // the mutation fired rather than an in-place visual flip; the fake store
-    // has no shared cache to reactively update an already-mounted request.
-    // `store.favorites` below stands in for "the backend now reflects this,"
-    // which the *next* fresh mount (the favourites route, then reopening the
-    // station) will correctly read.
-    store.favorites = ['holfuy-1804'];
+    // Star the open station.
     await click('[data-test-station-favorite]');
 
-    let mutations = favoriteMutations(store.calls);
-    assert.strictEqual(mutations.length, 1);
-    assert.strictEqual(mutations[0]?.method, 'POST');
+    assert
+      .dom('[data-test-station-favorite]')
+      .hasAria('pressed', 'true', 'the star reflects the new favourite');
+    assert.deepEqual(favorites.stationIds, ['holfuy-1804']);
 
-    // Jump to the favourites view from the account menu.
-    await click('[data-test-navbar-auth]');
-    await click('[data-test-navbar-auth-item="favorites"]');
+    // Jump to the favourites view from the nav menu.
+    await click('[data-test-navbar-link="favorites"]');
     assert.strictEqual(currentURL(), '/favorites');
 
     assert
@@ -304,16 +274,12 @@ module('Acceptance | app walkthrough', function (hooks) {
       .hasAria('pressed', 'true', 'the fresh mount picks up the favourite');
 
     // Unstar it.
-    store.favorites = [];
     await click('[data-test-station-favorite]');
 
-    mutations = favoriteMutations(store.calls);
-    assert.strictEqual(mutations.length, 2, 'one add and one remove');
-    assert.strictEqual(mutations[1]?.method, 'DELETE');
+    assert.deepEqual(favorites.stationIds, []);
 
     // Back in favourites, a fresh mount shows the now-empty list.
-    await click('[data-test-navbar-auth]');
-    await click('[data-test-navbar-auth-item="favorites"]');
+    await click('[data-test-navbar-link="favorites"]');
     await waitFor('[data-test-favorites-empty]');
 
     assert.dom('[data-test-nearby-station-card]').doesNotExist();

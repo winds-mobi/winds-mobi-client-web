@@ -1,8 +1,8 @@
 import Binoculars from 'ember-phosphor-icons/components/ph-binoculars';
 import MapTrifold from 'ember-phosphor-icons/components/ph-map-trifold';
 import Gear from 'ember-phosphor-icons/components/ph-gear';
+import Heart from 'ember-phosphor-icons/components/ph-heart';
 import Lifebuoy from 'ember-phosphor-icons/components/ph-lifebuoy';
-import Star from 'ember-phosphor-icons/components/ph-star';
 import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 export interface NavbarMenuItem {
@@ -23,7 +23,7 @@ export const NAVBAR_MENU_ITEMS: readonly NavbarMenuItem[] = [
     route: 'nearby',
   },
   {
-    icon: Star,
+    icon: Heart,
     labelKey: 'navigation.favorites',
     route: 'favorites',
   },

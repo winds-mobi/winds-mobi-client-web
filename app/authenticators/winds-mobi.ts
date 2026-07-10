@@ -1,3 +1,5 @@
+// TODO: Remove login — backs the disabled sign-in feature (see
+// app/services/session.ts). Kept for reference/restoration.
 import Base from 'ember-simple-auth/authenticators/base';
 import { setAuthToken } from 'winds-mobi-client-web/utils/auth-token';
 import { decodeJwtPayload } from 'winds-mobi-client-web/utils/jwt';

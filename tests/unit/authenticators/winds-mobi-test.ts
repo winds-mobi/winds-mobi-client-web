@@ -1,3 +1,6 @@
+// TODO: Remove login — this authenticator backs the disabled sign-in
+// feature (see app/services/session.ts). Kept for reference/restoration.
+/*
 import { module, test } from 'qunit';
 import { setupTest } from 'winds-mobi-client-web/tests/helpers';
 import type WindsMobiAuthenticator from 'winds-mobi-client-web/authenticators/winds-mobi';
@@ -132,3 +135,4 @@ module('Unit | Authenticator | winds-mobi', function (hooks) {
     assert.strictEqual(getAuthToken(), null);
   });
 });
+*/

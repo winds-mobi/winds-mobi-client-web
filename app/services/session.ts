@@ -1,3 +1,6 @@
+// TODO: Remove login — sign-in is currently disabled (unregistered route in
+// app/router.ts, no navbar entry point, no session.setup() call). This
+// service is kept for reference/restoration but is not actively wired in.
 import BaseSessionService from 'ember-simple-auth/services/session';
 import type { SessionAuthenticatedData } from 'winds-mobi-client-web/authenticators/winds-mobi';
 
