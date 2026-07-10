@@ -8,7 +8,7 @@ import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
-import SettingsShowcaseNearbyCompactList from 'winds-mobi-client-web/components/settings/showcase/nearby-compact-list';
+import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -76,8 +76,22 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             @titleClass="sr-only"
           >
             <SettingsRow @settings={{this.settings}} @name="nearbyCompactList">
-              <SettingsShowcaseNearbyCompactList
+              <SettingsShowcaseCompactList
                 @enabled={{this.settings.nearbyCompactList}}
+              />
+            </SettingsRow>
+          </StationSectionCard>
+
+          <StationSectionCard
+            @title={{t "settings.favoritesCompactList.label"}}
+            @titleClass="sr-only"
+          >
+            <SettingsRow
+              @settings={{this.settings}}
+              @name="favoritesCompactList"
+            >
+              <SettingsShowcaseCompactList
+                @enabled={{this.settings.favoritesCompactList}}
               />
             </SettingsRow>
           </StationSectionCard>

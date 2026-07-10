@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.16.0 - 2026-07-10
+
+### Added
+
+- **🧪 Beta:** Settings now has a toggle for smaller, compact favourite-station cards, matching the existing nearby-stations toggle.
+
+### Changed
+
+- The nearby view's card-size toggle has moved into Settings — pick bigger or smaller cards there instead of switching on the nearby screen itself.
+- Refreshed the Help page: shorter, more concise descriptions throughout, corrected privacy notes about favourites, and added the missing Favourites and Settings overview sections.
+
 ## v0.15.0 - 2026-07-10
 
 ### Added

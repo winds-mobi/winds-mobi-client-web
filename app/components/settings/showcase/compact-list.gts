@@ -1,6 +1,6 @@
 import { array } from '@ember/helper';
 
-export interface SettingsShowcaseNearbyCompactListSignature {
+export interface SettingsShowcaseCompactListSignature {
   Args: {
     enabled: boolean;
   };
@@ -8,10 +8,10 @@ export interface SettingsShowcaseNearbyCompactListSignature {
 }
 
 // A schematic (not real station data) comparing one big landscape card
-// against a 2x2 grid of the same card shrunk down, mirroring the actual
-// big/small toggle on /nearby (a name+time header, then a stat pair and a
-// round thumbnail) without rendering real stations. Whichever size matches
-// the current preference is highlighted; the other stays dim.
+// against a 2x2 grid of the same card shrunk down, mirroring the big/small
+// toggle shared by /nearby and /favorites (a name+time header, then a stat
+// pair and a round thumbnail) without rendering real stations. Whichever
+// size matches the current preference is highlighted; the other stays dim.
 <template>
   <div
     class="flex items-center justify-center gap-3 rounded-lg bg-slate-100 p-4"

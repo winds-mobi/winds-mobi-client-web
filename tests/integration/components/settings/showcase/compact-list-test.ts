@@ -13,7 +13,7 @@ function previewCards() {
 }
 
 module(
-  'Integration | Component | settings/showcase/nearby-compact-list',
+  'Integration | Component | settings/showcase/compact-list',
   function (hooks) {
     setupRenderingTest(hooks);
 
@@ -21,7 +21,7 @@ module(
       this.enabled = false;
 
       await render(
-        hbs`<Settings::Showcase::NearbyCompactList @enabled={{this.enabled}} />`
+        hbs`<Settings::Showcase::CompactList @enabled={{this.enabled}} />`
       );
 
       const off = previewCards();
@@ -30,7 +30,7 @@ module(
 
       this.enabled = true;
       await render(
-        hbs`<Settings::Showcase::NearbyCompactList @enabled={{this.enabled}} />`
+        hbs`<Settings::Showcase::CompactList @enabled={{this.enabled}} />`
       );
 
       const on = previewCards();

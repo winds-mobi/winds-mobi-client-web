@@ -18,7 +18,7 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the six preferences, on by default except the compact nearby list, icon labels, and beta features', async function (assert) {
+  test('it shows the seven preferences, on by default except the compact nearby/favourite lists, icon labels, and beta features', async function (assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -26,6 +26,7 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
+    assert.dom('[data-test-setting="favoritesCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
     assert.dom('[data-test-setting="betaFeaturesEnabled"]').isNotChecked();
     assert
@@ -85,6 +86,28 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
     assert.strictEqual(
       window.localStorage.getItem('settings.nearbyCompactList'),
+      null,
+      'restoring the default clears the stored override'
+    );
+  });
+
+  test('toggling the compact favourites list preference persists it to local storage', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="favoritesCompactList"]');
+
+    assert.dom('[data-test-setting="favoritesCompactList"]').isChecked();
+    assert.strictEqual(
+      window.localStorage.getItem('settings.favoritesCompactList'),
+      'true',
+      'the non-default preference is written to local storage'
+    );
+
+    await click('[data-test-setting="favoritesCompactList"]');
+
+    assert.dom('[data-test-setting="favoritesCompactList"]').isNotChecked();
+    assert.strictEqual(
+      window.localStorage.getItem('settings.favoritesCompactList'),
       null,
       'restoring the default clears the stored override'
     );

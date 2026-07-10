@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, visit } from '@ember/test-helpers';
+import { click, currentURL, settled, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
@@ -214,7 +214,7 @@ module('Acceptance | nearby route', function (hooks) {
     assert.strictEqual(params.get('zoom'), '10');
   });
 
-  test('it switches to the compact list view and back', async function (assert) {
+  test('it shows compact cards when the compact nearby list preference is on', async function (assert) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
@@ -226,7 +226,8 @@ module('Acceptance | nearby route', function (hooks) {
       .dom('[data-test-nearby-station-card-compact]')
       .doesNotExist('compact cards are not rendered in card view');
 
-    await click('[data-test-nearby-view-toggle="compact"]');
+    this.owner.lookup('service:settings').nearbyCompactList = true;
+    await settled();
 
     assert
       .dom(NEARBY_STATION_CARD_SELECTOR)
@@ -238,7 +239,8 @@ module('Acceptance | nearby route', function (hooks) {
       .dom('[data-test-nearby-station-card-compact="holfuy-1804"]')
       .includesText('Holfuy 1804');
 
-    await click('[data-test-nearby-view-toggle="card"]');
+    this.owner.lookup('service:settings').nearbyCompactList = false;
+    await settled();
 
     assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.dom('[data-test-nearby-station-card-compact]').doesNotExist();

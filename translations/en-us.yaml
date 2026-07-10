@@ -71,10 +71,16 @@ settings:
       stand out and stale ones recede. Arrows scale linearly from full size
       now down to half size at 30 minutes, and never shrink below half size.
   nearbyCompactList:
-    label: Smaller nearby cards
+    label: Compact nearby cards
     description: >-
-      Show nearby stations as smaller cards (name, altitude, wind, gusts, last
+      Show nearby stations as compact cards (name, altitude, wind, gusts, last
       update, and a small wind-direction thumbnail) instead of full-size
+      cards, so more stations fit on screen without scrolling.
+  favoritesCompactList:
+    label: Compact favourite cards
+    description: >-
+      Show favourite stations as compact cards (name, altitude, wind, gusts,
+      last update, and a small wind-direction thumbnail) instead of full-size
       cards, so more stations fit on screen without scrolling.
   useIconLabels:
     label: Use icons for labels
@@ -159,9 +165,6 @@ nearby:
   description: Use your location to find the closest stations around your current position and compare the live reading with the last hour at a glance.
   loading: Looking up the closest stations…
   requestError: Nearby stations could not be loaded right now.
-  view:
-    card: Bigger cards
-    compact: Smaller cards
   location:
     checking: Checking location access…
     locatingDescription: Trying to determine your current location…

@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, visit, waitFor } from '@ember/test-helpers';
+import { findAll, settled, visit, waitFor } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type FavoritesService from 'winds-mobi-client-web/services/favorites';
@@ -124,5 +124,31 @@ module('Acceptance | favorites route', function (hooks) {
       ['Holfuy 2222', 'Holfuy 1804'],
       'cards follow the order favourites were added, not the response order'
     );
+  });
+
+  test('it shows compact cards when the compact favourites list preference is on', async function (assert) {
+    const favorites = this.owner.lookup(
+      'service:favorites'
+    ) as FavoritesService;
+
+    favorites.add('holfuy-1804');
+    favorites.add('holfuy-2222');
+
+    await visit('/favorites');
+
+    assert.dom('[data-test-favorites-stations-compact]').doesNotExist();
+    assert
+      .dom('[data-test-nearby-station-card-compact]')
+      .doesNotExist('compact cards are not rendered in card view');
+
+    this.owner.lookup('service:settings').favoritesCompactList = true;
+    await settled();
+
+    assert
+      .dom(FAVORITES_CARD_SELECTOR)
+      .doesNotExist('full cards are not rendered in compact view');
+    assert
+      .dom('[data-test-nearby-station-card-compact]')
+      .exists({ count: STATION_FIXTURES.length });
   });
 });

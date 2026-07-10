@@ -6,12 +6,14 @@ import { getRequestState } from '@warp-drive/core/reactive';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
 import { favoritesQuery } from 'winds-mobi-client-web/builders/station';
+import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
   Station,
   StoreService,
@@ -27,6 +29,7 @@ interface FavoritesTemplateSignature {
 export default class FavoritesTemplate extends Component<FavoritesTemplateSignature> {
   @service declare favorites: FavoritesService;
   @service declare mapRefresh: MapRefreshService;
+  @service declare settings: SettingsService;
   @service declare store: StoreService;
 
   get favoriteIds(): string[] {
@@ -135,6 +138,15 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
               {{t "favorites.loading"}}
             </p>
           </StationSectionCard>
+        {{else if this.settings.favoritesCompactList}}
+          <div
+            class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(11rem,calc(50%-0.375rem)),1fr))]"
+            data-test-favorites-stations-compact
+          >
+            {{#each this.stations as |station|}}
+              <StationCompactCard @station={{station}} />
+            {{/each}}
+          </div>
         {{else}}
           <div
             class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(22rem,1fr))]"
