@@ -5,26 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 8. Wire type-checking into the lint gate (`lint:types`) — OPEN, incremental
-
-- **Where:** `package.json` scripts; whole app/tests tree.
-- **Problem:** the stock TS blueprint ships `lint:types` (Glint), which the `lint:*(!fix)`
-  glob then folds into `pnpm lint`. We have `@glint/ember-tsc` installed and working
-  (`pnpm exec ember-tsc --noEmit`) but no script — so nothing type-checks the app outside
-  the editor. Current state: **183 errors across 50 files** (top: `app/handlers/station.ts`
-  17, `app/templates/settings.gts` 14, `app/templates/help.gts` 12,
-  `app/services/store.ts` 9, `app/templates/nearby.gts` 8).
-- **Why not now:** adding the script today instantly turns `pnpm lint` (and the CI lint
-  job) red with 183 pre-existing failures. This is its own multi-session effort, like the
-  ESLint one (`cd6fcdd`) was.
-- **How (when worked):** burn the errors down per directory (`app/handlers`,
-  `app/services`, `app/templates`, `app/components`, `tests/…`), one focused commit each;
-  when the count is 0, add `"lint:types": "ember-tsc --noEmit"` — the existing glob wires
-  it into `pnpm lint`/CI automatically. Do **not** add the script before the errors are
-  fixed.
-- **Expected effect:** type errors caught in CI instead of only in whichever editor has
-  Glint running; full stock-blueprint script parity.
-
 ## Assessed — no change needed (audit findings, prune after reading)
 
 - **`docker compose exec` overhead:** measured `docker compose exec ui true` at

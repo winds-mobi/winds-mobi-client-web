@@ -85,7 +85,9 @@ module('Acceptance | favorites route', function (hooks) {
   });
 
   test('with no favourites it shows the empty state and skips the station request', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
 
     await visit('/favorites');
     await waitFor('[data-test-favorites-empty]');

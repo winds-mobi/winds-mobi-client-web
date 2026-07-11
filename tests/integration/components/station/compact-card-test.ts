@@ -1,17 +1,16 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  findAll,
-  render,
-  type RenderingTestContext,
-} from '@ember/test-helpers';
+import { findAll, render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-interface StationCompactCardTestContext extends RenderingTestContext {
+interface StationCompactCardTestContext extends RenderedTestContext {
   station: Station;
 }
 

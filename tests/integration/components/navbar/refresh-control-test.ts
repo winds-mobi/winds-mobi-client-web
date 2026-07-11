@@ -24,7 +24,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
   test('it spins while a refresh is in flight and is idle otherwise', async function (assert) {
     const mapRefresh = this.owner.lookup(
       'service:map-refresh'
-    ) as FakeMapRefreshService;
+    ) as unknown as FakeMapRefreshService;
 
     await render(hbs`<Navbar::RefreshControl />`);
 
@@ -39,7 +39,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
   test('pressing the button triggers a refresh', async function (assert) {
     const mapRefresh = this.owner.lookup(
       'service:map-refresh'
-    ) as FakeMapRefreshService;
+    ) as unknown as FakeMapRefreshService;
 
     await render(hbs`<Navbar::RefreshControl />`);
     await click('[data-test-navbar-refresh]');

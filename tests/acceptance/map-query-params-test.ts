@@ -105,7 +105,9 @@ module('Acceptance | map query params', function (hooks) {
     'it uses the URL view for the initial map and station request',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await waitUntil(() => countStationRequests(store.calls) > 0);
@@ -133,7 +135,9 @@ module('Acceptance | map query params', function (hooks) {
     'it force refreshes stations from the navbar button',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await waitUntil(() => countStationRequests(store.calls) > 0);
@@ -161,7 +165,9 @@ module('Acceptance | map query params', function (hooks) {
         ShortIntervalMapRefreshService
       );
 
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
 

@@ -1,12 +1,15 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { render, type RenderingTestContext } from '@ember/test-helpers';
+import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-interface HelpLiveStationTestContext extends RenderingTestContext {
+interface HelpLiveStationTestContext extends RenderedTestContext {
   stationId: string;
 }
 
@@ -68,7 +71,9 @@ module('Integration | Component | help/live-station', function (hooks) {
   });
 
   test('it shows an error message when the request fails', async function (this: HelpLiveStationTestContext, assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const rejection = Promise.reject(new Error('boom'));
 
     rejection.catch(() => {

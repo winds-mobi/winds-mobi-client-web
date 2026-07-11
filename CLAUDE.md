@@ -285,9 +285,12 @@ a function`) when the chart tries to render it.
   string whose exact ICU/Intl unit-format output isn't worth hand-deriving (e.g. `station/metric-card`'s
   `intl.formatNumber(..., {format: 'windSpeed'})`), capture it empirically via a throwaway debug render
   (`console.log` the text, read it from the test-runner output, delete the debug test) rather than guessing.
-- `pnpm lint` runs ESLint (type-aware, cached) alongside the other linters, and CI enforces it. When a test needs a
-  custom `this` context type, extend `@ember/test-helpers`'s `TestContext`/`RenderingTestContext` — a context type
-  that doesn't leaves `this.owner`/`this.element` untyped and cascades into `no-unsafe-*` errors downstream.
+- `pnpm lint` runs ESLint (type-aware, cached) and Glint type-checking (`lint:types`, `ember-tsc --noEmit`)
+  alongside the other linters, and CI enforces all of them. The tree is typecheck-clean — keep it that way; fix new
+  errors rather than working around them. When a rendering test needs a custom `this` context type, extend
+  `RenderedTestContext` from `tests/helpers` (it narrows `element` to `Element`, which qunit-dom's target/rootElement
+  params require); non-rendering contexts extend `@ember/test-helpers`'s `TestContext`. A context type that extends
+  neither leaves `this.owner`/`this.element` untyped and cascades into `no-unsafe-*` errors downstream.
 - Some acceptance tests need MapLibre's `idle` event, which never fires in this dev container (no WebGL in headless
   Chromium here). These fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions
   without checking whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize

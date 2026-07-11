@@ -84,6 +84,7 @@ const HISTORY: History[] = [
     gusts: 18,
     temperature: 7,
     humidity: 65,
+    rain: 0,
     timestamp: 1_710_000_000_000,
     [Type]: 'history',
   },
@@ -94,6 +95,7 @@ const HISTORY: History[] = [
     gusts: 20,
     temperature: 8,
     humidity: 61,
+    rain: 0,
     timestamp: 1_710_003_600_000,
     [Type]: 'history',
   },
@@ -319,7 +321,9 @@ module('Acceptance | map station panel', function (hooks) {
   test('it keeps the panel shell mounted while the next station loads', async function (this: MapStationPanelTestContext, assert) {
     const router = this.owner.lookup('service:router');
     const deferredRequest = createDeferredRequest();
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
 
     this.deferredSecondaryStationRequest = deferredRequest;
     store.deferredSecondaryStationRequest = deferredRequest;
@@ -356,7 +360,9 @@ module('Acceptance | map station panel', function (hooks) {
     'it force refreshes map and station requests from the navbar button',
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
@@ -399,7 +405,9 @@ module('Acceptance | map station panel', function (hooks) {
         ShortIntervalMapRefreshService
       );
 
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'

@@ -40,7 +40,9 @@ module(
     });
 
     test('it renders the graph with the resolved history', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       store.response = Promise.resolve({
         content: {
@@ -70,7 +72,9 @@ module(
     });
 
     test('it renders an empty graph when the request errors', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       const rejection = Promise.reject(new Error('boom'));
       rejection.catch(() => {

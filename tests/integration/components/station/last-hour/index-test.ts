@@ -88,7 +88,9 @@ module('Integration | Component | station/last-hour', function (hooks) {
   });
 
   test('it keeps the first station graph stable when another station resolves late', async function (this: StationLastHourIndexTestContext, assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const now = Date.now();
 
     const stationAHistory: History[] = [

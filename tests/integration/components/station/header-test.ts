@@ -1,11 +1,14 @@
 import { module, test } from 'qunit';
-import { render, type RenderingTestContext } from '@ember/test-helpers';
+import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-interface StationHeaderTestContext extends RenderingTestContext {
+interface StationHeaderTestContext extends RenderedTestContext {
   station: Station;
 }
 
