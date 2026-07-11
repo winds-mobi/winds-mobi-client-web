@@ -5,18 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 7. README: replace blueprint boilerplate
-
-- **Where:** `README.md`.
-- **Problem:** still the generated skeleton — "A short introduction of this app could
-  easily go here", "Specify what it takes to deploy your app", a
-  `pnpm test:ember --server` line that doesn't match our scripts, no mention of the
-  devcontainer workflow that CLAUDE.md mandates.
-- **How:** keep the stock structure, fill it in: one-paragraph app description, the
-  devcontainer (`docker compose`) path next to the host path, correct test commands,
-  actual deploy story (tag push → GitHub Actions → rsync to winds.mobi).
-- **Expected effect:** README describes this project, not the blueprint.
-
 ## 8. Wire type-checking into the lint gate (`lint:types`) — OPEN, incremental
 
 - **Where:** `package.json` scripts; whole app/tests tree.
