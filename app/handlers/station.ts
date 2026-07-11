@@ -35,6 +35,27 @@ interface StationApiPayload {
   };
 }
 
+// The flat attribute shape the handler emits; see the `last*` comment below
+// and the matching one on StationSchema in app/services/store.ts.
+interface StationAttributes {
+  _id: string;
+  altitude?: number;
+  location?: { coordinates?: [number, number] };
+  isPeak?: boolean;
+  providerName?: string;
+  name?: string;
+  status?: string;
+  providerUrl?: string;
+  lastTimestamp?: number;
+  lastDirection?: number;
+  lastSpeed?: number;
+  lastGusts?: number;
+  lastTemperature?: number;
+  lastHumidity?: number;
+  lastRain?: number;
+  lastPressure?: number | null;
+}
+
 function hasOwn<T extends object>(obj: T, key: PropertyKey): key is keyof T {
   return Object.prototype.hasOwnProperty.call(obj, key);
 }
@@ -44,7 +65,7 @@ function normalizeProviderUrl(urls?: Record<string, string>) {
     return undefined;
   }
 
-  return urls.default ?? urls.en ?? Object.values(urls)[0];
+  return urls['default'] ?? urls['en'] ?? Object.values(urls)[0];
 }
 
 function normalizePressure(
@@ -65,7 +86,7 @@ function normalizePressure(
 }
 
 function jsonApifyFields(elm: StationApiPayload) {
-  const attributes: Record<string, unknown> = {
+  const attributes: StationAttributes = {
     _id: elm._id,
   };
 

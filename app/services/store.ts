@@ -6,14 +6,16 @@ import HistoryHandler from 'winds-mobi-client-web/handlers/history';
 // app/services/session.ts). Restore this import alongside it.
 // import UserHandler from 'winds-mobi-client-web/handlers/user';
 import { withDefaults } from '@warp-drive/core/reactive';
+import type { ObjectSchema } from '@warp-drive/core/types/schema/fields';
+import type { ObjectValue } from '@warp-drive/core/types/json/raw';
 import { Type } from '@warp-drive/core/types/symbols';
 
 // Embedded object schema: location (no identity, just a shape)
-export const LocationSchema = {
+export const LocationSchema: ObjectSchema = {
   type: 'location',
   identity: null,
   fields: [{ name: 'coordinates', kind: 'array' }],
-} as const;
+};
 
 export const StationSchema = withDefaults({
   type: 'station',
@@ -128,15 +130,17 @@ export type Station = {
   [Type]: 'station';
 };
 
-// TODO: Remove login — Profile type paired with ProfileSchema above.
-// export type Profile = {
-//   id: string;
-//   displayName?: string;
-//   picture?: string;
-//   favorites: string[];
-//
-//   [Type]: 'profile';
-// };
+// TODO: Remove login — Profile type paired with the commented-out
+// ProfileSchema above. Kept live (types are inert at runtime) so
+// app/builders/profile.ts keeps compiling.
+export type Profile = {
+  id: string;
+  displayName?: string;
+  picture?: string;
+  favorites: string[];
+
+  [Type]: 'profile';
+};
 
 export type History = {
   id: string;
@@ -151,19 +155,21 @@ export type History = {
   [Type]: 'history';
 };
 
-type RecordType = Record<string, unknown> | unknown[];
-
 function isRecordType(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function unwrapDerivation(
-  record: RecordType,
-  options: {
-    path: string;
-  }
+  record: unknown,
+  options: ObjectValue | null
 ): unknown {
-  return options.path.split('.').reduce<unknown>((acc, key) => {
+  const path = options?.['path'];
+
+  if (typeof path !== 'string') {
+    return undefined;
+  }
+
+  return path.split('.').reduce<unknown>((acc, key) => {
     if (Array.isArray(acc)) {
       const index = Number.parseInt(key, 10);
 
@@ -179,20 +185,20 @@ unwrapDerivation[Type] = 'unwrap';
 
 // Reassembles the flat `last*` fields (see the comment on StationSchema)
 // back into the nested shape consumers read as `station.last`.
-function composeReadingDerivation(record: RecordType): unknown {
+function composeReadingDerivation(record: unknown): unknown {
   if (!isRecordType(record)) {
     return undefined;
   }
 
   return {
-    timestamp: record.lastTimestamp,
-    direction: record.lastDirection,
-    speed: record.lastSpeed,
-    gusts: record.lastGusts,
-    temperature: record.lastTemperature,
-    humidity: record.lastHumidity,
-    rain: record.lastRain,
-    pressure: record.lastPressure,
+    timestamp: record['lastTimestamp'],
+    direction: record['lastDirection'],
+    speed: record['lastSpeed'],
+    gusts: record['lastGusts'],
+    temperature: record['lastTemperature'],
+    humidity: record['lastHumidity'],
+    rain: record['lastRain'],
+    pressure: record['lastPressure'],
   };
 }
 composeReadingDerivation[Type] = 'composeReading';

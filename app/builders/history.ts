@@ -4,6 +4,10 @@ import type {
   QueryRequestOptions,
 } from '@warp-drive/core/types/request';
 import type { QueryParamsSource } from '@warp-drive/core/types/params';
+import type {
+  TypedRecordInstance,
+  TypeFromInstance,
+} from '@warp-drive/core/types/record';
 
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 
@@ -18,8 +22,8 @@ const defaultOptions: ConstrainedRequestOptions = {
   },
 };
 
-function historyQuery<T>(
-  type: string,
+function historyQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   id: string,
   query?: QueryParamsSource,
   options?: ConstrainedRequestOptions

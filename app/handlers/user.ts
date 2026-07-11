@@ -18,6 +18,12 @@ interface ProfileResponse {
   content: ProfileApiPayload;
 }
 
+interface ProfileAttributes {
+  favorites: string[];
+  picture?: string;
+  displayName?: string;
+}
+
 const USER_API_PREFIX = userApiUrl('');
 const PROFILE_URL = userApiUrl('profile/');
 
@@ -26,7 +32,7 @@ function hasOwn<T extends object>(obj: T, key: PropertyKey): key is keyof T {
 }
 
 function jsonApifyProfile(elm: ProfileApiPayload) {
-  const attributes: Record<string, unknown> = {
+  const attributes: ProfileAttributes = {
     // The profile is always fetched whole (no sparse fieldsets), so unlike
     // station attributes a missing list simply means "no favorites yet" —
     // default it so consumers always read an array.
