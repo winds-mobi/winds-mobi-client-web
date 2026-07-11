@@ -5,19 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 5. Dockerfile: drop global ember-cli, fix stage comments
-
-- **Where:** `Dockerfile` base stage: `RUN pnpm add -g ember-cli`; comments
-  "Stage 1 / Stage 3 / Stage 4" over three actual stages.
-- **Problem:** the global install pulls whatever the *latest* ember-cli is at image-build
-  time — unpinned, drifting, and shadowed anyway: every script path (`pnpm ember`,
-  `pnpm exec ember`, `test:ember`) resolves the pinned local devDependency
-  (`ember-cli@~6.3.1`) first. The stage numbering is leftover from a deleted stage.
-- **How:** delete the `pnpm add -g` line; renumber the comments. Verify with
-  `docker compose build`.
-- **Expected effect:** reproducible image (no unpinned latest), smaller layer, honest
-  comments.
-
 ## 6. Docs no longer match reality (CLAUDE.md + TROUBLESHOOTING.md)
 
 - **Where:** `CLAUDE.md` Commands + Testing sections; `TROUBLESHOOTING.md` blank-page
