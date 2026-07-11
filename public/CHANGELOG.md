@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.17.0 - 2026-07-11
+
+### Changed
+
+- Updated the app's icon set (Phosphor) to its latest release — icons throughout the interface pick up the refreshed glyph designs.
+
 ## v0.16.0 - 2026-07-10
 
 ### Added
