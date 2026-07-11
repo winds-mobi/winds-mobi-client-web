@@ -3,7 +3,6 @@ import { module, test } from 'qunit';
 import { findAll, settled, visit, waitFor } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 type FakeStoreRequest = {
@@ -103,9 +102,7 @@ module('Acceptance | favorites route', function (hooks) {
   });
 
   test('it renders the favourite stations in the order they were added', async function (assert) {
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     // Added in reverse of STATION_FIXTURES to pin the ordering behaviour.
     favorites.add('holfuy-2222');
@@ -127,9 +124,7 @@ module('Acceptance | favorites route', function (hooks) {
   });
 
   test('it shows compact cards when the compact favourites list preference is on', async function (assert) {
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     favorites.add('holfuy-1804');
     favorites.add('holfuy-2222');

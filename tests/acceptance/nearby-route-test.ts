@@ -124,8 +124,9 @@ function countStationRequests(calls: string[]) {
 }
 
 function stubPromptPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = async () => {
+  nearbyLocation.syncPermissionState = () => {
     nearbyLocation.permissionState = 'prompt';
+    return Promise.resolve();
   };
 }
 
@@ -139,8 +140,9 @@ function setGrantedCoordinates(
 }
 
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = async () => {
+  nearbyLocation.syncPermissionState = () => {
     setGrantedCoordinates(nearbyLocation);
+    return Promise.resolve();
   };
 }
 
@@ -169,11 +171,12 @@ module('Acceptance | nearby route', function (hooks) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubPromptPermission(nearbyLocation);
-    nearbyLocation.requestCurrentPosition = async () => {
+    nearbyLocation.requestCurrentPosition = () => {
       setGrantedCoordinates(nearbyLocation, {
         ...DEFAULT_COORDINATES,
         accuracy: 25,
       });
+      return Promise.resolve();
     };
 
     await visit('/nearby');

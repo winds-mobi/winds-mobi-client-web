@@ -355,7 +355,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'it force refreshes map and station requests from the navbar button',
     webGLAvailable,
-    async function (assert) {
+    async function (this: MapStationPanelTestContext, assert) {
       const store = this.owner.lookup('service:store') as FakeStoreService;
 
       await visit(
@@ -393,7 +393,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'it auto refreshes map and station requests after the refresh interval',
     webGLAvailable,
-    async function (assert) {
+    async function (this: MapStationPanelTestContext, assert) {
       this.owner.register(
         'service:map-refresh',
         ShortIntervalMapRefreshService

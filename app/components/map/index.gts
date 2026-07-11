@@ -175,7 +175,7 @@ export default class Map extends Component<MapSignature> {
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       mapQuery<Station>('station', bounds)

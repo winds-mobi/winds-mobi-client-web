@@ -1,14 +1,14 @@
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import Wind from 'ember-phosphor-icons/components/ph-wind';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 
-type StationMetricCardTestContext = {
+interface StationMetricCardTestContext extends RenderingTestContext {
   format?: string;
   value?: number | string;
   icon?: typeof Wind;
-};
+}
 
 module('Integration | Component | station/metric-card', function (hooks) {
   setupRenderingTest(hooks);

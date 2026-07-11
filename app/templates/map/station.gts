@@ -1,4 +1,5 @@
 import { pageTitle } from 'ember-page-title';
+import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
@@ -36,7 +37,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: StationModel }>(
       findRecord<StationModel>('station', this.stationId, undefined, {

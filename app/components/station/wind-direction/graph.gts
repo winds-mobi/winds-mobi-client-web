@@ -45,7 +45,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   // codebase's `mapRefresh.lastRefresh`-read convention for the same purpose.
   @cached
   get chartOptions() {
-    this.args.data;
+    void this.args.data;
     const now = Date.now();
     const minTimestamp = now - LAST_HOUR;
 

@@ -5,12 +5,10 @@ import {
   currentURL,
   fillIn,
   find,
-  settled,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 

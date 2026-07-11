@@ -51,20 +51,21 @@ export default class WindsMobiAuthenticator extends Base {
     return { token, exp: payload.exp, username: payload.username };
   }
 
-  override async restore(
+  override restore(
     data: SessionAuthenticatedData
   ): Promise<SessionAuthenticatedData> {
     if (!isFreshToken(data)) {
       setAuthToken(null);
-      throw new Error('Session has expired');
+      return Promise.reject(new Error('Session has expired'));
     }
 
     setAuthToken(data.token);
 
-    return data;
+    return Promise.resolve(data);
   }
 
-  override async invalidate(): Promise<void> {
+  override invalidate(): Promise<void> {
     setAuthToken(null);
+    return Promise.resolve();
   }
 }

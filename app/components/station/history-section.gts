@@ -38,7 +38,7 @@ export default class StationHistorySection extends Component<StationHistorySecti
 
   @cached
   get historyRequest() {
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: History[] }>(
       historyQuery<History>(

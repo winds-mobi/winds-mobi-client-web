@@ -1,13 +1,13 @@
 import { module, test } from 'qunit';
-import { render, settled } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
 
-type StationLastHourPresenterTestContext = {
+interface StationLastHourPresenterTestContext extends RenderingTestContext {
   history: History[];
-};
+}
 
 module(
   'Integration | Component | station/last-hour/presenter',

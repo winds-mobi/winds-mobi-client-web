@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
-import { click, render } from '@ember/test-helpers';
+import { click, render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
-type SettingsRowTestContext = {
+interface SettingsRowTestContext extends RenderingTestContext {
   settings: SettingsService;
-};
+}
 
 module('Integration | Component | settings/row', function (hooks) {
   setupRenderingTest(hooks);

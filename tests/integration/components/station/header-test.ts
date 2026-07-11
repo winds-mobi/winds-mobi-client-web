@@ -1,13 +1,13 @@
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-type StationHeaderTestContext = {
+interface StationHeaderTestContext extends RenderingTestContext {
   station: Station;
-};
+}
 
 const BASE_STATION: Omit<Station, 'providerUrl'> = {
   id: 'windline-4109',

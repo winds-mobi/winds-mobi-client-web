@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
-import type IntlService from 'ember-intl';
+import type { IntlService } from 'ember-intl';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import { windBandForSpeed } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';

@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 
-type StationMetaItemTestContext = {
+interface StationMetaItemTestContext extends RenderingTestContext {
   icon?: typeof Mountains;
-};
+}
 
 module('Integration | Component | station/meta-item', function (hooks) {
   setupRenderingTest(hooks);

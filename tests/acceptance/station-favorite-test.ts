@@ -3,7 +3,6 @@ import { module, test } from 'qunit';
 import { click, visit, waitFor } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
 type FakeStoreRequest = {
@@ -91,17 +90,13 @@ module('Acceptance | station favorite toggle', function (hooks) {
       .hasAria('label', 'Remove from favourites')
       .hasAria('pressed', 'true');
 
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     assert.deepEqual(favorites.stationIds, ['holfuy-1804']);
   });
 
   test('unstarring a favourite station removes it from the local list', async function (assert) {
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     favorites.add('holfuy-1804');
 

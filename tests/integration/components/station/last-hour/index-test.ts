@@ -1,6 +1,11 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, render, settled } from '@ember/test-helpers';
+import {
+  findAll,
+  render,
+  settled,
+  type RenderingTestContext,
+} from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -16,9 +21,9 @@ type FakeStoreRequest = {
   url?: string;
 };
 
-type StationLastHourIndexTestContext = {
+interface StationLastHourIndexTestContext extends RenderingTestContext {
   stationId: string;
-};
+}
 
 class FakeMapRefreshService extends Service {
   lastRefresh = 0;
