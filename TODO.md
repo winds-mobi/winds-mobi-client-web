@@ -5,22 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 1. Drop `--force` from `pnpm start`
-
-- **Where:** `package.json` → `"start": "vite --host 0.0.0.0 --force"`.
-- **Problem:** stock is plain `vite`. `--host 0.0.0.0` is a justified deviation (the
-  container must listen on all interfaces). `--force` is not: it throws away Vite's
-  dependency-optimization cache and re-scans every dependency on every boot.
-- **Why:** slower boots forever, to guard against a rare one-time condition; worse,
-  [TROUBLESHOOTING.md](TROUBLESHOOTING.md)'s own 504 root-cause analysis identifies the
-  forced full re-scan as the thing that turns a stale `node_modules` volume into a fully
-  dead dev server. Vite already re-optimizes automatically when the lockfile or config
-  changes, so the flag buys nothing in the normal case.
-- **How:** remove `--force`. When a corrupt optimize-deps cache is actually suspected,
-  run `pnpm start --force` ad hoc (pnpm forwards extra flags to vite), or
-  `rm -rf node_modules/.vite` per TROUBLESHOOTING.md.
-- **Expected effect:** faster container boots, one fewer crash amplifier, closer to stock.
-
 ## 2. Remove `postinstall: npm rebuild sharp`
 
 - **Where:** `package.json` → `"postinstall": "npm rebuild sharp"`.

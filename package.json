@@ -23,7 +23,7 @@
     "lint:hbs:fix": "ember-template-lint . --fix",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
-    "start": "vite --host 0.0.0.0 --force",
+    "start": "vite --host 0.0.0.0",
     "test": "concurrently \"pnpm:lint\" \"pnpm:test:ember\" --names \"lint,test:\" --prefixColors auto",
     "test:ember": "EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test vite build --mode test && ember test --path dist",
     "test:ember:dev": "node scripts/run-testem-dev.cjs ci",
