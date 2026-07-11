@@ -1,3 +1,4 @@
+import type { TOC } from '@ember/component/template-only';
 import SettingsWindArrow from 'winds-mobi-client-web/components/settings/wind-arrow';
 
 export interface SettingsShowcaseGustsSignature {
@@ -11,7 +12,7 @@ export interface SettingsShowcaseGustsSignature {
 // circle appears or disappears with the preference, exactly as the on-map
 // marker does. The sample's gusts (38) sit in a higher wind band than its
 // average (18), so the centre lights up when enabled.
-<template>
+const SettingsShowcaseGusts: TOC<SettingsShowcaseGustsSignature> = <template>
   <div
     class="flex items-center justify-center rounded-lg bg-slate-100 p-4"
     ...attributes
@@ -24,4 +25,6 @@ export interface SettingsShowcaseGustsSignature {
       @showGusts={{@enabled}}
     />
   </div>
-</template>
+</template>;
+
+export default SettingsShowcaseGusts;

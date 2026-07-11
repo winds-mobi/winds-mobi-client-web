@@ -1,3 +1,4 @@
+import type { TOC } from '@ember/component/template-only';
 export interface WindLegendBand {
   backgroundClass: string;
   label: string;
@@ -14,7 +15,7 @@ export interface MapLegendSignature {
   Element: HTMLElement;
 }
 
-<template>
+const MapLegend: TOC<MapLegendSignature> = <template>
   <aside
     class="inline-flex max-w-[min(22rem,calc(100vw-1.25rem))] flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/92 px-1 py-1 shadow-lg shadow-slate-900/10 backdrop-blur"
     data-test-map-wind-legend
@@ -37,4 +38,6 @@ export interface MapLegendSignature {
       {{/each}}
     </ul>
   </aside>
-</template>
+</template>;
+
+export default MapLegend;

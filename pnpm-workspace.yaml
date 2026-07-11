@@ -8,3 +8,8 @@ onlyBuiltDependencies:
 
 overrides:
   '@ember/string': 4.0.1
+  # Frontile 0.17 betas hard-depend on @glint/template 1.5.2 exactly, which
+  # gives them their own copy of the Glint type symbols — their yielded
+  # components (drawer.Header, popover.Content, ...) then type as `never` in
+  # the app's Glint 1.7.7 world. One copy for everyone fixes that.
+  '@glint/template': 1.7.7

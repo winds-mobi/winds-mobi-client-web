@@ -83,7 +83,7 @@
     "ember-maplibre-gl": "^0.6.2",
     "ember-modifier": "^4.2.0",
     "ember-page-title": "^9.0.1",
-    "ember-phosphor-icons": "^0.3.0",
+    "ember-phosphor-icons": "^1.0.2",
     "ember-qunit": "^9.0.1",
     "ember-resolver": "^13.1.0",
     "ember-simple-auth": "^8.3.1",

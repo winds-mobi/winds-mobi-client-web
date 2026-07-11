@@ -1,3 +1,4 @@
+import type { TOC } from '@ember/component/template-only';
 import { array } from '@ember/helper';
 
 export interface SettingsShowcaseCompactListSignature {
@@ -12,7 +13,7 @@ export interface SettingsShowcaseCompactListSignature {
 // toggle shared by /nearby and /favorites (a name+time header, then a stat
 // pair and a round thumbnail) without rendering real stations. Whichever
 // size matches the current preference is highlighted; the other stays dim.
-<template>
+const SettingsShowcaseCompactList: TOC<SettingsShowcaseCompactListSignature> = <template>
   <div
     class="flex items-center justify-center gap-3 rounded-lg bg-slate-100 p-4"
     ...attributes
@@ -54,4 +55,6 @@ export interface SettingsShowcaseCompactListSignature {
       {{/each}}
     </div>
   </div>
-</template>
+</template>;
+
+export default SettingsShowcaseCompactList;

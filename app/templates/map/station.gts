@@ -27,8 +27,10 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
 
-  get stationId() {
-    return this.router.currentRoute?.params['station_id'];
+  get stationId(): string | undefined {
+    const id = this.router.currentRoute?.params?.['station_id'];
+
+    return typeof id === 'string' ? id : undefined;
   }
 
   @cached
