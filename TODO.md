@@ -5,19 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 4. Remove unused `lint-to-the-future` devDependencies
-
-- **Where:** `package.json` devDependencies: `lint-to-the-future`,
-  `lint-to-the-future-eslint`, `lint-to-the-future-ember-template`.
-- **Problem:** nothing references them — no script, no config, no `.lint-todo`
-  directory. They were added during an old lint-migration push (CHANGELOG line 594) whose
-  workflow was never adopted; meanwhile the whole suite lints clean, so there is nothing
-  to "ignore now, fix later".
-- **How:** `pnpm remove` the three packages (run in the container so its `node_modules`
-  volume and the lockfile stay in sync).
-- **Expected effect:** three fewer dependencies to install/audit; dependency list closer
-  to stock.
-
 ## 5. Dockerfile: drop global ember-cli, fix stage comments
 
 - **Where:** `Dockerfile` base stage: `RUN pnpm add -g ember-cli`; comments
