@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import type Owner from '@ember/owner';
 import { registerDestructor } from '@ember/destroyable';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
@@ -21,7 +22,7 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
   @tracked error = false;
   @tracked isLoading = true;
 
-  constructor(owner: unknown, args: HelpChangelogSignature['Args']) {
+  constructor(owner: Owner, args: HelpChangelogSignature['Args']) {
     super(owner, args);
 
     registerDestructor(this, () => this.#abortController.abort());

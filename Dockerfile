@@ -24,19 +24,18 @@ RUN corepack enable && \
   pnpm config set store-dir "$PNPM_HOME/store" --global
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-RUN pnpm add -g ember-cli
 RUN pnpm install
 EXPOSE 4200
 CMD ["pnpm", "start"]
 
-### Stage 3: build
+### Stage 2: build
 FROM base AS build
 ARG API_HOST
 WORKDIR /app
 COPY . .
 RUN pnpm run build
 
-### Stage 4: prod
+### Stage 3: prod
 FROM nginx:stable-alpine AS prod
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html

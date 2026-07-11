@@ -1,17 +1,22 @@
 import { module, test } from 'qunit';
-import { find, findAll, render } from '@ember/test-helpers';
+import {
+  find,
+  findAll,
+  render,
+  type RenderingTestContext,
+} from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { stationArrowGeometry } from 'winds-mobi-client-web/utils/station-arrow';
 
-type SettingsWindArrowTestContext = {
+interface SettingsWindArrowTestContext extends RenderingTestContext {
   direction: number;
   speed: number;
   gusts: number;
   showGusts: boolean;
   scale?: number;
-};
+}
 
 module('Integration | Component | settings/wind-arrow', function (hooks) {
   setupRenderingTest(hooks);

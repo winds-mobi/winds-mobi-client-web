@@ -1,3 +1,4 @@
+import type { TOC } from '@ember/component/template-only';
 export interface StationSectionCardSignature {
   Args: {
     title: string;
@@ -9,7 +10,7 @@ export interface StationSectionCardSignature {
   Element: HTMLElement;
 }
 
-<template>
+const StationSectionCard: TOC<StationSectionCardSignature> = <template>
   <section
     class="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-2.5 md:rounded-2xl md:p-3.5"
     ...attributes
@@ -25,4 +26,6 @@ export interface StationSectionCardSignature {
       {{yield}}
     </div>
   </section>
-</template>
+</template>;
+
+export default StationSectionCard;

@@ -1,5 +1,20 @@
 import { module, test } from 'qunit';
+import type { NextFn } from '@warp-drive/core/request';
+import type { RequestContext } from '@warp-drive/core/types/request';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
+import { responseData } from 'winds-mobi-client-web/utils/request-response';
+
+// `HistoryHandler.request` is called directly here (no store), so the
+// `context`/`next` args are faked rather than pulled from a real request
+// pipeline — `next` only needs to resolve with the raw upstream payload,
+// never anything from `Future`'s abort/stream API.
+function fakeContext(url: string): RequestContext {
+  return { request: { url } } as unknown as RequestContext;
+}
+
+function fakeNext<T>(payload: unknown): NextFn<T> {
+  return (() => Promise.resolve(payload)) as unknown as NextFn<T>;
+}
 
 module('Unit | Handler | history', function () {
   test('it scopes historic record ids to the station id', async function (assert) {
@@ -16,50 +31,42 @@ module('Unit | Handler | history', function () {
       ],
     };
 
-    const holfuyResponse = await HistoryHandler.request<{
-      data: { id: string }[];
-    }>(
-      {
-        request: {
-          url: 'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600',
-        },
-      } as never,
-      async () => payload as never
+    const holfuyResponse = responseData(
+      await HistoryHandler.request<{
+        data: { id: string }[];
+      }>(
+        fakeContext(
+          'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600'
+        ),
+        fakeNext(payload)
+      )
     );
 
-    const otherStationResponse = await HistoryHandler.request<{
-      data: { id: string }[];
-    }>(
-      {
-        request: {
-          url: 'https://winds.mobi/api/2.3/stations/holfuy-2222/historic/?duration=435600',
-        },
-      } as never,
-      async () => payload as never
+    const otherStationResponse = responseData(
+      await HistoryHandler.request<{
+        data: { id: string }[];
+      }>(
+        fakeContext(
+          'https://winds.mobi/api/2.3/stations/holfuy-2222/historic/?duration=435600'
+        ),
+        fakeNext(payload)
+      )
     );
 
-    assert.strictEqual(holfuyResponse.data[0]?.id, 'holfuy-1804:1774341507');
-    assert.strictEqual(
-      otherStationResponse.data[0]?.id,
-      'holfuy-2222:1774341507'
-    );
-    assert.notStrictEqual(
-      holfuyResponse.data[0]?.id,
-      otherStationResponse.data[0]?.id
-    );
+    assert.strictEqual(holfuyResponse[0]?.id, 'holfuy-1804:1774341507');
+    assert.strictEqual(otherStationResponse[0]?.id, 'holfuy-2222:1774341507');
+    assert.notStrictEqual(holfuyResponse[0]?.id, otherStationResponse[0]?.id);
   });
 
   test('it reverses newest-first historic API rows into chronological order', async function (assert) {
-    const response = await HistoryHandler.request<{
-      data: { id: string; attributes: { timestamp: number } }[];
-    }>(
-      {
-        request: {
-          url: 'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600',
-        },
-      } as never,
-      async () =>
-        ({
+    const response = responseData(
+      await HistoryHandler.request<{
+        data: { id: string; attributes: { timestamp: number } }[];
+      }>(
+        fakeContext(
+          'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600'
+        ),
+        fakeNext({
           content: [
             {
               _id: 1_774_342_468,
@@ -78,33 +85,32 @@ module('Unit | Handler | history', function () {
               hum: 70,
             },
           ],
-        }) as never
+        })
+      )
     );
 
     assert.deepEqual(
-      response.data.map((record) => record.id),
+      response.map((record) => record.id),
       ['holfuy-1804:1774341507', 'holfuy-1804:1774342468']
     );
     assert.deepEqual(
-      response.data.map((record) => record.attributes.timestamp),
+      response.map((record) => record.attributes.timestamp),
       [1_774_341_507_000, 1_774_342_468_000]
     );
   });
 
   test('it only serializes history attributes present in the payload', async function (assert) {
-    const response = await HistoryHandler.request<{
-      data: {
-        id: string;
-        attributes: Record<string, number>;
-      }[];
-    }>(
-      {
-        request: {
-          url: 'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600&keys=temp&keys=hum&keys=rain',
-        },
-      } as never,
-      async () =>
-        ({
+    const response = responseData(
+      await HistoryHandler.request<{
+        data: {
+          id: string;
+          attributes: Record<string, number>;
+        }[];
+      }>(
+        fakeContext(
+          'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600&keys=temp&keys=hum&keys=rain'
+        ),
+        fakeNext({
           content: [
             {
               _id: 1_774_341_507,
@@ -113,17 +119,18 @@ module('Unit | Handler | history', function () {
               rain: 1.2,
             },
           ],
-        }) as never
+        })
+      )
     );
 
-    assert.deepEqual(response.data[0]?.attributes, {
+    assert.deepEqual(response[0]?.attributes, {
       humidity: 70,
       rain: 1.2,
       temperature: 7.5,
       timestamp: 1_774_341_507_000,
     });
-    assert.false('direction' in (response.data[0]?.attributes ?? {}));
-    assert.false('speed' in (response.data[0]?.attributes ?? {}));
-    assert.false('gusts' in (response.data[0]?.attributes ?? {}));
+    assert.false('direction' in (response[0]?.attributes ?? {}));
+    assert.false('speed' in (response[0]?.attributes ?? {}));
+    assert.false('gusts' in (response[0]?.attributes ?? {}));
   });
 });

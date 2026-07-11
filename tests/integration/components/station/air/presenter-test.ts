@@ -1,13 +1,13 @@
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
 
-type AirPresenterTestContext = {
+interface AirPresenterTestContext extends RenderingTestContext {
   history: History[];
-};
+}
 
 // The temperature/humidity series data itself is built by seriesFor (unit
 // tested in tests/unit/utils/chart-series-test.ts). Drawing it is

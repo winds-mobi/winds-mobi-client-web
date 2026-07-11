@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import HighCharts from 'ember-highcharts/components/high-charts';
+import type { Options } from 'highcharts';
 
 import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 import {
@@ -20,12 +21,12 @@ interface PolarChartOptions extends ChartOptions {
 export interface PolarSignature {
   Args: {
     chartOptions?: PolarChartOptions;
-    chartData?: unknown;
+    chartData?: Options['series'];
   };
   Blocks: {
     default: [];
   };
-  Element: null;
+  Element: HTMLDivElement;
 }
 
 export default class Polar extends Component<PolarSignature> {

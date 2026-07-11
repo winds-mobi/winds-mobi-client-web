@@ -1,6 +1,11 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, render, settled } from '@ember/test-helpers';
+import {
+  findAll,
+  render,
+  settled,
+  type RenderingTestContext,
+} from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -16,9 +21,9 @@ type FakeStoreRequest = {
   url?: string;
 };
 
-type StationLastHourIndexTestContext = {
+interface StationLastHourIndexTestContext extends RenderingTestContext {
   stationId: string;
-};
+}
 
 class FakeMapRefreshService extends Service {
   lastRefresh = 0;
@@ -83,7 +88,9 @@ module('Integration | Component | station/last-hour', function (hooks) {
   });
 
   test('it keeps the first station graph stable when another station resolves late', async function (this: StationLastHourIndexTestContext, assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const now = Date.now();
 
     const stationAHistory: History[] = [

@@ -21,16 +21,18 @@ change (`pnpm add`/`pnpm remove`) updates `package.json`/`pnpm-lock.yaml` (seen 
 both, since those are real files in the bind mount) but does **not** automatically
 reinstall the container's own `node_modules` volume.
 
-Our `start` script always passes `vite --force`, which throws away any cached
-dependency-optimization state and does a full re-scan on every boot. Combined
-with a `node_modules` volume that's now out of sync with the lockfile (or just
-needs the new package physically installed), that forced re-scan can crash
-mid-way — taking the dependency optimizer down with it. Since nearly every route
-imports something from the broken optimization batch, almost every request then
-hangs waiting on a result that never arrives, and the OrbStack proxy in front of
-it eventually returns `504`.
+When Vite (re-)runs its dependency optimizer against a `node_modules` volume
+that's out of sync with the lockfile (or just needs the new package physically
+installed), that re-scan can crash mid-way — taking the dependency optimizer
+down with it. (The `start` script used to pass `vite --force`, which triggered
+that full re-scan on _every_ boot; the flag has since been removed, so this now
+only bites when the optimizer genuinely re-runs — after a lockfile/config
+change or an explicit `pnpm start --force`.) Since nearly every route imports
+something from the broken optimization batch, almost every request then hangs
+waiting on a result that never arrives, and the OrbStack proxy in front of it
+eventually returns `504`.
 
-One specific instance we hit and fixed for good (see below): the forced re-scan
+One specific instance we hit and fixed for good (see below): the re-scan
 crawls the _entire_ `@frontile/collections` package because we import `Listbox`
 from it, even though we never use its `Table` component. `Table`'s precompiled
 templates aren't prebundle-clean (esbuild can't resolve a `@frontile/theme/src/
@@ -124,3 +126,70 @@ Just **hard-refresh the browser tab** (or close and reopen it). The dev
 server is healthy; the tab is the only thing out of date. Vite's HMR client
 normally does this reload automatically, but a tab that's been idle a long
 time, or whose websocket dropped, can miss the signal.
+
+## The dev server shows a blank white page after running `pnpm test:ember`
+
+**Symptom:** `pnpm start`'s page goes completely blank — not an error overlay,
+just an empty `<body>`. Viewing source shows the
+`winds-mobi-client-web/config/environment` meta tag decodes to
+`"environment":"test"`, `"APP":{"rootElement":"#ember-testing","autoboot":false}`
+— for a normal route like `/` or `/map`, not `/tests`.
+
+**What's actually happening:** `@embroider/vite`'s `contentFor()` Vite plugin
+(`node_modules/.pnpm/@embroider+vite@*/node_modules/@embroider/vite/dist/src/
+content-for.js`) injects that meta tag by reading
+`node_modules/.embroider/content-for.json` fresh **from disk on every single
+HTML request** — it is not cached in memory, and it is not namespaced by which
+Vite process is asking. That JSON file is keyed by path (`/index.html`,
+`/tests/index.html`) and lives under the project root, shared by every Vite
+process that runs against this working directory.
+
+Run any `vite build` with `docker compose exec ui` — i.e. **inside the same
+running container as the persistent `pnpm start` dev server** — without
+isolating its working directory, and that build regenerates `content-for.json`,
+overwriting the `/index.html` entry with its own environment
+(`autoboot: false`, `rootElement: "#ember-testing"`) instead of the dev
+server's own. The live dev server then reads that same corrupted entry for
+every subsequent request to `/`, `/map`, etc., until its own process restarts
+and regenerates the file for dev mode again. Since `autoboot` is now `false`
+and nothing ever calls `visit()` outside a test harness, the app never boots
+and the page stays blank — indefinitely, surviving hard refreshes and even new
+tabs, because the corruption is server-side, not a stale client cache.
+
+Confirm it's this (not a client-side caching issue) by checking directly from
+inside the container, bypassing the browser entirely:
+
+```sh
+docker compose exec ui sh -c "curl -s http://localhost:4200/ | grep -o 'environment%22%3A%22[a-z]*'"
+```
+
+If this prints `environment%22%3A%22test` for the plain `/` route, the shared
+cache is corrupted.
+
+### Fix
+
+Restart the container so its dev server process regenerates
+`content-for.json` for its own (development) mode:
+
+```sh
+docker restart <container-name>
+```
+
+Then re-check the command above — it should print `environment%22%3A%22
+development`.
+
+### Prevention — the systemic fix (applied)
+
+`package.json`'s `test:ember` script runs its build under
+`EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test`, giving the test
+build its own isolated working directory — it can no longer clobber the dev
+server's `content-for.json`. Verified empirically: a full `pnpm test:ember`
+run inside the container followed by the curl probe above still reported
+`environment:development`. That env-var prefix is load-bearing; keep it on any
+future script that invokes `vite build` in this container.
+
+The corruption can only recur if something runs a `vite build` against the
+project root _without_ that isolation while `pnpm start` is live (e.g. invoking
+`vite build --mode test` by hand). If that happens, restart the container
+afterward. For iterating, still prefer `pnpm test:ember:dev` — it runs against
+the already-live dev server via testem's proxy and never builds anything.

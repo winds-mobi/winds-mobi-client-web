@@ -1,4 +1,5 @@
 import { pageTitle } from 'ember-page-title';
+import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
@@ -26,8 +27,10 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
 
-  get stationId() {
-    return this.router.currentRoute?.params['station_id'];
+  get stationId(): string | undefined {
+    const id = this.router.currentRoute?.params?.['station_id'];
+
+    return typeof id === 'string' ? id : undefined;
   }
 
   @cached
@@ -36,7 +39,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: StationModel }>(
       findRecord<StationModel>('station', this.stationId, undefined, {

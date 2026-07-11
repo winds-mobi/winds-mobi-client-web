@@ -11,7 +11,6 @@ import {
 } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
@@ -158,7 +157,7 @@ class FakeStoreService extends Service {
 // be in place before that transition — registering it after arriving on the
 // route (e.g. after a nav-link click) is too late to be picked up.
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = async () => {
+  nearbyLocation.syncPermissionState = () => {
     nearbyLocation.permissionState = 'granted';
     nearbyLocation.requestState = 'ready';
     nearbyLocation.coordinates = {
@@ -166,6 +165,7 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
       latitude: 46.7,
       longitude: 7.9,
     };
+    return Promise.resolve();
   };
 }
 
@@ -227,9 +227,7 @@ module('Acceptance | app walkthrough', function (hooks) {
     assert.dom('[data-test-help-changelog]').exists();
 
     // No station was favourited along the way.
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     assert.deepEqual(favorites.stationIds, []);
   });
@@ -240,9 +238,7 @@ module('Acceptance | app walkthrough', function (hooks) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
     await waitFor('[data-test-station-favorite]');
 
-    const favorites = this.owner.lookup(
-      'service:favorites'
-    ) as FavoritesService;
+    const favorites = this.owner.lookup('service:favorites');
 
     assert
       .dom('[data-test-station-favorite]')

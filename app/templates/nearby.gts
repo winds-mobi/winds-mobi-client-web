@@ -52,7 +52,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       nearbyQuery<Station>(

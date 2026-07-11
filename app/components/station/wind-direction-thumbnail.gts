@@ -35,7 +35,7 @@ export default class StationWindDirectionThumbnail extends Component<StationWind
 
   @cached
   get historyRequest() {
-    this.mapRefresh.lastRefresh;
+    void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: History[] }>(
       historyQuery<History>(

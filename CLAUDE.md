@@ -35,7 +35,9 @@ pinned in `engines`.
   `node_modules` happen to be installed locally (e.g. Homebrew Node), which has produced spurious warnings — Node
   engine-version mismatches, duplicate native `sharp-libvips` dylib warnings — that don't occur in the container and
   are not real app issues. Confirm the container is up first with `docker compose ps`.
-- `pnpm install` — install dependencies (a `postinstall` rebuilds `sharp`).
+- **pnpm only.** Never `npm`/`yarn`, and never bare `npx` (it network-installs anything not already local).
+  Use `pnpm <script>` for scripts and `pnpm exec <bin>` for local binaries.
+- `pnpm install` — install dependencies.
 - `pnpm start` — Vite dev server on `0.0.0.0`, app at http://localhost:4200 (tests at `/tests`).
 - `pnpm build` — production Vite build. `pnpm ember build` for a development build.
 - `pnpm lint` — runs all linters in parallel (`eslint`, `ember-template-lint`, `stylelint`, prettier `--check`).
@@ -46,7 +48,12 @@ pinned in `engines`.
 
 - `pnpm test` — full CI gate: lint + the ember test build/run.
 - `pnpm test:ember` — isolated: `vite build --mode test` then `ember test --path dist`. Use only when the
-  dev variant is unavailable or an isolated build-style run is specifically needed.
+  dev variant is unavailable or an isolated build-style run is specifically needed. Its build runs under its own
+  `EMBROIDER_WORKING_DIRECTORY` (`node_modules/.embroider-test`), so it's safe to run in the container alongside
+  the live `pnpm start` server — that isolation is load-bearing: without it, the test build corrupts the dev
+  server's shared `content-for.json` and the app page goes blank until the container restarts. Keep the prefix, and
+  never run a raw `vite build` in the container without it. See
+  [TROUBLESHOOTING.md](TROUBLESHOOTING.md#the-dev-server-shows-a-blank-white-page-after-running-pnpm-testember).
 - `pnpm test:ember:dev` — runs tests against an already-running `pnpm start` dev server (assume one is up;
   **prefer this** while iterating). `pnpm test:ember:dev:server` opens an interactive Testem session.
 - There is no per-file test script; filter with QUnit's `--filter` (e.g. `pnpm test:ember -- --filter "navbar search"`)
@@ -56,6 +63,8 @@ pinned in `engines`.
 
 Do **not** run lint or tests while iterating unless the user asks. Verify only as the final pre-push step:
 run `pnpm lint` (or targeted `pnpm lint:format`) plus the relevant `test:ember:dev` tests for what changed.
+When lint fails, run `pnpm lint:fix` first and hand-fix only what the fixers can't reach (some rules, e.g.
+`no-useless-escape` and most type-aware ones, have no autofix).
 
 Do **not** spin up headless-browser/screenshot rigs (chromium-cli, raw `chromium --headless`, Playwright, etc.)
 to visually verify a UI change — this app's map/canvas-heavy UI doesn't render meaningfully in that path, and
@@ -133,7 +142,8 @@ Services ([app/services/](app/services/)) hold only cross-cutting, long-lived co
 (ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
 (geolocation + Permissions API state machine), `settings` (persisted display preferences, see
 [Settings persistence](#settings-persistence-tracked-local-storage) below), and ember-simple-auth's `session`
-(`app/authenticators/winds-mobi.ts`; see [TODO.md](TODO.md) for the OAuth/JWT flow this drives).
+(`app/authenticators/winds-mobi.ts`; sign-in is currently disabled — the code is kept commented, marked
+`TODO: Remove login`, and favourites are localStorage-only with no cross-device sync).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 
@@ -275,20 +285,21 @@ a function`) when the chart tries to render it.
   string whose exact ICU/Intl unit-format output isn't worth hand-deriving (e.g. `station/metric-card`'s
   `intl.formatNumber(..., {format: 'windSpeed'})`), capture it empirically via a throwaway debug render
   (`console.log` the text, read it from the test-runner output, delete the debug test) rather than guessing.
-- `pnpm lint` does **not** run ESLint — `package.json` has `lint:js:fix` but no plain `lint:js`, so the `lint:*(!fix)`
-  glob in the `lint` script silently skips it. Run `npx eslint <files>` directly (via `docker compose exec ui`) to
-  actually type-check test/app `.ts`/`.gts` files; several pre-existing test files fail it today (e.g.
-  `this.owner`/`this.element` come back untyped — `no-unsafe-*` errors — whenever a test's `this` is annotated with a
-  custom context type that doesn't extend `@ember/test-helpers`'s `TestContext`; last-hour/index-test.ts is the
-  original instance of this). None of this is CI-enforced, so treat new instances as consistent-with-precedent rather
-  than blocking, but don't be surprised by them.
+- `pnpm lint` runs ESLint (type-aware, cached) and Glint type-checking (`lint:types`, `ember-tsc --noEmit`)
+  alongside the other linters, and CI enforces all of them. The tree is typecheck-clean — keep it that way; fix new
+  errors rather than working around them. When a rendering test needs a custom `this` context type, extend
+  `RenderedTestContext` from `tests/helpers` (it narrows `element` to `Element`, which qunit-dom's target/rootElement
+  params require); non-rendering contexts extend `@ember/test-helpers`'s `TestContext`. A context type that extends
+  neither leaves `this.owner`/`this.element` untyped and cascades into `no-unsafe-*` errors downstream.
 - Some acceptance tests need MapLibre's `idle` event, which never fires in this dev container (no WebGL in headless
-  Chromium here) — see [TODO.md](TODO.md)'s "Map-refresh acceptance tests can't run in the dev container" note. These
-  fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions without checking
-  whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize map (likely WebGL
-issue)` console error in the failure output). `pnpm test:ember` (isolated build against a real installed Chrome) is
-  more reliable for local verification than `pnpm test:ember:dev` (headless chromium via testem-dev.js), which failed
-  to even connect the browser at all in one session here — if that happens, fall back to `pnpm test:ember`.
+  Chromium here). These fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions
+  without checking whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize
+map (likely WebGL issue)` console error in the failure output). Because each of these burns a long timeout, a full
+  unfiltered `pnpm test:ember:dev` run in the container is very slow — prefer filtered runs
+  (`pnpm test:ember:dev --test_page "tests/index.html?hidepassed&filter=<pattern>"`). If the testem browser ever
+  again fails to connect at all ("testem.js not loaded?"), suspect the proxy target in `testem-dev.js` first — it
+  must stay plain-http localhost, not the OrbStack HTTPS domain, because node's https client rejects OrbStack's CA
+  and 500s every proxied page request (root-caused 2026-07-11).
 
 ### Refactoring & cleanup
 

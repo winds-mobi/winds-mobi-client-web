@@ -2,13 +2,16 @@ import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 import { windBandForSpeed } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-type NavbarSearchResultTestContext = {
+interface NavbarSearchResultTestContext extends RenderedTestContext {
   station: Station;
-};
+}
 
 const STATION: Station = {
   id: 'holfuy-1850',

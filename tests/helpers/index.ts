@@ -8,6 +8,17 @@ import { setupIntl } from 'ember-intl/test-support';
 import { formats } from 'winds-mobi-client-web/ember-intl';
 import translationsForEnUs from 'virtual:ember-intl/translations/en-us';
 import type Owner from '@ember/owner';
+import type { RenderingTestContext } from '@ember/test-helpers';
+
+// @ember/test-helpers types `element` as `Element | Document`, but in a
+// rendering test it is always the testing container element — and qunit-dom's
+// target/rootElement parameters accept only `Element`. Narrowing the property
+// here (legal: `Element` is assignable to `Element | Document`) lets tests
+// hand `this.element` to `assert.dom` without casts. Extend this instead of
+// RenderingTestContext when a rendering test declares a custom `this` type.
+export interface RenderedTestContext extends RenderingTestContext {
+  element: Element;
+}
 
 // This file exists to provide wrappers around ember-qunit's
 // test setup functions. This way, you can easily extend the setup that is

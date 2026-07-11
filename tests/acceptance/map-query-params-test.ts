@@ -4,6 +4,7 @@ import {
   click,
   currentURL,
   settled,
+  type TestContext,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
@@ -103,8 +104,10 @@ module('Acceptance | map query params', function (hooks) {
   test.if(
     'it uses the URL view for the initial map and station request',
     webGLAvailable,
-    async function (assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+    async function (this: TestContext, assert) {
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await waitUntil(() => countStationRequests(store.calls) > 0);
@@ -131,8 +134,10 @@ module('Acceptance | map query params', function (hooks) {
   test.if(
     'it force refreshes stations from the navbar button',
     webGLAvailable,
-    async function (assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+    async function (this: TestContext, assert) {
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await waitUntil(() => countStationRequests(store.calls) > 0);
@@ -154,13 +159,15 @@ module('Acceptance | map query params', function (hooks) {
   test.if(
     'it auto refreshes stations after the refresh interval',
     webGLAvailable,
-    async function (assert) {
+    async function (this: TestContext, assert) {
       this.owner.register(
         'service:map-refresh',
         ShortIntervalMapRefreshService
       );
 
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
 

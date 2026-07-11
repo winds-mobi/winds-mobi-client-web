@@ -64,7 +64,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   }
 
   private windClassFor(speed: number | undefined) {
-    return this.hasHistory ? windToTextClass(speed) : undefined;
+    return speed === undefined ? undefined : windToTextClass(speed);
   }
 
   <template>

@@ -7,6 +7,10 @@ import type {
   QueryRequestOptions,
 } from '@warp-drive/core/types/request';
 import type { QueryParamsSource } from '@warp-drive/core/types/params';
+import type {
+  TypedRecordInstance,
+  TypeFromInstance,
+} from '@warp-drive/core/types/record';
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
 import type { Coordinates } from 'winds-mobi-client-web/utils/location';
@@ -54,8 +58,8 @@ const summaryStationQueryKeys = [
   'last.w-max',
 ] as const;
 
-function findRecord<T>(
-  type: string,
+function findRecord<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   id: string,
   query?: QueryParamsSource,
   options?: FindRecordOptions
@@ -86,8 +90,8 @@ function findRecord<T>(
   };
 }
 
-function query<T>(
-  type: string,
+function query<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   query?: QueryParamsSource,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
@@ -103,8 +107,8 @@ function query<T>(
   return jsonApiQuery<T>(type, mergedQuery, mergedOptions);
 }
 
-function mapQuery<T>(
-  type: string,
+function mapQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   bounds: MapBounds,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
@@ -123,8 +127,8 @@ function mapQuery<T>(
   );
 }
 
-function nearbyQuery<T>(
-  type: string,
+function nearbyQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   latitude: number,
   longitude: number,
   limit = 10,
@@ -144,8 +148,8 @@ function nearbyQuery<T>(
 
 // Fetches an explicit set of stations (the profile's favorites) by id.
 // No duplicates filtering: the user picked these exact stations.
-function favoritesQuery<T>(
-  type: string,
+function favoritesQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   ids: string[],
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
@@ -161,8 +165,8 @@ function favoritesQuery<T>(
   );
 }
 
-function searchQuery<T>(
-  type: string,
+function searchQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
   search: string,
   near?: Coordinates,
   limit = 8,

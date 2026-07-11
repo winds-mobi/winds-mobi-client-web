@@ -5,12 +5,10 @@ import {
   currentURL,
   fillIn,
   find,
-  settled,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 
@@ -161,7 +159,9 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it searches from the desktop navbar and recenters on the selected station at zoom 10', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
 
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
@@ -197,7 +197,9 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it searches without a location bias when the position is unknown', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     nearbyLocation.coordinates = undefined;
 
@@ -233,7 +235,9 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it shows empty state for unmatched queries and does not search for a single character', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
 
     await visit('/map');
     await fillIn('[data-test-navbar-search="navbar"] input', 'l');

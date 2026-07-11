@@ -1,3 +1,4 @@
+import type { TOC } from '@ember/component/template-only';
 import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 export interface StationMetaItemSignature {
@@ -11,7 +12,7 @@ export interface StationMetaItemSignature {
   Element: HTMLDivElement;
 }
 
-<template>
+const StationMetaItem: TOC<StationMetaItemSignature> = <template>
   <div class="flex items-center gap-1.5">
     <dt class="sr-only">{{@label}}</dt>
     <dd class="m-0 inline-flex items-center gap-1.5" ...attributes>
@@ -21,4 +22,6 @@ export interface StationMetaItemSignature {
       {{yield}}
     </dd>
   </div>
-</template>
+</template>;
+
+export default StationMetaItem;

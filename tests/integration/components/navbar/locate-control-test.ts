@@ -39,8 +39,9 @@ module('Integration | Component | navbar/locate-control', function (hooks) {
     nearbyLocation.permissionState = 'granted';
     let requested = false;
 
-    nearbyLocation.requestCurrentPosition = async () => {
+    nearbyLocation.requestCurrentPosition = () => {
       requested = true;
+      return Promise.resolve();
     };
 
     await render(hbs`<Navbar::LocateControl />`);

@@ -3,7 +3,13 @@
 const http = require('node:http');
 const https = require('node:https');
 
-const APP_URL = process.env.APP_URL || 'http://127.0.0.1:4200';
+// Proxy target for the vite dev server. Deliberately NOT the browser-facing
+// APP_URL from compose.yaml: that is the OrbStack HTTPS domain, whose
+// certificate node's https client rejects ("self-signed certificate in
+// certificate chain" — node ignores the system CA store), 500-ing every
+// proxied page request so the browser never loads testem.js. The dev server
+// is colocated in this container, so target it directly over plain http.
+const APP_URL = process.env.TESTEM_APP_URL || 'http://127.0.0.1:4200';
 
 function testemProxy(targetURL) {
   const target = new URL(targetURL);

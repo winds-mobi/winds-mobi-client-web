@@ -124,8 +124,9 @@ function countStationRequests(calls: string[]) {
 }
 
 function stubPromptPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = async () => {
+  nearbyLocation.syncPermissionState = () => {
     nearbyLocation.permissionState = 'prompt';
+    return Promise.resolve();
   };
 }
 
@@ -139,8 +140,9 @@ function setGrantedCoordinates(
 }
 
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = async () => {
+  nearbyLocation.syncPermissionState = () => {
     setGrantedCoordinates(nearbyLocation);
+    return Promise.resolve();
   };
 }
 
@@ -152,7 +154,9 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it shows the explainer and waits for the nearby location button when access is not granted yet', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubPromptPermission(nearbyLocation);
@@ -165,15 +169,18 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it requests location after the user uses the nearby location button and then loads nearby stations', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubPromptPermission(nearbyLocation);
-    nearbyLocation.requestCurrentPosition = async () => {
+    nearbyLocation.requestCurrentPosition = () => {
       setGrantedCoordinates(nearbyLocation, {
         ...DEFAULT_COORDINATES,
         accuracy: 25,
       });
+      return Promise.resolve();
     };
 
     await visit('/nearby');
@@ -186,7 +193,9 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it skips the button when geolocation permission is already granted', async function (assert) {
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);
@@ -249,7 +258,9 @@ module('Acceptance | nearby route', function (hooks) {
   test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {
     this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
 
-    const store = this.owner.lookup('service:store') as FakeStoreService;
+    const store = this.owner.lookup(
+      'service:store'
+    ) as unknown as FakeStoreService;
     const nearbyLocation = this.owner.lookup('service:nearby-location');
 
     stubGrantedPermission(nearbyLocation);

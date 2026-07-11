@@ -1,12 +1,16 @@
 import { module, test } from 'qunit';
-import { findAll, render } from '@ember/test-helpers';
+import {
+  findAll,
+  render,
+  type RenderingTestContext,
+} from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { WindLegendBand } from 'winds-mobi-client-web/components/map/legend';
 
-type MapLegendTestContext = {
+interface MapLegendTestContext extends RenderingTestContext {
   bands: WindLegendBand[];
-};
+}
 
 module('Integration | Component | map/legend', function (hooks) {
   setupRenderingTest(hooks);

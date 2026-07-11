@@ -3,13 +3,16 @@ import { module, test } from 'qunit';
 import { findAll, render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-type StationCompactCardTestContext = {
+interface StationCompactCardTestContext extends RenderedTestContext {
   station: Station;
-};
+}
 
 class FakeMapRefreshService extends Service {
   lastRefresh = 0;

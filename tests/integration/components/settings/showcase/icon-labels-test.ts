@@ -1,9 +1,14 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
-import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupRenderingTest,
+  type RenderedTestContext,
+} from 'winds-mobi-client-web/tests/helpers';
 
-type Ctx = { enabled: boolean };
+interface Ctx extends RenderedTestContext {
+  enabled: boolean;
+}
 
 module(
   'Integration | Component | settings/showcase/icon-labels',

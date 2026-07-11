@@ -1,6 +1,12 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, findAll, visit } from '@ember/test-helpers';
+import {
+  click,
+  currentURL,
+  findAll,
+  type TestContext,
+  visit,
+} from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 
 // The settings route doesn't fetch stations, but the shared navbar is always
@@ -11,6 +17,13 @@ class FakeStoreService extends Service {
   }
 }
 
+// `@ember/test-helpers` doesn't publicly export its `ApplicationTestContext`
+// (only the base `TestContext` and `RenderingTestContext`), so acceptance
+// tests that read `this.element` need this shape declared locally.
+interface SettingsRouteTestContext extends TestContext {
+  element?: Element | null;
+}
+
 module('Acceptance | settings route', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -18,7 +31,7 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the seven preferences, on by default except the compact nearby/favourite lists, icon labels, and beta features', async function (assert) {
+  test('it shows the seven preferences, on by default except the compact nearby/favourite lists, icon labels, and beta features', async function (this: SettingsRouteTestContext, assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');

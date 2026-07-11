@@ -1,14 +1,15 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
 
-type StationWindDirectionThumbnailTestContext = {
+interface StationWindDirectionThumbnailTestContext
+  extends RenderingTestContext {
   stationId: string;
-};
+}
 
 class FakeMapRefreshService extends Service {
   lastRefresh = 0;
@@ -39,7 +40,9 @@ module(
     });
 
     test('it renders the graph with the resolved history', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       store.response = Promise.resolve({
         content: {
@@ -69,7 +72,9 @@ module(
     });
 
     test('it renders an empty graph when the request errors', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup('service:store') as FakeStoreService;
+      const store = this.owner.lookup(
+        'service:store'
+      ) as unknown as FakeStoreService;
 
       const rejection = Promise.reject(new Error('boom'));
       rejection.catch(() => {
