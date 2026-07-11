@@ -5,19 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 3. Stock-parity touch-ups in package.json
-
-- **Where:** `package.json`.
-- **Problem:** two small drifts from the stock blueprint:
-  - `"lint:js": "eslint ."` — stock is `eslint . --cache` (`.eslintcache` is already
-    gitignored here, so the cache was clearly intended at some point).
-  - `description`/`repository` are still blueprint boilerplate ("Small description for
-    winds-mobi-client-web goes here", `""`).
-- **How:** add `--cache`; fill in a real one-line description and the GitHub repository
-  URL. Leave `license`/`author` untouched (licensing is a maintainer decision).
-- **Expected effect:** faster repeat lints; `package.json` stops advertising itself as an
-  unedited blueprint.
-
 ## 4. Remove unused `lint-to-the-future` devDependencies
 
 - **Where:** `package.json` devDependencies: `lint-to-the-future`,
