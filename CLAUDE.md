@@ -291,9 +291,12 @@ a function`) when the chart tries to render it.
 - Some acceptance tests need MapLibre's `idle` event, which never fires in this dev container (no WebGL in headless
   Chromium here). These fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions
   without checking whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize
-map (likely WebGL issue)` console error in the failure output). `pnpm test:ember` (isolated build) is more reliable
-  for local verification than `pnpm test:ember:dev` (headless chromium via testem-dev.js), which failed to even
-  connect the browser at all in one session here — if that happens, fall back to `pnpm test:ember`.
+map (likely WebGL issue)` console error in the failure output). Because each of these burns a long timeout, a full
+  unfiltered `pnpm test:ember:dev` run in the container is very slow — prefer filtered runs
+  (`pnpm test:ember:dev --test_page "tests/index.html?hidepassed&filter=<pattern>"`). If the testem browser ever
+  again fails to connect at all ("testem.js not loaded?"), suspect the proxy target in `testem-dev.js` first — it
+  must stay plain-http localhost, not the OrbStack HTTPS domain, because node's https client rejects OrbStack's CA
+  and 500s every proxied page request (root-caused 2026-07-11).
 
 ### Refactoring & cleanup
 
