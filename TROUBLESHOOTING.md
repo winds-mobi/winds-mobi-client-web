@@ -21,16 +21,18 @@ change (`pnpm add`/`pnpm remove`) updates `package.json`/`pnpm-lock.yaml` (seen 
 both, since those are real files in the bind mount) but does **not** automatically
 reinstall the container's own `node_modules` volume.
 
-Our `start` script always passes `vite --force`, which throws away any cached
-dependency-optimization state and does a full re-scan on every boot. Combined
-with a `node_modules` volume that's now out of sync with the lockfile (or just
-needs the new package physically installed), that forced re-scan can crash
-mid-way — taking the dependency optimizer down with it. Since nearly every route
-imports something from the broken optimization batch, almost every request then
-hangs waiting on a result that never arrives, and the OrbStack proxy in front of
-it eventually returns `504`.
+When Vite (re-)runs its dependency optimizer against a `node_modules` volume
+that's out of sync with the lockfile (or just needs the new package physically
+installed), that re-scan can crash mid-way — taking the dependency optimizer
+down with it. (The `start` script used to pass `vite --force`, which triggered
+that full re-scan on _every_ boot; the flag has since been removed, so this now
+only bites when the optimizer genuinely re-runs — after a lockfile/config
+change or an explicit `pnpm start --force`.) Since nearly every route imports
+something from the broken optimization batch, almost every request then hangs
+waiting on a result that never arrives, and the OrbStack proxy in front of it
+eventually returns `504`.
 
-One specific instance we hit and fixed for good (see below): the forced re-scan
+One specific instance we hit and fixed for good (see below): the re-scan
 crawls the _entire_ `@frontile/collections` package because we import `Listbox`
 from it, even though we never use its `Table` component. `Table`'s precompiled
 templates aren't prebundle-clean (esbuild can't resolve a `@frontile/theme/src/
@@ -142,10 +144,10 @@ Vite process is asking. That JSON file is keyed by path (`/index.html`,
 `/tests/index.html`) and lives under the project root, shared by every Vite
 process that runs against this working directory.
 
-`pnpm test:ember` runs `vite build --mode test`. Run it with `docker compose
-exec ui` — i.e. **inside the same running container as the persistent `pnpm
-start` dev server** — and that test build regenerates `content-for.json`,
-overwriting the `/index.html` entry with the test build's environment
+Run any `vite build` with `docker compose exec ui` — i.e. **inside the same
+running container as the persistent `pnpm start` dev server** — without
+isolating its working directory, and that build regenerates `content-for.json`,
+overwriting the `/index.html` entry with its own environment
 (`autoboot: false`, `rootElement: "#ember-testing"`) instead of the dev
 server's own. The live dev server then reads that same corrupted entry for
 every subsequent request to `/`, `/map`, etc., until its own process restarts
@@ -176,21 +178,18 @@ docker restart <container-name>
 Then re-check the command above — it should print `environment%22%3A%22
 development`.
 
-### Prevention — this is the systemic fix
+### Prevention — the systemic fix (applied)
 
-**Never run `pnpm test:ember` (or anything invoking `vite build`) via `docker
-compose exec ui` while `pnpm start` is live in that same container** — the two
-share the same `node_modules/.embroider/content-for.json` and will keep
-re-corrupting each other's entry for as long as both exist. In this
-devcontainer setup, `pnpm start` is _always_ running (it's the container's
-`CMD`), so this hazard is live every time `pnpm test:ember` is invoked here,
-not just occasionally.
+`package.json`'s `test:ember` script runs its build under
+`EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test`, giving the test
+build its own isolated working directory — it can no longer clobber the dev
+server's `content-for.json`. Verified empirically: a full `pnpm test:ember`
+run inside the container followed by the curl probe above still reported
+`environment:development`. That env-var prefix is load-bearing; keep it on any
+future script that invokes `vite build` in this container.
 
-- Prefer `pnpm test:ember:dev` for iterating (it runs against the already-live
-  dev server via testem's proxy — no separate `vite build`, nothing gets
-  overwritten).
-- If `test:ember:dev`'s headless Chromium fails to connect and you fall back
-  to `pnpm test:ember` (as [CLAUDE.md](CLAUDE.md) suggests), treat the dev
-  server as contaminated the moment that command finishes — **restart the
-  container immediately afterward**, before relying on `pnpm start` again for
-  manual browsing or a screenshot.
+The corruption can only recur if something runs a `vite build` against the
+project root _without_ that isolation while `pnpm start` is live (e.g. invoking
+`vite build --mode test` by hand). If that happens, restart the container
+afterward. For iterating, still prefer `pnpm test:ember:dev` — it runs against
+the already-live dev server via testem's proxy and never builds anything.

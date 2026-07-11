@@ -5,32 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 6. Docs no longer match reality (CLAUDE.md + TROUBLESHOOTING.md)
-
-- **Where:** `CLAUDE.md` Commands + Testing sections; `TROUBLESHOOTING.md` blank-page
-  section.
-- **Problem:** recent fixes made several passages actively wrong:
-  - CLAUDE.md still says `pnpm lint` does **not** run ESLint and recommends
-    `npx eslint <files>` — `lint:js` was wired in and all 121 errors fixed (`cd6fcdd`);
-    the lint gate now covers ESLint in CI.
-  - CLAUDE.md still warns that `pnpm test:ember` in the container corrupts the live dev
-    server and demands a container restart afterwards — the permanent fix
-    (`EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test` isolating the test
-    build) is applied and verified; the hazard is gone for the script itself.
-  - TROUBLESHOOTING.md's "Prevention — this is the systemic fix" section likewise still
-    prescribes "never run it / restart immediately" instead of describing the applied fix.
-  - Two dangling "see TODO.md" references (OAuth/JWT flow; map-refresh WebGL note) point
-    at content deleted in `d334234`.
-- **How:** rewrite those passages to describe the current state (keeping the diagnostic
-  content — it's good archaeology); inline the WebGL/map-idle fact instead of pointing at
-  TODO.md; note login is disabled (`TODO: Remove login` in the authenticator). Add two
-  small policy lines while in there: (a) pnpm only — never `npm`/`npx`; use `pnpm <script>`
-  or `pnpm exec <bin>` so nothing gets network-installed on demand; (b) after a lint
-  failure, run `pnpm lint:fix` first and hand-fix only what autofix can't (some rules,
-  e.g. `no-useless-escape`, have no fixer).
-- **Expected effect:** guidance stops contradicting the repo; future sessions stop
-  restarting containers and hand-fixing autofixable lint errors for no reason.
-
 ## 7. README: replace blueprint boilerplate
 
 - **Where:** `README.md`.
