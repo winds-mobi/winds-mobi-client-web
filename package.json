@@ -26,8 +26,8 @@
     "start": "vite --host 0.0.0.0",
     "test": "concurrently \"pnpm:lint\" \"pnpm:test:ember\" --names \"lint,test:\" --prefixColors auto",
     "test:ember": "EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test vite build --mode test && ember test --path dist",
-    "test:ember:dev": "node scripts/run-testem-dev.cjs ci",
-    "test:ember:dev:server": "node scripts/run-testem-dev.cjs",
+    "test:ember:dev": "testem ci --file testem-dev.js",
+    "test:ember:dev:server": "testem --file testem-dev.js",
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "devDependencies": {
@@ -106,6 +106,7 @@
     "stylelint": "^16.16.0",
     "stylelint-config-standard": "^36.0.1",
     "tailwindcss": "^4.0.0",
+    "testem": "^3.15.2",
     "tracked-built-ins": "^3.4.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.27.0",
