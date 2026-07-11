@@ -124,3 +124,73 @@ Just **hard-refresh the browser tab** (or close and reopen it). The dev
 server is healthy; the tab is the only thing out of date. Vite's HMR client
 normally does this reload automatically, but a tab that's been idle a long
 time, or whose websocket dropped, can miss the signal.
+
+## The dev server shows a blank white page after running `pnpm test:ember`
+
+**Symptom:** `pnpm start`'s page goes completely blank — not an error overlay,
+just an empty `<body>`. Viewing source shows the
+`winds-mobi-client-web/config/environment` meta tag decodes to
+`"environment":"test"`, `"APP":{"rootElement":"#ember-testing","autoboot":false}`
+— for a normal route like `/` or `/map`, not `/tests`.
+
+**What's actually happening:** `@embroider/vite`'s `contentFor()` Vite plugin
+(`node_modules/.pnpm/@embroider+vite@*/node_modules/@embroider/vite/dist/src/
+content-for.js`) injects that meta tag by reading
+`node_modules/.embroider/content-for.json` fresh **from disk on every single
+HTML request** — it is not cached in memory, and it is not namespaced by which
+Vite process is asking. That JSON file is keyed by path (`/index.html`,
+`/tests/index.html`) and lives under the project root, shared by every Vite
+process that runs against this working directory.
+
+`pnpm test:ember` runs `vite build --mode test`. Run it with `docker compose
+exec ui` — i.e. **inside the same running container as the persistent `pnpm
+start` dev server** — and that test build regenerates `content-for.json`,
+overwriting the `/index.html` entry with the test build's environment
+(`autoboot: false`, `rootElement: "#ember-testing"`) instead of the dev
+server's own. The live dev server then reads that same corrupted entry for
+every subsequent request to `/`, `/map`, etc., until its own process restarts
+and regenerates the file for dev mode again. Since `autoboot` is now `false`
+and nothing ever calls `visit()` outside a test harness, the app never boots
+and the page stays blank — indefinitely, surviving hard refreshes and even new
+tabs, because the corruption is server-side, not a stale client cache.
+
+Confirm it's this (not a client-side caching issue) by checking directly from
+inside the container, bypassing the browser entirely:
+
+```sh
+docker compose exec ui sh -c "curl -s http://localhost:4200/ | grep -o 'environment%22%3A%22[a-z]*'"
+```
+
+If this prints `environment%22%3A%22test` for the plain `/` route, the shared
+cache is corrupted.
+
+### Fix
+
+Restart the container so its dev server process regenerates
+`content-for.json` for its own (development) mode:
+
+```sh
+docker restart <container-name>
+```
+
+Then re-check the command above — it should print `environment%22%3A%22
+development`.
+
+### Prevention — this is the systemic fix
+
+**Never run `pnpm test:ember` (or anything invoking `vite build`) via `docker
+compose exec ui` while `pnpm start` is live in that same container** — the two
+share the same `node_modules/.embroider/content-for.json` and will keep
+re-corrupting each other's entry for as long as both exist. In this
+devcontainer setup, `pnpm start` is _always_ running (it's the container's
+`CMD`), so this hazard is live every time `pnpm test:ember` is invoked here,
+not just occasionally.
+
+- Prefer `pnpm test:ember:dev` for iterating (it runs against the already-live
+  dev server via testem's proxy — no separate `vite build`, nothing gets
+  overwritten).
+- If `test:ember:dev`'s headless Chromium fails to connect and you fall back
+  to `pnpm test:ember` (as [CLAUDE.md](CLAUDE.md) suggests), treat the dev
+  server as contaminated the moment that command finishes — **restart the
+  container immediately afterward**, before relying on `pnpm start` again for
+  manual browsing or a screenshot.

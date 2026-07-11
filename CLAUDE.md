@@ -46,7 +46,13 @@ pinned in `engines`.
 
 - `pnpm test` — full CI gate: lint + the ember test build/run.
 - `pnpm test:ember` — isolated: `vite build --mode test` then `ember test --path dist`. Use only when the
-  dev variant is unavailable or an isolated build-style run is specifically needed.
+  dev variant is unavailable or an isolated build-style run is specifically needed. **Running this via
+  `docker compose exec ui` corrupts the live `pnpm start` dev server** — both share
+  `node_modules/.embroider/content-for.json`, which `@embroider/vite` re-reads from disk on every request, so this
+  build overwrites the dev server's `/index.html` entry with test-mode config (`autoboot: false`,
+  `rootElement: "#ember-testing"`), leaving `pnpm start` showing a blank white page until its container restarts.
+  See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#the-dev-server-shows-a-blank-white-page-after-running-pnpm-testember).
+  **Restart the container right after running this command** if anyone needs `pnpm start` afterward.
 - `pnpm test:ember:dev` — runs tests against an already-running `pnpm start` dev server (assume one is up;
   **prefer this** while iterating). `pnpm test:ember:dev:server` opens an interactive Testem session.
 - There is no per-file test script; filter with QUnit's `--filter` (e.g. `pnpm test:ember -- --filter "navbar search"`)
@@ -288,7 +294,8 @@ a function`) when the chart tries to render it.
   whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize map (likely WebGL
 issue)` console error in the failure output). `pnpm test:ember` (isolated build against a real installed Chrome) is
   more reliable for local verification than `pnpm test:ember:dev` (headless chromium via testem-dev.js), which failed
-  to even connect the browser at all in one session here — if that happens, fall back to `pnpm test:ember`.
+  to even connect the browser at all in one session here — if that happens, fall back to `pnpm test:ember`, then
+  restart the container afterward (see the `test:ember` corruption caveat under Commands above).
 
 ### Refactoring & cleanup
 

@@ -14,7 +14,10 @@ const testemBinPath = path.resolve(
   testemPackage.bin.testem
 );
 
-const args = process.argv.slice(2);
+// pnpm forwards a literal `--` separator (e.g. `pnpm test:ember:dev -- --test_page ...`)
+// straight into argv; testem's own CLI doesn't expect it there and hangs silently
+// waiting on a browser that never connects. Drop it before parsing.
+const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const subcommand = args[0]?.startsWith('-') ? [] : args.slice(0, 1);
 const forwardedArgs = args[0]?.startsWith('-') ? args : args.slice(1);
 
