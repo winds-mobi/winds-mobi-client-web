@@ -28,7 +28,6 @@
     "test:ember": "EMBROIDER_WORKING_DIRECTORY=node_modules/.embroider-test vite build --mode test && ember test --path dist",
     "test:ember:dev": "node scripts/run-testem-dev.cjs ci",
     "test:ember:dev:server": "node scripts/run-testem-dev.cjs",
-    "postinstall": "npm rebuild sharp",
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "devDependencies": {

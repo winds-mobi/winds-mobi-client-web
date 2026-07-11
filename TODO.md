@@ -5,21 +5,6 @@ Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 variant. Each section below is worked as one focused commit that also removes its
 section; sections under "Assessed — no change" are recorded findings, not work items.
 
-## 2. Remove `postinstall: npm rebuild sharp`
-
-- **Where:** `package.json` → `"postinstall": "npm rebuild sharp"`.
-- **Problem:** the only `npm` invocation in a repo otherwise pinned to pnpm
-  (`packageManager`, `engines`, corepack in the Dockerfile). It's also redundant:
-  `pnpm-workspace.yaml` already lists `sharp` under `onlyBuiltDependencies`, so pnpm
-  runs sharp's native build itself during `pnpm install`.
-- **Why:** mixing package managers is exactly the class of drift this audit is removing;
-  stock blueprint has no `postinstall` at all. The script dates to early "sharp issues"
-  fire-fighting (`e5928db`) that predates the `onlyBuiltDependencies` allowlist.
-- **How:** delete the script. Verify inside the container: `pnpm rebuild sharp` succeeds
-  and `node -e "require('sharp')"` loads.
-- **Expected effect:** pnpm-only toolchain, slightly faster installs, one less non-stock
-  script line.
-
 ## 3. Stock-parity touch-ups in package.json
 
 - **Where:** `package.json`.
