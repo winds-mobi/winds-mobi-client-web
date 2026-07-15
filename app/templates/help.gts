@@ -207,6 +207,53 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
           </StationSectionCard>
         </div>
 
+        <StationSectionCard @title={{t "help.faq.title"}}>
+          <div class="grid gap-3 text-sm leading-6 text-slate-600">
+            <dl class="grid gap-3 text-sm text-slate-700">
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "help.faq.items.whyQuestion"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.faq.items.whyAnswer"}}</dd>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "help.faq.items.feelQuestion"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.faq.items.feelAnswer"}}</dd>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "help.faq.items.costQuestion"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.faq.items.costAnswer"}}</dd>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3" data-test-help-faq-sosm>
+                <dt class="font-semibold text-slate-950">{{t
+                    "help.faq.items.fixQuestion"
+                  }}</dt>
+                <dd class="mt-1">
+                  <p>{{t "help.faq.items.fixAnswer"}}</p>
+                  <a
+                    class="mt-1 inline-block underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                    href="https://sosm.ch/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    sosm.ch
+                  </a>
+                </dd>
+              </div>
+              <div class="rounded-lg bg-slate-50 p-3">
+                <dt class="font-semibold text-slate-950">{{t
+                    "help.faq.items.futureQuestion"
+                  }}</dt>
+                <dd class="mt-1">{{t "help.faq.items.futureAnswer"}}</dd>
+              </div>
+            </dl>
+          </div>
+        </StationSectionCard>
+
         <StationSectionCard @title={{t "help.about.title"}}>
           <div class="grid gap-3 text-sm leading-6 text-slate-600">
             <p>{{t "help.about.description"}}</p>
