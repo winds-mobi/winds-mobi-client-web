@@ -133,6 +133,41 @@ help:
   privacy:
     title: Privacy
     description: Location is only used when you ask, for the nearby view and distances. Favourites are saved in your browser only — no account or cross-device sync.
+  faq:
+    title: FAQ about v2 of the web app
+    items:
+      whyQuestion: Why refresh something that already worked?
+      whyAnswer: >-
+        "Still works" isn't the same as "will keep working." The app was built on tools
+        that, years on, had quietly become the software equivalent of a wing well past
+        what its manual recommends — it still flew, but fewer people in the world still
+        knew how to check it properly, and every change felt like a bit of a leap of
+        faith. For a tool pilots use to judge whether it's safe to launch, that's not a
+        feeling we wanted to keep.
+      feelQuestion: Will it feel different?
+      feelAnswer: >-
+        A few corners got tidied up along the way, the same way you might swap a worn
+        strap while you're already re-lining a wing. But the map, the stations, and the
+        wind readings you already know how to read are all still there. Most of what
+        changed, you won't see directly — it's now much safer for us to keep improving
+        things, and you can already feel that in how often small updates have been
+        landing since.
+      costQuestion: Wasn't there something about the map costing money?
+      costAnswer: >-
+        For years, yes. The map ran on Mapbox, a paid service that bills by usage — so the
+        more pilots opened the app, the bigger the bill. Every year, keeping winds.mobi's
+        map switched on meant asking Mapbox for a discount just to afford it. A strange
+        position for a free safety tool to be in.
+      fixQuestion: So what changed?
+      fixAnswer: >-
+        We moved the map to tiles run by the Swiss OpenStreetMap Association — a
+        community of volunteers who keep it open to anyone, free of charge, the same
+        spirit winds.mobi itself runs on.
+      futureQuestion: Will winds.mobi keep costing nothing to run?
+      futureAnswer: >-
+        That's the point of doing this now. The map used to be the single biggest running
+        cost — now it isn't one at all, which makes it a lot easier to keep winds.mobi
+        free for as long as pilots need it.
   about:
     title: About
     description: Questions, issues, or improvement ideas are welcome.
