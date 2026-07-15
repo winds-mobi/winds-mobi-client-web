@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.18.0 - 2026-07-15
+
+### Added
+
+- The Help page now has an FAQ section explaining why the app was rebuilt, whether it feels different, and why the map no longer costs anything to run.
+
+### Fixed
+
+- Fixed the production build so installed/home-screen PWA assets resolve their paths correctly, regardless of the CDN URL used to serve the app's other assets.
+
 ## v0.17.0 - 2026-07-11
 
 ### Changed
