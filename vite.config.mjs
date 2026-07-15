@@ -37,6 +37,7 @@ export default defineConfig(({ mode }) => ({
     tailwindcss(),
     mode === 'production'
       ? VitePWA({
+          base: '/',
           registerType: 'autoUpdate',
           pwaAssets: {
             config: true,
