@@ -17,4 +17,5 @@ Router.map(function () {
   // this.route('auth-callback', { path: '/auth/callback' });
   this.route('settings');
   this.route('help');
+  this.route('not-found', { path: '/*path' });
 });
