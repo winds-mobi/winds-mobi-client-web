@@ -33,6 +33,9 @@ interface TimeSeriesSeries extends ChartOptions {
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
   defaultChartOptions: TimeSeriesChartOptions = {
+    time: {
+      useUTC: false,
+    },
     credits: {
       enabled: false,
     },

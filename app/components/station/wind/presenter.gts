@@ -42,6 +42,9 @@ export default class StationWindContent extends Component<StationWindContentSign
         name: 'Gusts',
         data: gusts,
         dashStyle: 'ShortDash',
+        dataGrouping: {
+          approximation: 'high',
+        },
         lineWidth: 2.5,
         tooltip: {
           valueSuffix: 'km/h',
