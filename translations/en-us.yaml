@@ -88,6 +88,13 @@ settings:
       Show a small icon instead of the text label for each value in the Now
       and Last hour cards. Each value then only takes as much width as it
       needs, so several fit per row instead of one per row.
+  refreshButtonSpin:
+    label: Spin the refresh button on press
+    description: >-
+      Play a quick one-off spin of the refresh button's arrow every time you
+      press it, so you always get visible feedback even when the refresh
+      itself finishes almost instantly.
+    tryIt: Try the refresh spin
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-

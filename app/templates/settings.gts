@@ -10,6 +10,7 @@ import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/sho
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
+import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
@@ -106,6 +107,25 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
               />
             </SettingsRow>
           </StationSectionCard>
+
+          {{! Beta-gated settings only appear once beta features are on,
+            slotted in right before the master toggle so it always stays
+            last. }}
+          {{#if this.settings.betaFeaturesEnabled}}
+            <StationSectionCard
+              @title={{t "settings.refreshButtonSpin.label"}}
+              @titleClass="sr-only"
+            >
+              <SettingsRow
+                @settings={{this.settings}}
+                @name="refreshButtonSpin"
+              >
+                <SettingsShowcaseRefreshSpin
+                  @enabled={{this.settings.refreshButtonSpin}}
+                />
+              </SettingsRow>
+            </StationSectionCard>
+          {{/if}}
 
           {{! Beta features stays last: it gates other, newer settings/
             features rather than being a peer display preference. }}

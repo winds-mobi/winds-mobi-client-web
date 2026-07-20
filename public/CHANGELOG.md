@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **🧪 Beta:** The refresh button's arrow now plays a quick one-off spin every time it's pressed, giving immediate feedback even when the refresh itself finishes almost instantly. A new "Spin the refresh button on press" setting (on by default, shown once beta features are enabled) turns it off if you'd rather not. The existing continuous spin while data is actually loading is unchanged.
+
 ### Fixed
 
 - Fixed map, search, nearby, and favourites requests being sent twice: the client was missing a trailing slash that made the API respond with a redirect on every call.

@@ -5,11 +5,12 @@ import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-// The favourites view and the favourite heart are beta features (see
-// app/services/settings.ts): hidden by default, revealed once a visitor
-// opts into "Enable beta features" in Settings. This file covers the
-// gating itself; the features' own behaviour once visible is covered by
-// favorites-route-test.ts and station-favorite-test.ts.
+// The favourites view, the favourite heart, and the refresh button's one-off
+// spin are beta features (see app/services/settings.ts): hidden/inert by
+// default, revealed/enabled once a visitor opts into "Enable beta features"
+// in Settings. This file covers the gating itself; the features' own
+// behaviour once visible is covered by favorites-route-test.ts,
+// station-favorite-test.ts, and refresh-control-test.ts.
 
 type FakeStoreRequest = {
   url?: string;
@@ -96,5 +97,19 @@ module('Acceptance | beta features gating', function (hooks) {
     await waitFor('[data-test-station-favorite]');
 
     assert.dom('[data-test-station-favorite]').exists();
+  });
+
+  test('the refresh-button-spin setting is hidden by default', async function (assert) {
+    await visit('/settings');
+
+    assert.dom('[data-test-setting="refreshButtonSpin"]').doesNotExist();
+  });
+
+  test('enabling beta features reveals the refresh-button-spin setting', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    assert.dom('[data-test-setting="refreshButtonSpin"]').isChecked();
   });
 });

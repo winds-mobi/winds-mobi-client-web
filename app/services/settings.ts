@@ -60,6 +60,19 @@ export default class SettingsService extends Service {
   })
   useIconLabels!: boolean;
 
+  // Beta feature: play a one-off full-rotation spin on the refresh button's
+  // arrow every time it's pressed (app/components/navbar/refresh-control.gts),
+  // on top of the continuous spin already shown while a request is actually
+  // loading — gives immediate feedback even when the refresh itself is
+  // near-instant. Its own toggle defaults on, but — like every beta feature —
+  // only takes effect while `betaFeaturesEnabled` is also on, and its
+  // settings row only appears once beta features are enabled.
+  @trackedInLocalStorage({
+    keyName: 'settings.refreshButtonSpin',
+    defaultValue: true,
+  })
+  refreshButtonSpin!: boolean;
+
   // Early access to in-development features (currently: the favourites view
   // and the favourite heart). Off by default — see app/templates/settings.gts
   // for the warning shown alongside this toggle.
@@ -81,6 +94,7 @@ export type BooleanSettingKey =
   | 'nearbyCompactList'
   | 'favoritesCompactList'
   | 'useIconLabels'
+  | 'refreshButtonSpin'
   | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {

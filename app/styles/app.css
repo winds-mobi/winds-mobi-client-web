@@ -48,6 +48,28 @@
   --color-fresh-7: rgb(147 130 127);
   --color-fresh-8: rgb(148 147 156);
   --color-fresh-9: rgb(148 163 184);
+
+  /* One-off full-rotation spin for a button press (see
+     app/components/navbar/refresh-control.gts), independent of Tailwind's own
+     `animate-spin` (infinite) used while a request is actually in flight. Two
+     identical keyframes under different names: a CSS animation only replays
+     when its `animation-name` actually changes, so re-applying the *same*
+     utility on a second press wouldn't restart it — alternating between
+     these two keeps that value genuinely different on every press. */
+  --animate-spin-once-a: spin-once-a 0.5s ease-in-out;
+  --animate-spin-once-b: spin-once-b 0.5s ease-in-out;
+
+  @keyframes spin-once-a {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin-once-b {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 /* stylelint-enable */

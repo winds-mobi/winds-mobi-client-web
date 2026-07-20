@@ -46,4 +46,58 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     assert.strictEqual(mapRefresh.refreshNowCallCount, 1);
   });
+
+  test('the one-off spin is off by default (beta features are off)', async function (assert) {
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    await click('[data-test-navbar-refresh]');
+
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .doesNotHaveClass('animate-spin-once-a')
+      .doesNotHaveClass('animate-spin-once-b');
+  });
+
+  test('each press plays a one-off spin once beta features are enabled, alternating classes so it replays every time', async function (assert) {
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
+
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .doesNotHaveClass('animate-spin-once-a', 'no spin before any press')
+      .doesNotHaveClass('animate-spin-once-b', 'no spin before any press');
+
+    await click('[data-test-navbar-refresh]');
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasClass('animate-spin-once-a', 'first press uses the "a" utility');
+
+    await click('[data-test-navbar-refresh]');
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasClass(
+        'animate-spin-once-b',
+        'second press switches to the "b" utility so the animation-name actually changes and replays'
+      );
+
+    await click('[data-test-navbar-refresh]');
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasClass('animate-spin-once-a', 'third press switches back to "a"');
+  });
+
+  test('the one-off spin stays off if its own setting is disabled, even with beta features on', async function (assert) {
+    const settings = this.owner.lookup('service:settings');
+    settings.betaFeaturesEnabled = true;
+    settings.refreshButtonSpin = false;
+
+    await render(hbs`<Navbar::RefreshControl />`);
+    await click('[data-test-navbar-refresh]');
+
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .doesNotHaveClass('animate-spin-once-a')
+      .doesNotHaveClass('animate-spin-once-b');
+  });
 });
