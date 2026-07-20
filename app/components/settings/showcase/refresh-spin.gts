@@ -16,8 +16,25 @@ export interface SettingsShowcaseRefreshSpinSignature {
 // app/components/navbar/refresh-control.gts) without touching
 // `mapRefresh.refreshNow` — this only plays the animation, it never refreshes
 // anything. Disabled, pressing it does nothing, matching the real control.
+// Square with a subtle corner radius to match the real navbar button's
+// actual rendered shape (~48x48, `rounded-sm`), not a generic circular demo
+// button.
 export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowcaseRefreshSpinSignature> {
-  @tracked private spinDegrees = 0;
+  // Presses only ever change via a real click event (safe to write tracked
+  // state from), never from a modifier reacting to `@enabled` -- an earlier
+  // attempt did that and hit an Ember backtracking-render assertion (writing
+  // a tracked value that this same component's own render already read in
+  // the same computation; see app/components/navbar/refresh-control.gts's
+  // history for the same failure on the real button). `spinDegrees` below is
+  // instead purely derived from `@enabled` and this counter, so turning the
+  // preference on plays a spin with no imperative write at all.
+  @tracked private pressCount = 0;
+
+  get spinDegrees() {
+    const enabledTurn = this.args.enabled ? 360 : 0;
+
+    return this.pressCount * 360 + enabledTurn;
+  }
 
   get spinStyle() {
     return htmlSafe(`transform: rotate(${this.spinDegrees}deg);`);
@@ -28,7 +45,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
       return;
     }
 
-    this.spinDegrees += 360;
+    this.pressCount++;
   };
 
   <template>
@@ -39,7 +56,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
       <button
         type="button"
         aria-label={{t "settings.refreshButtonSpin.tryIt"}}
-        class="rounded-full border border-slate-300 bg-white p-2"
+        class="flex h-12 w-12 items-center justify-center rounded-sm border border-slate-300 bg-white"
         {{on "click" this.handlePress}}
       >
         {{! template-lint-disable no-inline-styles }}
