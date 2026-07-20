@@ -1,10 +1,35 @@
 import { module, test } from 'qunit';
 import {
   favoritesQuery,
+  findRecord,
+  mapQuery,
   searchQuery,
 } from 'winds-mobi-client-web/builders/station';
 
 module('Unit | Builder | station', function () {
+  test('findRecord and query-based builders end in a trailing slash before the query string', function (assert) {
+    // The winds.mobi API 307-redirects slash-less collection/resource URLs,
+    // doubling every call (see GitHub issue #110) — the trailing slash must stay.
+    const findRecordRequest = findRecord('station', 'holfuy-1850') as {
+      url: string;
+    };
+    assert.true(
+      new URL(findRecordRequest.url, 'https://winds.mobi').pathname.endsWith(
+        '/'
+      ),
+      'findRecord URL path ends with /'
+    );
+
+    const mapQueryRequest = mapQuery('station', {
+      northEast: [7.9, 46.7],
+      southWest: [7.8, 46.6],
+    }) as { url: string };
+    assert.true(
+      new URL(mapQueryRequest.url, 'https://winds.mobi').pathname.endsWith('/'),
+      'query-based URL path ends with /'
+    );
+  });
+
   test('favoritesQuery fetches exactly the given station ids', function (assert) {
     const request = favoritesQuery('station', ['holfuy-1850', 'jdc-1001']) as {
       url: string;

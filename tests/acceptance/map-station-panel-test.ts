@@ -129,7 +129,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations/holfuy-1804?')) {
+    if (url.includes('/stations/holfuy-1804/?')) {
       cachedRequest = Promise.resolve({
         content: {
           data: PRIMARY_STATION,
@@ -139,7 +139,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations/holfuy-2222?')) {
+    if (url.includes('/stations/holfuy-2222/?')) {
       if (this.deferredSecondaryStationRequest) {
         cachedRequest = this.deferredSecondaryStationRequest
           .promise as Promise<{
@@ -158,7 +158,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations?')) {
+    if (url.includes('/stations/?')) {
       cachedRequest = Promise.resolve({
         content: {
           data: [PRIMARY_STATION, SECONDARY_STATION],
@@ -211,11 +211,11 @@ function assertCurrentRoute(
 }
 
 function countStationListRequests(calls: string[]) {
-  return calls.filter((url) => url.includes('/stations?')).length;
+  return calls.filter((url) => url.includes('/stations/?')).length;
 }
 
 function countStationDetailRequests(calls: string[], stationId: string) {
-  return calls.filter((url) => url.includes(`/stations/${stationId}?`)).length;
+  return calls.filter((url) => url.includes(`/stations/${stationId}/?`)).length;
 }
 
 function countHistoryRequests(calls: string[], stationId: string) {
@@ -337,6 +337,11 @@ module('Acceptance | map station panel', function (hooks) {
       },
     });
 
+    // Deliberately polls the URL rather than awaiting `settled()`/the
+    // transition promise directly: the deferred station request above is
+    // still pending by design, and fully awaiting either one lets enough
+    // of the app settle that the assertions below (the mid-loading state)
+    // no longer catch anything -- confirmed empirically, not just in theory.
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
     assert.dom('[data-test-station-panel]').exists();

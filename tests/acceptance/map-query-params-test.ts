@@ -78,7 +78,7 @@ class ShortIntervalMapRefreshService extends MapRefreshService {
 }
 
 function countStationRequests(calls: string[]) {
-  return calls.filter((url) => url.includes('/stations?')).length;
+  return calls.filter((url) => url.includes('/stations/?')).length;
 }
 
 function assertCurrentMapUrl(
