@@ -7,10 +7,14 @@ import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 
 class FakeMapRefreshService extends Service {
   @tracked isRefreshing = false;
+  @tracked refreshCount = 0;
   refreshNowCallCount = 0;
 
+  // Mirrors the real service: every refresh, from any trigger, bumps
+  // `refreshCount`.
   refreshNow = () => {
     this.refreshNowCallCount++;
+    this.refreshCount++;
   };
 }
 
@@ -54,37 +58,66 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     assert
       .dom('[data-test-navbar-refresh] span')
-      .doesNotHaveClass('animate-spin-once-a')
-      .doesNotHaveClass('animate-spin-once-b');
+      .hasAttribute('style', /rotate\(0deg\)/);
   });
 
-  test('each press plays a one-off spin once beta features are enabled, alternating classes so it replays every time', async function (assert) {
+  test('each refresh adds a full turn once beta features are enabled, so the transition replays every time', async function (assert) {
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
 
     await render(hbs`<Navbar::RefreshControl />`);
 
     assert
       .dom('[data-test-navbar-refresh] span')
-      .doesNotHaveClass('animate-spin-once-a', 'no spin before any press')
-      .doesNotHaveClass('animate-spin-once-b', 'no spin before any press');
-
-    await click('[data-test-navbar-refresh]');
-    assert
-      .dom('[data-test-navbar-refresh] span')
-      .hasClass('animate-spin-once-a', 'first press uses the "a" utility');
-
-    await click('[data-test-navbar-refresh]');
-    assert
-      .dom('[data-test-navbar-refresh] span')
-      .hasClass(
-        'animate-spin-once-b',
-        'second press switches to the "b" utility so the animation-name actually changes and replays'
+      .hasAttribute(
+        'style',
+        /rotate\(0deg\)/,
+        'no rotation before any refresh'
       );
 
     await click('[data-test-navbar-refresh]');
     assert
       .dom('[data-test-navbar-refresh] span')
-      .hasClass('animate-spin-once-a', 'third press switches back to "a"');
+      .hasAttribute('style', /rotate\(360deg\)/, 'first press adds one turn');
+
+    await click('[data-test-navbar-refresh]');
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasAttribute(
+        'style',
+        /rotate\(720deg\)/,
+        'second press adds another turn -- always forward, never resetting back to 0'
+      );
+
+    await click('[data-test-navbar-refresh]');
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasAttribute(
+        'style',
+        /rotate\(1080deg\)/,
+        'third press adds a third turn'
+      );
+  });
+
+  test('a refresh triggered from elsewhere (e.g. the auto-refresh tick) spins the icon too, not just a button press', async function (assert) {
+    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
+
+    const refreshService = this.owner.lookup(
+      'service:map-refresh'
+    ) as unknown as FakeMapRefreshService;
+
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    // Simulate the auto-refresh loop firing on its own, with no click.
+    refreshService.refreshCount++;
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    assert
+      .dom('[data-test-navbar-refresh] span')
+      .hasAttribute(
+        'style',
+        /rotate\(360deg\)/,
+        'a non-click refresh start still plays the one-off spin'
+      );
   });
 
   test('the one-off spin stays off if its own setting is disabled, even with beta features on', async function (assert) {
@@ -97,7 +130,6 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     assert
       .dom('[data-test-navbar-refresh] span')
-      .doesNotHaveClass('animate-spin-once-a')
-      .doesNotHaveClass('animate-spin-once-b');
+      .hasAttribute('style', /rotate\(0deg\)/);
   });
 });

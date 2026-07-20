@@ -61,21 +61,34 @@ export default class SettingsService extends Service {
   useIconLabels!: boolean;
 
   // Beta feature: play a one-off full-rotation spin on the refresh button's
-  // arrow every time it's pressed (app/components/navbar/refresh-control.gts),
-  // on top of the continuous spin already shown while a request is actually
-  // loading — gives immediate feedback even when the refresh itself is
-  // near-instant. Its own toggle defaults on, but — like every beta feature —
-  // only takes effect while `betaFeaturesEnabled` is also on, and its
-  // settings row only appears once beta features are enabled.
+  // arrow every time a refresh starts (app/components/navbar/refresh-control.ts),
+  // whatever triggers it — a press, the auto-refresh tick, or anything else
+  // that calls `refreshNow` — on top of the continuous spin already shown
+  // while a request is actually loading. Gives immediate feedback even when
+  // the refresh itself is near-instant. Its own toggle defaults on, but —
+  // like every beta feature — only takes effect while `betaFeaturesEnabled`
+  // is also on, and its settings row only appears once beta features are
+  // enabled.
   @trackedInLocalStorage({
     keyName: 'settings.refreshButtonSpin',
     defaultValue: true,
   })
   refreshButtonSpin!: boolean;
 
-  // Early access to in-development features (currently: the favourites view
-  // and the favourite heart). Off by default — see app/templates/settings.gts
-  // for the warning shown alongside this toggle.
+  // Beta feature: the favourites view and the favourite heart on a station
+  // panel (app/components/navbar/menu/items.ts, app/components/station/header.gts).
+  // Its own toggle defaults on (this feature already shipped, gated only by
+  // `betaFeaturesEnabled` until now) but — like every beta feature — only
+  // takes effect while `betaFeaturesEnabled` is also on.
+  @trackedInLocalStorage({
+    keyName: 'settings.favoritesFeatureEnabled',
+    defaultValue: true,
+  })
+  favoritesFeatureEnabled!: boolean;
+
+  // Early access to in-development features. Off by default; turning it on
+  // reveals each individual beta feature's own toggle below it (see
+  // app/templates/settings.gts for the warning shown alongside this toggle).
   @trackedInLocalStorage({
     keyName: 'settings.betaFeaturesEnabled',
     defaultValue: false,
@@ -95,6 +108,7 @@ export type BooleanSettingKey =
   | 'favoritesCompactList'
   | 'useIconLabels'
   | 'refreshButtonSpin'
+  | 'favoritesFeatureEnabled'
   | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {

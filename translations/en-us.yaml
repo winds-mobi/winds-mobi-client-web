@@ -89,16 +89,23 @@ settings:
       and Last hour cards. Each value then only takes as much width as it
       needs, so several fit per row instead of one per row.
   refreshButtonSpin:
-    label: Spin the refresh button on press
+    label: Spin the refresh button when refreshing
     description: >-
-      Play a quick one-off spin of the refresh button's arrow every time you
-      press it, so you always get visible feedback even when the refresh
-      itself finishes almost instantly.
+      Play a quick one-off spin of the refresh button's arrow every time a
+      refresh starts — whether you pressed the button or it refreshed on its
+      own — so you always get visible feedback even when the refresh itself
+      finishes almost instantly.
     tryIt: Try the refresh spin
+  favoritesFeatureEnabled:
+    label: Favourites
+    description: >-
+      Show the Favourites view in navigation and a heart on each station
+      panel to save it — stored in this browser only, no account needed.
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-
       Turn on early access to features still in development.
+    groupLabel: Beta features
     warning: >-
       Beta features are early access. We do not guarantee they work correctly.
 

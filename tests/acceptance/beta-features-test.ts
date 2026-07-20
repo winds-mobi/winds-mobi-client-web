@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, visit, waitFor } from '@ember/test-helpers';
+import { click, findAll, visit, waitFor } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -111,5 +111,54 @@ module('Acceptance | beta features gating', function (hooks) {
     await click('[data-test-setting="betaFeaturesEnabled"]');
 
     assert.dom('[data-test-setting="refreshButtonSpin"]').isChecked();
+  });
+
+  test('the favourites-feature setting is hidden by default', async function (assert) {
+    await visit('/settings');
+
+    assert.dom('[data-test-setting="favoritesFeatureEnabled"]').doesNotExist();
+  });
+
+  test('enabling beta features reveals the favourites-feature setting, checked by default', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    assert.dom('[data-test-setting="favoritesFeatureEnabled"]').isChecked();
+  });
+
+  test('turning off the favourites-feature setting hides favourites even with beta features on', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+    await click('[data-test-setting="favoritesFeatureEnabled"]');
+
+    assert.dom('[data-test-navbar-link="favorites"]').doesNotExist();
+
+    await visit('/map/holfuy-1804');
+
+    assert.dom('[data-test-station-title]').exists();
+    assert.dom('[data-test-station-favorite]').doesNotExist();
+  });
+
+  test('the master beta toggle sits above the individual beta features it reveals', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    const settingNames = findAll('[data-test-setting]').map((element) =>
+      element.getAttribute('data-test-setting')
+    );
+    const betaIndex = settingNames.indexOf('betaFeaturesEnabled');
+
+    assert.true(betaIndex >= 0, 'the master toggle is on the page');
+    assert.true(
+      betaIndex < settingNames.indexOf('favoritesFeatureEnabled'),
+      'the master toggle comes before the favourites-feature toggle'
+    );
+    assert.true(
+      betaIndex < settingNames.indexOf('refreshButtonSpin'),
+      'the master toggle comes before the refresh-spin toggle'
+    );
   });
 });

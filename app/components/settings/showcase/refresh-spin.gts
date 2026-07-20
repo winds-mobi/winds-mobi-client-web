@@ -1,9 +1,9 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { on } from '@ember/modifier';
+import { htmlSafe } from '@ember/template';
 import { t } from 'ember-intl';
 import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
-import { oneOffSpinClass } from 'winds-mobi-client-web/utils/one-off-spin';
 
 export interface SettingsShowcaseRefreshSpinSignature {
   Args: {
@@ -17,10 +17,10 @@ export interface SettingsShowcaseRefreshSpinSignature {
 // `mapRefresh.refreshNow` — this only plays the animation, it never refreshes
 // anything. Disabled, pressing it does nothing, matching the real control.
 export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowcaseRefreshSpinSignature> {
-  @tracked private pressCount = 0;
+  @tracked private spinDegrees = 0;
 
-  get pressSpinClass() {
-    return this.args.enabled ? oneOffSpinClass(this.pressCount) : '';
+  get spinStyle() {
+    return htmlSafe(`transform: rotate(${this.spinDegrees}deg);`);
   }
 
   handlePress = () => {
@@ -28,7 +28,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
       return;
     }
 
-    this.pressCount++;
+    this.spinDegrees += 360;
   };
 
   <template>
@@ -42,9 +42,14 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
         class="rounded-full border border-slate-300 bg-white p-2"
         {{on "click" this.handlePress}}
       >
-        <span class={{this.pressSpinClass}}>
+        {{! template-lint-disable no-inline-styles }}
+        <span
+          class="inline-flex transition-transform duration-500 ease-in-out"
+          style={{this.spinStyle}}
+        >
           <ArrowClockwise />
         </span>
+        {{! template-lint-enable no-inline-styles }}
       </button>
     </div>
   </template>

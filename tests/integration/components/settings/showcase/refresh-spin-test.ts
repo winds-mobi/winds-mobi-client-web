@@ -18,10 +18,7 @@ module(
       );
       await click('button');
 
-      assert
-        .dom('button span')
-        .doesNotHaveClass('animate-spin-once-a')
-        .doesNotHaveClass('animate-spin-once-b');
+      assert.dom('button span').hasAttribute('style', /rotate\(0deg\)/);
 
       this.enabled = true;
       await render(
@@ -29,7 +26,7 @@ module(
       );
       await click('button');
 
-      assert.dom('button span').hasClass('animate-spin-once-a');
+      assert.dom('button span').hasAttribute('style', /rotate\(360deg\)/);
     });
   }
 );

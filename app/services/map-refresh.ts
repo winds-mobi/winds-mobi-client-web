@@ -15,6 +15,14 @@ export default class MapRefreshService extends Service {
   @tracked scheduleStartedAt = new Date();
   @tracked currentTime = this.scheduleStartedAt;
 
+  // Counts every refresh, from any trigger (a manual press, the auto-refresh
+  // tick, or a force-refresh from elsewhere) — consumers that want to react
+  // to "a refresh just started" (e.g. the navbar refresh button's one-off
+  // spin) can derive straight from this rather than watching `lastRefresh`
+  // themselves, which would need an imperative side effect to turn a
+  // Date change into a counter.
+  @tracked refreshCount = 0;
+
   refreshIntervalMs = DEFAULT_REFRESH_INTERVAL_MS;
   countdownTickMs = DEFAULT_COUNTDOWN_TICK_MS;
 
@@ -159,6 +167,7 @@ export default class MapRefreshService extends Service {
 
   private noteRefresh() {
     this.lastRefresh = new Date();
+    this.refreshCount++;
   }
 }
 

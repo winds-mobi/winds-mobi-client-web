@@ -14,7 +14,10 @@ export default class NavbarMenuDesktop extends Component<NavbarMenuDesktopSignat
   @service declare settings: SettingsService;
 
   get visibleItems() {
-    return visibleNavbarMenuItems(this.settings.betaFeaturesEnabled);
+    return visibleNavbarMenuItems(
+      this.settings.betaFeaturesEnabled,
+      this.settings.favoritesFeatureEnabled
+    );
   }
 
   <template>

@@ -11,6 +11,7 @@ import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/sh
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
 import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
+import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
@@ -108,43 +109,52 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             </SettingsRow>
           </StationSectionCard>
 
-          {{! Beta-gated settings only appear once beta features are on,
-            slotted in right before the master toggle so it always stays
-            last. }}
-          {{#if this.settings.betaFeaturesEnabled}}
-            <StationSectionCard
-              @title={{t "settings.refreshButtonSpin.label"}}
-              @titleClass="sr-only"
-            >
-              <SettingsRow
-                @settings={{this.settings}}
-                @name="refreshButtonSpin"
-              >
-                <SettingsShowcaseRefreshSpin
-                  @enabled={{this.settings.refreshButtonSpin}}
-                />
-              </SettingsRow>
-            </StationSectionCard>
-          {{/if}}
-
-          {{! Beta features stays last: it gates other, newer settings/
-            features rather than being a peer display preference. }}
+          {{! Every beta feature lives in this one visually distinguished
+            (amber) container: the master toggle always sits above the
+            individual beta features it reveals, so the toggle that causes
+            them to appear is never below its own effects. Add a new beta
+            feature's own toggle here, inside this same card, rather than as
+            a separate top-level StationSectionCard. }}
           <StationSectionCard
-            @title={{t "settings.betaFeaturesEnabled.label"}}
+            @title={{t "settings.betaFeaturesEnabled.groupLabel"}}
             @titleClass="sr-only"
             class="border-amber-300 bg-amber-50"
           >
-            <SettingsRow
-              @settings={{this.settings}}
-              @name="betaFeaturesEnabled"
-            >
-              <p
-                class="flex items-start gap-1.5 text-sm font-bold text-amber-800"
+            <div class="flex flex-col gap-3">
+              <SettingsRow
+                @settings={{this.settings}}
+                @name="betaFeaturesEnabled"
               >
-                <Warning @size={{18}} class="mt-0.5 shrink-0" />
-                {{t "settings.betaFeaturesEnabled.warning"}}
-              </p>
-            </SettingsRow>
+                <p
+                  class="flex items-start gap-1.5 text-sm font-bold text-amber-800"
+                >
+                  <Warning @size={{18}} class="mt-0.5 shrink-0" />
+                  {{t "settings.betaFeaturesEnabled.warning"}}
+                </p>
+              </SettingsRow>
+
+              {{#if this.settings.betaFeaturesEnabled}}
+                <SettingsRow
+                  @settings={{this.settings}}
+                  @name="favoritesFeatureEnabled"
+                  class="border-t border-amber-200 pt-3"
+                >
+                  <SettingsShowcaseFavorites
+                    @enabled={{this.settings.favoritesFeatureEnabled}}
+                  />
+                </SettingsRow>
+
+                <SettingsRow
+                  @settings={{this.settings}}
+                  @name="refreshButtonSpin"
+                  class="border-t border-amber-200 pt-3"
+                >
+                  <SettingsShowcaseRefreshSpin
+                    @enabled={{this.settings.refreshButtonSpin}}
+                  />
+                </SettingsRow>
+              {{/if}}
+            </div>
           </StationSectionCard>
         </div>
       </div>

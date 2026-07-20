@@ -4,7 +4,11 @@
 
 ### Added
 
-- **🧪 Beta:** The refresh button's arrow now plays a quick one-off spin every time it's pressed, giving immediate feedback even when the refresh itself finishes almost instantly. A new "Spin the refresh button on press" setting (on by default, shown once beta features are enabled) turns it off if you'd rather not. The existing continuous spin while data is actually loading is unchanged.
+- **🧪 Beta:** The refresh button's arrow now plays a quick one-off spin every time a refresh starts — whether you pressed the button, it refreshed on its own, or anything else triggered it — giving immediate feedback even when the refresh itself finishes almost instantly. A new "Spin the refresh button when refreshing" setting (on by default, shown once beta features are enabled) turns it off if you'd rather not. The existing continuous spin while data is actually loading is unchanged.
+
+### Changed
+
+- **🧪 Beta:** Favourites now has its own "Favourites" setting (on by default, shown once beta features are enabled) instead of being tied only to the "Enable beta features" toggle. Every individual beta feature's toggle now lives together with the master toggle in one grouped settings card, with the master toggle always shown first.
 
 ### Fixed
 
