@@ -81,7 +81,7 @@ function findRecord<T extends TypedRecordInstance>(
     ...defaultOptions.urlParamsSettings,
     ...options?.urlParamsSettings,
   });
-  const url = `${baseURL}/?${qp}`;
+  const url = `${baseURL}?${qp}`;
 
   const jsonApiObject = jsonApiFindRecord<T>(type, id, mergedOptions);
   return {
@@ -104,24 +104,7 @@ function query<T extends TypedRecordInstance>(
     ...options,
   };
 
-  // Trailing slash avoids a 307 redirect round-trip: the API redirects
-  // slash-less collection URLs, doubling every map/search/nearby call.
-  const baseURL = buildBaseURL({
-    resourcePath: pluralize(type),
-    op: 'query',
-    identifier: { type },
-  });
-  const qp = buildQueryParams(mergedQuery, {
-    ...defaultOptions.urlParamsSettings,
-    ...options?.urlParamsSettings,
-  });
-  const url = `${baseURL}/?${qp}`;
-
-  const jsonApiObject = jsonApiQuery<T>(type, mergedQuery, mergedOptions);
-  return {
-    ...jsonApiObject,
-    url,
-  };
+  return jsonApiQuery<T>(type, mergedQuery, mergedOptions);
 }
 
 function mapQuery<T extends TypedRecordInstance>(

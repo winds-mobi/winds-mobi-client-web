@@ -1,11 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### Fixed
-
-- Fixed map, search, nearby, and favourites requests being sent twice: the client was missing a trailing slash that made the API respond with a redirect on every call.
-
 ## v0.18.0 - 2026-07-15
 
 ### Added
