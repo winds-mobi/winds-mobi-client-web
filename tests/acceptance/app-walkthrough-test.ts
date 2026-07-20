@@ -1,14 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  click,
-  currentURL,
-  fillIn,
-  find,
-  visit,
-  waitFor,
-  waitUntil,
-} from '@ember/test-helpers';
+import { click, currentURL, fillIn, visit, waitFor } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
@@ -188,9 +180,7 @@ module('Acceptance | app walkthrough', function (hooks) {
 
     // Search for a station and open it.
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(() =>
-      find('[data-test-navbar-search-result="holfuy-1850"]')
-    );
+    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 

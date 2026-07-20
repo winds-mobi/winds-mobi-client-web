@@ -1,13 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  click,
-  currentURL,
-  fillIn,
-  find,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
+import { click, currentURL, fillIn, visit, waitFor } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
@@ -165,8 +158,7 @@ module('Acceptance | navbar search', function (hooks) {
 
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(() => countSearchRequests(store.calls) > 0);
-    await waitUntil(() => find('[data-test-navbar-search-results]'));
+    await waitFor('[data-test-navbar-search-results]');
 
     const searchParams = lastSearchRequestParams(store.calls);
     assert.strictEqual(
@@ -205,7 +197,7 @@ module('Acceptance | navbar search', function (hooks) {
 
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(() => countSearchRequests(store.calls) > 0);
+    await waitFor('[data-test-navbar-search-results]');
 
     const searchParams = lastSearchRequestParams(store.calls);
     assert.false(
@@ -221,9 +213,7 @@ module('Acceptance | navbar search', function (hooks) {
   test('it uses zoom 10 when searching from a non-map route', async function (assert) {
     await visit('/help');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(() =>
-      find('[data-test-navbar-search-result="holfuy-1850"]')
-    );
+    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 
@@ -245,8 +235,7 @@ module('Acceptance | navbar search', function (hooks) {
     assert.strictEqual(countSearchRequests(store.calls), 0);
 
     await fillIn('[data-test-navbar-search="navbar"] input', 'zz');
-    await waitUntil(() => countSearchRequests(store.calls) > 0);
-    await waitUntil(() => find('[data-test-navbar-search-empty]'));
+    await waitFor('[data-test-navbar-search-empty]');
 
     assert.dom('[data-test-navbar-search-empty]').hasText('No stations found.');
   });
@@ -254,9 +243,7 @@ module('Acceptance | navbar search', function (hooks) {
   test('it clears the search field and closes the results after selecting a station', async function (assert) {
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitUntil(() =>
-      find('[data-test-navbar-search-result="holfuy-1850"]')
-    );
+    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 

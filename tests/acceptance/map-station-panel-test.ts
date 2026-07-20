@@ -337,6 +337,11 @@ module('Acceptance | map station panel', function (hooks) {
       },
     });
 
+    // Deliberately polls the URL rather than awaiting `settled()`/the
+    // transition promise directly: the deferred station request above is
+    // still pending by design, and fully awaiting either one lets enough
+    // of the app settle that the assertions below (the mid-loading state)
+    // no longer catch anything -- confirmed empirically, not just in theory.
     await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
 
     assert.dom('[data-test-station-panel]').exists();
