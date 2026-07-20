@@ -9,6 +9,8 @@
 ### Changed
 
 - **🧪 Beta:** Favourites now has its own "Favourites" setting (on by default, shown once beta features are enabled) instead of being tied only to the "Enable beta features" toggle. Every individual beta feature's toggle now lives together with the master toggle in one grouped settings card, with the master toggle always shown first.
+- Compact station cards (Nearby and Favourites) now show the same wind arrow used on the map — giving an at-a-glance read on speed, gusts, and direction — alongside the existing wind-direction history graph. The name, altitude, and last-updated time now share a single line, and the cards themselves are a bit bigger.
+- Map markers now shrink as you zoom out, so they no longer dwarf the map when viewing a whole region.
 
 ### Fixed
 

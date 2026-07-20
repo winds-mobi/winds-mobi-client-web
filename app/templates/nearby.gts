@@ -164,7 +164,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
             </StationSectionCard>
           {{else if this.settings.nearbyCompactList}}
             <div
-              class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(11rem,calc(50%-0.375rem)),1fr))]"
+              class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,calc(50%-0.375rem)),1fr))]"
               data-test-nearby-stations-compact
             >
               {{#each this.stations as |station|}}
