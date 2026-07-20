@@ -45,7 +45,7 @@ class FakeStoreService extends Service {
       return Promise.resolve({ content: { data: [] } });
     }
 
-    if (url.includes(`/stations/${STATION_FIXTURE.id}?`)) {
+    if (url.includes(`/stations/${STATION_FIXTURE.id}/?`)) {
       return Promise.resolve({ content: { data: STATION_FIXTURE } });
     }
 

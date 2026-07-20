@@ -129,7 +129,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations/holfuy-1804?')) {
+    if (url.includes('/stations/holfuy-1804/?')) {
       cachedRequest = Promise.resolve({
         content: {
           data: PRIMARY_STATION,
@@ -139,7 +139,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations/holfuy-2222?')) {
+    if (url.includes('/stations/holfuy-2222/?')) {
       if (this.deferredSecondaryStationRequest) {
         cachedRequest = this.deferredSecondaryStationRequest
           .promise as Promise<{
@@ -158,7 +158,7 @@ class FakeStoreService extends Service {
       return cachedRequest;
     }
 
-    if (url.includes('/stations?')) {
+    if (url.includes('/stations/?')) {
       cachedRequest = Promise.resolve({
         content: {
           data: [PRIMARY_STATION, SECONDARY_STATION],
@@ -211,11 +211,11 @@ function assertCurrentRoute(
 }
 
 function countStationListRequests(calls: string[]) {
-  return calls.filter((url) => url.includes('/stations?')).length;
+  return calls.filter((url) => url.includes('/stations/?')).length;
 }
 
 function countStationDetailRequests(calls: string[], stationId: string) {
-  return calls.filter((url) => url.includes(`/stations/${stationId}?`)).length;
+  return calls.filter((url) => url.includes(`/stations/${stationId}/?`)).length;
 }
 
 function countHistoryRequests(calls: string[], stationId: string) {

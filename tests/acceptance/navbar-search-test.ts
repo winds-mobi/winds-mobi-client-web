@@ -83,7 +83,7 @@ class FakeStoreService extends Service {
       });
     }
 
-    if (url.includes('/stations/holfuy-1804?')) {
+    if (url.includes('/stations/holfuy-1804/?')) {
       return Promise.resolve({
         content: {
           data: HELP_STATION,
@@ -91,7 +91,7 @@ class FakeStoreService extends Service {
       });
     }
 
-    if (url.includes('/stations/holfuy-1850?')) {
+    if (url.includes('/stations/holfuy-1850/?')) {
       return Promise.resolve({
         content: {
           data: SEARCH_STATION,
@@ -107,7 +107,7 @@ class FakeStoreService extends Service {
       });
     }
 
-    if (url.includes('/stations?')) {
+    if (url.includes('/stations/?')) {
       return Promise.resolve({
         content: {
           data: [SEARCH_STATION],
@@ -131,14 +131,14 @@ function currentSearchParams() {
 
 function countSearchRequests(calls: string[]) {
   return calls.filter(
-    (url) => url.includes('/stations?') && url.includes('search=')
+    (url) => url.includes('/stations/?') && url.includes('search=')
   ).length;
 }
 
 function lastSearchRequestParams(calls: string[]) {
   const url = [...calls]
     .reverse()
-    .find((call) => call.includes('/stations?') && call.includes('search='));
+    .find((call) => call.includes('/stations/?') && call.includes('search='));
 
   return url ? new URL(url, 'https://winds.mobi').searchParams : undefined;
 }

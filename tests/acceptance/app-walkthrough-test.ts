@@ -121,7 +121,7 @@ class FakeStoreService extends Service {
     }
 
     const singleStation = ALL_STATIONS.find((station) =>
-      url.includes(`/stations/${station.id}?`)
+      url.includes(`/stations/${station.id}/?`)
     );
 
     if (singleStation) {
