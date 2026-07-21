@@ -3,16 +3,12 @@ import { service } from '@ember/service';
 import { LinkTo } from '@ember/routing';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
-import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
-import timeAgo, {
-  relativeSecondsFromTimestamp,
-} from 'winds-mobi-client-web/helpers/time-ago';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
-import { textClassForReadingAge } from 'winds-mobi-client-web/utils/reading-freshness';
 import SettingsWindArrow from 'winds-mobi-client-web/components/settings/wind-arrow';
 import StationMetaItem from './meta-item';
+import StationUpdatedMeta from './updated-meta';
 import StationWindDirectionThumbnail from './wind-direction-thumbnail';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -60,17 +56,10 @@ export default class StationCompactCard extends Component<StationCompactCardSign
         </dl>
 
         <dl class="m-0 shrink-0">
-          <StationMetaItem
-            @icon={{ClockCounterClockwise}}
-            @label={{t "station.meta.updated"}}
-            class="text-[11px] text-slate-500"
-          >
-            <span
-              class={{textClassForReadingAge @station.last.timestamp}}
-            >{{timeAgo
-                (relativeSecondsFromTimestamp @station.last.timestamp)
-              }}</span>
-          </StationMetaItem>
+          <StationUpdatedMeta
+            @timestamp={{@station.last.timestamp}}
+            @isCompact={{true}}
+          />
         </dl>
       </div>
 
@@ -79,7 +68,7 @@ export default class StationCompactCard extends Component<StationCompactCardSign
           class="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center gap-1"
         >
           <SettingsWindArrow
-            class="aspect-square h-full max-h-full max-w-full"
+            class="aspect-square h-2/3 max-h-2/3 max-w-2/3"
             @direction={{@station.last.direction}}
             @speed={{@station.last.speed}}
             @gusts={{@station.last.gusts}}
@@ -89,17 +78,17 @@ export default class StationCompactCard extends Component<StationCompactCardSign
           <dl class="m-0 flex items-baseline gap-1">
             <dt class="sr-only">{{t "wind.speed"}}</dt>
             <dd
-              class="m-0 text-[1.5rem] font-semibold leading-none
+              class="m-0 text-lg font-semibold leading-none
                 {{windToTextClass @station.last.speed}}"
             >
               {{formatNumber @station.last.speed format="integer"}}
             </dd>
 
-            <span aria-hidden="true" class="text-slate-400">/</span>
+            <span aria-hidden="true" class="text-slate-400">–</span>
 
             <dt class="sr-only">{{t "wind.gusts"}}</dt>
             <dd
-              class="m-0 text-base font-semibold leading-none
+              class="m-0 text-sm font-semibold leading-none
                 {{windToTextClass @station.last.gusts}}"
             >
               {{formatNumber @station.last.gusts format="integer"}}
