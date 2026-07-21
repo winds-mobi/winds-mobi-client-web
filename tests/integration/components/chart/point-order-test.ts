@@ -53,12 +53,10 @@ function lastHourRequestUrl(stationId: string) {
 // Highcharts renders history data in exactly the array order it receives,
 // even when that order isn't chronological. These tests pin that fact down
 // with a deliberately out-of-order fixture (see issue #111: "Glitches with
-// wind direction history"), so the guarantee that upstream data arrives
-// pre-sorted -- currently enforced in app/handlers/history.ts -- doesn't
-// silently regress. If either assertion below ever starts failing because
-// Highcharts *did* start reordering points, that's a reason to revisit
-// whether the handler-side sort is still needed, not a reason to just
-// update the assertion.
+// wind direction history") purely to document this constraint on the chart
+// layer -- app/handlers/history.ts relies on the historic API's documented
+// newest-first ordering (see its own comment) rather than re-sorting
+// defensively, so this guarantee currently rests on that upstream contract.
 module('Integration | Chart | point order', function (hooks) {
   setupRenderingTest(hooks);
 

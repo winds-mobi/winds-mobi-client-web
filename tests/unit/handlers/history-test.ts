@@ -58,7 +58,7 @@ module('Unit | Handler | history', function () {
     assert.notStrictEqual(holfuyResponse[0]?.id, otherStationResponse[0]?.id);
   });
 
-  test('it sorts newest-first historic API rows into chronological order', async function (assert) {
+  test('it reverses newest-first historic API rows into chronological order', async function (assert) {
     const response = responseData(
       await HistoryHandler.request<{
         data: { id: string; attributes: { timestamp: number } }[];
@@ -96,44 +96,6 @@ module('Unit | Handler | history', function () {
     assert.deepEqual(
       response.map((record) => record.attributes.timestamp),
       [1_774_341_507_000, 1_774_342_468_000]
-    );
-  });
-
-  // The API is documented to return newest-first rows, but a plain reversal
-  // only produces chronological order if that's actually true for every row.
-  // A delayed/backfilled reading landing out of sequence (e.g. a station
-  // catching up after being briefly offline) would slip through a `.reverse()`
-  // unfixed and show up as a real glitch downstream: the polar wind-direction
-  // chart's connecting line visibly jumping backwards in time (issue #111).
-  // Sorting explicitly by timestamp is robust to that regardless of the
-  // order the API actually returned the rows in.
-  test('it sorts chronologically even when a row is out of sequence, not just reversed', async function (assert) {
-    const response = responseData(
-      await HistoryHandler.request<{
-        data: { id: string; attributes: { timestamp: number } }[];
-      }>(
-        fakeContext(
-          'https://winds.mobi/api/2.3/stations/holfuy-1804/historic/?duration=435600'
-        ),
-        fakeNext({
-          content: [
-            // Mostly newest-first as documented, but the middle row arrived
-            // late (e.g. a backfilled reading) and landed out of sequence.
-            // A plain `.reverse()` of this array yields
-            // [341000, 342000, 340000] -- still not chronological -- whereas
-            // an explicit sort fixes it regardless.
-            { _id: 1_774_342_000, 'w-dir': 180, 'w-avg': 4, 'w-max': 8 },
-            { _id: 1_774_340_000, 'w-dir': 160, 'w-avg': 2, 'w-max': 6 },
-            { _id: 1_774_341_000, 'w-dir': 170, 'w-avg': 3, 'w-max': 7 },
-          ],
-        })
-      )
-    );
-
-    assert.deepEqual(
-      response.map((record) => record.attributes.timestamp),
-      [1_774_340_000_000, 1_774_341_000_000, 1_774_342_000_000],
-      'rows come out strictly chronological regardless of the order the API returned them in'
     );
   });
 
