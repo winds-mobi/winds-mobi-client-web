@@ -287,6 +287,20 @@ a function`) when the chart tries to render it.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.
+- **Stick to a library's public interface, but verify real effects when that's the only way to know our own code
+  works.** Don't assert on a library's _own judgment calls_ over config we hand it — e.g. don't read Highcharts
+  internals to check that `dataGrouping.approximation` groups points the way Highcharts itself decides to, or that a
+  `timezone` option is interpreted the way Highcharts' own docs say it is. That's testing the library, not us, and
+  it breaks/needs rewriting on every upstream behavior tweak (see the historical "Stop asserting on Highcharts' own
+  rendering in component tests" commit). But when the only way to confirm _our_ code produced the right observable
+  outcome is to look at what the library actually did with the data we gave it — its rendered DOM, an object it
+  built from our input, a side effect it triggered — reading that is legitimate and sometimes the only real
+  verification available. Concretely: reading `Highcharts.charts[...].series[0].data` to confirm _our_ component fed
+  it points in the right order/identity (`tests/integration/components/chart/point-order-test.ts`, issue #111) is
+  testing our own data-flow contract, not Highcharts' behavior, even though it pokes at Highcharts' internals to do
+  it. The line: would this assertion need to change if the library shipped a different but equally valid internal
+  algorithm for the same input? If yes, it's testing the library — stop. If no (the library's _observable output_
+  is what any correct implementation would also produce from that input), it's testing us — keep it.
 - **Never reach for raw DOM in tests** (`document.querySelector`/`querySelectorAll`, `getElementById`, `.textContent`,
   `.getAttribute`, etc.). Assert with **qunit-dom** (`assert.dom(selector).exists()/.hasText()/.hasAttribute(...)`, and
   `assert.dom(selector, rootElement)` to scope — e.g. `document.head` for head content); `hasAttribute` accepts a regex
