@@ -1,4 +1,5 @@
 import { useLegacyStore } from '@warp-drive/legacy';
+import { DefaultCachePolicy } from '@warp-drive/core/store';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
@@ -215,6 +216,17 @@ const AppStore = useLegacyStore({
   // station/history reshapers see them. Restore alongside it.
   handlers: [StationHandler, HistoryHandler],
   derivations: [unwrapDerivation, composeReadingDerivation],
+  // Warp Drive's own default (30s soft / 15min hard) means a manual refresh
+  // pressed within 30s of the last fetch does nothing at all -- no request,
+  // foreground or background (see issue #118). Shortening apiCacheSoftExpires
+  // to 15s doesn't remove that dead window, but it does halve it, so a manual
+  // refresh reflects new data sooner without forcing every refresh to bypass
+  // the cache outright (which would defeat its point of avoiding redundant
+  // requests). apiCacheHardExpires is left at Warp Drive's own default.
+  policy: new DefaultCachePolicy({
+    apiCacheSoftExpires: 15 * 1000,
+    apiCacheHardExpires: 15 * 60 * 1000,
+  }),
 });
 
 // The store *instance* type — exposes the generic `request<RT>(builder): Future<RT>`,
