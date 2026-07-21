@@ -21,7 +21,7 @@ const StationLastHour: TOC<StationLastHourSignature> = <template>
     @keys={{KEYS}}
     as |history|
   >
-    <StationLastHourContent @history={{history}} />
+    <StationLastHourContent @stationId={{@stationId}} @history={{history}} />
   </StationHistorySection>
 </template>;
 

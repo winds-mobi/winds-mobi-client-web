@@ -13,6 +13,7 @@ import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 export interface StationLastHourContentSignature {
   Args: {
+    stationId: string;
     history: History[];
   };
   Blocks: {
@@ -70,7 +71,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
   <template>
     <div class="grid gap-2 md:gap-3">
       <div class="min-w-0 w-full aspect-square">
-        <WindDirectionGraph @data={{@history}} />
+        <WindDirectionGraph @stationId={{@stationId}} @data={{@history}} />
       </div>
 
       <dl class="m-0 grid gap-1 md:gap-2">

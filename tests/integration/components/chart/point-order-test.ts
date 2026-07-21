@@ -104,10 +104,14 @@ module('Integration | Chart | point order', function (hooks) {
 
   test('the polar wind-direction chart renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
     set(this, 'data', outOfOrderHistory);
+    set(this, 'stationId', 'holfuy-test');
 
     await render(hbs`
       <div class="h-64 w-64">
-        <Station::WindDirection::Graph @data={{this.data}} />
+        <Station::WindDirection::Graph
+          @stationId={{this.stationId}}
+          @data={{this.data}}
+        />
       </div>
     `);
 
@@ -152,21 +156,25 @@ module('Integration | Chart | point order', function (hooks) {
     );
   });
 
-  // Investigated as part of issue #111: since ember-highcharts updates an
-  // existing chart in place via Highcharts' `series.setData()` rather than
-  // always destroying/recreating it, and Highcharts falls back to matching
-  // incoming points by raw x value (wind direction here) when it can't match
-  // by id, switching stations on a *reused* chart instance could in theory
-  // leave a stale point behind or interleave points in the wrong order.
-  // Verified empirically (by comparing `chart.index` before/after the
-  // switch) that this doesn't actually happen: StationHistorySection's
-  // `<Request @request={{this.historyRequest}}>` gets a genuinely new
-  // Future for a new station, and that causes the whole
-  // Request/WindDirectionGraph/HighCharts subtree -- and therefore the
-  // Highcharts chart instance itself -- to be destroyed and recreated, not
-  // incrementally updated. So there's never a stale chart around to
-  // misupdate in the first place. This test pins that down as a regression
-  // guard on the mechanism, not because a fix was needed here.
+  // Root cause of issue #111, confirmed both by a real browser repro (see the
+  // PR discussion) and here: ember-highcharts updates an existing chart in
+  // place via Highcharts' `series.setData()` rather than always
+  // destroying/recreating it, and Highcharts falls back to matching incoming
+  // points by raw x value (wind direction here, a coarse 0-360 value) when it
+  // can't match by id. On a *fresh* fetch (cache miss), StationHistorySection
+  // gets a genuinely new Future, and `<Request>` tears down its whole content
+  // block -- so there's no stale chart around to misupdate. But revisiting a
+  // recently-cached station resolves without ever showing `:loading` (Warp
+  // Drive serves it instantly), so `<Request>`'s content block -- and the
+  // chart inside it -- is never torn down either. Highcharts' x-fallback
+  // matching then displaces one coincidentally-matching point to the wrong
+  // spot in the array: values stay correct, but the polar line's draw order
+  // doesn't, which is what actually read as "the tangled/glitchy line" (see
+  // the `<Station::WindDirection::Graph>`-level test below, which reproduces
+  // that exact "surrounding tree doesn't tear down" case directly). The fix
+  // is the {{#each (array @stationId)}} keying in wind-direction/graph.gts,
+  // which forces the chart itself to be replaced whenever @stationId changes
+  // regardless of what the surrounding Request/route layer does.
   test('switching stations replaces the chart instance instead of incrementally updating a shared one', async function (this: Ctx, assert) {
     this.owner.register('service:store', FakeStoreService);
     this.owner.register('service:map-refresh', FakeMapRefreshService);
@@ -259,6 +267,94 @@ module('Integration | Chart | point order', function (hooks) {
       points,
       stationB.map((row) => ({ x: row.direction, y: row.timestamp })),
       "after switching to station B, the chart shows only station B's points, in station B's own order"
+    );
+  });
+
+  // Direct reproduction of the case a fresh-fetch station switch doesn't
+  // cover: the surrounding tree (unlike a real <Request> on a cache miss)
+  // does *not* tear down here -- this renders the same
+  // <Station::WindDirection::Graph> instance throughout and just swaps its
+  // @stationId/@data args, mirroring what a Warp Drive cache-hit revisit
+  // does to <Request>'s content block in the real app. Without the
+  // {{#each (array @stationId)}} keying, this reliably displaces one
+  // coincidentally-matching point (see the fixture comment above) instead of
+  // rendering station B's own chronological order.
+  test('swapping @stationId/@data on the same WindDirectionGraph instance still renders station order correctly', async function (this: Ctx, assert) {
+    const stationA: History[] = [
+      {
+        id: 'holfuy-1829:1',
+        direction: 45,
+        speed: 5,
+        gusts: 6,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 20 * 60 * 1000,
+        [Type]: 'history',
+      },
+      {
+        id: 'holfuy-1829:2',
+        direction: 180,
+        speed: 6,
+        gusts: 7,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 10 * 60 * 1000,
+        [Type]: 'history',
+      },
+    ];
+    const stationB: History[] = [
+      {
+        id: 'holfuy-1808:1',
+        direction: 270,
+        speed: 20,
+        gusts: 21,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 4 * 60 * 1000,
+        [Type]: 'history',
+      },
+      {
+        id: 'holfuy-1808:2',
+        direction: 180,
+        speed: 25,
+        gusts: 26,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 3 * 60 * 1000,
+        [Type]: 'history',
+      },
+    ];
+
+    set(this, 'stationId', 'holfuy-1829');
+    set(this, 'data', stationA);
+    await render(hbs`
+      <div class="h-64 w-64">
+        <Station::WindDirection::Graph
+          @stationId={{this.stationId}}
+          @data={{this.data}}
+        />
+      </div>
+    `);
+
+    set(this, 'stationId', 'holfuy-1808');
+    set(this, 'data', stationB);
+    await settled();
+
+    const Highcharts = (await import('highcharts')).default;
+    const chart = Highcharts.charts.findLast(
+      (c) => c && c.options.chart?.polar
+    );
+    const points =
+      chart?.series[0]?.data.map((p) => ({ x: p.x, y: p.y })) ?? [];
+
+    assert.deepEqual(
+      points,
+      stationB.map((row) => ({ x: row.direction, y: row.timestamp })),
+      "the chart shows station B's points in station B's own chronological order, not with the coincidentally-shared-direction point displaced to the end"
     );
   });
 });
