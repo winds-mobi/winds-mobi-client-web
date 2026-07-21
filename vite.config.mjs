@@ -84,6 +84,7 @@ export default defineConfig(({ mode }) => ({
             // https://github.com/winds-mobi/winds-mobi-config/blob/main/winds.mobi/Caddyfile
             navigateFallbackDenylist: [
               /^\/api/,
+              /^\/user/,
               /^\/admin/,
               /^\/django-static/,
             ],
