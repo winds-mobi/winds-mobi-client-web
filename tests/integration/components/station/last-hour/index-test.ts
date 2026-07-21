@@ -6,6 +6,7 @@ import {
   settled,
   type RenderingTestContext,
 } from '@ember/test-helpers';
+import { set } from '@ember/object';
 import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -180,7 +181,7 @@ module('Integration | Component | station/last-hour', function (hooks) {
       deferredStationBHistory.promise
     );
 
-    this.stationId = 'station-a';
+    set(this, 'stationId', 'station-a');
 
     await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
 
@@ -188,10 +189,10 @@ module('Integration | Component | station/last-hour', function (hooks) {
 
     assert.true(stationAInitialMetrics.length > 0);
 
-    this.stationId = 'station-b';
+    set(this, 'stationId', 'station-b');
     await settled();
 
-    this.stationId = 'station-a';
+    set(this, 'stationId', 'station-a');
     await settled();
 
     assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);

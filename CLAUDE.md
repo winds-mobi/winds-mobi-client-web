@@ -260,6 +260,26 @@ obvious from the decorator call site:
 - Treat `highcharts` as a real, current app dependency (not a transitive peer). If wind/air stock-chart range-selector
   buttons break, suspect a Highcharts module/version mismatch first and prefer upgrading `highcharts`/`ember-highcharts`
   over app-side loading workarounds.
+- Both chart wrappers ([chart/polar.gts](app/components/chart/polar.gts),
+  [chart/time-series.gts](app/components/chart/time-series.gts)) set `chart.allowMutatingData: false`. This isn't a
+  perf knob we tuned — it's the fix for issue #111 ("glitches with wind direction history"), and removing it
+  reintroduces a real bug: `ember-highcharts` updates an existing chart via `series.setData()` rather than always
+  destroying/recreating it (confirmed: a station switch that resolves from Warp Drive's cache without a `:loading`
+  gap reuses the same chart instance/DOM node — verified live against the real app by tagging the rendered
+  `.highcharts-container` node across a station-A → station-B → station-A-revisit sequence). Highcharts' default
+  point-matching then falls back to raw x value when it can't match an incoming point by id, and for the polar
+  chart that's wind direction — a coarse 0-360 value that collides constantly, both across two different stations'
+  data and within one station's own sliding-window refresh (a reading that just expired and a brand-new reading can
+  share a direction by coincidence). The mismatch displaces one point to the wrong position in the array — every
+  value stays individually correct, but the connecting line's draw order doesn't, which is what actually reads as
+  a "tangled path." Two earlier fix attempts were tried and abandoned once this was found: giving each point an
+  explicit Highcharts `id` (doesn't help — a never-seen id still falls through to the x-value fallback) and keying
+  the chart's render on `@stationId` via `{{#each (array @stationId)}}` to force a teardown on station switches
+  (works for that one case, but not for the same-station sliding-window case, since the key doesn't change then).
+  `allowMutatingData: false` fixes both by disabling point-reuse entirely — Highcharts always rebuilds series data
+  from the given array's own order. Measured no meaningful performance difference at this app's data volumes (a
+  few dozen points for the polar chart, up to ~1500 for the 5-day wind/air charts) — the docs' "might decrease
+  performance" warning is written for far larger datasets than this app ever renders.
 
 ### i18n & relative time
 
@@ -287,6 +307,20 @@ a function`) when the chart tries to render it.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.
+- **Stick to a library's public interface, but verify real effects when that's the only way to know our own code
+  works.** Don't assert on a library's _own judgment calls_ over config we hand it — e.g. don't read Highcharts
+  internals to check that `dataGrouping.approximation` groups points the way Highcharts itself decides to, or that a
+  `timezone` option is interpreted the way Highcharts' own docs say it is. That's testing the library, not us, and
+  it breaks/needs rewriting on every upstream behavior tweak (see the historical "Stop asserting on Highcharts' own
+  rendering in component tests" commit). But when the only way to confirm _our_ code produced the right observable
+  outcome is to look at what the library actually did with the data we gave it — its rendered DOM, an object it
+  built from our input, a side effect it triggered — reading that is legitimate and sometimes the only real
+  verification available. Concretely: reading `Highcharts.charts[...].series[0].data` to confirm _our_ component fed
+  it points in the right order/identity (`tests/integration/components/chart/point-order-test.ts`, issue #111) is
+  testing our own data-flow contract, not Highcharts' behavior, even though it pokes at Highcharts' internals to do
+  it. The line: would this assertion need to change if the library shipped a different but equally valid internal
+  algorithm for the same input? If yes, it's testing the library — stop. If no (the library's _observable output_
+  is what any correct implementation would also produce from that input), it's testing us — keep it.
 - **Never reach for raw DOM in tests** (`document.querySelector`/`querySelectorAll`, `getElementById`, `.textContent`,
   `.getAttribute`, etc.). Assert with **qunit-dom** (`assert.dom(selector).exists()/.hasText()/.hasAttribute(...)`, and
   `assert.dom(selector, rootElement)` to scope — e.g. `document.head` for head content); `hasAttribute` accepts a regex
