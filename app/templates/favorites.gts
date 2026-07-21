@@ -140,7 +140,7 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
           </StationSectionCard>
         {{else if this.settings.favoritesCompactList}}
           <div
-            class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(11rem,calc(50%-0.375rem)),1fr))]"
+            class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(14rem,calc(50%-0.375rem)),1fr))]"
             data-test-favorites-stations-compact
           >
             {{#each this.stations as |station|}}

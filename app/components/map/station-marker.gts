@@ -9,6 +9,7 @@ import {
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
   scaleForReadingAge,
+  scaleForZoom,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -18,6 +19,7 @@ export interface MapStationMarkerSignature {
     isSelected?: boolean;
     onSelect: (station: Station) => void;
     station: Station;
+    zoom: number;
   };
   Element: HTMLButtonElement;
 }
@@ -56,15 +58,19 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     );
   }
 
-  // Shrink the whole arrow by reading age when the preference is on. Recomputed
-  // each refresh cycle as new readings replace the record, so no timer is needed
-  // — the data only changes on refresh anyway.
+  // Shrink the whole arrow by reading age when the preference is on, and
+  // always by map zoom so markers don't dwarf the map when zoomed out to see
+  // a whole region. The two multiply together, so an old reading at a low
+  // zoom shrinks further still. Recomputed each refresh cycle as new readings
+  // replace the record, so no timer is needed — the data only changes on
+  // refresh anyway; the zoom factor is recomputed whenever the routed zoom
+  // (settled after a pan/zoom gesture) changes.
   get markerScale() {
-    if (!this.settings.shrinkOldData) {
-      return 1;
-    }
+    const ageScale = this.settings.shrinkOldData
+      ? scaleForReadingAge(this.args.station.last.timestamp)
+      : 1;
 
-    return scaleForReadingAge(this.args.station.last.timestamp);
+    return ageScale * scaleForZoom(this.args.zoom);
   }
 
   // Rotate to the wind direction and, when shrinking, scale about the same hub
@@ -110,7 +116,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     >
       <svg
         aria-hidden="true"
-        class="h-16 w-16 overflow-visible"
+        class="h-24 w-24 overflow-visible"
         viewBox={{this.viewBox}}
       >
         <g transform={{this.markerTransform}}>

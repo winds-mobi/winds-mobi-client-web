@@ -381,17 +381,17 @@ export function geometryFromSvg(svg) {
   const hubY = round2(centreY * k);
 
   // The viewBox is a square centred on the hub (the rotation centre), sized to
-  // the farthest the arrow reaches from the hub so it can't clip at any
-  // rotation, plus a little for the outline stroke. Every consumer (the on-map
-  // marker, the favicon, the settings preview) rotates the arrow about the hub
-  // in place, so the hub has to be the centre of the square those rotations
-  // happen inside — that's also what keeps a "selected" ring drawn around the
-  // square concentric with the actual rotation point.
+  // the shape's own natural reach from the hub along each axis, plus a little
+  // for the outline stroke — not padded for full-rotation safety. That means a
+  // rotated arrow can clip its corners against the box at some angles, but
+  // every consumer (the on-map marker, the favicon, the settings preview, the
+  // compact card) renders the same unpadded size instead of each one sitting
+  // inside its own oversized, mostly-empty safety margin.
   const reach = Math.max(
-    Math.hypot(body.minX - centreX, body.minY - centreY),
-    Math.hypot(body.minX - centreX, body.maxY - centreY),
-    Math.hypot(body.maxX - centreX, body.minY - centreY),
-    Math.hypot(body.maxX - centreX, body.maxY - centreY),
+    Math.abs(body.minX - centreX),
+    Math.abs(body.maxX - centreX),
+    Math.abs(body.minY - centreY),
+    Math.abs(body.maxY - centreY),
   );
   const half = Math.ceil((reach + bh * 0.06) * k);
 

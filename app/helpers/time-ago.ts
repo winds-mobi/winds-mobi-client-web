@@ -46,6 +46,28 @@ export function renderTimeAgoText(intl: IntlService, seconds: number) {
   return intl.formatRelativeTime(value, { unit, style: 'narrow' });
 }
 
+const COMPACT_UNIT_SUFFIXES: Partial<
+  Record<Intl.RelativeTimeFormatUnit, string>
+> = {
+  second: 's',
+  minute: 'm',
+  hour: 'h',
+  day: 'd',
+  week: 'w',
+  month: 'mo',
+  year: 'y',
+};
+
+// A terse "5m" reading with no "ago"/unit-word, for tight spaces (e.g. the
+// compact nearby/favourites cards) where renderTimeAgoText's full wording
+// doesn't fit. Shares timeAgoParts with the narrow-style helper above so the
+// two never disagree on which unit a given age falls into.
+export function compactTimeAgo(seconds: number): string {
+  const { value, unit } = timeAgoParts(seconds);
+
+  return `${Math.abs(value)}${COMPACT_UNIT_SUFFIXES[unit] ?? ''}`;
+}
+
 interface TimeAgoSignature {
   Args: {
     Positional: [number];

@@ -6,21 +6,17 @@ import { Button } from '@frontile/buttons';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
-import ClockCounterClockwise from 'ember-phosphor-icons/components/ph-clock-counter-clockwise';
 import Heart from 'ember-phosphor-icons/components/ph-heart';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
-import timeAgo, {
-  relativeSecondsFromTimestamp,
-} from 'winds-mobi-client-web/helpers/time-ago';
 import type FavoritesService from 'winds-mobi-client-web/services/favorites';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
-import { textClassForReadingAge } from 'winds-mobi-client-web/utils/reading-freshness';
 import StationMetaItem from './meta-item';
+import StationUpdatedMeta from './updated-meta';
 
 export interface StationHeaderSignature {
   Args: {
@@ -113,16 +109,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
             m</span>
         </StationMetaItem>
 
-        <StationMetaItem
-          @icon={{ClockCounterClockwise}}
-          @label={{t "station.meta.updated"}}
-        >
-          <span
-            class={{textClassForReadingAge @station.last.timestamp}}
-          >{{timeAgo
-              (relativeSecondsFromTimestamp @station.last.timestamp)
-            }}</span>
-        </StationMetaItem>
+        <StationUpdatedMeta @timestamp={{@station.last.timestamp}} />
 
         {{#let this.nearbyLocation.coordinates as |coordinates|}}
           {{#let

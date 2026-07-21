@@ -396,6 +396,7 @@ export default class Map extends Component<MapSignature> {
               @isSelected={{this.isStationSelected station}}
               @onSelect={{this.stationSelected}}
               @station={{station}}
+              @zoom={{this.mapView.zoom}}
             />
           </map.marker>
         {{/each}}

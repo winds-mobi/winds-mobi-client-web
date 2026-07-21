@@ -58,6 +58,34 @@ export function scaleForReadingAge(timestamp: number): number {
   return 1 - (1 - MIN_MARKER_SCALE) * progress;
 }
 
+// Marker scale steps by map zoom, so arrows don't dwarf the map when zoomed
+// out to see a whole region. Deliberately discrete steps rather than a
+// continuous function: the routed `zoom` query param this reads only updates
+// once a pan/zoom gesture settles (see CLAUDE.md's map-state architecture),
+// so markers only ever need to hold one of a handful of sizes at a time.
+const ZOOM_SCALE_STEPS: readonly (readonly [minZoom: number, scale: number])[] =
+  [
+    [13, 1],
+    [11, 0.8],
+    [9, 0.65],
+    [7, 0.5],
+  ];
+export const MIN_ZOOM_MARKER_SCALE = 0.4;
+
+export function scaleForZoom(zoom: number): number {
+  if (!Number.isFinite(zoom)) {
+    return 1;
+  }
+
+  for (const [minZoom, scale] of ZOOM_SCALE_STEPS) {
+    if (zoom >= minZoom) {
+      return scale;
+    }
+  }
+
+  return MIN_ZOOM_MARKER_SCALE;
+}
+
 // A reading older than a day is drawn grey rather than in its wind-speed colour.
 export function colourForWindReading(speed: number, timestamp: number): string {
   if (!Number.isFinite(timestamp)) {
