@@ -80,6 +80,14 @@ export default defineConfig(({ mode }) => ({
           workbox: {
             navigateFallback: '/index.html',
             maximumFileSizeToCacheInBytes: 8000000,
+            // Ignore paths that are managed by Caddy reverse proxy backends.
+            // https://github.com/winds-mobi/winds-mobi-config/blob/main/winds.mobi/Caddyfile
+            navigateFallbackDenylist: [
+              /^\/api/,
+              /^\/user/,
+              /^\/admin/,
+              /^\/django-static/,
+            ],
             runtimeCaching: [
               {
                 // Base raster map tiles (tile.osm.ch/switzerland): roads/labels
