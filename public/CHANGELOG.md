@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.0 - 2026-07-21
+
 ### Added
 
 - **🧪 Beta:** The refresh button's arrow now plays a quick one-off spin every time a refresh starts — whether you pressed the button, it refreshed on its own, or anything else triggered it — giving immediate feedback even when the refresh itself finishes almost instantly. A new "Spin the refresh button when refreshing" setting (on by default, shown once beta features are enabled) turns it off if you'd rather not. The existing continuous spin while data is actually loading is unchanged.
