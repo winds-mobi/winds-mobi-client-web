@@ -22,9 +22,7 @@ module(
     test('it renders the chart when there is no history', async function (this: WindDirectionGraphTestContext, assert) {
       this.data = [];
 
-      await render(
-        hbs`<Station::WindDirection::Graph @stationId="holfuy-test" @data={{this.data}} />`
-      );
+      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
 
       assert.dom('.highcharts-container').exists();
     });
@@ -55,9 +53,7 @@ module(
         },
       ];
 
-      await render(
-        hbs`<Station::WindDirection::Graph @stationId="holfuy-test" @data={{this.data}} />`
-      );
+      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
 
       assert.dom('.highcharts-container').exists();
     });

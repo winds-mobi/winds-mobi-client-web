@@ -260,6 +260,26 @@ obvious from the decorator call site:
 - Treat `highcharts` as a real, current app dependency (not a transitive peer). If wind/air stock-chart range-selector
   buttons break, suspect a Highcharts module/version mismatch first and prefer upgrading `highcharts`/`ember-highcharts`
   over app-side loading workarounds.
+- Both chart wrappers ([chart/polar.gts](app/components/chart/polar.gts),
+  [chart/time-series.gts](app/components/chart/time-series.gts)) set `chart.allowMutatingData: false`. This isn't a
+  perf knob we tuned — it's the fix for issue #111 ("glitches with wind direction history"), and removing it
+  reintroduces a real bug: `ember-highcharts` updates an existing chart via `series.setData()` rather than always
+  destroying/recreating it (confirmed: a station switch that resolves from Warp Drive's cache without a `:loading`
+  gap reuses the same chart instance/DOM node — verified live against the real app by tagging the rendered
+  `.highcharts-container` node across a station-A → station-B → station-A-revisit sequence). Highcharts' default
+  point-matching then falls back to raw x value when it can't match an incoming point by id, and for the polar
+  chart that's wind direction — a coarse 0-360 value that collides constantly, both across two different stations'
+  data and within one station's own sliding-window refresh (a reading that just expired and a brand-new reading can
+  share a direction by coincidence). The mismatch displaces one point to the wrong position in the array — every
+  value stays individually correct, but the connecting line's draw order doesn't, which is what actually reads as
+  a "tangled path." Two earlier fix attempts were tried and abandoned once this was found: giving each point an
+  explicit Highcharts `id` (doesn't help — a never-seen id still falls through to the x-value fallback) and keying
+  the chart's render on `@stationId` via `{{#each (array @stationId)}}` to force a teardown on station switches
+  (works for that one case, but not for the same-station sliding-window case, since the key doesn't change then).
+  `allowMutatingData: false` fixes both by disabling point-reuse entirely — Highcharts always rebuilds series data
+  from the given array's own order. Measured no meaningful performance difference at this app's data volumes (a
+  few dozen points for the polar chart, up to ~1500 for the 5-day wind/air charts) — the docs' "might decrease
+  performance" warning is written for far larger datasets than this app ever renders.
 
 ### i18n & relative time
 

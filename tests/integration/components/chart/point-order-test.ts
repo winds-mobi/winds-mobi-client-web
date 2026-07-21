@@ -104,14 +104,10 @@ module('Integration | Chart | point order', function (hooks) {
 
   test('the polar wind-direction chart renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
     set(this, 'data', outOfOrderHistory);
-    set(this, 'stationId', 'holfuy-test');
 
     await render(hbs`
       <div class="h-64 w-64">
-        <Station::WindDirection::Graph
-          @stationId={{this.stationId}}
-          @data={{this.data}}
-        />
+        <Station::WindDirection::Graph @data={{this.data}} />
       </div>
     `);
 
@@ -156,26 +152,20 @@ module('Integration | Chart | point order', function (hooks) {
     );
   });
 
-  // Root cause of issue #111, confirmed both by a real browser repro (see the
-  // PR discussion) and here: ember-highcharts updates an existing chart in
-  // place via Highcharts' `series.setData()` rather than always
-  // destroying/recreating it, and Highcharts falls back to matching incoming
-  // points by raw x value (wind direction here, a coarse 0-360 value) when it
-  // can't match by id. On a *fresh* fetch (cache miss), StationHistorySection
-  // gets a genuinely new Future, and `<Request>` tears down its whole content
-  // block -- so there's no stale chart around to misupdate. But revisiting a
-  // recently-cached station resolves without ever showing `:loading` (Warp
-  // Drive serves it instantly), so `<Request>`'s content block -- and the
-  // chart inside it -- is never torn down either. Highcharts' x-fallback
-  // matching then displaces one coincidentally-matching point to the wrong
-  // spot in the array: values stay correct, but the polar line's draw order
-  // doesn't, which is what actually read as "the tangled/glitchy line" (see
-  // the `<Station::WindDirection::Graph>`-level test below, which reproduces
-  // that exact "surrounding tree doesn't tear down" case directly). The fix
-  // is the {{#each (array @stationId)}} keying in wind-direction/graph.gts,
-  // which forces the chart itself to be replaced whenever @stationId changes
-  // regardless of what the surrounding Request/route layer does.
-  test('switching stations replaces the chart instance instead of incrementally updating a shared one', async function (this: Ctx, assert) {
+  // Root cause of issue #111, confirmed by a real browser repro (search for
+  // and click between two stations, reading the rendered SVG before/after):
+  // ember-highcharts updates an existing chart in place via Highcharts'
+  // `series.setData()` rather than always destroying/recreating it, and
+  // Highcharts' default point-matching falls back to raw x value (wind
+  // direction here, a coarse 0-360 value) whenever it can't match an
+  // incoming point by id. On a *fresh* fetch (cache miss, as simulated by
+  // FakeStoreService below), StationHistorySection gets a genuinely new
+  // Future and `<Request>` tears its content block down -- so this
+  // particular test would pass even without a fix. It's kept as a
+  // regression guard on that teardown behavior; the actual bug (and the fix
+  // below) only shows up when the surrounding tree does *not* tear down --
+  // see the next two tests.
+  test('a fresh station fetch replaces the chart instance', async function (this: Ctx, assert) {
     this.owner.register('service:store', FakeStoreService);
     this.owner.register('service:map-refresh', FakeMapRefreshService);
 
@@ -183,10 +173,6 @@ module('Integration | Chart | point order', function (hooks) {
       'service:store'
     ) as unknown as FakeStoreService;
 
-    // Station A's second point deliberately shares a wind direction (180)
-    // with station B's second point, and station B's first point is
-    // deliberately unrelated -- exactly the shape that would expose
-    // Highcharts' by-x-value point matching if the chart were reused.
     const stationA: History[] = [
       {
         id: 'holfuy-1829:1',
@@ -271,15 +257,16 @@ module('Integration | Chart | point order', function (hooks) {
   });
 
   // Direct reproduction of the case a fresh-fetch station switch doesn't
-  // cover: the surrounding tree (unlike a real <Request> on a cache miss)
-  // does *not* tear down here -- this renders the same
-  // <Station::WindDirection::Graph> instance throughout and just swaps its
-  // @stationId/@data args, mirroring what a Warp Drive cache-hit revisit
-  // does to <Request>'s content block in the real app. Without the
-  // {{#each (array @stationId)}} keying, this reliably displaces one
-  // coincidentally-matching point (see the fixture comment above) instead of
-  // rendering station B's own chronological order.
-  test('swapping @stationId/@data on the same WindDirectionGraph instance still renders station order correctly', async function (this: Ctx, assert) {
+  // cover: the surrounding tree does *not* tear down here -- this renders
+  // the same <Station::WindDirection::Graph> instance throughout and just
+  // swaps its @data, mirroring what a Warp Drive cache-hit revisit does to
+  // <Request>'s content block in the real app (confirmed against the real
+  // running app: the chart's DOM node was reused across a station revisit,
+  // and one point was displaced to the end of the array). The fix is
+  // `chart.allowMutatingData: false` in chart/polar.gts, which stops
+  // Highcharts from trying to match/reuse old points at all -- it always
+  // rebuilds series data from the given array's own order instead.
+  test('swapping @data on the same WindDirectionGraph instance still renders station order correctly', async function (this: Ctx, assert) {
     const stationA: History[] = [
       {
         id: 'holfuy-1829:1',
@@ -329,18 +316,13 @@ module('Integration | Chart | point order', function (hooks) {
       },
     ];
 
-    set(this, 'stationId', 'holfuy-1829');
     set(this, 'data', stationA);
     await render(hbs`
       <div class="h-64 w-64">
-        <Station::WindDirection::Graph
-          @stationId={{this.stationId}}
-          @data={{this.data}}
-        />
+        <Station::WindDirection::Graph @data={{this.data}} />
       </div>
     `);
 
-    set(this, 'stationId', 'holfuy-1808');
     set(this, 'data', stationB);
     await settled();
 
@@ -355,6 +337,93 @@ module('Integration | Chart | point order', function (hooks) {
       points,
       stationB.map((row) => ({ x: row.direction, y: row.timestamp })),
       "the chart shows station B's points in station B's own chronological order, not with the coincidentally-shared-direction point displaced to the end"
+    );
+  });
+
+  // A second, distinct failure mode `allowMutatingData: false` fixes: even
+  // when the station *doesn't* change (an ordinary refresh poll sliding the
+  // 1-hour window forward), a reading that just expired and a brand-new
+  // reading can coincidentally share a wind direction. Without this fix,
+  // Highcharts matches the new reading to the expired point's old array
+  // position instead of appending it as the newest entry.
+  test('a same-station refresh does not displace a reading that coincidentally shares a direction with an expiring one', async function (this: Ctx, assert) {
+    const round1: History[] = [
+      {
+        id: 'x:1',
+        direction: 45, // about to fall out of the window on the next poll
+        speed: 5,
+        gusts: 6,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 55 * 60 * 1000,
+        [Type]: 'history',
+      },
+      {
+        id: 'x:2',
+        direction: 90,
+        speed: 6,
+        gusts: 7,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 30 * 60 * 1000,
+        [Type]: 'history',
+      },
+      {
+        id: 'x:3',
+        direction: 135,
+        speed: 7,
+        gusts: 8,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - 5 * 60 * 1000,
+        [Type]: 'history',
+      },
+    ];
+
+    // x:1 (direction 45) fell out of the window; a brand-new reading
+    // arrived that *coincidentally* also has direction 45 -- it should be
+    // the newest point (appended at the end), not treated as "the same
+    // point" as the one that just expired.
+    const round2: History[] = [
+      round1[1]!,
+      round1[2]!,
+      {
+        id: 'x:4',
+        direction: 45,
+        speed: 9,
+        gusts: 10,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now,
+        [Type]: 'history',
+      },
+    ];
+
+    set(this, 'data', round1);
+    await render(hbs`
+      <div class="h-64 w-64">
+        <Station::WindDirection::Graph @data={{this.data}} />
+      </div>
+    `);
+
+    set(this, 'data', round2);
+    await settled();
+
+    const Highcharts = (await import('highcharts')).default;
+    const chart = Highcharts.charts.findLast(
+      (c) => c && c.options.chart?.polar
+    );
+    const points =
+      chart?.series[0]?.data.map((p) => ({ x: p.x, y: p.y })) ?? [];
+
+    assert.deepEqual(
+      points,
+      round2.map((row) => ({ x: row.direction, y: row.timestamp })),
+      'the newest reading lands at the end, not displacing/reusing the expired point'
     );
   });
 });

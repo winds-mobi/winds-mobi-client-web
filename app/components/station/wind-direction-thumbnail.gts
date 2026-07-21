@@ -56,16 +56,11 @@ export default class StationWindDirectionThumbnail extends Component<StationWind
     <div class="min-h-0 min-w-0" ...attributes>
       <Request @request={{this.historyRequest}}>
         <:content as |result|>
-          <WindDirectionGraph
-            @stationId={{@stationId}}
-            @data={{result.data}}
-            @hideAxisLabels={{true}}
-          />
+          <WindDirectionGraph @data={{result.data}} @hideAxisLabels={{true}} />
         </:content>
 
         <:loading>
           <WindDirectionGraph
-            @stationId={{@stationId}}
             @data={{EMPTY_HISTORY}}
             @hideAxisLabels={{true}}
           />
@@ -73,7 +68,6 @@ export default class StationWindDirectionThumbnail extends Component<StationWind
 
         <:error>
           <WindDirectionGraph
-            @stationId={{@stationId}}
             @data={{EMPTY_HISTORY}}
             @hideAxisLabels={{true}}
           />

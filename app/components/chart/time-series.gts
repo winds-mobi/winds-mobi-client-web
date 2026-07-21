@@ -54,6 +54,19 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       spacingLeft: 0,
       spacingRight: 0,
       type: 'spline',
+      // ember-highcharts updates an existing chart via series.setData()
+      // rather than always destroying/recreating it (e.g. when a station
+      // switch resolves from cache without a loading gap in between, see
+      // wind-direction/graph.gts). Highcharts' default point-matching then
+      // falls back to raw x value (timestamp here) when it can't match an
+      // incoming point by id, which can displace a point to the wrong
+      // position in the array if a timestamp coincidentally collides
+      // between two stations' data (issue #111). Disabling this lets
+      // Highcharts always rebuild series data from the given array's own
+      // order instead of trying to reuse/match old points -- measured no
+      // meaningful performance difference at this app's data volumes
+      // (~1500 points for the longest, 5-day chart).
+      allowMutatingData: false,
       panning: {
         enabled: true,
         type: 'x',

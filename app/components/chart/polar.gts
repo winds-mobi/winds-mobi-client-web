@@ -48,6 +48,19 @@ export default class Polar extends Component<PolarSignature> {
       reflow: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
+      // ember-highcharts updates an existing chart via series.setData()
+      // rather than always destroying/recreating it (e.g. when a station
+      // switch resolves from cache without a loading gap in between).
+      // Highcharts' default point-matching then falls back to raw x value
+      // (wind direction here, a coarse 0-360 value) when it can't match an
+      // incoming point by id, which displaces a point to the wrong position
+      // in the array when two stations' data happen to share a direction
+      // (issue #111 -- the "tangled path" glitch). Disabling this lets
+      // Highcharts always rebuild series data from the given array's own
+      // order instead of trying to reuse/match old points -- measured no
+      // meaningful performance difference at this chart's data volumes
+      // (a handful to a few dozen points, one hour of history).
+      allowMutatingData: false,
     },
     title: {
       text: undefined,
