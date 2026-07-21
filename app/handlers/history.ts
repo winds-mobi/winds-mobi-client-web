@@ -76,11 +76,22 @@ const HistoryHandler: Handler = {
     // JSON-API requires us to have IDs
     // Historic timestamps are only unique within a station,
     // so cache identity must include the station id.
-    // The historic API returns newest-first rows, but the app consumes
-    // history in chronological order for charting and the last-hour graph.
+    // The historic API is documented to return newest-first rows, but the
+    // app's charts (the polar wind-direction graph in particular -- see
+    // issue #111) assume chronological order and don't sort or validate
+    // it themselves; Highcharts renders whichever order it's given rather
+    // than correcting it (see tests/integration/components/chart/point-order-test.ts).
+    // A plain `.reverse()` only produces chronological order if the API's
+    // rows were already perfectly newest-first, which isn't guaranteed --
+    // e.g. a backfilled/delayed reading arriving out of sequence would
+    // silently carry through as a visible glitch (a line jumping backwards
+    // in time). Sorting explicitly by `_id` (the historic timestamp, in
+    // seconds) is robust to that regardless of the order the API returned.
 
     const contentWithIds = Array.isArray(content)
-      ? content.map((elm) => renameFields(elm, stationId)).reverse()
+      ? content
+          .toSorted((a, b) => a._id - b._id)
+          .map((elm) => renameFields(elm, stationId))
       : renameFields(content, stationId);
 
     return toJsonApiEnvelope<T>(context.request.url, contentWithIds);

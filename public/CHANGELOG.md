@@ -20,6 +20,7 @@
 - Fixed old bookmarked/shared links (e.g. the pre-rebuild `/stations/...` URLs) showing a blank page with a console error — they now redirect to the map instead.
 - Pressing refresh very soon after the last one (within 15s, down from 30s) is now more likely to actually pick up new data.
 - Fixed the installed app's service worker intercepting the API docs, admin, and account-management pages (served by other backends, not this app) and wrongly showing the map instead.
+- Fixed the wind-direction history graph occasionally drawing a line that jumps backwards in time, making the path look tangled or nonsensical.
 
 ## v0.18.0 - 2026-07-15
 
