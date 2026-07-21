@@ -27,7 +27,10 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
   @tracked isOpen = false;
 
   get visibleItems() {
-    return visibleNavbarMenuItems(this.settings.betaFeaturesEnabled);
+    return visibleNavbarMenuItems(
+      this.settings.betaFeaturesEnabled,
+      this.settings.favoritesFeatureEnabled
+    );
   }
 
   @action

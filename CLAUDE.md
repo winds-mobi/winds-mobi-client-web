@@ -66,10 +66,20 @@ run `pnpm lint` (or targeted `pnpm lint:format`) plus the relevant `test:ember:d
 When lint fails, run `pnpm lint:fix` first and hand-fix only what the fixers can't reach (some rules, e.g.
 `no-useless-escape` and most type-aware ones, have no autofix).
 
-Do **not** spin up headless-browser/screenshot rigs (chromium-cli, raw `chromium --headless`, Playwright, etc.)
-to visually verify a UI change — this app's map/canvas-heavy UI doesn't render meaningfully in that path, and
-it burns time on tooling rather than the change. Run `pnpm lint` and the relevant tests, then describe what
-changed and ask the user to check it in their own browser via `pnpm start`.
+Screenshots for visual verification (e.g. attaching a preview to a PR) are fine to take with the dev
+container's existing system Chromium (`/usr/bin/chromium` — the same binary Testem already launches for
+headless test runs, no separate tool to install):
+
+```
+docker compose exec ui chromium --headless --disable-gpu --no-sandbox --disable-dev-shm-usage \
+  --window-size=1440,900 --screenshot=/tmp/shot.png 'http://localhost:4200/<route>'
+docker cp winds-mobi-client-web-ui-1:/tmp/shot.png ./shot.png
+```
+
+Map/canvas routes are the one caveat: MapLibre needs WebGL, which this headless setup doesn't provide (see
+`tests/helpers/webgl.ts`), so a map screenshot will render blank/broken — expected, not a bug in the shot.
+Everything else (Settings, station panels, nearby/favourites lists, etc.) renders normally. Still run
+`pnpm lint` and the relevant tests as the actual verification; a screenshot is a visual aid on top; it doesn't replace them.
 
 ## Architecture
 

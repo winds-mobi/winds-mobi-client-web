@@ -44,10 +44,13 @@ export default class StationHeader extends Component<StationHeaderSignature> {
   }
 
   // Favouriting is a beta feature (see app/services/settings.ts): hidden
-  // until beta is opted into. No account is required — favourites persist
-  // locally (see app/services/favorites.ts).
+  // until beta is opted into *and* the favourites feature's own toggle is on.
+  // No account is required — favourites persist locally (see
+  // app/services/favorites.ts).
   get showFavoriteControl(): boolean {
-    return this.settings.betaFeaturesEnabled;
+    return (
+      this.settings.betaFeaturesEnabled && this.settings.favoritesFeatureEnabled
+    );
   }
 
   get isFavorite(): boolean {

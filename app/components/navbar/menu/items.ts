@@ -40,11 +40,13 @@ export const NAVBAR_MENU_ITEMS: readonly NavbarMenuItem[] = [
 ];
 
 // The favourites view is a beta feature (see app/services/settings.ts); hide
-// its nav entry until the visitor has opted into beta features.
+// its nav entry unless the visitor has opted into beta features *and* the
+// favourites feature's own toggle.
 export function visibleNavbarMenuItems(
-  betaFeaturesEnabled: boolean
+  betaFeaturesEnabled: boolean,
+  favoritesFeatureEnabled: boolean
 ): readonly NavbarMenuItem[] {
-  return betaFeaturesEnabled
+  return betaFeaturesEnabled && favoritesFeatureEnabled
     ? NAVBAR_MENU_ITEMS
     : NAVBAR_MENU_ITEMS.filter((item) => item.route !== 'favorites');
 }
