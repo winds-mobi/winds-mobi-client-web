@@ -11,10 +11,12 @@
 - **🧪 Beta:** Favourites now has its own "Favourites" setting (on by default, shown once beta features are enabled) instead of being tied only to the "Enable beta features" toggle. Every individual beta feature's toggle now lives together with the master toggle in one grouped settings card, with the master toggle always shown first.
 - Compact station cards (Nearby and Favourites) now show the same wind arrow used on the map side by side with the existing wind-direction history graph — giving an at-a-glance read on speed, gusts, and direction. The name, altitude, and last-updated time now share a single line, with the updated time shown as a terser "5m" instead of "5m ago" to save space. The cards themselves are a bit bigger.
 - Map markers now shrink as you zoom out, so they no longer dwarf the map when viewing a whole region.
+- On the wind chart, when zoomed out far enough that Highcharts groups several readings into one point, the gusts line now shows the highest gust in the group instead of an average, so peak gusts stay visible.
 
 ### Fixed
 
 - Fixed map, search, nearby, and favourites requests being sent twice: the client was missing a trailing slash that made the API respond with a redirect on every call.
+- Time-series charts (wind, air) now show times in your local timezone instead of UTC.
 
 ## v0.18.0 - 2026-07-15
 

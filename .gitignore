@@ -26,6 +26,7 @@
 /DEBUG/
 
 /.vscode
+/.idea
 
 /node-compile-cache
 /dev-dist
