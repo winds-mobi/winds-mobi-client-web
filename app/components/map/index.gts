@@ -28,7 +28,6 @@ import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loadi
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
-import { requestAndFly } from 'winds-mobi-client-web/utils/locate';
 import {
   OSM_SWISS_STYLE,
   TEST_MAP_STYLE,
@@ -36,6 +35,7 @@ import {
 import {
   boundsFromMap,
   roundBoundsForRequest,
+  focusQueryParamsFor,
   mapBoundsEqual,
   mapViewCenter,
   mapViewsEqual,
@@ -243,14 +243,26 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  async handleMapLoaded() {
-    // On a fresh load with the default Switzerland view, acquire location
-    // silently if permission is already granted (no prompt) and fly to it.
-    // The user's own pan or the locate button handle everything else.
+  handleMapLoaded() {
+    // On a fresh load with the default Switzerland view, fly to the user's
+    // location if it's already known -- no geolocation request happens here.
+    // `ApplicationRoute#beforeModel` already awaits `nearbyLocation.syncPermissionState()`
+    // before anything renders, and that already requests the position itself
+    // when permission is already granted, so `coordinates` is normally already
+    // populated by the time the map ever mounts. `coordinates` being set at all
+    // implies granted permission (see `updateFromPosition`), so there's nothing
+    // else to check. The user's own pan or the locate button (a fresh, explicit
+    // request) handle every other case, including permission not yet granted
+    // and a transient geolocation failure at boot.
     if (!this.isInitialDefaultView || config.environment === 'test') return;
-    if (this.nearbyLocation.permissionState !== 'granted') return;
 
-    await requestAndFly(this.nearbyLocation, this.router);
+    const { coordinates } = this.nearbyLocation;
+
+    if (coordinates) {
+      void this.router.replaceWith({
+        queryParams: focusQueryParamsFor(coordinates),
+      });
+    }
   }
 
   @action
