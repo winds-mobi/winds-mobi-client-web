@@ -105,12 +105,12 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   // default-size padding non-deterministically fight this button's own
   // `rounded-full`/`p-1`.
   //
-  // The button's own box (h-28) is deliberately a touch bigger than the svg
-  // it wraps (h-24, the arrow's natural drawn size), so the ring reads as
-  // just outside the arrow's silhouette rather than hugging it exactly --
-  // and `p-1!`'s padding (included inside the box, border-box) shaves a
-  // little more off the interior on every side, on top of that. `flex!
-  // items-center justify-center` centres the svg within that padded
+  // The button's own box (h-28, 112px) is deliberately bigger than the svg it
+  // wraps (h-24, 96px, the arrow's natural drawn size) -- even after `p-1!`'s
+  // padding and Frontile's own 1px border eat into the interior (down to
+  // 102px), the svg still fits inside with room to spare, so the ring reads
+  // as just outside the arrow's silhouette rather than hugging its edges.
+  // `flex! items-center justify-center` centres the svg within that
   // interior; `!` forces it over Frontile's own base `inline-block`
   // (verified in `@frontile/theme`'s `baseButton`), which otherwise wins the
   // `display` property by source order (same unmerged-class gotcha as
@@ -146,16 +146,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       style={{this.scaleStyle}}
     >
       {{! template-lint-enable no-inline-styles }}
-      {{! pointer-events-none: the svg is purely decorative (already
-        aria-hidden), so its overflow past the button's own padded interior
-        (see `buttonClass`) never intercepts clicks -- they fall through to
-        whatever's actually under the cursor (the map, or a neighbouring
-        marker). }}
-      <svg
-        aria-hidden="true"
-        class="pointer-events-none h-24 w-24 overflow-visible"
-        viewBox={{this.viewBox}}
-      >
+      <svg aria-hidden="true" class="h-24 w-24" viewBox={{this.viewBox}}>
         <g transform={{this.markerTransform}}>
           {{! Gusts band differs: the gusts shape behind, shown through the hub hole. }}
           {{#if this.showGustsHub}}
