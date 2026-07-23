@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Fixed the map sometimes visibly jumping back toward your location when opening a second station's detail panel right after another one.
+
 ## v0.19.1 - 2026-07-23
 
 ### Changed

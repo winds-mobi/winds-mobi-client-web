@@ -13,11 +13,7 @@ import { cached, tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
-import type {
-  Map as MaplibreMap,
-  MapInitOptions,
-  StyleSpecification,
-} from 'ember-maplibre-gl';
+import type { Map as MaplibreMap, MapInitOptions } from 'ember-maplibre-gl';
 import { NavigationControl, TerrainControl } from 'maplibre-gl';
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
@@ -27,19 +23,25 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
-import { requestAndFly } from 'winds-mobi-client-web/utils/locate';
+import {
+  OSM_SWISS_STYLE,
+  TEST_MAP_STYLE,
+} from 'winds-mobi-client-web/utils/map-style';
 import {
   boundsFromMap,
   roundBoundsForRequest,
+  focusQueryParamsFor,
   mapBoundsEqual,
-  currentMapView,
+  mapViewCenter,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
+  TrackedMapView,
   type MapBounds,
 } from 'winds-mobi-client-web/utils/map-view';
 
@@ -50,52 +52,6 @@ export interface MapSignature {
   };
   Element: null;
 }
-
-const OSM_SWISS_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osmswissstyle: {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxzoom: 19,
-      tiles: ['https://tile.osm.ch/switzerland/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      type: 'raster',
-    },
-    terrainSource: {
-      type: 'raster-dem',
-      attribution: '© Mapzen terrain tiles',
-      encoding: 'terrarium',
-      maxzoom: 15,
-      tiles: [
-        'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'osmswissstyle',
-      source: 'osmswissstyle',
-      type: 'raster',
-    },
-  ],
-  sky: {},
-};
-
-const TEST_MAP_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {},
-  layers: [
-    {
-      id: 'background',
-      type: 'background',
-      paint: {
-        'background-color': '#f1f5f9',
-      },
-    },
-  ],
-};
 
 export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
@@ -115,8 +71,25 @@ export default class Map extends Component<MapSignature> {
           exaggeration: 1,
         });
 
+  // See `TrackedMapView` for why this needs to be more than `currentMapView(this.router)`
+  // read directly (issue #131). `handleRouteChange`, wired to the `onRouteChange`
+  // modifier below, is what keeps it in sync with the router. A `@cached` getter
+  // rather than a field initializer, so it's constructed lazily on first access —
+  // `@service` fields use `declare` and have no real instance initializer of their
+  // own, so reading `this.router` eagerly in a field initializer runs into it
+  // "not yet initialized" as far as TypeScript's control-flow analysis can tell.
+  @cached
+  get trackedMapView(): TrackedMapView {
+    return new TrackedMapView(this.router);
+  }
+
   get mapView() {
-    return currentMapView(this.router);
+    return this.trackedMapView.current;
+  }
+
+  @action
+  handleRouteChange() {
+    this.trackedMapView.sync();
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).
@@ -218,10 +191,7 @@ export default class Map extends Component<MapSignature> {
     return {
       attributionControl: { compact: true },
       bearing: 0,
-      center: [this.mapView.longitude, this.mapView.latitude] as [
-        number,
-        number,
-      ],
+      center: mapViewCenter(this.mapView),
       dragRotate: true,
       maxPitch: 85,
       pitch: 0,
@@ -273,14 +243,26 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  async handleMapLoaded() {
-    // On a fresh load with the default Switzerland view, acquire location
-    // silently if permission is already granted (no prompt) and fly to it.
-    // The user's own pan or the locate button handle everything else.
+  handleMapLoaded() {
+    // On a fresh load with the default Switzerland view, fly to the user's
+    // location if it's already known -- no geolocation request happens here.
+    // `ApplicationRoute#beforeModel` already awaits `nearbyLocation.syncPermissionState()`
+    // before anything renders, and that already requests the position itself
+    // when permission is already granted, so `coordinates` is normally already
+    // populated by the time the map ever mounts. `coordinates` being set at all
+    // implies granted permission (see `updateFromPosition`), so there's nothing
+    // else to check. The user's own pan or the locate button (a fresh, explicit
+    // request) handle every other case, including permission not yet granted
+    // and a transient geolocation failure at boot.
     if (!this.isInitialDefaultView || config.environment === 'test') return;
-    if (this.nearbyLocation.permissionState !== 'granted') return;
 
-    await requestAndFly(this.nearbyLocation, this.router);
+    const { coordinates } = this.nearbyLocation;
+
+    if (coordinates) {
+      void this.router.replaceWith({
+        queryParams: focusQueryParamsFor(coordinates),
+      });
+    }
   }
 
   @action
@@ -336,10 +318,7 @@ export default class Map extends Component<MapSignature> {
   @cached
   get flyToOptions() {
     return {
-      center: [this.mapView.longitude, this.mapView.latitude] as [
-        number,
-        number,
-      ],
+      center: mapViewCenter(this.mapView),
       zoom: this.mapView.zoom,
     };
   }
@@ -348,6 +327,7 @@ export default class Map extends Component<MapSignature> {
     <div
       data-test-map-container
       class="relative h-full w-full"
+      {{onRouteChange this.router this.handleRouteChange}}
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
     >
