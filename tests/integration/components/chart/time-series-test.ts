@@ -44,4 +44,24 @@ module('Integration | Component | chart/time-series', function (hooks) {
 
     assert.dom('.highcharts-container').exists();
   });
+
+  // Highcharts 13 auto-follows the OS/browser's prefers-color-scheme by
+  // default (`palette.colorScheme` defaults to `'light dark'`), which would
+  // otherwise silently switch this chart to a dark palette on a device set
+  // to dark mode. `defaultChartOptions` pins `palette.colorScheme` to
+  // `'light'`, which Highcharts reflects as an inline `color-scheme: light`
+  // style on its own wrapper (`.highcharts-container`) -- reading that
+  // confirms our option actually reached and took effect on the real chart,
+  // not just that we passed it.
+  test('it pins the chart to light mode regardless of the OS/browser color scheme preference', async function (this: TimeSeriesTestContext, assert) {
+    this.chartData = [{ name: 'Wind', data: [[Date.now(), 10]] }];
+
+    await render(
+      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+    );
+
+    assert
+      .dom('.highcharts-container')
+      .hasAttribute('style', /color-scheme:\s*light/);
+  });
 });
