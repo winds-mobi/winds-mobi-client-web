@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { on } from '@ember/modifier';
+import { Button } from '@frontile/buttons';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   ARROW_DIRECTION_OFFSET,
@@ -105,14 +105,15 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   }
 
   <template>
-    <button
-      type="button"
+    <Button
       aria-label={{@station.name}}
-      class={{this.buttonClass}}
       data-selected={{if @isSelected "true"}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
-      {{on "click" this.handleSelect}}
+      @appearance="custom"
+      @intent="default"
+      @onPress={{this.handleSelect}}
+      class={{this.buttonClass}}
     >
       <svg
         aria-hidden="true"
@@ -136,6 +137,6 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
           />
         </g>
       </svg>
-    </button>
+    </Button>
   </template>
 }

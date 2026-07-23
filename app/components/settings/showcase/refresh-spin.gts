@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { on } from '@ember/modifier';
 import { htmlSafe } from '@ember/template';
+import { Button } from '@frontile/buttons';
 import { t } from 'ember-intl';
 import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
 
@@ -53,11 +53,11 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
       class="flex items-center justify-center rounded-lg bg-slate-100 p-4"
       ...attributes
     >
-      <button
-        type="button"
+      <Button
         aria-label={{t "settings.refreshButtonSpin.tryIt"}}
-        class="flex h-12 w-12 items-center justify-center rounded-sm border border-slate-300 bg-white"
-        {{on "click" this.handlePress}}
+        @appearance="outlined"
+        @onPress={{this.handlePress}}
+        class="flex h-12 w-12 items-center justify-center p-0"
       >
         {{! template-lint-disable no-inline-styles }}
         <span
@@ -67,7 +67,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
           <ArrowClockwise />
         </span>
         {{! template-lint-enable no-inline-styles }}
-      </button>
+      </Button>
     </div>
   </template>
 }
