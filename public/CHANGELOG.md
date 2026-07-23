@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.1 - 2026-07-23
+
 ### Changed
 
 - The last-hour wind-direction graph is now anchored to the last recorded reading instead of the current time, so a station that has gone quiet still shows its full window (previously the graph would empty out as real time drifted past stale data). The most recent reading now sits on the outer ring, with older readings spreading in towards the center. A station with only one reading in the window now draws it as a full spoke from center to edge so its direction stays visible.
