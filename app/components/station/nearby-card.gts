@@ -1,5 +1,6 @@
 import type { TOC } from '@ember/component/template-only';
 import StationHeader from './header';
+import StationMeta from './meta';
 import StationSummary from './summary';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
@@ -20,6 +21,7 @@ const StationNearbyCard: TOC<StationNearbyCardSignature> = <template>
   >
     <div class="mb-4">
       <StationHeader @station={{@station}} />
+      <StationMeta @station={{@station}} class="mt-1.5" />
     </div>
 
     <StationSummary @station={{@station}} />

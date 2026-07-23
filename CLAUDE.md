@@ -294,6 +294,22 @@ obvious from the decorator call site:
 ### UI
 
 - Reuse existing Frontile + Tailwind patterns for shared UI before introducing new ones.
+- **Always use Frontile's `<Button>` (`@frontile/buttons`) instead of a bare HTML `<button>`.** Use `@onPress`
+  (not an `{{on "click" ...}}` modifier). Reach for `@appearance="custom"` (plus an explicit `@intent="default"`,
+  since `custom`'s own default intent resolves to `primary`) when a button needs fully bespoke, non-thematic
+  coloring (e.g. an SVG marker whose fill colors are computed data, not a Frontile intent) — `custom` has no
+  background/hover compound classes of its own to fight, unlike `minimal`/`outlined`/`default`. Only a handful of
+  _non-button_ clickable custom elements are legitimate exceptions (e.g. `<LinkTo>` navigation, or a MapLibre
+  control that isn't DOM at all) — a plain `<button>` standing in for one is not.
+  - **A `class` override does NOT tailwind-merge against the theme's own base/variant classes** — verified
+    empirically (render a `<Button class="rounded-full">`, inspect `element.className`): both `rounded-sm` (the
+    theme's base) and your `rounded-full` end up in the class list, and plain CSS source order — not attribute
+    order — decides which one's declaration wins, which is effectively undefined from the call site. Whenever your
+    `class` is meant to _replace_ a variant-driven utility (shape, size/padding, display), force it with Tailwind
+    v4's `!` suffix (e.g. `rounded-full!`, `p-1!`, `flex!`) rather than relying on it winning by luck. This only
+    matters for genuine conflicts (same CSS property); additive classes (new colors, `transition`, etc.) need no
+    `!`. `@frontile/theme` does depend on `tailwind-merge` internally, but not for this — don't assume it applies
+    to a plain `<Button class="...">` override without checking.
 
 ### Testing
 

@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { on } from '@ember/modifier';
+import { Button } from '@frontile/buttons';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   ARROW_DIRECTION_OFFSET,
@@ -88,9 +88,16 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `${rotate} translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
   }
 
+  // Frontile's Button doesn't tailwind-merge its `class` arg against the
+  // theme's own base/variant classes (verified empirically -- both a passed
+  // override and the conflicting theme class end up in the DOM, and CSS
+  // source order decides the winner, not attribute order). `!` forces our
+  // override to win regardless: without it, the theme's own `rounded-sm`/
+  // default-size padding non-deterministically fight this button's own
+  // `rounded-full`/`p-1`.
   get buttonClass() {
     const base =
-      'block cursor-pointer rounded-full p-1 transition focus:outline-none';
+      'block cursor-pointer rounded-full! p-1! transition focus:outline-none';
 
     // Selected: a grey disc + ring hugging the arrow so it stands out without
     // spilling into neighbouring markers' clickable area.
@@ -105,14 +112,15 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   }
 
   <template>
-    <button
-      type="button"
+    <Button
       aria-label={{@station.name}}
-      class={{this.buttonClass}}
       data-selected={{if @isSelected "true"}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
-      {{on "click" this.handleSelect}}
+      @appearance="custom"
+      @intent="default"
+      @onPress={{this.handleSelect}}
+      class={{this.buttonClass}}
     >
       <svg
         aria-hidden="true"
@@ -136,6 +144,6 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
           />
         </g>
       </svg>
-    </button>
+    </Button>
   </template>
 }
