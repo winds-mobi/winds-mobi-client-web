@@ -3,6 +3,7 @@ import { service } from '@ember/service';
 import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
+import X from 'ember-phosphor-icons/components/ph-x';
 import StationHeader from './header';
 import StationMeta from './meta';
 import StationSummary from './summary';
@@ -50,12 +51,12 @@ export default class StationIndex extends Component<StationIndexSignature> {
         <button
           data-test-station-close
           type="button"
-          class="self-start rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          class="self-start rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           aria-label={{t "common.close"}}
           title={{t "common.close"}}
           {{on "click" this.close}}
         >
-          &times;
+          <X @size={{20}} />
         </button>
       </div>
 
