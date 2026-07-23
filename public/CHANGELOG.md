@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.2 - 2026-07-23
+
 ### Changed
 
 - The station panel's altitude, last-updated, distance, and provider-link row now scrolls away with the rest of the panel content instead of staying pinned under the station name, freeing up space on the compact mobile layout.
