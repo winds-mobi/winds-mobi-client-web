@@ -4,6 +4,10 @@ import type { Options } from 'highcharts';
 
 import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
 import {
+  cardinalOnlyDirectionLabel,
+  COMPASS_LABEL_FONT_FAMILY,
+} from 'winds-mobi-client-web/utils/compass-labels';
+import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
@@ -133,9 +137,14 @@ export default class Polar extends Component<PolarSignature> {
           },
         },
         {
-          // Thumbnail size (e.g. a compact nearby-list row): the N/E/S/W
-          // labels have no room to render legibly, so drop them entirely and
-          // let the polar pane fill almost the whole box as a plain dot scatter.
+          // Thumbnail size (e.g. the last-hour card on a genuinely narrow
+          // phone viewport): the full 8-way N/NE/E/SE/S/SW/W/NW label set has
+          // no room to render legibly, but the 4 cardinal directions still
+          // fit, so keep only those and drop the diagonals. This is a
+          // fallback keyed on the chart's own measured width; a consumer that
+          // is *always* compact by design (e.g. the nearby-list thumbnail)
+          // should pass `@compact` to `WindDirectionGraph` instead of relying
+          // on this to happen to trigger -- see graph.gts.
           condition: {
             maxWidth: 90,
           },
@@ -153,7 +162,12 @@ export default class Polar extends Component<PolarSignature> {
             },
             xAxis: {
               labels: {
-                enabled: false,
+                formatter: function ({ value }: { value: number }) {
+                  return cardinalOnlyDirectionLabel(value);
+                },
+                style: {
+                  fontFamily: COMPASS_LABEL_FONT_FAMILY,
+                },
               },
             },
           },

@@ -244,5 +244,35 @@ module(
         'a synthetic point is added at the center, in the same direction, so the single reading draws as a visible spoke rather than a lone dot on the outer ring'
       );
     });
+
+    // A grid card (e.g. the nearby-list thumbnail) can render wider than
+    // Polar's own maxWidth:90 responsive breakpoint depending on viewport/
+    // column count while still being "the small one" by design intent, so
+    // `@compact` must force cardinal-only labels itself rather than relying
+    // on the chart's actual measured width to cross that threshold.
+    test('it forces cardinal-only labels when @compact is set, regardless of measured width', async function (this: WindDirectionGraphTestContext, assert) {
+      this.data = [];
+
+      await render(hbs`
+        <div class="h-96 w-96">
+          <Station::WindDirection::Graph @data={{this.data}} @compact={{true}} />
+        </div>
+      `);
+
+      const chart = await renderedPolarChart();
+      // The label formatter isn't part of Highcharts' public `XAxisOptions`
+      // type in a directly-callable shape, so read it through a narrow local
+      // shape instead of `any`.
+      const formatter = (
+        chart?.userOptions.xAxis as
+          | { labels?: { formatter?: (ctx: { value: number }) => string } }[]
+          | undefined
+      )?.[0]?.labels?.formatter;
+
+      assert.strictEqual(formatter?.({ value: 0 }), 'N');
+      assert.strictEqual(formatter?.({ value: 90 }), 'E');
+      assert.strictEqual(formatter?.({ value: 45 }), '');
+      assert.strictEqual(formatter?.({ value: 315 }), '');
+    });
   }
 );
