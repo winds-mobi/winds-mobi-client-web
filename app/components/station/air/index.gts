@@ -22,7 +22,7 @@ const StationAir: TOC<StationAirSignature> = <template>
       @keys={{KEYS}}
       as |history|
     >
-      <StationAirContent @history={{history}} />
+      <StationAirContent @history={{history}} @stationId={{@stationId}} />
     </StationHistorySection>
   </section>
 </template>;

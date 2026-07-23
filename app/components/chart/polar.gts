@@ -1,12 +1,12 @@
 import Component from '@glimmer/component';
-import HighCharts from 'ember-highcharts/components/high-charts';
-import type { Options } from 'highcharts';
 
 import { DIRECTIONS } from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
+import renderHighcharts from 'winds-mobi-client-web/modifiers/render-highcharts';
 import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
+import type { NamedSeriesOptions } from 'winds-mobi-client-web/utils/highcharts-lifecycle';
 
 interface PolarChartOptions extends ChartOptions {
   chart?: ChartOptions;
@@ -21,7 +21,7 @@ interface PolarChartOptions extends ChartOptions {
 export interface PolarSignature {
   Args: {
     chartOptions?: PolarChartOptions;
-    chartData?: Options['series'];
+    chartData?: NamedSeriesOptions[];
   };
   Blocks: {
     default: [];
@@ -34,12 +34,14 @@ export default class Polar extends Component<PolarSignature> {
     credits: {
       enabled: false,
     },
-    // ember-highcharts always imports the accessibility module, but its
-    // keyboard-navigation point proxies can throw ("Invalid value for <rect>
-    // attribute y=NaN") on sparse scatter series (e.g. a station that only
-    // reports every 30 minutes may have just one point in the last-hour
-    // window). This chart's data is also available via the metric cards and
-    // tooltips, so the a11y module isn't adding real value here.
+    // No accessibility module is imported at all (see render-highcharts.ts)
+    // -- unlike ember-highcharts, which always imported it, so the crash risk
+    // that used to force this option (keyboard-navigation point proxies
+    // throwing on sparse scatter series) can't happen any more; there's
+    // simply no such code loaded to run. Highcharts still emits an advisory
+    // console warning whenever `accessibility.enabled` isn't set at all and
+    // the module isn't loaded, though, so this stays just to keep that
+    // warning quiet.
     accessibility: {
       enabled: false,
     },
@@ -48,19 +50,6 @@ export default class Polar extends Component<PolarSignature> {
       reflow: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
-      // ember-highcharts updates an existing chart via series.setData()
-      // rather than always destroying/recreating it (e.g. when a station
-      // switch resolves from cache without a loading gap in between).
-      // Highcharts' default point-matching then falls back to raw x value
-      // (wind direction here, a coarse 0-360 value) when it can't match an
-      // incoming point by id, which displaces a point to the wrong position
-      // in the array when two stations' data happen to share a direction
-      // (issue #111 -- the "tangled path" glitch). Disabling this lets
-      // Highcharts always rebuild series data from the given array's own
-      // order instead of trying to reuse/match old points -- measured no
-      // meaningful performance difference at this chart's data volumes
-      // (a handful to a few dozen points, one hour of history).
-      allowMutatingData: false,
     },
     title: {
       text: undefined,
@@ -175,10 +164,10 @@ export default class Polar extends Component<PolarSignature> {
   }
 
   <template>
-    <HighCharts
+    <div
+      class="chart-container"
       ...attributes
-      @content={{@chartData}}
-      @chartOptions={{this.mergedChartOptions}}
-    />
+      {{renderHighcharts "chart" this.mergedChartOptions @chartData}}
+    ></div>
   </template>
 }

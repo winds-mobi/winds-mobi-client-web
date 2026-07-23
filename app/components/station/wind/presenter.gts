@@ -11,6 +11,7 @@ import {
 export interface StationWindContentSignature {
   Args: {
     history: History[];
+    stationId: string;
   };
   Blocks: {
     default: [];
@@ -64,6 +65,7 @@ export default class StationWindContent extends Component<StationWindContentSign
 
   <template>
     <TimeSeries
+      @stationId={{@stationId}}
       @chartOptions={{this.chartOptions}}
       @chartData={{this.chartData}}
     />

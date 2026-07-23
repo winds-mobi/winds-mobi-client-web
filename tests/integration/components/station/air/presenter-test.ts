@@ -44,7 +44,9 @@ module('Integration | Component | station/air/presenter', function (hooks) {
       },
     ];
 
-    await render(hbs`<Station::Air::Presenter @history={{this.history}} />`);
+    await render(
+      hbs`<Station::Air::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+    );
 
     assert.dom('.highcharts-container').exists();
   });
@@ -52,7 +54,9 @@ module('Integration | Component | station/air/presenter', function (hooks) {
   test('it renders the chart when there is no history', async function (this: AirPresenterTestContext, assert) {
     this.history = [];
 
-    await render(hbs`<Station::Air::Presenter @history={{this.history}} />`);
+    await render(
+      hbs`<Station::Air::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+    );
 
     assert.dom('.highcharts-container').exists();
   });

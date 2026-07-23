@@ -11,6 +11,7 @@ import {
 export interface StationAirContentSignature {
   Args: {
     history: History[];
+    stationId: string;
   };
   Blocks: {
     default: [];
@@ -79,6 +80,7 @@ export default class StationAirContent extends Component<StationAirContentSignat
 
   <template>
     <TimeSeries
+      @stationId={{@stationId}}
       @chartData={{this.chartData}}
       @chartOptions={{this.chartOptions}}
     />

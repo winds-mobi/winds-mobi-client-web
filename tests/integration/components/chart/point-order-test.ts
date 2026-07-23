@@ -131,7 +131,7 @@ module('Integration | Chart | point order', function (hooks) {
 
     await render(hbs`
       <div class="h-64 w-64">
-        <Station::Wind::Presenter @history={{this.data}} />
+        <Station::Wind::Presenter @history={{this.data}} @stationId="holfuy-1829" />
       </div>
     `);
 
@@ -152,10 +152,10 @@ module('Integration | Chart | point order', function (hooks) {
 
   // Root cause of issue #111, confirmed by a real browser repro (search for
   // and click between two stations, reading the rendered SVG before/after):
-  // ember-highcharts updates an existing chart in place via Highcharts'
-  // `series.setData()` rather than always destroying/recreating it, and
-  // Highcharts' default point-matching falls back to raw x value (wind
-  // direction here, a coarse 0-360 value) whenever it can't match an
+  // the chart-rendering code updates an existing chart in place via
+  // Highcharts' `series.setData()` rather than always destroying/recreating
+  // it, and Highcharts' default point-matching falls back to raw x value
+  // (wind direction here, a coarse 0-360 value) whenever it can't match an
   // incoming point by id. On a *fresh* fetch (cache miss, as simulated by
   // FakeStoreService below), StationHistorySection gets a genuinely new
   // Future and `<Request>` tears its content block down -- so this
@@ -261,8 +261,10 @@ module('Integration | Chart | point order', function (hooks) {
   // <Request>'s content block in the real app (confirmed against the real
   // running app: the chart's DOM node was reused across a station revisit,
   // and one point was displaced to the end of the array). The fix is
-  // `chart.allowMutatingData: false` in chart/polar.gts, which stops
-  // Highcharts from trying to match/reuse old points at all -- it always
+  // `updateChart` (app/utils/highcharts-lifecycle.ts, used by
+  // render-highcharts.ts) always calling `series.setData(data, false,
+  // false, false)` -- that last `false` is `updatePoints`, which stops
+  // Highcharts from trying to match/reuse old points at all; it always
   // rebuilds series data from the given array's own order instead.
   test('swapping @data on the same WindDirectionGraph instance still renders station order correctly', async function (this: Ctx, assert) {
     const stationA: History[] = [

@@ -41,6 +41,7 @@
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^4.0.1",
     "@ember/test-helpers": "^5.4.3",
+    "@ember/test-waiters": "^4.1.2",
     "@embroider/compat": "^4.0.3",
     "@embroider/config-meta-loader": "^1.0.0",
     "@embroider/core": "^4.0.3",
@@ -78,7 +79,6 @@
     "ember-cli-deprecation-workflow": "^3.3.0",
     "ember-cli-htmlbars": "^6.3.0",
     "ember-concurrency": "^4.0.2",
-    "ember-highcharts": "^7.0.0",
     "ember-intl": "^8.2.1",
     "ember-load-initializers": "^3.0.1",
     "ember-maplibre-gl": "^0.6.2",
@@ -143,7 +143,7 @@
     "@warp-drive/legacy": "5.8.0",
     "@warp-drive/schema-record": "5.8.0",
     "@warp-drive/utilities": "5.8.0",
-    "highcharts": "12.5.0",
+    "highcharts": "13.0.0",
     "sharp": "^0.34.1"
   }
 }

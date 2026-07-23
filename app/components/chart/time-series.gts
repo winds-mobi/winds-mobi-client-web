@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
-import HighCharts from 'ember-highcharts/components/high-charts';
+import renderHighcharts from 'winds-mobi-client-web/modifiers/render-highcharts';
 import {
   mergeChartOptions,
   type ChartOptions,
@@ -18,6 +18,7 @@ interface TimeSeriesChartOptions extends ChartOptions {
 
 export interface TimeSeriesSignature {
   Args: {
+    stationId: string;
     chartOptions?: TimeSeriesChartOptions;
     chartData?: TimeSeriesSeries[];
   };
@@ -27,7 +28,13 @@ export interface TimeSeriesSignature {
   Element: null;
 }
 
+// The "6h" button -- see `rangeSelector.buttons` below. Shared with the
+// `renderHighcharts` modifier invocation so the two can't silently drift
+// apart.
+const DEFAULT_RANGE_SELECTOR_INDEX = 4;
+
 interface TimeSeriesSeries extends ChartOptions {
+  name: string;
   data: TimeSeriesPoint[];
 }
 
@@ -39,12 +46,14 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     credits: {
       enabled: false,
     },
-    // ember-highcharts always imports the accessibility module, but its
-    // keyboard-navigation point proxies can throw ("Invalid value for <rect>
-    // attribute y=NaN") on series with null/gap points (see
-    // utils/chart-series.ts, which intentionally emits null for missing
-    // readings). This chart's data is also available via the metric cards
-    // and tooltips, so the a11y module isn't adding real value here.
+    // No accessibility module is imported at all (see render-highcharts.ts)
+    // -- unlike ember-highcharts, which always imported it, so the crash risk
+    // that used to force this option (keyboard-navigation point proxies
+    // throwing on null/gap points, see utils/chart-series.ts) can't happen
+    // any more; there's simply no such code loaded to run. Highcharts still
+    // emits an advisory console warning whenever `accessibility.enabled`
+    // isn't set at all and the module isn't loaded, though, so this stays
+    // just to keep that warning quiet.
     accessibility: {
       enabled: false,
     },
@@ -54,19 +63,6 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       spacingLeft: 0,
       spacingRight: 0,
       type: 'spline',
-      // ember-highcharts updates an existing chart via series.setData()
-      // rather than always destroying/recreating it (e.g. when a station
-      // switch resolves from cache without a loading gap in between, see
-      // wind-direction/graph.gts). Highcharts' default point-matching then
-      // falls back to raw x value (timestamp here) when it can't match an
-      // incoming point by id, which can displace a point to the wrong
-      // position in the array if a timestamp coincidentally collides
-      // between two stations' data (issue #111). Disabling this lets
-      // Highcharts always rebuild series data from the given array's own
-      // order instead of trying to reuse/match old points -- measured no
-      // meaningful performance difference at this app's data volumes
-      // (~1500 points for the longest, 5-day chart).
-      allowMutatingData: false,
       panning: {
         enabled: true,
         type: 'x',
@@ -114,7 +110,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
           fontWeight: '600',
         },
       },
-      selected: 4,
+      selected: DEFAULT_RANGE_SELECTOR_INDEX,
       labelStyle: {
         fontSize: '12px',
       },
@@ -217,10 +213,15 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
   }
 
   <template>
-    <HighCharts
-      @mode="StockChart"
-      @content={{@chartData}}
-      @chartOptions={{this.mergedChartOptions}}
-    />
+    <div
+      class="chart-container"
+      {{renderHighcharts
+        "stockChart"
+        this.mergedChartOptions
+        @chartData
+        stationId=@stationId
+        defaultRangeSelectorIndex=DEFAULT_RANGE_SELECTOR_INDEX
+      }}
+    ></div>
   </template>
 }
