@@ -57,7 +57,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
         aria-label={{t "settings.refreshButtonSpin.tryIt"}}
         @appearance="outlined"
         @onPress={{this.handlePress}}
-        class="flex h-12 w-12 items-center justify-center p-0"
+        class="flex! h-12 w-12 items-center justify-center p-0!"
       >
         {{! template-lint-disable no-inline-styles }}
         <span
