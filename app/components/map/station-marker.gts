@@ -95,9 +95,19 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   // override to win regardless: without it, the theme's own `rounded-sm`/
   // default-size padding non-deterministically fight this button's own
   // `rounded-full`/`p-1`.
+  //
+  // The button's own box (h-16, a sane click target) is deliberately smaller
+  // than the svg it wraps (h-24, the arrow's natural drawn size) -- the svg
+  // overflows past it (see its own `overflow-visible`), so the arrow always
+  // renders at one true size regardless of the click target's size. `flex!
+  // items-center justify-center` centres that overflow evenly on all sides;
+  // `!` forces it over Frontile's own base `inline-block` (verified in
+  // `@frontile/theme`'s `baseButton`), which otherwise wins the `display`
+  // property by source order (same unmerged-class gotcha as elsewhere in
+  // this file) and leaves the svg anchored top-left instead of centred.
   get buttonClass() {
     const base =
-      'block cursor-pointer rounded-full! p-1! transition focus:outline-none';
+      'flex! h-16 w-16 cursor-pointer items-center justify-center rounded-full! p-1! transition focus:outline-none';
 
     // Selected: a grey disc + ring hugging the arrow so it stands out without
     // spilling into neighbouring markers' clickable area.
@@ -122,9 +132,13 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       @onPress={{this.handleSelect}}
       class={{this.buttonClass}}
     >
+      {{! pointer-events-none: the svg is purely decorative (already
+        aria-hidden), so its overflow past the button's own smaller h-16 box
+        never intercepts clicks -- they fall through to whatever's actually
+        under the cursor (the map, or a neighbouring marker). }}
       <svg
         aria-hidden="true"
-        class="h-24 w-24 overflow-visible"
+        class="pointer-events-none h-24 w-24 overflow-visible"
         viewBox={{this.viewBox}}
       >
         <g transform={{this.markerTransform}}>
