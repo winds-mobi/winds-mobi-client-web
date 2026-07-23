@@ -1,3 +1,4 @@
+import { tracked } from '@glimmer/tracking';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import type RouterService from '@ember/routing/router-service';
 
@@ -167,4 +168,47 @@ export function stableMapView(
   next: MapView
 ): MapView {
   return previous && mapViewsEqual(previous, next) ? previous : next;
+}
+
+// The two coordinates most map-init/fly-to option objects need, in the
+// [lng, lat] tuple order MapLibre itself expects.
+export function mapViewCenter(view: MapView): [number, number] {
+  return [view.longitude, view.latitude];
+}
+
+// Tracks the routed `MapView` with a reference that stays stable across
+// transitions that don't actually change it, for consumers (e.g. a `@cached`
+// getter feeding a declarative `<map.call @func="flyTo">`) that need to key
+// off "did the routed view change" rather than "did any transition happen"
+// (issue #131) -- `router.currentRoute` gets a brand new identity on *every*
+// transition, even one that deliberately leaves the map's own query params
+// untouched (selecting a different station).
+//
+// `sync` must be called from somewhere other than `current`'s own read (a
+// modifier hooked to the router's `routeDidChange`, not the getter itself):
+// Ember's `@tracked` has no built-in bail-out for a reference-equal
+// reassignment -- re-setting a tracked property to its own value is actually
+// a documented technique for *forcing* a recompute, the opposite of what's
+// needed here. `sync` only assigns when `stableMapView` hands back a
+// genuinely different reference, so an unrelated transition never dirties
+// anything downstream.
+export class TrackedMapView {
+  @tracked private lastView?: MapView;
+  private router: RouterService;
+
+  constructor(router: RouterService) {
+    this.router = router;
+  }
+
+  get current(): MapView {
+    return this.lastView ?? currentMapView(this.router);
+  }
+
+  sync = (): void => {
+    const next = stableMapView(this.lastView, currentMapView(this.router));
+
+    if (next !== this.lastView) {
+      this.lastView = next;
+    }
+  };
 }

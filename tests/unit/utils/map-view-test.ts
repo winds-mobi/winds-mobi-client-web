@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
-import { cached, tracked } from '@glimmer/tracking';
+import { cached } from '@glimmer/tracking';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
+import type RouterService from '@ember/routing/router-service';
 import {
   DEFAULT_MAP_LAT,
   DEFAULT_MAP_LNG,
@@ -12,7 +13,24 @@ import {
   parseMapView,
   roundBoundsForRequest,
   stableMapView,
+  TrackedMapView,
 } from 'winds-mobi-client-web/utils/map-view';
+
+// `RouterService['currentRoute']['queryParams']` is a read-only real Ember
+// type, so this keeps the mutable state behind a plain, loosely-typed object
+// and only exposes the strictly-typed cast for reading -- `setQueryParams`
+// mutates the same object the cast points at, simulating a route transition
+// without ever needing to write through `RouterService`'s own types.
+function fakeRouter(queryParams: Record<string, unknown>) {
+  const state = { currentRoute: { queryParams } };
+
+  return {
+    router: state as unknown as RouterService,
+    setQueryParams: (next: Record<string, unknown>) => {
+      state.currentRoute = { queryParams: next };
+    },
+  };
+}
 
 module('Unit | Utility | map-view', function () {
   test('it parses defaults and numeric query params', function (assert) {
@@ -159,75 +177,83 @@ module('Unit | Utility | map-view', function () {
     assert.strictEqual(stableMapView(undefined, next), next);
   });
 
-  // The bug this guards against isn't in `stableMapView` itself (it always
-  // returned the right reference) -- it's that a *caller* which unconditionally
-  // assigns `stableMapView`'s result back to a `@tracked` property still
-  // invalidates that property's consumers even when the assigned value is
-  // reference-equal. Ember's `@tracked` has no built-in bail-out for a
-  // reference-equal reassignment -- re-setting a tracked property to its own
-  // value is actually a documented technique for *forcing* a recompute, the
-  // opposite of what's needed here. The first attempt at fixing issue #131
-  // did exactly this (always wrote `this.lastMapView = stableMapView(...)`),
-  // which silently kept `flyToOptions` recomputing on every station switch,
-  // same as before the fix. The real fix skips the assignment entirely when
-  // `stableMapView` returns the same reference -- this test exercises that
-  // exact caller pattern (not just the pure function) via a plain tracked
-  // class, using `@cached`'s own recompute-counting to prove it, without
-  // needing a component, rendering, or MapLibre/WebGL at all.
-  test('a caller that skips the assignment when stableMapView returns the same reference avoids downstream recomputation', function (assert) {
-    class Probe {
-      @tracked mapView = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+  // issue #131: the actual bug wasn't in `stableMapView` (it always returned
+  // the right reference) -- it was that the map component's first fix attempt
+  // unconditionally assigned `stableMapView`'s result back to a `@tracked`
+  // property on every route change. Ember's `@tracked` has no built-in
+  // bail-out for a reference-equal reassignment -- re-setting a tracked
+  // property to its own value is actually a documented technique for
+  // *forcing* a recompute, the opposite of what's needed here -- so a
+  // downstream `@cached` consumer (the map's `flyToOptions`) kept recomputing
+  // on every station switch, silently undoing the fix. This exercises
+  // `TrackedMapView` (the real class the map component uses) end-to-end
+  // against a `@cached` consumer, using its own recompute count as proof,
+  // without needing a component, rendering, or MapLibre/WebGL at all.
+  test('TrackedMapView keeps a downstream @cached consumer from recomputing across a transition that leaves the view unchanged', function (assert) {
+    class Consumer {
+      trackedMapView: TrackedMapView;
       recomputeCount = 0;
+
+      constructor(router: RouterService) {
+        this.trackedMapView = new TrackedMapView(router);
+      }
 
       @cached
       get flyToOptions() {
         this.recomputeCount++;
-        return { center: [this.mapView.longitude, this.mapView.latitude] };
-      }
-
-      updateGuarded(next: typeof this.mapView) {
-        const stable = stableMapView(this.mapView, next);
-
-        if (stable !== this.mapView) {
-          this.mapView = stable;
-        }
-      }
-
-      updateUnguarded(next: typeof this.mapView) {
-        this.mapView = stableMapView(this.mapView, next);
+        const view = this.trackedMapView.current;
+        return { center: [view.longitude, view.latitude], zoom: view.zoom };
       }
     }
 
-    const guarded = new Probe();
-    void guarded.flyToOptions;
-    assert.strictEqual(guarded.recomputeCount, 1, 'initial read computes once');
-
-    guarded.updateGuarded({
+    const { router, setQueryParams } = fakeRouter({
       longitude: 8.12345,
       latitude: 46.76543,
       zoom: 9.88,
     });
-    void guarded.flyToOptions;
+    const consumer = new Consumer(router);
+
+    void consumer.flyToOptions;
     assert.strictEqual(
-      guarded.recomputeCount,
+      consumer.recomputeCount,
       1,
-      'guarded update with a value-equal view does not trigger a recompute'
+      'initial read computes once, live off the router since nothing has synced yet'
     );
 
-    const unguarded = new Probe();
-    void unguarded.flyToOptions;
-    assert.strictEqual(unguarded.recomputeCount, 1);
-
-    unguarded.updateUnguarded({
-      longitude: 8.12345,
-      latitude: 46.76543,
-      zoom: 9.88,
-    });
-    void unguarded.flyToOptions;
+    // The *first* sync establishes `lastView` from nothing, which is a
+    // genuine change and is expected to dirty the one recompute below --
+    // this isn't the case the fix guards, just the baseline before it.
+    consumer.trackedMapView.sync();
+    void consumer.flyToOptions;
     assert.strictEqual(
-      unguarded.recomputeCount,
+      consumer.recomputeCount,
       2,
-      'unconditionally re-assigning even a value-equal reference still dirties the tracked property and forces a recompute -- this is the exact regression the guard in handleRouteChange prevents'
+      'the first sync legitimately establishes a value and recomputes once'
+    );
+
+    // Simulate a *second* transition that leaves the routed view unchanged
+    // (e.g. selecting a different station, which deliberately omits query
+    // params). `router.currentRoute` would be a brand new object in real
+    // Ember, but `currentMapView`/`parseMapView` already construct a fresh
+    // `MapView` object on every call regardless of that, so the fake
+    // router's `queryParams` reference doesn't need to change to reproduce
+    // it -- this is the actual case the fix guards.
+    consumer.trackedMapView.sync();
+    void consumer.flyToOptions;
+    assert.strictEqual(
+      consumer.recomputeCount,
+      2,
+      'a subsequent transition that does not change the routed view does not trigger a downstream recompute'
+    );
+
+    // Now a transition that actually changes the routed view.
+    setQueryParams({ longitude: 8.5, latitude: 46.76543, zoom: 9.88 });
+    consumer.trackedMapView.sync();
+    void consumer.flyToOptions;
+    assert.strictEqual(
+      consumer.recomputeCount,
+      3,
+      'a transition that changes the routed view does trigger a downstream recompute'
     );
   });
 });

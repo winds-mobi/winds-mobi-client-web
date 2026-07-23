@@ -13,11 +13,7 @@ import { cached, tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
-import type {
-  Map as MaplibreMap,
-  MapInitOptions,
-  StyleSpecification,
-} from 'ember-maplibre-gl';
+import type { Map as MaplibreMap, MapInitOptions } from 'ember-maplibre-gl';
 import { NavigationControl, TerrainControl } from 'maplibre-gl';
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
@@ -34,16 +30,19 @@ import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-lo
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import { requestAndFly } from 'winds-mobi-client-web/utils/locate';
 import {
+  OSM_SWISS_STYLE,
+  TEST_MAP_STYLE,
+} from 'winds-mobi-client-web/utils/map-style';
+import {
   boundsFromMap,
   roundBoundsForRequest,
   mapBoundsEqual,
-  currentMapView,
+  mapViewCenter,
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
-  stableMapView,
+  TrackedMapView,
   type MapBounds,
-  type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
@@ -53,52 +52,6 @@ export interface MapSignature {
   };
   Element: null;
 }
-
-const OSM_SWISS_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osmswissstyle: {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxzoom: 19,
-      tiles: ['https://tile.osm.ch/switzerland/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      type: 'raster',
-    },
-    terrainSource: {
-      type: 'raster-dem',
-      attribution: '© Mapzen terrain tiles',
-      encoding: 'terrarium',
-      maxzoom: 15,
-      tiles: [
-        'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      ],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'osmswissstyle',
-      source: 'osmswissstyle',
-      type: 'raster',
-    },
-  ],
-  sky: {},
-};
-
-const TEST_MAP_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {},
-  layers: [
-    {
-      id: 'background',
-      type: 'background',
-      paint: {
-        'background-color': '#f1f5f9',
-      },
-    },
-  ],
-};
 
 export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
@@ -118,43 +71,25 @@ export default class Map extends Component<MapSignature> {
           exaggeration: 1,
         });
 
-  // Value-stable across transitions: `router.currentRoute` gets a brand new
-  // identity on *every* transition, even one that doesn't touch the map's own
-  // query params (e.g. selecting a different station, which deliberately
-  // omits them -- see `stationSelected`). Reading it directly would make
-  // `mapView` return a fresh object each time regardless of whether the
-  // parsed view actually changed, and since `flyToOptions` below depends on
-  // it, that fresh identity alone was enough to re-trigger the declarative
-  // `flyTo` on every single station switch (issue #131) -- normally an
-  // invisible no-op since the target already matches the camera, but visibly
-  // wrong whenever something else had moved the camera in between.
-  //
-  // `handleRouteChange` (below, run from the `onRouteChange` modifier on
-  // `routeDidChange`, not from this getter) is what actually replaces
-  // `lastMapView` -- and only when the newly parsed view differs by value --
-  // so a getter stays a pure read and `flyToOptions`'s own `@cached` sees a
-  // stable dependency across transitions that don't change the routed view.
-  @tracked private lastMapView?: MapView;
+  // See `TrackedMapView` for why this needs to be more than `currentMapView(this.router)`
+  // read directly (issue #131). `handleRouteChange`, wired to the `onRouteChange`
+  // modifier below, is what keeps it in sync with the router. A `@cached` getter
+  // rather than a field initializer, so it's constructed lazily on first access —
+  // `@service` fields use `declare` and have no real instance initializer of their
+  // own, so reading `this.router` eagerly in a field initializer runs into it
+  // "not yet initialized" as far as TypeScript's control-flow analysis can tell.
+  @cached
+  get trackedMapView(): TrackedMapView {
+    return new TrackedMapView(this.router);
+  }
 
-  get mapView(): MapView {
-    return this.lastMapView ?? currentMapView(this.router);
+  get mapView() {
+    return this.trackedMapView.current;
   }
 
   @action
   handleRouteChange() {
-    const next = stableMapView(this.lastMapView, currentMapView(this.router));
-
-    // `stableMapView` returning the *same* reference means nothing changed --
-    // skip the assignment entirely rather than writing it back. Ember's
-    // `@tracked` has no built-in bail-out for a reference-equal reassignment
-    // (re-setting a tracked property to its own value is actually a
-    // documented technique for *forcing* a dirty/recompute); an unconditional
-    // `this.lastMapView = next` here would still invalidate `mapView` and
-    // `flyToOptions` on every transition, silently undoing the whole point of
-    // this indirection.
-    if (next !== this.lastMapView) {
-      this.lastMapView = next;
-    }
+    this.trackedMapView.sync();
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).
@@ -256,10 +191,7 @@ export default class Map extends Component<MapSignature> {
     return {
       attributionControl: { compact: true },
       bearing: 0,
-      center: [this.mapView.longitude, this.mapView.latitude] as [
-        number,
-        number,
-      ],
+      center: mapViewCenter(this.mapView),
       dragRotate: true,
       maxPitch: 85,
       pitch: 0,
@@ -374,10 +306,7 @@ export default class Map extends Component<MapSignature> {
   @cached
   get flyToOptions() {
     return {
-      center: [this.mapView.longitude, this.mapView.latitude] as [
-        number,
-        number,
-      ],
+      center: mapViewCenter(this.mapView),
       zoom: this.mapView.zoom,
     };
   }
