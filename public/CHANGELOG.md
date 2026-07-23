@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.4 - 2026-07-24
+
 ### Fixed
 
 - Fixed the wind/air and wind-direction charts sometimes rendering in a dark palette when your device's browser or OS is set to dark mode. They're always meant to match the rest of the app's light UI.
