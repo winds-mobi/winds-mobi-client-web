@@ -27,6 +27,7 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
@@ -40,7 +41,9 @@ import {
   mapViewsEqual,
   mapViewFromMap,
   parseMapView,
+  stableMapView,
   type MapBounds,
+  type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
 
 export interface MapSignature {
@@ -115,8 +118,34 @@ export default class Map extends Component<MapSignature> {
           exaggeration: 1,
         });
 
-  get mapView() {
-    return currentMapView(this.router);
+  // Value-stable across transitions: `router.currentRoute` gets a brand new
+  // identity on *every* transition, even one that doesn't touch the map's own
+  // query params (e.g. selecting a different station, which deliberately
+  // omits them -- see `stationSelected`). Reading it directly would make
+  // `mapView` return a fresh object each time regardless of whether the
+  // parsed view actually changed, and since `flyToOptions` below depends on
+  // it, that fresh identity alone was enough to re-trigger the declarative
+  // `flyTo` on every single station switch (issue #131) -- normally an
+  // invisible no-op since the target already matches the camera, but visibly
+  // wrong whenever something else had moved the camera in between.
+  //
+  // `handleRouteChange` (below, run from the `onRouteChange` modifier on
+  // `routeDidChange`, not from this getter) is what actually replaces
+  // `lastMapView` -- and only when the newly parsed view differs by value --
+  // so a getter stays a pure read and `flyToOptions`'s own `@cached` sees a
+  // stable dependency across transitions that don't change the routed view.
+  @tracked private lastMapView?: MapView;
+
+  get mapView(): MapView {
+    return this.lastMapView ?? currentMapView(this.router);
+  }
+
+  @action
+  handleRouteChange() {
+    this.lastMapView = stableMapView(
+      this.lastMapView,
+      currentMapView(this.router)
+    );
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).
@@ -348,6 +377,7 @@ export default class Map extends Component<MapSignature> {
     <div
       data-test-map-container
       class="relative h-full w-full"
+      {{onRouteChange this.router this.handleRouteChange}}
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
     >

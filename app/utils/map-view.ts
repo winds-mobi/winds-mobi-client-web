@@ -150,3 +150,21 @@ export function mapViewsEqual(left: MapView, right: MapView) {
     left.zoom === right.zoom
   );
 }
+
+// Keeps the previous `MapView` reference when the newly parsed one is
+// value-equal, rather than handing back `next` unconditionally. This matters
+// because `router.currentRoute` (what `currentMapView` reads) gets a brand
+// new identity on *every* transition, even one that doesn't touch the map's
+// own query params (e.g. selecting a different station, which deliberately
+// leaves them untouched -- see `stationSelected` in map/index.gts). A
+// `@cached` getter downstream (`flyToOptions`) that depends on the *value*
+// of the routed view, not on how many transitions have happened, needs a
+// stable reference to key off of -- without this, it recomputes (and the
+// declarative `<map.call @func="flyTo">` re-fires) on every single station
+// switch, not just ones that actually change the routed view (issue #131).
+export function stableMapView(
+  previous: MapView | undefined,
+  next: MapView
+): MapView {
+  return previous && mapViewsEqual(previous, next) ? previous : next;
+}

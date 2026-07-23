@@ -10,6 +10,7 @@ import {
   mapViewsEqual,
   parseMapView,
   roundBoundsForRequest,
+  stableMapView,
 } from 'winds-mobi-client-web/utils/map-view';
 
 module('Unit | Utility | map-view', function () {
@@ -119,5 +120,41 @@ module('Unit | Utility | map-view', function () {
       mapBoundsEqual(a, b),
       'tiny pans round to the same request bounds, so they do not refetch'
     );
+  });
+
+  // issue #131: `router.currentRoute` (what `currentMapView` reads) gets a
+  // brand new identity on every transition, even one that leaves the map's
+  // own query params untouched (e.g. selecting a different station). A
+  // `@cached` getter downstream that depends on the *value* of the routed
+  // view needs `stableMapView` to keep returning the same reference across
+  // those transitions, otherwise it recomputes -- and the declarative
+  // `<map.call @func="flyTo">` it feeds re-fires -- on every station switch,
+  // not just ones that actually change the routed view.
+  test('stableMapView keeps the previous reference when the new view is value-equal', function (assert) {
+    const previous = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+    const next = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+
+    assert.strictEqual(
+      stableMapView(previous, next),
+      previous,
+      'a value-equal but referentially distinct view resolves to the same reference'
+    );
+  });
+
+  test('stableMapView adopts the new view when it actually differs', function (assert) {
+    const previous = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+    const next = { longitude: 8.5, latitude: 46.76543, zoom: 9.88 };
+
+    assert.strictEqual(
+      stableMapView(previous, next),
+      next,
+      'a genuinely different view is adopted'
+    );
+  });
+
+  test('stableMapView adopts the new view when there is no previous one', function (assert) {
+    const next = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+
+    assert.strictEqual(stableMapView(undefined, next), next);
   });
 });
