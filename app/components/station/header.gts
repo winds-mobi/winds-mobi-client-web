@@ -68,7 +68,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           aria-pressed={{if this.isFavorite "true" "false"}}
           data-test-station-favorite
           @appearance="minimal"
-          @size="sm"
+          @size="xs"
           @onPress={{this.handleToggleFavorite}}
         >
           <Heart
