@@ -6,6 +6,7 @@
 
 - Fixed the on-map wind arrows rotating around a point that didn't line up with their visual center, causing the arrow's silhouette to shift unevenly within its frame as it turned to different wind directions.
 - Fixed the selected-marker ring on the map looking oversized around its wind arrow. The ring is now sized to frame the arrow closely, and shrinks together with it as a station's reading gets older or you zoom out, instead of staying a fixed size around a shrinking arrow.
+- Fixed the wind and air graphs sometimes opening zoomed out to show all of their history instead of the intended default 6-hour view, most noticeably when switching between stations in the sidebar.
 
 ## v0.19.2 - 2026-07-23
 

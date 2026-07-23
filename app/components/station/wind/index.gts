@@ -22,7 +22,7 @@ const StationWind: TOC<StationWindSignature> = <template>
       @keys={{KEYS}}
       as |history|
     >
-      <StationWindContent @history={{history}} />
+      <StationWindContent @history={{history}} @stationId={{@stationId}} />
     </StationHistorySection>
   </section>
 </template>;

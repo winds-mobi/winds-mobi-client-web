@@ -25,8 +25,8 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   // `@cached` keeps `chartOptions`/`points`/`chartData` returning the *same*
   // object/array references across the repeated autotracked reads Glimmer's
   // render pipeline performs in a single render pass. Without it, each read
-  // built a fresh object, which made `ember-highcharts` see "changed" args on
-  // every access and re-init/update the underlying chart mid-render -- the
+  // built a fresh object, which made `render-highcharts`'s modifier see
+  // "changed" args on every access and re-run its update mid-render -- the
   // root cause of this component's flaky marker-rendering (see TODO.md).
 
   // The radial window spans exactly the given data's own oldest-to-newest
@@ -190,7 +190,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
 
   <template>
     <Polar
-      class="h-full min-h-0 min-w-0 w-full [&_.chart-container]:h-full [&_.chart-container]:min-h-0 [&_.chart-container]:w-full"
+      class="h-full min-h-0 min-w-0 w-full"
       @chartData={{this.chartData}}
       @chartOptions={{this.chartOptions}}
     />

@@ -28,7 +28,9 @@ module('Integration | Component | chart/time-series', function (hooks) {
       },
     ];
 
-    await render(hbs`<Chart::TimeSeries @chartData={{this.chartData}} />`);
+    await render(
+      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+    );
 
     assert.dom('.highcharts-container').exists();
   });
@@ -36,7 +38,9 @@ module('Integration | Component | chart/time-series', function (hooks) {
   test('it renders with no series data', async function (this: TimeSeriesTestContext, assert) {
     this.chartData = [];
 
-    await render(hbs`<Chart::TimeSeries @chartData={{this.chartData}} />`);
+    await render(
+      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+    );
 
     assert.dom('.highcharts-container').exists();
   });

@@ -11,8 +11,8 @@ view backed by geolocation, and search.
 
 Stack: Ember 6 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive / EmberData
 5.8 (schema-record reactive store), Frontile components, Tailwind CSS v4, ember-intl, ember-concurrency,
-ember-maplibre-gl, ember-highcharts. Package manager is **pnpm** (pinned via `packageManager`); Node is
-pinned in `engines`.
+ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers, no wrapper addon — see
+Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is pinned in `engines`.
 
 ## Authoritative external references
 
@@ -257,29 +257,49 @@ obvious from the decorator call site:
 
 ### Highcharts
 
-- Treat `highcharts` as a real, current app dependency (not a transitive peer). If wind/air stock-chart range-selector
-  buttons break, suspect a Highcharts module/version mismatch first and prefer upgrading `highcharts`/`ember-highcharts`
-  over app-side loading workarounds.
-- Both chart wrappers ([chart/polar.gts](app/components/chart/polar.gts),
-  [chart/time-series.gts](app/components/chart/time-series.gts)) set `chart.allowMutatingData: false`. This isn't a
-  perf knob we tuned — it's the fix for issue #111 ("glitches with wind direction history"), and removing it
-  reintroduces a real bug: `ember-highcharts` updates an existing chart via `series.setData()` rather than always
-  destroying/recreating it (confirmed: a station switch that resolves from Warp Drive's cache without a `:loading`
-  gap reuses the same chart instance/DOM node — verified live against the real app by tagging the rendered
-  `.highcharts-container` node across a station-A → station-B → station-A-revisit sequence). Highcharts' default
-  point-matching then falls back to raw x value when it can't match an incoming point by id, and for the polar
-  chart that's wind direction — a coarse 0-360 value that collides constantly, both across two different stations'
-  data and within one station's own sliding-window refresh (a reading that just expired and a brand-new reading can
-  share a direction by coincidence). The mismatch displaces one point to the wrong position in the array — every
-  value stays individually correct, but the connecting line's draw order doesn't, which is what actually reads as
-  a "tangled path." Two earlier fix attempts were tried and abandoned once this was found: giving each point an
-  explicit Highcharts `id` (doesn't help — a never-seen id still falls through to the x-value fallback) and keying
-  the chart's render on `@stationId` via `{{#each (array @stationId)}}` to force a teardown on station switches
-  (works for that one case, but not for the same-station sliding-window case, since the key doesn't change then).
-  `allowMutatingData: false` fixes both by disabling point-reuse entirely — Highcharts always rebuilds series data
-  from the given array's own order. Measured no meaningful performance difference at this app's data volumes (a
-  few dozen points for the polar chart, up to ~1500 for the 5-day wind/air charts) — the docs' "might decrease
-  performance" warning is written for far larger datasets than this app ever renders.
+- **No `ember-highcharts`.** Both chart wrappers ([chart/polar.gts](app/components/chart/polar.gts),
+  [chart/time-series.gts](app/components/chart/time-series.gts)) drive real Highcharts directly through one shared
+  class-based modifier ([modifiers/render-highcharts.ts](app/modifiers/render-highcharts.ts), invoked with a
+  `"chart"`/`"stockChart"` kind), which itself uses a create/update helper
+  ([utils/highcharts-lifecycle.ts](app/utils/highcharts-lifecycle.ts)). This replaced the addon (previously the only
+  Ember-specific Highcharts wrapper that existed) after tracing a real bug (issue #137, see below) to a piece of its
+  own update logic that had gone unrevisited since 2016 and had no open upstream issue covering it — owning the
+  update path ourselves both fixed that root cause and let the app move straight onto the current Highcharts major
+  (`highcharts` is a real, current, direct app dependency, not a transitive peer). Only the exact modules this app
+  actually uses are imported, each as its own dynamically-`import()`ed chunk wrapped in `@ember/test-waiters`'
+  `waitForPromise` (so test helpers' `await settled()` waits for chart creation): `highcharts/modules/stock` for the
+  wind/air stock charts, `highcharts/highcharts-more` for the polar wind-direction chart's pane/radial-axis support.
+  Deliberately not imported: the accessibility module (ember-highcharts always loaded it; this app disables
+  accessibility on every chart anyway, see each component's `accessibility: { enabled: false }` and its comment).
+- **Series updates never let Highcharts match old points to new ones.** `updateChart` (in
+  utils/highcharts-lifecycle.ts) always calls `series.setData(data, false, false, false)` — that last `false` is
+  `updatePoints`, Highcharts' own point-matching-for-animation feature, off unconditionally. This is the fix for
+  issue #111 ("glitches with wind direction history"): a station switch that resolves from Warp Drive's cache
+  without a `:loading` gap reuses the same chart instance/DOM node (confirmed live against the real app by tagging
+  the rendered `.highcharts-container` node across a station-A → station-B → station-A-revisit sequence), and
+  Highcharts' default point-matching falls back to raw x value when it can't match an incoming point by id — for
+  the polar chart that's wind direction, a coarse 0-360 value that collides constantly, both across two different
+  stations' data and within one station's own sliding-window refresh (a reading that just expired and a brand-new
+  reading can share a direction by coincidence). The mismatch displaces one point to the wrong position in the
+  array — every value stays individually correct, but the connecting line's draw order doesn't, which is what
+  actually reads as a "tangled path." Two earlier fix attempts were tried and abandoned once this was found: giving
+  each point an explicit Highcharts `id` (doesn't help — a never-seen id still falls through to the x-value
+  fallback) and keying the chart's render on `@stationId` via `{{#each (array @stationId)}}` to force a teardown on
+  station switches (works for that one case, but not for the same-station sliding-window case, since the key
+  doesn't change then). Before the `ember-highcharts` rewrite, this same fix was expressed as a chart-level
+  `chart.allowMutatingData: false` option (that flag no longer exists in either chart component — don't add it
+  back; the fix now lives in `updateChart`'s own `setData` call). Measured no meaningful performance difference at
+  this app's data volumes (a few dozen points for the polar chart, up to ~1500 for the 5-day wind/air charts) — the
+  docs' "might decrease performance" warning for disabling point-matching is written for far larger datasets than
+  this app ever renders.
+- **The wind/air range selector resets to its default ("6h") on every station change, not on every refresh.**
+  `render-highcharts.ts` re-applies `rangeSelector`'s default button (`RangeSelector#clickButton`) only when
+  `@stationId` itself changes, leaving an ordinary same-station background refresh free to preserve whatever range
+  is currently showing. This is the fix for issue #137: naive chart-update logic (this app's own former use of
+  `ember-highcharts`, and likely any other integration that calls `chart.xAxis[0].setExtremes()` unconditionally
+  after every update, as that addon's own `onDidUpdate` did) resets the visible range to "all data" on _any_ update
+  to an already-existing chart instance, not just a station switch — see
+  [tests/integration/components/chart/range-selector-reset-test.ts](tests/integration/components/chart/range-selector-reset-test.ts).
 
 ### i18n & relative time
 
