@@ -46,6 +46,16 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
     credits: {
       enabled: false,
     },
+    // Highcharts 13 auto-follows the OS/browser's prefers-color-scheme by
+    // default (`palette.colorScheme` defaults to `'light dark'`, resolved via
+    // CSS `light-dark()` on Highcharts' own inner wrapper div) -- verified by
+    // reading `renderer.box.parentElement`'s inline style directly in a
+    // scratch test. We only ever draw a light UI, so pin it explicitly
+    // rather than silently switching palettes when a station panel is
+    // viewed on a device set to dark mode.
+    palette: {
+      colorScheme: 'light',
+    },
     // No accessibility module is imported at all (see render-highcharts.ts)
     // -- unlike ember-highcharts, which always imported it, so the crash risk
     // that used to force this option (keyboard-navigation point proxies

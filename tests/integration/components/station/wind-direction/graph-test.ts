@@ -35,6 +35,36 @@ module(
       assert.dom('.highcharts-container').exists();
     });
 
+    // Highcharts 13 auto-follows the OS/browser's prefers-color-scheme by
+    // default (`palette.colorScheme` defaults to `'light dark'`), which would
+    // otherwise silently switch this chart to a dark palette on a device set
+    // to dark mode. `chart/polar.gts`'s `defaultChartOptions` pins
+    // `palette.colorScheme` to `'light'`, which Highcharts reflects as an
+    // inline `color-scheme: light` style on its own wrapper
+    // (`.highcharts-container`) -- reading that confirms our option actually
+    // reached and took effect on the real chart, not just that we passed it.
+    test('it pins the chart to light mode regardless of the OS/browser color scheme preference', async function (this: WindDirectionGraphTestContext, assert) {
+      this.data = [
+        {
+          id: 'reading',
+          direction: 180,
+          speed: 10,
+          gusts: 14,
+          temperature: 6,
+          humidity: 60,
+          rain: 0,
+          timestamp: Date.now(),
+          [Type]: 'history',
+        },
+      ];
+
+      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+
+      assert
+        .dom('.highcharts-container')
+        .hasAttribute('style', /color-scheme:\s*light/);
+    });
+
     test('it renders the chart for recent history', async function (this: WindDirectionGraphTestContext, assert) {
       this.data = [
         {
