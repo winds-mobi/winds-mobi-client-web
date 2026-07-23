@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+import { cached, tracked } from '@glimmer/tracking';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   DEFAULT_MAP_LAT,
@@ -156,5 +157,77 @@ module('Unit | Utility | map-view', function () {
     const next = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
 
     assert.strictEqual(stableMapView(undefined, next), next);
+  });
+
+  // The bug this guards against isn't in `stableMapView` itself (it always
+  // returned the right reference) -- it's that a *caller* which unconditionally
+  // assigns `stableMapView`'s result back to a `@tracked` property still
+  // invalidates that property's consumers even when the assigned value is
+  // reference-equal. Ember's `@tracked` has no built-in bail-out for a
+  // reference-equal reassignment -- re-setting a tracked property to its own
+  // value is actually a documented technique for *forcing* a recompute, the
+  // opposite of what's needed here. The first attempt at fixing issue #131
+  // did exactly this (always wrote `this.lastMapView = stableMapView(...)`),
+  // which silently kept `flyToOptions` recomputing on every station switch,
+  // same as before the fix. The real fix skips the assignment entirely when
+  // `stableMapView` returns the same reference -- this test exercises that
+  // exact caller pattern (not just the pure function) via a plain tracked
+  // class, using `@cached`'s own recompute-counting to prove it, without
+  // needing a component, rendering, or MapLibre/WebGL at all.
+  test('a caller that skips the assignment when stableMapView returns the same reference avoids downstream recomputation', function (assert) {
+    class Probe {
+      @tracked mapView = { longitude: 8.12345, latitude: 46.76543, zoom: 9.88 };
+      recomputeCount = 0;
+
+      @cached
+      get flyToOptions() {
+        this.recomputeCount++;
+        return { center: [this.mapView.longitude, this.mapView.latitude] };
+      }
+
+      updateGuarded(next: typeof this.mapView) {
+        const stable = stableMapView(this.mapView, next);
+
+        if (stable !== this.mapView) {
+          this.mapView = stable;
+        }
+      }
+
+      updateUnguarded(next: typeof this.mapView) {
+        this.mapView = stableMapView(this.mapView, next);
+      }
+    }
+
+    const guarded = new Probe();
+    void guarded.flyToOptions;
+    assert.strictEqual(guarded.recomputeCount, 1, 'initial read computes once');
+
+    guarded.updateGuarded({
+      longitude: 8.12345,
+      latitude: 46.76543,
+      zoom: 9.88,
+    });
+    void guarded.flyToOptions;
+    assert.strictEqual(
+      guarded.recomputeCount,
+      1,
+      'guarded update with a value-equal view does not trigger a recompute'
+    );
+
+    const unguarded = new Probe();
+    void unguarded.flyToOptions;
+    assert.strictEqual(unguarded.recomputeCount, 1);
+
+    unguarded.updateUnguarded({
+      longitude: 8.12345,
+      latitude: 46.76543,
+      zoom: 9.88,
+    });
+    void unguarded.flyToOptions;
+    assert.strictEqual(
+      unguarded.recomputeCount,
+      2,
+      'unconditionally re-assigning even a value-equal reference still dirties the tracked property and forces a recompute -- this is the exact regression the guard in handleRouteChange prevents'
+    );
   });
 });

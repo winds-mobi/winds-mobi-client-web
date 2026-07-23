@@ -142,10 +142,19 @@ export default class Map extends Component<MapSignature> {
 
   @action
   handleRouteChange() {
-    this.lastMapView = stableMapView(
-      this.lastMapView,
-      currentMapView(this.router)
-    );
+    const next = stableMapView(this.lastMapView, currentMapView(this.router));
+
+    // `stableMapView` returning the *same* reference means nothing changed --
+    // skip the assignment entirely rather than writing it back. Ember's
+    // `@tracked` has no built-in bail-out for a reference-equal reassignment
+    // (re-setting a tracked property to its own value is actually a
+    // documented technique for *forcing* a dirty/recompute); an unconditional
+    // `this.lastMapView = next` here would still invalidate `mapView` and
+    // `flyToOptions` on every transition, silently undoing the whole point of
+    // this indirection.
+    if (next !== this.lastMapView) {
+      this.lastMapView = next;
+    }
   }
 
   // The station whose detail panel is open (the `map.station/:station_id` route).
