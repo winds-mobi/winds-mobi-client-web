@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
+import { htmlSafe } from '@ember/template';
 import { Button } from '@frontile/buttons';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
@@ -73,19 +74,27 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return ageScale * scaleForZoom(this.args.zoom);
   }
 
-  // Rotate to the wind direction and, when shrinking, scale about the same hub
-  // centre so the arrow gets smaller in place instead of drifting off its point.
+  // Rotate to the wind direction about the hub centre. `rotate(angle cx cy)`
+  // takes its centre natively, unlike scale (see `scaleStyle` below), so this
+  // needs no recentring trick of its own.
   get markerTransform() {
     const centre = this.geometry.rotationCentre;
     const angle = this.args.station.last.direction + ARROW_DIRECTION_OFFSET;
-    const rotate = `rotate(${angle} ${centre})`;
-    const scale = this.markerScale;
-    if (scale === 1) {
-      return rotate;
-    }
+    return `rotate(${angle} ${centre})`;
+  }
 
-    const [cx = 0, cy = 0] = centre.split(' ').map(Number);
-    return `${rotate} translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
+  // Age/zoom shrink applied as a CSS transform on the button itself, rather
+  // than an SVG-space scale on the inner <g>, so the button's own click
+  // target and the arrow it wraps shrink together as one unit -- a stale or
+  // zoomed-out station gets a smaller tap target to match its smaller
+  // silhouette, rather than a full-size ring around a shrunken arrow. This
+  // also sidesteps SVG's `scale()` always scaling about the origin: CSS
+  // transforms default to `transform-origin: center`, and the button's own
+  // box is already centred on the hub (the svg's `viewBox` is centred on it,
+  // and `flex! items-center justify-center` centres the svg within the
+  // button), so scaling the button needs no manual recentring either.
+  get scaleStyle() {
+    return htmlSafe(`transform: scale(${this.markerScale});`);
   }
 
   // Frontile's Button doesn't tailwind-merge its `class` arg against the
@@ -96,18 +105,20 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   // default-size padding non-deterministically fight this button's own
   // `rounded-full`/`p-1`.
   //
-  // The button's own box (h-16, a sane click target) is deliberately smaller
-  // than the svg it wraps (h-24, the arrow's natural drawn size) -- the svg
-  // overflows past it (see its own `overflow-visible`), so the arrow always
-  // renders at one true size regardless of the click target's size. `flex!
-  // items-center justify-center` centres that overflow evenly on all sides;
-  // `!` forces it over Frontile's own base `inline-block` (verified in
-  // `@frontile/theme`'s `baseButton`), which otherwise wins the `display`
-  // property by source order (same unmerged-class gotcha as elsewhere in
-  // this file) and leaves the svg anchored top-left instead of centred.
+  // The button's own box (h-28) is deliberately a touch bigger than the svg
+  // it wraps (h-24, the arrow's natural drawn size), so the ring reads as
+  // just outside the arrow's silhouette rather than hugging it exactly --
+  // and `p-1!`'s padding (included inside the box, border-box) shaves a
+  // little more off the interior on every side, on top of that. `flex!
+  // items-center justify-center` centres the svg within that padded
+  // interior; `!` forces it over Frontile's own base `inline-block`
+  // (verified in `@frontile/theme`'s `baseButton`), which otherwise wins the
+  // `display` property by source order (same unmerged-class gotcha as
+  // elsewhere in this file) and leaves the svg anchored top-left instead of
+  // centred.
   get buttonClass() {
     const base =
-      'flex! h-16 w-16 cursor-pointer items-center justify-center rounded-full! p-1! transition focus:outline-none';
+      'flex! h-28 w-28 cursor-pointer items-center justify-center rounded-full! p-1! transition focus:outline-none';
 
     // Selected: a grey disc + ring hugging the arrow so it stands out without
     // spilling into neighbouring markers' clickable area.
@@ -122,6 +133,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   }
 
   <template>
+    {{! template-lint-disable no-inline-styles }}
     <Button
       aria-label={{@station.name}}
       data-selected={{if @isSelected "true"}}
@@ -131,11 +143,14 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       @intent="default"
       @onPress={{this.handleSelect}}
       class={{this.buttonClass}}
+      style={{this.scaleStyle}}
     >
+      {{! template-lint-enable no-inline-styles }}
       {{! pointer-events-none: the svg is purely decorative (already
-        aria-hidden), so its overflow past the button's own smaller h-16 box
-        never intercepts clicks -- they fall through to whatever's actually
-        under the cursor (the map, or a neighbouring marker). }}
+        aria-hidden), so its overflow past the button's own padded interior
+        (see `buttonClass`) never intercepts clicks -- they fall through to
+        whatever's actually under the cursor (the map, or a neighbouring
+        marker). }}
       <svg
         aria-hidden="true"
         class="pointer-events-none h-24 w-24 overflow-visible"
