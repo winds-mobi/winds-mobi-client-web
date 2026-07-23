@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.3 - 2026-07-23
+
 ### Fixed
 
 - Fixed the on-map wind arrows rotating around a point that didn't line up with their visual center, causing the arrow's silhouette to shift unevenly within its frame as it turned to different wind directions.
