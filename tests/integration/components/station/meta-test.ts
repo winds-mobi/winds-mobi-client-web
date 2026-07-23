@@ -8,7 +8,7 @@ import {
 } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
-interface StationHeaderTestContext extends RenderedTestContext {
+interface StationMetaTestContext extends RenderedTestContext {
   station: Station;
 }
 
@@ -33,39 +33,39 @@ const BASE_STATION: Omit<Station, 'providerUrl'> = {
   [Type]: 'station',
 };
 
-module('Integration | Component | station/header', function (hooks) {
+module('Integration | Component | station/meta', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it hides the provider meta item when the provider name is missing', async function (this: StationHeaderTestContext, assert) {
+  test('it hides the provider meta item when the provider name is missing', async function (this: StationMetaTestContext, assert) {
     this.station = {
       ...BASE_STATION,
       providerName: undefined,
     };
 
-    await render(hbs`<Station::Header @station={{this.station}} />`);
+    await render(hbs`<Station::Meta @station={{this.station}} />`);
 
     assert.dom('[data-test-station-provider-link]').doesNotExist();
     assert.dom(this.element).doesNotIncludeText('Provider');
   });
 
-  test('it hides the provider meta item when the provider URL is missing', async function (this: StationHeaderTestContext, assert) {
+  test('it hides the provider meta item when the provider URL is missing', async function (this: StationMetaTestContext, assert) {
     this.station = {
       ...BASE_STATION,
     };
 
-    await render(hbs`<Station::Header @station={{this.station}} />`);
+    await render(hbs`<Station::Meta @station={{this.station}} />`);
 
     assert.dom('[data-test-station-provider-link]').doesNotExist();
     assert.dom(this.element).doesNotIncludeText('Provider');
   });
 
-  test('it renders the provider link when the provider URL is available', async function (this: StationHeaderTestContext, assert) {
+  test('it renders the provider link when the provider URL is available', async function (this: StationMetaTestContext, assert) {
     this.station = {
       ...BASE_STATION,
       providerUrl: 'https://windline.ch/station/4109',
     };
 
-    await render(hbs`<Station::Header @station={{this.station}} />`);
+    await render(hbs`<Station::Meta @station={{this.station}} />`);
 
     assert
       .dom('[data-test-station-provider-link]')

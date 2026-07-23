@@ -9,6 +9,7 @@ import type {
 } from 'winds-mobi-client-web/services/store.js';
 import StationAir from 'winds-mobi-client-web/components/station/air';
 import StationHeader from 'winds-mobi-client-web/components/station/header';
+import StationMeta from 'winds-mobi-client-web/components/station/meta';
 import StationSummary from 'winds-mobi-client-web/components/station/summary';
 import StationWind from 'winds-mobi-client-web/components/station/wind';
 
@@ -40,6 +41,7 @@ export default class HelpLiveStation extends Component<HelpLiveStationSignature>
             class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
           >
             <StationHeader @station={{result.data}} />
+            <StationMeta @station={{result.data}} class="mt-1.5" />
           </div>
 
           <div class="rounded-xl border border-slate-200 bg-slate-100 p-3">

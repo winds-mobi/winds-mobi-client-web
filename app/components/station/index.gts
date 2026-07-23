@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import type RouterService from '@ember/routing/router-service';
 import { on } from '@ember/modifier';
 import StationHeader from './header';
+import StationMeta from './meta';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
@@ -61,6 +62,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
       <div class="min-h-0 flex-1 overflow-y-auto">
         {{#if @station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
+            <StationMeta @station={{@station}} />
             <StationSummary @station={{@station}} />
             <StationWind @stationId={{@station.id}} />
             <StationAir @stationId={{@station.id}} />

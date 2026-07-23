@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- The station panel's altitude, last-updated, distance, and provider-link row now scrolls away with the rest of the panel content instead of staying pinned under the station name, freeing up space on the compact mobile layout.
+
 ### Fixed
 
 - Fixed the map sometimes visibly jumping back toward your location when opening a second station's detail panel right after another one.
