@@ -1,9 +1,11 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { htmlSafe } from '@ember/template';
+import selectMapMarker from 'winds-mobi-client-web/modifiers/select-map-marker';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   ARROW_DIRECTION_OFFSET,
+  ARROW_SCALE,
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
@@ -72,19 +74,21 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     );
   }
 
-  // Shrink the whole arrow by reading age when the preference is on, and
-  // always by map zoom so markers don't dwarf the map when zoomed out to see
-  // a whole region. The two multiply together, so an old reading at a low
-  // zoom shrinks further still. Recomputed each refresh cycle as new readings
-  // replace the record, so no timer is needed — the data only changes on
-  // refresh anyway; the zoom factor is recomputed whenever the routed zoom
-  // (settled after a pan/zoom gesture) changes.
+  // ARROW_SCALE grows the arrow past the ring's fixed baseline (see the
+  // svg's own class below and ARROW_SCALE's comment in station-arrow.ts).
+  // On top of that, shrink the whole arrow by reading age when the
+  // preference is on, and always by map zoom so markers don't dwarf the map
+  // when zoomed out to see a whole region. All three multiply together, so
+  // an old reading at a low zoom shrinks further still. Recomputed each
+  // refresh cycle as new readings replace the record, so no timer is needed
+  // — the data only changes on refresh anyway; the zoom factor is recomputed
+  // whenever the routed zoom (settled after a pan/zoom gesture) changes.
   get markerScale() {
     const ageScale = this.settings.shrinkOldData
       ? scaleForReadingAge(this.args.station.last.timestamp)
       : 1;
 
-    return ageScale * scaleForZoom(this.args.zoom);
+    return ARROW_SCALE * ageScale * scaleForZoom(this.args.zoom);
   }
 
   // Rotate to the wind direction about the hub centre. `rotate(angle cx cy)`
@@ -108,22 +112,18 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return htmlSafe(`transform: scale(${this.markerScale});`);
   }
 
-  // The div's own box (h-14, 56px) is deliberately bigger than the svg it
-  // wraps (h-12, 48px, the arrow's natural drawn size), so the ring reads as
-  // just outside the arrow's silhouette rather than hugging its edges -- the
-  // same 7:6 ratio as the previous h-28/h-24 sizing, just at a footprint
-  // that doesn't dwarf the map at full zoom/a fresh reading (`markerScale`
-  // of 1).
-  get markerClass() {
-    const base =
-      'flex h-14 w-14 cursor-pointer items-center justify-center rounded-full p-1 transition';
-
-    // Selected: a grey disc + ring hugging the arrow so it stands out without
-    // spilling into neighbouring markers' clickable area.
-    return this.args.isSelected
-      ? `${base} bg-slate-400/40 ring-1 ring-inset ring-slate-500/70`
-      : base;
-  }
+  // `cursor-pointer` and `rounded-full` deliberately live on the MapLibre
+  // marker element itself (`markerInitOptions` in map/index.gts, that shape
+  // is static and never varies), and the selected-state ring lives there too,
+  // toggled by the `selectMapMarker` modifier below (that one's reactive, so
+  // it can't be a static `className` -- see the modifier's own comment). That
+  // outer element's shrink-wrapped size comes from this div's own unscaled
+  // layout box (h-20, 80px) alone -- the svg below deliberately carries no
+  // `h-*`/`w-*` of its own (confirmed empirically that tuning them had no
+  // visible effect anyway), so `ARROW_SCALE` (see station-arrow.ts) is the
+  // only thing controlling the arrow's visible size, via the same
+  // `transform: scale(...)` below.
+  markerClass = 'flex h-20 w-20 items-center justify-center p-1 transition';
 
   <template>
     {{! template-lint-disable no-inline-styles }}
@@ -133,9 +133,10 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       data-test-map-station-marker
       class={{this.markerClass}}
       style={{this.scaleStyle}}
+      {{selectMapMarker @isSelected}}
     >
       {{! template-lint-enable no-inline-styles }}
-      <svg aria-hidden="true" class="h-12 w-12" viewBox={{this.viewBox}}>
+      <svg aria-hidden="true" viewBox={{this.viewBox}}>
         <g transform={{this.markerTransform}}>
           {{! Gusts band differs: the gusts shape behind, shown through the hub hole. }}
           {{#if this.showGustsHub}}

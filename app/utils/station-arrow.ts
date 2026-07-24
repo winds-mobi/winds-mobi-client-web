@@ -86,6 +86,16 @@ export function scaleForZoom(zoom: number): number {
   return MIN_ZOOM_MARKER_SCALE;
 }
 
+// Grows the arrow past its baseline (which matches the ring's own fixed size)
+// via the CSS `transform: scale(...)` that `markerScale` already drives —
+// tuning the arrow/svg's own Tailwind `h-*`/`w-*` classes turned out not to
+// visibly change anything (untraced further; suspected Tailwind-generation or
+// overflow quirk), whereas this transform is the same mechanism the age/zoom
+// shrink already uses and is proven to render. The ring lives on a separate,
+// unscaled ancestor (see `map/station-marker.gts`), so this constant is free
+// to tune without affecting the ring at all.
+export const ARROW_SCALE = 1.2;
+
 // A reading older than a day is drawn grey rather than in its wind-speed colour.
 export function colourForWindReading(speed: number, timestamp: number): string {
   if (!Number.isFinite(timestamp)) {
