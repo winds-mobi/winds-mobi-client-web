@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.19.5 - 2026-07-24
+
 ### Changed
 
 - Station markers on the map are a little smaller when zoomed in, so they don't crowd the map.
