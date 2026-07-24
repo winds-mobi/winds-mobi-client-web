@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { array } from '@ember/helper';
+import { array, fn } from '@ember/helper';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
@@ -371,12 +371,16 @@ export default class Map extends Component<MapSignature> {
           <map.marker
             @initOptions={{this.markerInitOptions}}
             @lngLat={{this.markerPosition station}}
+            as |marker|
           >
             <MapStationMarker
               @isSelected={{this.isStationSelected station}}
-              @onSelect={{this.stationSelected}}
               @station={{station}}
               @zoom={{this.mapView.zoom}}
+            />
+            <marker.on
+              @event="click"
+              @action={{fn this.stationSelected station}}
             />
           </map.marker>
         {{/each}}

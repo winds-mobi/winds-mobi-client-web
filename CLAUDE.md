@@ -317,10 +317,23 @@ obvious from the decorator call site:
 - **Always use Frontile's `<Button>` (`@frontile/buttons`) instead of a bare HTML `<button>`.** Use `@onPress`
   (not an `{{on "click" ...}}` modifier). Reach for `@appearance="custom"` (plus an explicit `@intent="default"`,
   since `custom`'s own default intent resolves to `primary`) when a button needs fully bespoke, non-thematic
-  coloring (e.g. an SVG marker whose fill colors are computed data, not a Frontile intent) — `custom` has no
-  background/hover compound classes of its own to fight, unlike `minimal`/`outlined`/`default`. Only a handful of
-  _non-button_ clickable custom elements are legitimate exceptions (e.g. `<LinkTo>` navigation, or a MapLibre
-  control that isn't DOM at all) — a plain `<button>` standing in for one is not.
+  coloring — `custom` has no background/hover compound classes of its own to fight, unlike
+  `minimal`/`outlined`/`default`. Only a handful of _non-button_ clickable custom elements are legitimate
+  exceptions (e.g. `<LinkTo>` navigation) — a plain `<button>` standing in for one is not.
+  - **The on-map station marker ([map/station-marker.gts](app/components/map/station-marker.gts)) is a
+    deliberate exception, and isn't a button at all — not even Frontile's.** It's a plain, non-interactive
+    `<div>`; selecting a station is wired up in [map/index.gts](app/components/map/index.gts) via
+    `<marker.on @event="click" @action={{fn this.stationSelected station}}>`, using the click MapLibre's own
+    `Marker` already fires on itself (it uses this internally for popup-toggling). This replaced an earlier
+    version with its own nested `<Button>` and `@onSelect` callback: MapLibre repositions every marker via a
+    continuous CSS `transform` reassignment on every pan/zoom/momentum-settle, and stacking a second
+    independently-transformed clickable element on top of that gave mobile browsers a second thing that could be
+    moving mid-tap — a documented trigger for silently dropping a touch's synthesized click (a target moving
+    between touchstart and touchend reads as a scroll, not a tap). Routing the click through the marker's own
+    already-reliable element removes that. Traded away deliberately: keyboard Enter/Space activation, which the
+    old `<Button>` gave for free — MapLibre's own keyboard handling on a marker only wires Enter/Space to
+    toggling a popup, not a generic click, and this app has accepted that gap rather than wiring up a keyboard
+    handler of its own.
   - **A `class` override does NOT tailwind-merge against the theme's own base/variant classes** — verified
     empirically (render a `<Button class="rounded-full">`, inspect `element.className`): both `rounded-sm` (the
     theme's base) and your `rounded-full` end up in the class list, and plain CSS source order — not attribute

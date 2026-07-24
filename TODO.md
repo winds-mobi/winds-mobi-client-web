@@ -1,5 +1,31 @@
 # TODO
 
+## Exploratory
+
+- **Render map station markers as native MapLibre GL layers instead of per-station DOM
+  markers.** Where it lives: `app/components/map/station-marker.gts` (the marker itself)
+  and `app/components/map/index.gts` (the `{{#each this.stations as |station|}}` /
+  `<map.marker>` loop). Problem: today each station is a real DOM element
+  (`<map.marker>`'s `domContent` div) repositioned via JS/CSS `transform` on every map
+  frame; that's one HTML node + CSS transform per station (currently capped at 470 by
+  `mapQuery`), and it's the same category of "DOM element with its own transform, stacked
+  on top of MapLibre's own transformed marker element" that turned out to cause the
+  mobile click-reliability bug fixed alongside this TODO entry. A `GeoJSONSource` +
+  `symbol`/`circle` layer setup (see MapLibre's own layer/source components,
+  `ember-maplibre-gl`'s `<map.source>`/`<source.layer>`) renders all stations as vector
+  data on the WebGL canvas instead, with MapLibre's own feature-click hit-testing (pure
+  GPU raycasting, no DOM/CSS-transform involved at all) replacing per-marker DOM click
+  handling entirely, and scales far better than one DOM node per station. Proposed fix:
+  not a quick swap -- would need (1) pre-rasterizing the two arrow shapes
+  (`public/images/arrow-not-peak.svg`/`arrow-peak.svg`) into recolorable SDF sprites
+  (`map.addImage(..., {sdf: true})`) instead of drawing the SVG paths directly, (2)
+  moving per-station rotation/color/scale from the current Ember getters
+  (`station-marker.gts`'s `markerColor`/`markerScale`/`markerTransform`) into precomputed
+  GeoJSON feature properties consumed via `icon-rotate`/`icon-color`/`icon-size`
+  expressions, (3) a separate filtered layer (or paint expression) for the gusts hub and
+  the selection ring. Worth prototyping as a throwaway spike first (confirm SDF
+  recoloring + rotation actually looks right) before committing to the full rewrite.
+
 Dev-environment cleanup audit (2026-07-11). Baseline for comparison: the stock
 `ember-cli` 6.3.1 app blueprint + `@ember/app-blueprint` (Vite) overlay, TypeScript
 variant. Each section below is worked as one focused commit that also removes its

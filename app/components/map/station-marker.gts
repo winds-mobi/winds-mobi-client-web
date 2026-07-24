@@ -1,8 +1,6 @@
 import Component from '@glimmer/component';
-import { action } from '@ember/object';
 import { service } from '@ember/service';
 import { htmlSafe } from '@ember/template';
-import { Button } from '@frontile/buttons';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   ARROW_DIRECTION_OFFSET,
@@ -18,13 +16,28 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 export interface MapStationMarkerSignature {
   Args: {
     isSelected?: boolean;
-    onSelect: (station: Station) => void;
     station: Station;
     zoom: number;
   };
-  Element: HTMLButtonElement;
+  Element: HTMLDivElement;
 }
 
+// Purely presentational -- the ring/disc and the arrow inside it. Clicking is
+// handled by the MapLibre marker itself, not by anything in this component
+// (see `map/index.gts`'s `<marker.on @event="click" ...>`): MapLibre's own
+// `Marker` element already fires a native `click` (it uses this internally
+// for popup-toggling), and continuously repositions itself via CSS
+// `transform` during every pan/zoom/momentum-settle -- stacking our own
+// separate clickable element (and its own `transform: scale(...)`) on top
+// added a second thing that could be moving mid-tap, which is a known
+// trigger for mobile browsers to silently drop a touch's synthesized click
+// (a target that moves between touchstart and touchend reads as a
+// scroll/pan, not a tap). Letting the marker's own already-reliable click
+// carry the selection removes that extra layer. Traded away: keyboard
+// Enter/Space activation, which this component's own real `<button>` used
+// to give for free -- MapLibre's marker only wires Enter/Space to toggling a
+// popup, not a generic click, and this app has decided that's an acceptable
+// gap for now rather than wiring up a keyboard handler of its own.
 export default class MapStationMarker extends Component<MapStationMarkerSignature> {
   @service declare settings: SettingsService;
 
@@ -83,42 +96,27 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `rotate(${angle} ${centre})`;
   }
 
-  // Age/zoom shrink applied as a CSS transform on the button itself, rather
-  // than an SVG-space scale on the inner <g>, so the button's own click
-  // target and the arrow it wraps shrink together as one unit -- a stale or
-  // zoomed-out station gets a smaller tap target to match its smaller
-  // silhouette, rather than a full-size ring around a shrunken arrow. This
-  // also sidesteps SVG's `scale()` always scaling about the origin: CSS
-  // transforms default to `transform-origin: center`, and the button's own
-  // box is already centred on the hub (the svg's `viewBox` is centred on it,
-  // and `flex! items-center justify-center` centres the svg within the
-  // button), so scaling the button needs no manual recentring either.
+  // Age/zoom shrink applied as a CSS transform on the outer div itself,
+  // rather than an SVG-space scale on the inner <g>, so the ring and the
+  // arrow it wraps shrink together as one unit. This also sidesteps SVG's
+  // `scale()` always scaling about the origin: CSS transforms default to
+  // `transform-origin: center`, and the div's own box is already centred on
+  // the hub (the svg's `viewBox` is centred on it, and `flex items-center
+  // justify-center` centres the svg within the div), so scaling the div
+  // needs no manual recentring either.
   get scaleStyle() {
     return htmlSafe(`transform: scale(${this.markerScale});`);
   }
 
-  // Frontile's Button doesn't tailwind-merge its `class` arg against the
-  // theme's own base/variant classes (verified empirically -- both a passed
-  // override and the conflicting theme class end up in the DOM, and CSS
-  // source order decides the winner, not attribute order). `!` forces our
-  // override to win regardless: without it, the theme's own `rounded-sm`/
-  // default-size padding non-deterministically fight this button's own
-  // `rounded-full`/`p-1`.
-  //
-  // The button's own box (h-28, 112px) is deliberately bigger than the svg it
-  // wraps (h-24, 96px, the arrow's natural drawn size) -- even after `p-1!`'s
-  // padding and Frontile's own 1px border eat into the interior (down to
-  // 102px), the svg still fits inside with room to spare, so the ring reads
-  // as just outside the arrow's silhouette rather than hugging its edges.
-  // `flex! items-center justify-center` centres the svg within that
-  // interior; `!` forces it over Frontile's own base `inline-block`
-  // (verified in `@frontile/theme`'s `baseButton`), which otherwise wins the
-  // `display` property by source order (same unmerged-class gotcha as
-  // elsewhere in this file) and leaves the svg anchored top-left instead of
-  // centred.
-  get buttonClass() {
+  // The div's own box (h-14, 56px) is deliberately bigger than the svg it
+  // wraps (h-12, 48px, the arrow's natural drawn size), so the ring reads as
+  // just outside the arrow's silhouette rather than hugging its edges -- the
+  // same 7:6 ratio as the previous h-28/h-24 sizing, just at a footprint
+  // that doesn't dwarf the map at full zoom/a fresh reading (`markerScale`
+  // of 1).
+  get markerClass() {
     const base =
-      'flex! h-28 w-28 cursor-pointer items-center justify-center rounded-full! p-1! transition focus:outline-none';
+      'flex h-14 w-14 cursor-pointer items-center justify-center rounded-full p-1 transition';
 
     // Selected: a grey disc + ring hugging the arrow so it stands out without
     // spilling into neighbouring markers' clickable area.
@@ -127,26 +125,17 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       : base;
   }
 
-  @action
-  handleSelect() {
-    this.args.onSelect(this.args.station);
-  }
-
   <template>
     {{! template-lint-disable no-inline-styles }}
-    <Button
-      aria-label={{@station.name}}
+    <div
       data-selected={{if @isSelected "true"}}
       data-station-id={{@station.id}}
       data-test-map-station-marker
-      @appearance="custom"
-      @intent="default"
-      @onPress={{this.handleSelect}}
-      class={{this.buttonClass}}
+      class={{this.markerClass}}
       style={{this.scaleStyle}}
     >
       {{! template-lint-enable no-inline-styles }}
-      <svg aria-hidden="true" class="h-24 w-24" viewBox={{this.viewBox}}>
+      <svg aria-hidden="true" class="h-12 w-12" viewBox={{this.viewBox}}>
         <g transform={{this.markerTransform}}>
           {{! Gusts band differs: the gusts shape behind, shown through the hub hole. }}
           {{#if this.showGustsHub}}
@@ -164,6 +153,6 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
           />
         </g>
       </svg>
-    </Button>
+    </div>
   </template>
 }
