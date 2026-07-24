@@ -474,4 +474,83 @@ module('Acceptance | map station panel', function (hooks) {
 
     assert.dom("link[type='image/svg+xml']", document.head).doesNotExist();
   });
+
+  // `cursor-pointer` deliberately lives on MapLibre's own marker element
+  // (passed via `markerInitOptions`'s `className`), not on anything inside
+  // `<MapStationMarker>` -- that outer element is what `<marker.on
+  // @event="click">` actually listens on (see `map/station-marker.gts`'s
+  // top-of-file comment for why click is routed through it rather than a
+  // second clickable element). This reads the real DOM MapLibre produced to
+  // confirm the option actually reached it, not just that we passed it.
+  test.if(
+    'the map marker element itself gets the pointer cursor, not just its inner content',
+    webGLAvailable,
+    async function (assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      assert
+        .dom('[data-station-id="holfuy-1804"].cursor-pointer')
+        .doesNotExist(
+          'the inner marker content no longer carries its own cursor-pointer'
+        );
+      assert
+        .dom(
+          '.maplibregl-marker.cursor-pointer:has([data-station-id="holfuy-1804"])'
+        )
+        .exists('the outer MapLibre marker element carries it instead');
+    }
+  );
+
+  // The selected-station ring/disc is toggled by the `selectMapMarker`
+  // modifier directly on MapLibre's own marker element (the same element
+  // `cursor-pointer` lives on, see the test above), not on anything inside
+  // `<MapStationMarker>` -- reactively, since which station is selected
+  // changes over the page's lifetime (unlike `cursor-pointer`, which is
+  // static and set once via `className`). This reads the real DOM to
+  // confirm the ring actually follows selection from one station to
+  // another, not just that it's present on the initially-selected one.
+  test.if(
+    'the selected-station ring lives on the map marker element and follows selection',
+    webGLAvailable,
+    async function (this: MapStationPanelTestContext, assert) {
+      const router = this.owner.lookup('service:router');
+
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      assert
+        .dom(
+          '.maplibregl-marker.bg-slate-400\\/40:has([data-station-id="holfuy-1804"])'
+        )
+        .exists('the initially-selected station has the ring');
+      assert
+        .dom(
+          '.maplibregl-marker.bg-slate-400\\/40:has([data-station-id="holfuy-2222"])'
+        )
+        .doesNotExist('the other station does not');
+
+      void router.transitionTo('map.station', 'holfuy-2222', {
+        queryParams: {
+          latitude: 46.67719,
+          longitude: 7.86323,
+          zoom: 13,
+        },
+      });
+      await settled();
+
+      assert
+        .dom(
+          '.maplibregl-marker.bg-slate-400\\/40:has([data-station-id="holfuy-1804"])'
+        )
+        .doesNotExist('the previously-selected station no longer has it');
+      assert
+        .dom(
+          '.maplibregl-marker.bg-slate-400\\/40:has([data-station-id="holfuy-2222"])'
+        )
+        .exists('the newly-selected station has it instead');
+    }
+  );
 });

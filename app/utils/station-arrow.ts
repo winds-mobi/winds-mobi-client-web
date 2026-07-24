@@ -86,6 +86,18 @@ export function scaleForZoom(zoom: number): number {
   return MIN_ZOOM_MARKER_SCALE;
 }
 
+// The marker's own box (ring + arrow together, see `map/station-marker.gts`)
+// is sized as `BASE_MARKER_SIZE * markerScale` px, so this is a flat
+// multiplier on top of the age/zoom scaling below -- tune it to make the
+// whole marker (not just the arrow inside it) read bigger or smaller
+// overall.
+export const ARROW_SCALE = 2;
+
+// Reference marker size (px) at `markerScale` of 1 (fresh reading, full
+// zoom, before ARROW_SCALE). The rendered box is always this times the
+// combined scale -- see `markerSizePx` in `map/station-marker.gts`.
+export const BASE_MARKER_SIZE = 56;
+
 // A reading older than a day is drawn grey rather than in its wind-speed colour.
 export function colourForWindReading(speed: number, timestamp: number): string {
   if (!Number.isFinite(timestamp)) {

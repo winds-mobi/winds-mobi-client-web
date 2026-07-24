@@ -4,11 +4,15 @@
 
 ### Changed
 
-- Map station markers are smaller at full size, so they no longer dwarf the map on a close-up view.
+- Station markers on the map are a little smaller when zoomed in, so they don't crowd the map.
+- The wind direction arrow on each station marker is bigger and easier to see at a glance.
 
 ### Fixed
 
-- Fixed map station markers sometimes not responding to a tap on mobile. Selecting a station is now handled by the map marker itself instead of a separate button layered on top of it.
+- Fixed station markers on the map sometimes not responding to a tap on mobile.
+- Fixed the highlight ring around a selected station staying the same size while its marker shrank (an older reading, or zooming out), which made it easy to accidentally tap the wrong station when markers were close together.
+- Fixed the compass letters (N, S, E, W, etc.) missing from the wind-direction circle on a station's panel.
+- Removed a distracting animation that played every time the charts refreshed with new data.
 
 ## v0.19.4 - 2026-07-24
 

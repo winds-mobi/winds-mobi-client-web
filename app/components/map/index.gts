@@ -204,6 +204,17 @@ export default class Map extends Component<MapSignature> {
   get markerInitOptions() {
     return {
       anchor: 'center' as const,
+      // `cursor-pointer` and `rounded-full` here, not on anything inside
+      // `<MapStationMarker>`: this `className` lands on MapLibre's own
+      // marker element, the one `<marker.on @event="click">` listens on and
+      // the reliable click target (see `map/station-marker.gts`'s top-of-file
+      // comment for why click is routed through it rather than a second
+      // clickable element). This element shrink-wraps to `<MapStationMarker>`'s
+      // own content, so the cursor and the selected-state ring (see the
+      // `selectMapMarker` modifier) always match the marker's current size.
+      // This value is static and never varies, unlike the ring itself, so
+      // it's a plain `className` rather than something toggled by a modifier.
+      className: 'cursor-pointer rounded-full',
       // Pin the marker to the map plane so MapLibre counter-rotates it by the
       // bearing and tilts it by the pitch on every rotate/pitch event. The wind
       // direction stays in the marker's own SVG `rotate(...)`, so the net effect

@@ -60,6 +60,14 @@ export default class Polar extends Component<PolarSignature> {
       reflow: true,
       type: 'line',
       spacing: [0, 0, 0, 0],
+      // `plotOptions.series.animation` below only covers per-point/series
+      // animation. Chart-level animation still applies to everything else --
+      // notably the yAxis extremes, which shift on every background refresh
+      // as `wind-direction/graph.gts`'s sliding window moves, animating every
+      // point to a new radius each time. Data here always replaces outright
+      // rather than transitioning between old and new state, so animation is
+      // off at the chart level too, not just per-series.
+      animation: false,
     },
     title: {
       text: undefined,
@@ -73,10 +81,20 @@ export default class Polar extends Component<PolarSignature> {
       min: 0,
       max: 360,
       labels: {
+        // Highcharts' cartesian-oriented overflow check misjudges this
+        // circular layout and crops most of the 8 compass labels down to
+        // nothing (only N/S happen to pass it); `allow` renders every label
+        // the formatter returns, uncropped.
+        overflow: 'allow',
         formatter: function ({ value }: { value: number }) {
           return DIRECTIONS[Math.round(value / 45)];
         },
-        distance: '86%',
+        // The pane (below and in the `responsive` rules) always fills nearly
+        // the whole chart box, so a positive distance -- which places labels
+        // *outside* the pane's own radius -- pushes them past the visible
+        // edge. Negative keeps them inside the pane, with room for the
+        // label's own text width before the edge.
+        distance: '-25%',
         style: {
           fontSize: '11px',
         },
@@ -123,7 +141,7 @@ export default class Polar extends Component<PolarSignature> {
             },
             xAxis: {
               labels: {
-                distance: '78%',
+                distance: '-25%',
                 style: {
                   fontSize: '10px',
                 },
