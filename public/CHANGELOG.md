@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Changed
+
+- Map station markers are smaller at full size, so they no longer dwarf the map on a close-up view.
+
+### Fixed
+
+- Fixed map station markers sometimes not responding to a tap on mobile. Selecting a station is now handled by the map marker itself instead of a separate button layered on top of it.
+
 ## v0.19.4 - 2026-07-24
 
 ### Fixed
