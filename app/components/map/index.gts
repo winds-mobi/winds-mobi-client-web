@@ -207,16 +207,15 @@ export default class Map extends Component<MapSignature> {
       // `cursor-pointer` and `rounded-full` here, not on anything inside
       // `<MapStationMarker>`: this `className` lands on MapLibre's own
       // marker element (the thing `<marker.on @event="click">` actually
-      // listens on), which stays at its full unscaled size even when the
-      // marker's own inner content is visually shrunk via `scale()` (a CSS
-      // transform doesn't shrink the box a parent/hit-test uses, only the
-      // transformed element's own painted region) -- so the cursor, and the
-      // circular shape the selected-state ring (see the `selectMapMarker`
-      // modifier) needs to render against, both have to live on the outer
-      // element to match the real clickable area, not the inner content
-      // that can be smaller than it. Static and never varies, unlike the
-      // ring itself, so this is a plain `className` rather than something
-      // toggled by a modifier.
+      // listens on), which is the element the app needs a reliable click
+      // from -- see `map/station-marker.gts`'s own top-of-file comment for
+      // why click is routed through MapLibre's own element rather than a
+      // second clickable element stacked on top. `<MapStationMarker>`'s own
+      // content now sizes this outer element too (it shrink-wraps to it), so
+      // the cursor and the selected-state ring (see the `selectMapMarker`
+      // modifier) track the marker's actual current size, not a fixed one.
+      // Static and never varies, unlike the ring itself, so this is a plain
+      // `className` rather than something toggled by a modifier.
       className: 'cursor-pointer rounded-full',
       // Pin the marker to the map plane so MapLibre counter-rotates it by the
       // bearing and tilts it by the pitch on every rotate/pitch event. The wind

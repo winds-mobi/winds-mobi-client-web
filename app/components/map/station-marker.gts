@@ -6,6 +6,7 @@ import type SettingsService from 'winds-mobi-client-web/services/settings';
 import {
   ARROW_DIRECTION_OFFSET,
   ARROW_SCALE,
+  BASE_MARKER_SIZE,
   colourForWindReading,
   MARKER_OUTLINE_WIDTH,
   MARKER_PLAIN_OUTLINE_COLOUR,
@@ -74,15 +75,15 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     );
   }
 
-  // ARROW_SCALE grows the arrow past the ring's fixed baseline (see the
-  // svg's own class below and ARROW_SCALE's comment in station-arrow.ts).
-  // On top of that, shrink the whole arrow by reading age when the
-  // preference is on, and always by map zoom so markers don't dwarf the map
-  // when zoomed out to see a whole region. All three multiply together, so
-  // an old reading at a low zoom shrinks further still. Recomputed each
-  // refresh cycle as new readings replace the record, so no timer is needed
-  // — the data only changes on refresh anyway; the zoom factor is recomputed
-  // whenever the routed zoom (settled after a pan/zoom gesture) changes.
+  // ARROW_SCALE is a flat overall-size multiplier (see its comment in
+  // station-arrow.ts). On top of that, shrink the whole marker by reading
+  // age when the preference is on, and always by map zoom so markers don't
+  // dwarf the map when zoomed out to see a whole region. All three multiply
+  // together, so an old reading at a low zoom shrinks further still.
+  // Recomputed each refresh cycle as new readings replace the record, so no
+  // timer is needed — the data only changes on refresh anyway; the zoom
+  // factor is recomputed whenever the routed zoom (settled after a pan/zoom
+  // gesture) changes.
   get markerScale() {
     const ageScale = this.settings.shrinkOldData
       ? scaleForReadingAge(this.args.station.last.timestamp)
@@ -91,39 +92,58 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return ARROW_SCALE * ageScale * scaleForZoom(this.args.zoom);
   }
 
+  // The actual rendered box (px) for both the ring and the arrow together —
+  // see `sizeStyle` below for why this drives real `width`/`height` rather
+  // than a `transform: scale(...)`.
+  get markerSizePx() {
+    return BASE_MARKER_SIZE * this.markerScale;
+  }
+
   // Rotate to the wind direction about the hub centre. `rotate(angle cx cy)`
-  // takes its centre natively, unlike scale (see `scaleStyle` below), so this
-  // needs no recentring trick of its own.
+  // takes its centre natively, unlike scale, so this needs no recentring
+  // trick of its own.
   get markerTransform() {
     const centre = this.geometry.rotationCentre;
     const angle = this.args.station.last.direction + ARROW_DIRECTION_OFFSET;
     return `rotate(${angle} ${centre})`;
   }
 
-  // Age/zoom shrink applied as a CSS transform on the outer div itself,
-  // rather than an SVG-space scale on the inner <g>, so the ring and the
-  // arrow it wraps shrink together as one unit. This also sidesteps SVG's
-  // `scale()` always scaling about the origin: CSS transforms default to
-  // `transform-origin: center`, and the div's own box is already centred on
-  // the hub (the svg's `viewBox` is centred on it, and `flex items-center
-  // justify-center` centres the svg within the div), so scaling the div
-  // needs no manual recentring either.
-  get scaleStyle() {
-    return htmlSafe(`transform: scale(${this.markerScale});`);
+  // Age/zoom/ARROW_SCALE resize the outer div's real `width`/`height`
+  // (`markerSizePx` above), not a `transform: scale(...)` -- deliberately,
+  // so the ring (the outer `.maplibregl-marker` element, which shrink-wraps
+  // to this div's own layout box) tracks the same size as the arrow instead
+  // of staying fixed while only the arrow's paint shrinks. A `transform`
+  // only affects an element's own painted/hit-test region, never the layout
+  // box an ancestor uses to size itself around it -- real `width`/`height`
+  // is what actually propagates up. This is also what makes the marker's
+  // real clickable area (on the outer element, see `markerInitOptions` in
+  // map/index.gts) match its current visual size, which matters when
+  // several markers' click areas would otherwise overlap at a shrunk zoom
+  // level. The svg below fills this box (`h-full w-full`), and MapLibre's
+  // own `anchor: 'center'` recentring is percentage-based, so it stays
+  // correct as the box resizes without any recentring trick here either.
+  get sizeStyle() {
+    const size = this.markerSizePx;
+    return htmlSafe(`width: ${size}px; height: ${size}px;`);
   }
 
   // `cursor-pointer` and `rounded-full` deliberately live on the MapLibre
   // marker element itself (`markerInitOptions` in map/index.gts, that shape
   // is static and never varies), and the selected-state ring lives there too,
   // toggled by the `selectMapMarker` modifier below (that one's reactive, so
-  // it can't be a static `className` -- see the modifier's own comment). That
-  // outer element's shrink-wrapped size comes from this div's own unscaled
-  // layout box (h-20, 80px) alone -- the svg below deliberately carries no
-  // `h-*`/`w-*` of its own (confirmed empirically that tuning them had no
-  // visible effect anyway), so `ARROW_SCALE` (see station-arrow.ts) is the
-  // only thing controlling the arrow's visible size, via the same
-  // `transform: scale(...)` below.
-  markerClass = 'flex h-20 w-20 items-center justify-center p-1 transition';
+  // it can't be a static `className` -- see the modifier's own comment).
+  // Sizing is entirely `sizeStyle` above now (real `width`/`height`, not a
+  // Tailwind `h-*`/`w-*`), so this only carries layout/visual classes that
+  // don't vary with scale; `transition-[width,height]` keeps resizes smooth
+  // now that the default `transition` utility (which covered `transform`)
+  // no longer applies to what's actually changing. `p-1` gives the arrow a
+  // small fixed gap from the ring's edge (works because Tailwind's
+  // preflight sets `box-sizing: border-box` app-wide, so this padding
+  // carves into `sizeStyle`'s box rather than growing past it) -- it's a
+  // fixed px amount rather than a percentage, so it becomes proportionally
+  // more of the box the smaller a marker shrinks.
+  markerClass =
+    'flex items-center justify-center p-1 transition-[width,height]';
 
   <template>
     {{! template-lint-disable no-inline-styles }}
@@ -132,11 +152,11 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       data-station-id={{@station.id}}
       data-test-map-station-marker
       class={{this.markerClass}}
-      style={{this.scaleStyle}}
+      style={{this.sizeStyle}}
       {{selectMapMarker @isSelected}}
     >
       {{! template-lint-enable no-inline-styles }}
-      <svg aria-hidden="true" viewBox={{this.viewBox}}>
+      <svg aria-hidden="true" class="h-full w-full" viewBox={{this.viewBox}}>
         <g transform={{this.markerTransform}}>
           {{! Gusts band differs: the gusts shape behind, shown through the hub hole. }}
           {{#if this.showGustsHub}}

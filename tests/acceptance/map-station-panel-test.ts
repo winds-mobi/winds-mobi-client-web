@@ -478,12 +478,10 @@ module('Acceptance | map station panel', function (hooks) {
   // `cursor-pointer` deliberately lives on MapLibre's own marker element
   // (passed via `markerInitOptions`'s `className`), not on anything inside
   // `<MapStationMarker>` -- that outer element is what `<marker.on
-  // @event="click">` actually listens on, and it stays at its full unscaled
-  // size even when the marker's own inner content is visually shrunk via a
-  // CSS `transform: scale(...)` (a transform doesn't shrink the box a
-  // parent/hit-test uses, only the transformed element's own painted
-  // region). This reads the real DOM MapLibre produced to confirm the
-  // option actually reached it, not just that we passed it.
+  // @event="click">` actually listens on (see `map/station-marker.gts`'s
+  // top-of-file comment for why click is routed through it rather than a
+  // second clickable element). This reads the real DOM MapLibre produced to
+  // confirm the option actually reached it, not just that we passed it.
   test.if(
     'the map marker element itself gets the pointer cursor, not just its inner content',
     webGLAvailable,
