@@ -7,16 +7,13 @@ interface SelectMapMarkerSignature {
   };
 }
 
-// The selected-station ring/disc has to live on MapLibre's own marker
-// element -- this modifier's host element's own parent, since
-// `station-marker.gts` renders directly inside it via `{{#in-element}}` --
-// not on our own inner content. That outer element stays at full, unscaled
-// size regardless of the marker's own age/zoom shrink (`markerScale`'s
-// `transform: scale(...)` lives on our inner content only), and it's also
-// the element `<marker.on @event="click">` actually listens on: painting
-// the "this is selected" indicator anywhere else risks the same
-// visual/interactive mismatch the `cursor-pointer` fix (see
-// `markerInitOptions` in map/index.gts) already addressed for hovering.
+// The selected-station ring/disc lives on MapLibre's own marker element --
+// this modifier's host element's own parent, since `station-marker.gts`
+// renders directly inside it via `{{#in-element}}` -- not on our own inner
+// content. That outer element is the one `<marker.on @event="click">`
+// actually listens on and the one that shrink-wraps to the marker's real
+// current size (see `map/index.gts`'s `markerInitOptions` comment), so the
+// ring needs to render there to match both.
 //
 // `MarkerOptions.className` (the mechanism `cursor-pointer` uses) can't
 // carry this, though: ember-maplibre-gl only reads `@initOptions` once, in

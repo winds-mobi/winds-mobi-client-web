@@ -26,21 +26,17 @@ export interface MapStationMarkerSignature {
 }
 
 // Purely presentational -- the ring/disc and the arrow inside it. Clicking is
-// handled by the MapLibre marker itself, not by anything in this component
-// (see `map/index.gts`'s `<marker.on @event="click" ...>`): MapLibre's own
-// `Marker` element already fires a native `click` (it uses this internally
-// for popup-toggling), and continuously repositions itself via CSS
-// `transform` during every pan/zoom/momentum-settle -- stacking our own
-// separate clickable element (and its own `transform: scale(...)`) on top
-// added a second thing that could be moving mid-tap, which is a known
-// trigger for mobile browsers to silently drop a touch's synthesized click
-// (a target that moves between touchstart and touchend reads as a
-// scroll/pan, not a tap). Letting the marker's own already-reliable click
-// carry the selection removes that extra layer. Traded away: keyboard
-// Enter/Space activation, which this component's own real `<button>` used
-// to give for free -- MapLibre's marker only wires Enter/Space to toggling a
-// popup, not a generic click, and this app has decided that's an acceptable
-// gap for now rather than wiring up a keyboard handler of its own.
+// handled by the MapLibre marker itself (see `map/index.gts`'s `<marker.on
+// @event="click" ...>`), not by anything in this component: MapLibre's own
+// `Marker` element continuously repositions itself via CSS `transform`
+// during every pan/zoom/momentum-settle, and a second, independently
+// clickable element layered on top would give mobile browsers a second
+// thing that can be moving mid-tap -- a known trigger for a touch's
+// synthesized click getting silently dropped (a target that moves between
+// touchstart and touchend reads as a scroll/pan, not a tap). The marker's
+// own click is reliable and carries the selection instead. This does mean
+// no keyboard Enter/Space activation -- MapLibre's marker only wires those
+// keys to toggling a popup, not a generic click.
 export default class MapStationMarker extends Component<MapStationMarkerSignature> {
   @service declare settings: SettingsService;
 
@@ -108,40 +104,36 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
     return `rotate(${angle} ${centre})`;
   }
 
-  // Age/zoom/ARROW_SCALE resize the outer div's real `width`/`height`
-  // (`markerSizePx` above), not a `transform: scale(...)` -- deliberately,
-  // so the ring (the outer `.maplibregl-marker` element, which shrink-wraps
-  // to this div's own layout box) tracks the same size as the arrow instead
-  // of staying fixed while only the arrow's paint shrinks. A `transform`
-  // only affects an element's own painted/hit-test region, never the layout
-  // box an ancestor uses to size itself around it -- real `width`/`height`
-  // is what actually propagates up. This is also what makes the marker's
-  // real clickable area (on the outer element, see `markerInitOptions` in
-  // map/index.gts) match its current visual size, which matters when
-  // several markers' click areas would otherwise overlap at a shrunk zoom
-  // level. The svg below fills this box (`h-full w-full`), and MapLibre's
-  // own `anchor: 'center'` recentring is percentage-based, so it stays
-  // correct as the box resizes without any recentring trick here either.
+  // Sets the div's real `width`/`height` (`markerSizePx` above) rather than
+  // a `transform: scale(...)`, so the ring (the outer `.maplibregl-marker`
+  // element, which shrink-wraps to this div's own layout box) tracks the
+  // arrow's size instead of staying a fixed size around a shrunk arrow -- a
+  // `transform` only affects an element's own painted/hit-test region, never
+  // the layout box an ancestor uses to size itself around it. This also
+  // keeps the marker's real clickable area (the outer element, see
+  // `markerInitOptions` in map/index.gts) matching its current visual size,
+  // so neighbouring markers' click areas don't overlap more than their
+  // visible arrows do at a shrunk zoom level. The svg fills this box
+  // (`h-full w-full`), and MapLibre's own `anchor: 'center'` recentring is
+  // percentage-based, so it stays correct as the box resizes.
   get sizeStyle() {
     const size = this.markerSizePx;
     return htmlSafe(`width: ${size}px; height: ${size}px;`);
   }
 
-  // `cursor-pointer` and `rounded-full` deliberately live on the MapLibre
-  // marker element itself (`markerInitOptions` in map/index.gts, that shape
-  // is static and never varies), and the selected-state ring lives there too,
-  // toggled by the `selectMapMarker` modifier below (that one's reactive, so
-  // it can't be a static `className` -- see the modifier's own comment).
-  // Sizing is entirely `sizeStyle` above now (real `width`/`height`, not a
-  // Tailwind `h-*`/`w-*`), so this only carries layout/visual classes that
-  // don't vary with scale; `transition-[width,height]` keeps resizes smooth
-  // now that the default `transition` utility (which covered `transform`)
-  // no longer applies to what's actually changing. `p-1` gives the arrow a
-  // small fixed gap from the ring's edge (works because Tailwind's
-  // preflight sets `box-sizing: border-box` app-wide, so this padding
-  // carves into `sizeStyle`'s box rather than growing past it) -- it's a
-  // fixed px amount rather than a percentage, so it becomes proportionally
-  // more of the box the smaller a marker shrinks.
+  // `cursor-pointer` and `rounded-full` live on the MapLibre marker element
+  // itself (`markerInitOptions` in map/index.gts, a static shape), and the
+  // selected-state ring lives there too, toggled by the `selectMapMarker`
+  // modifier below (reactive, so it can't be a static `className` -- see the
+  // modifier's own comment). Size comes entirely from `sizeStyle` above
+  // (real `width`/`height`), so this only carries classes that don't vary
+  // with scale; `transition-[width,height]` keeps resizes smooth (Tailwind's
+  // `transition` utility covers `transform`, not `width`/`height`). `p-1`
+  // gives the arrow a small fixed gap from the ring's edge (Tailwind's
+  // preflight sets `box-sizing: border-box` app-wide, so this padding carves
+  // into `sizeStyle`'s box rather than growing past it) -- being a fixed px
+  // amount rather than a percentage, that gap becomes proportionally bigger
+  // the smaller a marker shrinks.
   markerClass =
     'flex items-center justify-center p-1 transition-[width,height]';
 

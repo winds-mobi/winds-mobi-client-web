@@ -80,6 +80,13 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       spacingBottom: 6,
       spacingTop: 6,
       zoomType: 'x',
+      // `plotOptions.series.animation` below only covers per-point/series
+      // animation. Chart-level animation still applies to everything else
+      // (e.g. axis extremes) on every background refresh. Data here always
+      // replaces outright rather than transitioning between old and new
+      // state, so animation is off at the chart level too, not just
+      // per-series.
+      animation: false,
     },
     rangeSelector: {
       inputEnabled: false,
