@@ -8,7 +8,7 @@ export interface HelpChangelogSignature {
   Blocks: {
     default: [];
   };
-  Element: HTMLElement;
+  Element: null;
 }
 
 export default class HelpChangelog extends Component<HelpChangelogSignature> {
@@ -21,10 +21,12 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
   }
 
   <template>
-    <div data-test-help-changelog class="text-sm text-slate-600">
-      <p data-test-help-changelog-version>
-        {{t "help.changelog.version" version=this.version}}
-      </p>
+    <dt data-test-help-changelog class="font-medium text-slate-500">{{t
+        "help.changelog.versionLabel"
+      }}</dt>
+    <dd data-test-help-changelog-version>{{this.version}}</dd>
+    <dt class="font-medium text-slate-500">{{t "help.changelog.title"}}</dt>
+    <dd>
       <a
         data-test-help-changelog-link
         class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
@@ -34,6 +36,6 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
       >
         {{t "help.changelog.linkText"}}
       </a>
-    </div>
+    </dd>
   </template>
 }

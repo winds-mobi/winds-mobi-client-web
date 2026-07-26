@@ -83,9 +83,7 @@ module('Acceptance | help route', function (hooks) {
     assert.dom('[data-test-station-air-section]').exists();
     assert.dom('[data-test-station-provider-link]').hasText('Holfuy');
     assert.dom('[data-test-help-changelog]').exists();
-    assert
-      .dom('[data-test-help-changelog-version]')
-      .hasText('Version: unreleased');
+    assert.dom('[data-test-help-changelog-version]').hasText('unreleased');
     assert
       .dom('[data-test-help-changelog-link]')
       .hasAttribute(
