@@ -53,7 +53,7 @@ decoding the sourcemap mappings) plus live headers from `https://winds.mobi` and
 - Origin (`winds.mobi`, Caddy): **no `cache-control` and no compression at all** on
   `index.html`, `sw.js`, or the `assets/*` copies it also serves.
 
-### 1. The service worker precaches the wrong origin (highest value, pure bug)
+### 1. The service worker precaches the wrong origin — ✅ done
 
 Where it lives: [vite.config.mjs](vite.config.mjs) — `base: process.env.CDN_URL || '/'`
 for Vite, but `VitePWA({ base: '/' })` hardcoded; CDN_URL is set to
@@ -65,27 +65,61 @@ Problem: the two `base` values disagree, so the built `sw.js` precaches
 `https://v2-winds-mobi.b-cdn.net/assets/main-*.js`. Verified against production: the live
 `sw.js` precache list is all root-relative (`assets/main-B1MYm70R.js`, …) and
 `https://winds.mobi/assets/main-B1MYm70R.js` returns the same file (rsync deploys `dist/`
-to Caddy too). Consequences, both real today:
+to Caddy too). Consequences, both real:
 
-- Every first visit downloads the app **twice** — ~605 kB zstd from the CDN to boot, plus a
+- Every first visit downloaded the app **twice** — ~605 kB zstd from the CDN to boot, plus a
   background precache of **2.9 MB uncompressed** from Caddy (which sends no
-  `content-encoding`), competing for bandwidth exactly during startup. On mobile this is
-  the single most expensive thing the app does.
-- Repeat visits get **no** service-worker benefit for JS/CSS — the CDN responses are in no
-  Workbox cache, so the app is only as fast as the HTTP cache allows and is not offline-capable.
+  `content-encoding`), competing for bandwidth exactly during startup. On mobile this was
+  the single most expensive thing the app did.
+- Repeat visits got **no** service-worker benefit for JS/CSS — the CDN responses were in no
+  Workbox cache, so the app was only as fast as the HTTP cache allowed and wasn't
+  offline-capable.
 
-Proposed fix: make the two bases agree — `VitePWA({ base: process.env.CDN_URL || '/' })`.
-Bunny already sends `access-control-allow-origin: *` and the script/link tags already carry
-`crossorigin`, so cross-origin precaching will work. Verify by building with
-`CDN_URL=https://v2-winds-mobi.b-cdn.net/` and confirming the precache URLs in `dist/sw.js`
-are absolute CDN URLs while `index.html`/`registerSW.js`/`manifest.webmanifest` (served by
-Caddy, not the CDN) stay root-relative — those three must NOT move to the CDN, since the
-service worker's scope is `winds.mobi`. If `workbox.base` can't express that split, the
-alternative is to drop `globPatterns` for `assets/**` from the precache entirely and add a
-runtime `CacheFirst` route for `^https://v2-winds-mobi\.b-cdn\.net/` instead — same effect,
-less coupling to the CDN URL. Either way this also answers "cache everything for a week
-without even a freshness request": precached and `CacheFirst` entries are served straight
-from Cache Storage with no network round-trip at all.
+**The naive fix — `VitePWA({ base: process.env.CDN_URL || '/' })`, as originally proposed
+here — is wrong and was tested to confirm it: it doesn't just fix the precache, it also
+moves the service worker's own registration URL and scope to the CDN, and a service worker
+can only be registered from the same origin as the document registering it.** Built with
+that change and confirmed the browser-facing breakage directly: `registerSW.js` came out
+calling `navigator.serviceWorker.register('https://v2-winds-mobi.b-cdn.net/sw.js', { scope:
+'https://v2-winds-mobi.b-cdn.net/' })`, which browsers reject outright. `base: '/'` here is
+not an oversight — it's PR #107 (`bb9c92c`), a deliberate prior fix by Yann Savary for
+exactly this failure mode; its own PR body shows the `manifest.webmanifest`/`registerSW.js`
+tags staying root-relative as the point of the change. That fix is correct and still
+needed; it just left the precache-manifest mismatch (this item) unaddressed, since Workbox
+derives the precache manifest's URL prefix from the same `base` value.
+
+**Actual fix:** kept `base: '/'` for `VitePWA`'s own artifacts, and added Workbox's
+`modifyURLPrefix` — a `generateSW` option that rewrites only the precache manifest's own
+URLs, independent of the `base` used for the SW's registration/scope/manifest tags — scoped
+to exactly the two prefixes the real page actually fetches from the CDN in production
+(`assets/` and `@embroider/virtual/`; verified against a real prod `index.html`, not
+assumed). Applied only when `CDN_URL` is set, so a local/CDN-less `pnpm build` is unaffected.
+
+Verified with real builds, both with and without `CDN_URL` set:
+
+- With `CDN_URL`: `registerSW.js`/`manifest.webmanifest`/`index.html`'s manifest and
+  registerSW `<link>`/`<script>` tags all stayed root-relative; the precache list's
+  `assets/*` and `@embroider/virtual/*` entries became CDN-absolute; `index.html`,
+  `registerSW.js`, `manifest.webmanifest`, and the icon files stayed root-relative (correct
+  — those are genuinely Caddy-served, not on the CDN).
+- Without `CDN_URL`: precache list is entirely root-relative, unchanged from before this fix
+  — no regression for a CDN-less build.
+
+Bunny already sends `access-control-allow-origin: *` on CDN assets, so Workbox's
+cross-origin precache fetches get a real (non-opaque) response it can verify and cache
+normally — no CORS obstacle.
+
+This also answers "cache everything for a week without even a freshness request":
+precached entries are served straight from Cache Storage with no network round-trip at all.
+
+Considered and explicitly deferred (not done as part of this fix): putting Bunny in front
+of `winds.mobi` itself (a custom hostname/CNAME) so there's no separate CDN origin at all,
+which would eliminate this entire class of base-mismatch bug rather than patching around
+it. Real option — the team controls DNS, Bunny, and Caddy — but it's a bigger cross-repo,
+cross-dashboard change with real tradeoffs (Bunny becomes load-bearing for the whole site,
+not just static assets; needs edge-rule work to keep `/api`, `/admin`, `/user`,
+`/django-static` bypassing cache correctly) that needs its own discussion, not something to
+fold into an app-level bug fix.
 
 ### 2. First render is blocked on a GPS fix
 
