@@ -87,9 +87,9 @@ less coupling to the CDN URL. Either way this also answers "cache everything for
 without even a freshness request": precached and `CacheFirst` entries are served straight
 from Cache Storage with no network round-trip at all.
 
-### 2. First render is blocked on a GPS fix
+### 2. First render is blocked on a GPS fix — ✅ done
 
-Where it lives: [app/routes/application.ts](app/routes/application.ts) —
+Where it lived: [app/routes/application.ts](app/routes/application.ts) —
 `await this.nearbyLocation.syncPermissionState()` in `beforeModel`, and
 [app/services/nearby-location.ts](app/services/nearby-location.ts), whose
 `syncPermissionState` ends with `await this.requestCurrentPosition()` when the permission
@@ -107,10 +107,16 @@ mobile GPS fix. Nothing needs the result synchronously: every consumer
 the service's tracked state, and `isCheckingPermission` already exists to express
 "not known yet".
 
-Proposed fix: stop awaiting it — kick the sync off without blocking the transition. Keep
-the existing re-entrancy guard so it still runs exactly once. The permission-state machine
-already models the intermediate state, so the UI should need no change; confirm the
-locate-control's disabled/spinner states still read correctly while it's in flight.
+Fix: dropped the `await` (`void this.nearbyLocation.syncPermissionState();`). No other
+change needed — `syncPermissionState`'s own re-entrancy guard (the synchronous
+`this.permissionState = 'syncing'` transition before its first `await`) lives entirely
+inside the service method itself, so it still runs exactly once regardless of whether the
+caller awaits it, and the existing `isCheckingPermission`/tracked-state consumers already
+render the "not known yet" state correctly with no changes on their end.
+
+Verified: `pnpm lint` clean; full `pnpm test:ember:dev` suite (217 passed, 8 skipped —
+the WebGL-dependent tests, unrelated) including `navbar/locate-control`'s pending/disabled
+integration tests and every `nearby-route` acceptance test, none of which needed changes.
 
 ### 3. Caddy serves the origin uncompressed and without cache headers
 
