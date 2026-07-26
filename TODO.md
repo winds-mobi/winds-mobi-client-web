@@ -185,23 +185,29 @@ staleness indicator driven off `station.last.timestamp` (the `time-ago` helper a
 renders exactly this wording) and, ideally, a dimmed/greyed marker treatment past some age
 threshold. Do not land item 5 without it.
 
-### 6. Keep `marked` off the critical path
+### 6. Keep `marked` off the critical path — ✅ done, superseded by dropping it entirely
 
-Where it lives: [app/components/help/changelog.gts](app/components/help/changelog.gts) —
-`import { marked } from 'marked'`.
+Landed, in two steps on the same branch: the first commit deferred `marked` behind a
+dynamic `import()`, as originally proposed below. The second commit went further and
+**removed `marked` as a dependency altogether** — instead of rendering `CHANGELOG.md`
+in-app, the help page now links to GitHub's own rendering of `CHANGELOG.md`, pinned to
+the exact git tag a build shipped (`app/utils/changelog-link.ts`, fed by a new
+`config.version` stamped from `APP_VERSION` in
+[.github/workflows/build-deploy-production.yml](.github/workflows/build-deploy-production.yml)),
+and shows that version number directly so a visitor can report it against a bug. Verified
+that `marked` no longer appears in the production bundle at all (not even as its own
+chunk); `@tailwindcss/typography` (only ever used for the markdown render's `prose`
+classes) was removed too, dropping the CSS bundle 174 kB → 158 kB raw.
 
-Problem: 40 kB of the main chunk is a Markdown parser used by exactly one component on
-`/help`, which also `fetch`es a 46 kB `CHANGELOG.md` at runtime.
+The `@tracked isLoading` manual-loading-flag issue flagged below is moot — the rewritten
+component is a plain presentational one with no fetch, no task, no loading state at all.
 
-Proposed fix: `await import('marked')` inside the component's existing load path (it is
-already async and already has an `AbortController`), so the parser is fetched alongside the
-Markdown it parses. Cheap and self-contained. A broader alternative — adopting
-`@embroider/router`'s `splitAtRoutes` so `help`/`settings`/`favorites` become route chunks —
-is a bigger change with a smaller payoff, since `map` is the default route and carries
-almost all the weight; not recommended unless items 4 and 6 prove insufficient.
-
-While in this file: `@tracked isLoading` here contradicts the "no manual loading flags" rule
-in CLAUDE.md. Fold that into this commit or record it as its own.
+Original proposal, kept for context: `await import('marked')` inside the component's
+existing load path, so the parser is fetched alongside the Markdown it parses. A broader
+alternative was also considered — adopting `@embroider/router`'s `splitAtRoutes` so
+`help`/`settings`/`favorites` become route chunks — and rejected as a bigger change with a
+smaller payoff, since `map` is the default route and carries almost all the weight. See the
+"Assessed" entry below for what checking that alternative actually turned up.
 
 ### 7. Preconnect to the tile hosts
 
@@ -282,6 +288,26 @@ station deep link in a private window with no service worker registered.
   imports, not the whole icon set. Leave it.
 - **Highcharts is already optimally split** — three dynamic chunks, no accessibility module.
   See the Highcharts section in CLAUDE.md.
+- **`@embroider/router` (item 6's rejected route-splitting alternative) is an unused
+  dependency, but its `splitAtRoutes` mechanism is real and does still work with this
+  app's Vite build** — worth knowing precisely if a future route ever gets heavy enough on
+  its own component code (not a single swappable dependency like `marked` was) to justify
+  it. Verified by reading the installed packages, not assumed: [app/router.ts](app/router.ts)
+  extends the plain `@ember/routing/router`, never `@embroider/router`'s (`@embroider/router`
+  is a tiny extension of the stock router that only activates lazy-loaded route bundles it
+  finds — installing it and switching `router.ts` to extend it is a prerequisite, not
+  optional). The actual splitting logic lives one layer down, in `@embroider/core` (its
+  `resolver-loader.js` and `virtual-route-entrypoint.js` both reference `splitAtRoutes`) and
+  is threaded through by `@embroider/compat`'s `compat-app-builder.js` from `EmberApp`'s own
+  options (`this.options.splitAtRoutes`) — i.e. it flows through
+  [ember-cli-build.mjs](ember-cli-build.mjs)'s existing `new EmberAppDefault(defaults, {...})`
+  call, the same place `babel.plugins` is already set, as `{ splitAtRoutes: [...] }`. This is
+  confirmed present in the exact `@embroider/vite`/`@embroider/core` versions this app has
+  installed — it is not a classic-build-only feature that quietly stopped working under Vite.
+  Its own README lists two real costs to weigh before reaching for it: the `serialize` hook on
+  `Route` stops working for a lazy route, and any route unit test that does
+  `owner.lookup('route:name')` needs to explicitly import and register that Route first,
+  since it's no longer guaranteed loaded.
 - **`manualChunks` would not help.** Splitting statically-imported code into more chunks
   changes nothing about how much must be parsed before boot; only the dynamic imports in
   items 4 and 6 do.
