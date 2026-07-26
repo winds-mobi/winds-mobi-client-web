@@ -112,6 +112,16 @@ normally — no CORS obstacle.
 This also answers "cache everything for a week without even a freshness request":
 precached entries are served straight from Cache Storage with no network round-trip at all.
 
+**To see the pre-fix bug live in DevTools:** unregistering the service worker does not
+clear its Cache Storage, so a browser that has ever visited `winds.mobi` before will often
+show no live duplicate request on reload — Workbox checks Cache Storage first and skips
+re-fetching a precache entry it already has. Two ways to actually see it: (1) Application →
+Storage → Cache Storage → `workbox-precache-*` → look for `https://winds.mobi/assets/main-*`
+sitting there unread (the page always loads the CDN copy) — the duplicate is present even
+with no live request; or (2) Application → Storage → **"Clear site data"** (not just
+unregister), then reload with the Network panel filtered to `main` — this forces a true
+cache miss and shows both the CDN and Caddy requests firing live, one for each origin.
+
 Considered and explicitly deferred (not done as part of this fix): putting Bunny in front
 of `winds.mobi` itself (a custom hostname/CNAME) so there's no separate CDN origin at all,
 which would eliminate this entire class of base-mismatch bug rather than patching around
