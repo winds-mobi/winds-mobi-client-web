@@ -1,10 +1,10 @@
 import Component from '@glimmer/component';
 import type Owner from '@ember/owner';
 import { registerDestructor } from '@ember/destroyable';
-import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import { htmlSafe, type SafeString } from '@ember/template';
-import { marked } from 'marked';
+import { waitForPromise } from '@ember/test-waiters';
+import { task } from 'ember-concurrency';
 import { t } from 'ember-intl';
 
 export interface HelpChangelogSignature {
@@ -18,50 +18,41 @@ export interface HelpChangelogSignature {
 export default class HelpChangelog extends Component<HelpChangelogSignature> {
   #abortController = new AbortController();
 
-  @tracked markdown?: string;
-  @tracked error = false;
-  @tracked isLoading = true;
+  @tracked renderedMarkdown?: SafeString;
 
   constructor(owner: Owner, args: HelpChangelogSignature['Args']) {
     super(owner, args);
 
     registerDestructor(this, () => this.#abortController.abort());
-    void this.load();
+    void this.load.perform();
   }
 
-  get renderedMarkdown(): SafeString | undefined {
-    if (!this.markdown) {
-      return undefined;
+  get isLoading() {
+    return this.load.isRunning;
+  }
+
+  get error() {
+    return this.load.last?.isError ?? false;
+  }
+
+  // Fetches the changelog and imports the markdown parser in parallel, rather
+  // than one after the other, since neither depends on the other's result.
+  // `waitForPromise` on the dynamic import, matching render-highcharts.ts,
+  // so test helpers' `await settled()` waits for the chunk to load.
+  load = task(async () => {
+    const [response, { marked }] = await Promise.all([
+      fetch('/CHANGELOG.md', { signal: this.#abortController.signal }),
+      waitForPromise(import('marked')),
+    ]);
+
+    if (!response.ok) {
+      throw new Error(`Unable to load changelog: ${response.status}`);
     }
 
-    return htmlSafe(marked.parse(this.markdown, { async: false }));
-  }
+    const markdown = await response.text();
 
-  @action
-  async load() {
-    try {
-      const response = await fetch('/CHANGELOG.md', {
-        signal: this.#abortController.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Unable to load changelog: ${response.status}`);
-      }
-
-      this.markdown = await response.text();
-      this.error = false;
-    } catch {
-      if (this.#abortController.signal.aborted) {
-        return;
-      }
-
-      this.error = true;
-    } finally {
-      if (!this.#abortController.signal.aborted) {
-        this.isLoading = false;
-      }
-    }
-  }
+    this.renderedMarkdown = htmlSafe(marked.parse(markdown, { async: false }));
+  });
 
   <template>
     <div data-test-help-changelog>
