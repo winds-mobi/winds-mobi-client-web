@@ -196,9 +196,11 @@ help:
     repoDescription: For developers — browse the source or open an issue.
   changelog:
     title: Changelog
-    description: Recent shipped changes, straight from the project changelog.
-    loading: Loading changelog…
-    error: The changelog could not be loaded right now.
+    description: >-
+      See what's changed, and check your version below — handy to include
+      when reporting a bug.
+    version: 'Version: {version}'
+    linkText: View the full changelog on GitHub
 
 map:
   legend:

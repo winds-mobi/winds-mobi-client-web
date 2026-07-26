@@ -84,6 +84,15 @@ module('Acceptance | help route', function (hooks) {
     assert.dom('[data-test-station-provider-link]').hasText('Holfuy');
     assert.dom('[data-test-help-changelog]').exists();
     assert
+      .dom('[data-test-help-changelog-version]')
+      .hasText('Version: unreleased');
+    assert
+      .dom('[data-test-help-changelog-link]')
+      .hasAttribute(
+        'href',
+        'https://github.com/winds-mobi/winds-mobi-client-web/blob/main/CHANGELOG.md'
+      );
+    assert
       .dom('[data-test-help-discord-link]')
       .hasAttribute('href', 'https://discord.gg/6VU23xDv5v');
   });
