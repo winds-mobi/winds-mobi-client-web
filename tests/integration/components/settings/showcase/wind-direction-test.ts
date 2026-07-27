@@ -51,11 +51,15 @@ module(
       );
       const series = chart?.series.find((s) => s.name === 'Direction');
 
+      // Regression guard: windbarb's own dataGrouping.enabled: true default
+      // combined several of these into one grouped point at this narrow a
+      // width before the series explicitly disabled it -- "only one arrow,
+      // stuck at one side" (see chartData's dataGrouping comment).
       assert.deepEqual(
         series?.data.map(
           (p) => (p as unknown as { direction: number }).direction
         ),
-        [20, 110, 250]
+        [0, 45, 120, 200, 300]
       );
     });
   }

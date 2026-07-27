@@ -11,15 +11,16 @@ export interface SettingsShowcaseWindDirectionSignature {
   Element: HTMLDivElement;
 }
 
-// Stronger gusts than a typical light-wind reading: windbarb's barb shape
-// is Beaufort/knot-derived (see highcharts-options.ts's KM_H_PER_M_S
-// comment), so a weak sample speed draws as a bare stem or a single
-// half-feather and barely reads as a wind barb at all. These are picked to
-// each grow a visibly different number of feathers.
+// From calm (0 -- windbarb draws Beaufort level 0 as a plain circle, not a
+// stem) up to a strong-ish gust, each step growing a visibly different
+// number of feathers -- windbarb's barb shape is Beaufort/knot-derived (see
+// highcharts-options.ts's KM_H_PER_M_S comment).
 const SAMPLE_READINGS = [
-  { speed: 45, direction: 20 },
-  { speed: 65, direction: 110 },
-  { speed: 50, direction: 250 },
+  { speed: 0, direction: 0 },
+  { speed: 10, direction: 45 },
+  { speed: 20, direction: 120 },
+  { speed: 30, direction: 200 },
+  { speed: 40, direction: 300 },
 ];
 
 // Renders the *real* Highcharts windbarb series (via the same
@@ -32,7 +33,7 @@ export default class SettingsShowcaseWindDirection extends Component<SettingsSho
   chartOptions = {
     chart: {
       height: 56,
-      margin: [4, 4, 4, 4],
+      margin: [4, 12, 4, 12],
       animation: false,
     },
     title: { text: undefined },
@@ -50,6 +51,13 @@ export default class SettingsShowcaseWindDirection extends Component<SettingsSho
       {
         name: 'Direction',
         type: 'windbarb',
+        // This preview is a handful of fixed decorative points, not a real
+        // time series -- windbarb's own `dataGrouping.enabled: true`
+        // default (needed for the crash fix above) would otherwise combine
+        // several of them into one grouped point at a narrow width like
+        // this (`groupPixelWidth: 30`), which is what "only one arrow,
+        // stuck at one side" actually was.
+        dataGrouping: { enabled: false },
         data: SAMPLE_READINGS.map((reading, index) => ({
           x: index,
           value: reading.speed / KM_H_PER_M_S,
@@ -67,7 +75,7 @@ export default class SettingsShowcaseWindDirection extends Component<SettingsSho
     >
       {{#if @enabled}}
         <div
-          class="h-14 w-32"
+          class="h-14 w-full"
           {{renderHighcharts
             "chart"
             this.chartOptions
