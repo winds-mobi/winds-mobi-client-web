@@ -139,7 +139,14 @@ export default class StationWindContent extends Component<StationWindContentSign
             // point's direction is windbarb's own vector-average of every
             // raw direction in the group, a real float
             // (e.g. 86.28656870131857), not a station-reported integer.
-            const direction = Math.round(this.direction);
+            // Also normalized to 0-359: that vector average is computed via
+            // `Math.atan2`, which returns (-180, 180], not [0, 360) -- a
+            // raw reading is always already 0-359, so this only bites a
+            // grouped point. Without normalizing, azimuthToCardinal's own
+            // `% 8` on a negative input stays negative in JS (unlike a
+            // mathematical modulo), indexing DIRECTIONS out of bounds and
+            // rendering "undefined" in the tooltip.
+            const direction = ((Math.round(this.direction) % 360) + 360) % 360;
 
             return `${this.series.name}: ${azimuthToCardinal(
               direction

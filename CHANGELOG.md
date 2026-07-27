@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **🧪 Beta:** The wind history chart can now show wind direction alongside speed and gusts, as a row of small arrows along the top — rotated to the wind's direction and coloured by its speed, matching the map markers. Off by default; turn it on under Settings → Beta features.
+
 ## v0.20.1 - 2026-07-31
 
 ### Fixed

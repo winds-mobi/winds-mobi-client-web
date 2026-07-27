@@ -244,4 +244,77 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
       `tooltip "${tooltip}" mentions the point's own (grouped) direction (${expectedDirectionText}), not a stale raw reading`
     );
   });
+
+  // Regression test for a real bug: windbarb's vector-average approximation
+  // (see ApproximationRegistry.windbarb in Highcharts' own WindbarbSeries.js)
+  // recovers the group's direction via `Math.atan2`, which returns degrees
+  // in (-180, 180], not [0, 360) -- a raw reading is always already 0-359,
+  // so this only surfaces for a grouped point whose average direction falls
+  // in the "negative" half (e.g. 200° comes back as -160°, the same angle).
+  // Feeding that negative value straight into azimuthToCardinal broke: its
+  // own `% 8` keeps JS's sign-of-the-dividend behaviour on a negative input,
+  // indexing DIRECTIONS out of bounds and rendering the literal string
+  // "undefined" in the tooltip instead of a cardinal direction.
+  test('a grouped Direction point whose vector average wraps negative still renders a real cardinal, not "undefined"', async function (this: WindPresenterTestContext, assert) {
+    enableWindDirectionBeta(this);
+
+    const now = Date.now();
+
+    this.history = Array.from({ length: 400 }, (_, i) => ({
+      id: `history-${i}`,
+      // Constant direction, alternating speed only: forces grouping (same
+      // as the test above) while keeping the vector average exactly 200°
+      // (recovered by atan2 as -160°) rather than some other blend.
+      direction: 200,
+      speed: i % 2 === 0 ? 3 : 45,
+      gusts: 22,
+      temperature: 6,
+      humidity: 60,
+      rain: 0,
+      timestamp: now - (400 - i) * 30 * 1000,
+      [Type]: 'history',
+    }));
+
+    await render(
+      hbs`<div class="h-64 w-64"><Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" /></div>`
+    );
+
+    const Highcharts = (await import('highcharts')).default;
+    const chart = Highcharts.charts.findLast((c) =>
+      c?.series.some((s) => s.name === 'Direction')
+    );
+    const series = chart?.series.find((s) => s.name === 'Direction');
+    const points = (series?.points ??
+      series?.data ??
+      []) as WindbarbPointLike[];
+    const grouped = points.find(
+      (p) =>
+        ((p as unknown as { dataGroup?: { length: number } }).dataGroup
+          ?.length ?? 1) > 1
+    );
+
+    assert.ok(
+      grouped,
+      'fixture is dense enough that at least one rendered point groups multiple raw readings'
+    );
+    assert.true(
+      grouped!.direction < 0,
+      `fixture reproduces the wraparound: grouped direction (${grouped?.direction}) is negative, as atan2 returns for a 200° average`
+    );
+
+    const tooltip = (
+      series as unknown as {
+        tooltipOptions: { pointFormatter: (this: unknown) => string };
+      }
+    ).tooltipOptions.pointFormatter.call(grouped);
+
+    assert.false(
+      tooltip.includes('undefined'),
+      `tooltip "${tooltip}" must not contain "undefined"`
+    );
+    assert.true(
+      tooltip.includes('S') && tooltip.includes('200°'),
+      `tooltip "${tooltip}" shows the normalized cardinal/degrees (S, 200°), not the raw negative value`
+    );
+  });
 });
