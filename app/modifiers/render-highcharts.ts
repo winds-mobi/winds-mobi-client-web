@@ -35,11 +35,18 @@ interface RenderHighchartsSignature {
       // undefined for the plain/polar chart, which has no range selector.
       stationId?: string;
       defaultRangeSelectorIndex?: number;
-      // Only the wind history chart sets this: it's the one stock chart
-      // with a `windbarb` series (wind direction), which needs its own
-      // module beyond `highcharts/modules/stock`. Left undefined/false for
-      // every other chart so they don't pay for a module they never use.
+      // Set by any chart with a `windbarb` series (wind direction): the
+      // wind history stock chart, and the settings page's mini showcase
+      // preview of it. Left undefined/false for every other chart so they
+      // don't pay for a module they never use.
       needsWindbarb?: boolean;
+      // Set by the polar wind-direction chart: the pane/radial-axis support
+      // `chart.polar: true` needs lives in `highcharts/highcharts-more`, not
+      // core Highcharts. Previously assumed true for every non-stock chart,
+      // which was fine while the polar chart was the only other consumer,
+      // but a plain (non-polar) `chart` kind -- e.g. the settings windbarb
+      // showcase -- has no use for it and shouldn't pay for it either.
+      needsPolarSupport?: boolean;
     };
   };
 }
@@ -92,6 +99,7 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       stationId,
       defaultRangeSelectorIndex,
       needsWindbarb,
+      needsPolarSupport,
     }: RenderHighchartsSignature['Args']['Named']
   ) {
     const callId = ++this.latestCallId;
@@ -104,7 +112,8 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       seriesData,
       stationId,
       defaultRangeSelectorIndex,
-      needsWindbarb
+      needsWindbarb,
+      needsPolarSupport
     );
   }
 
@@ -116,7 +125,8 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     seriesData: NamedSeriesOptions[] | undefined,
     stationId: string | undefined,
     defaultRangeSelectorIndex: number | undefined,
-    needsWindbarb: boolean | undefined
+    needsWindbarb: boolean | undefined,
+    needsPolarSupport: boolean | undefined
   ) {
     // Wrapped in `waitForPromise` so test helpers' `await settled()` (and
     // `render()`, which awaits it internally) wait for this async chart
@@ -125,14 +135,14 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
 
     if (kind === 'stockChart') {
       await waitForPromise(import('highcharts/modules/stock'));
+    }
 
-      if (needsWindbarb) {
-        await waitForPromise(import('highcharts/modules/windbarb'));
-      }
-    } else {
-      // Polar support (the pane, radial axes, `chart.polar: true`) lives in
-      // this module, not core Highcharts.
+    if (needsPolarSupport) {
       await waitForPromise(import('highcharts/highcharts-more'));
+    }
+
+    if (needsWindbarb) {
+      await waitForPromise(import('highcharts/modules/windbarb'));
     }
 
     if (callId !== this.latestCallId) {

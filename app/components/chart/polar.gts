@@ -209,7 +209,12 @@ export default class Polar extends Component<PolarSignature> {
     <div
       class="chart-container"
       ...attributes
-      {{renderHighcharts "chart" this.mergedChartOptions @chartData}}
+      {{renderHighcharts
+        "chart"
+        this.mergedChartOptions
+        @chartData
+        needsPolarSupport=true
+      }}
     ></div>
   </template>
 }
