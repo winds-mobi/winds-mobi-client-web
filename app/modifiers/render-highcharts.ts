@@ -142,6 +142,21 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     }
 
     if (needsWindbarb) {
+      // windbarb registers its own custom data-grouping approximation
+      // (a vector-average weighted by speed) into Highcharts' shared
+      // `dataGrouping.approximations` registry on load -- that registry
+      // only exists at all once either Highcharts Stock (`modules/stock`,
+      // already loaded above whenever kind is 'stockChart') or this
+      // standalone module has run; core Highcharts alone has no data
+      // grouping and no such registry, so loading windbarb without one of
+      // the two first throws (`_Highcharts.dataGrouping.approximations` is
+      // undefined) -- confirmed live, this only surfaced for the settings
+      // showcase's plain (non-stock) preview chart, since every other
+      // windbarb consumer is a stock chart.
+      if (kind !== 'stockChart') {
+        await waitForPromise(import('highcharts/modules/datagrouping'));
+      }
+
       await waitForPromise(import('highcharts/modules/windbarb'));
     }
 

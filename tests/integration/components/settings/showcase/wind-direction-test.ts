@@ -24,6 +24,18 @@ module(
     // data-flow contract into it), not just that a chart of some kind
     // exists -- see CLAUDE.md's Testing section on why this is testing us,
     // not Highcharts.
+    //
+    // This test caught a real bug once already (issue: crash on the
+    // settings page, `_Highcharts.dataGrouping.approximations` undefined):
+    // windbarb registers a custom data-grouping approximation into
+    // Highcharts' shared registry on load, which only exists once either
+    // Highcharts Stock or the standalone `modules/datagrouping` has run --
+    // and only ran green in the *full* suite because an earlier stock-chart
+    // test happened to load Stock first in the same page, polluting the
+    // shared global Highcharts state in a way that accidentally hid the
+    // bug. If this test is ever changed, re-run it filtered to just this
+    // file (not the whole suite) to make sure it still fails on its own
+    // when the fix in render-highcharts.ts is reverted.
     test('it renders a real windbarb series with sample readings when enabled', async function (this: Ctx, assert) {
       this.enabled = true;
 
