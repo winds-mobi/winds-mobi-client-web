@@ -42,16 +42,12 @@ module('Unit | Utility | chart-series', function () {
       direction: number;
     }
 
-    const accessors = (row: WindbarbRow) => row;
-
     function build(rows: WindbarbRow[] | undefined) {
       return buildWindbarbData(
         rows,
         (row) => row.timestamp,
         (row) => row.speed,
-        (row) => row.direction,
-        () => 'red',
-        (row) => `tooltip-${accessors(row).direction}`
+        (row) => row.direction
       );
     }
 
@@ -63,27 +59,9 @@ module('Unit | Utility | chart-series', function () {
           { timestamp: 2, speed: 20, direction: 200 },
         ]),
         [
-          {
-            x: 3,
-            value: 30,
-            direction: 300,
-            color: 'red',
-            customTooltip: 'tooltip-300',
-          },
-          {
-            x: 1,
-            value: 10,
-            direction: 100,
-            color: 'red',
-            customTooltip: 'tooltip-100',
-          },
-          {
-            x: 2,
-            value: 20,
-            direction: 200,
-            color: 'red',
-            customTooltip: 'tooltip-200',
-          },
+          { x: 3, value: 30, direction: 300 },
+          { x: 1, value: 10, direction: 100 },
+          { x: 2, value: 20, direction: 200 },
         ]
       );
     });
@@ -95,15 +73,7 @@ module('Unit | Utility | chart-series', function () {
           { timestamp: 2, speed: -1, direction: 20 },
           { timestamp: 3, speed: 5, direction: 30 },
         ]),
-        [
-          {
-            x: 3,
-            value: 5,
-            direction: 30,
-            color: 'red',
-            customTooltip: 'tooltip-30',
-          },
-        ]
+        [{ x: 3, value: 5, direction: 30 }]
       );
     });
 

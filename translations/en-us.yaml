@@ -101,6 +101,11 @@ settings:
     description: >-
       Show the Favourites view in navigation and a heart on each station
       panel to save it — stored in this browser only, no account needed.
+  windDirectionHistoryEnabled:
+    label: Wind direction on the wind history chart
+    description: >-
+      Show small arrows along the top of the wind history chart, pointing
+      which way the wind was blowing at each reading.
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-

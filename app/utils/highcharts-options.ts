@@ -1,7 +1,4 @@
-import type { IntlService } from 'ember-intl';
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal';
-import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { buildTimeSeriesData, buildWindbarbData } from './chart-series';
 
 export type ChartOptions = Record<string, unknown>;
@@ -53,20 +50,17 @@ export function seriesFor(history: History[], key: NumericHistoryKey) {
 
 // Highcharts' windbarb series expects wind speed in meters per second (its
 // barb shape is derived from Beaufort thresholds defined in m/s) -- this
-// app stores and displays speed in km/h everywhere else.
-const KM_H_PER_M_S = 3.6;
+// app stores and displays speed in km/h everywhere else. Exported so
+// callers can convert their own km/h thresholds (e.g. windColourZones) to
+// the same unit -- see wind/presenter.gts's windbarbZones.
+export const KM_H_PER_M_S = 3.6;
 
-export function windbarbSeriesFor(history: History[], intl: IntlService) {
+export function windbarbSeriesFor(history: History[]) {
   return buildWindbarbData(
     history,
     (elm) => elm.timestamp,
     (elm) => elm.speed / KM_H_PER_M_S,
-    (elm) => elm.direction,
-    (elm) => windToColour(elm.speed),
-    (elm) =>
-      `${azimuthToCardinal(elm.direction)} ${intl.t('format.azimuth', {
-        azimuth: elm.direction,
-      })}`
+    (elm) => elm.direction
   );
 }
 

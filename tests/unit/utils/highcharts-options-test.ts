@@ -1,7 +1,5 @@
 import { module, test } from 'qunit';
-import type { TestContext } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import { setupTest } from 'winds-mobi-client-web/tests/helpers';
 import { windbarbSeriesFor } from 'winds-mobi-client-web/utils/highcharts-options';
 import type { History } from 'winds-mobi-client-web/services/store';
 
@@ -20,58 +18,37 @@ function historyRow(overrides: Partial<History>): History {
   };
 }
 
-module('Unit | Utility | highcharts-options', function (hooks) {
-  setupTest(hooks);
-
+// windbarbSeriesFor deliberately returns bare {x, value, direction} points
+// with no colour or tooltip text baked in -- see chart-series.ts's comment
+// on buildWindbarbData for why: those must be derived from whatever
+// value/direction Highcharts actually renders (raw or data-grouped), not
+// precomputed here, or they silently go stale after grouping (issue: label
+// not matching the arrow). Colour (windToColour) and tooltip text
+// (azimuthToCardinal + intl) are exercised at the point Highcharts hands
+// back, in wind/presenter.gts, not here.
+module('Unit | Utility | highcharts-options', function () {
   module('windbarbSeriesFor', function () {
-    test('it converts speed from km/h to m/s', function (this: TestContext, assert) {
-      const intl = this.owner.lookup('service:intl');
-
-      const [point] = windbarbSeriesFor(
-        [historyRow({ timestamp: 1, speed: 36, direction: 90 })],
-        intl
-      );
+    test('it converts speed from km/h to m/s', function (assert) {
+      const [point] = windbarbSeriesFor([
+        historyRow({ timestamp: 1, speed: 36, direction: 90 }),
+      ]);
 
       assert.strictEqual(point?.value, 10, '36 km/h is 10 m/s');
     });
 
-    test('it colours each point by its own wind speed', function (this: TestContext, assert) {
-      const intl = this.owner.lookup('service:intl');
+    test('it passes direction through unchanged', function (assert) {
+      const [point] = windbarbSeriesFor([
+        historyRow({ timestamp: 1, speed: 10, direction: 315 }),
+      ]);
 
-      const [calm, strong] = windbarbSeriesFor(
-        [
-          historyRow({ timestamp: 1, speed: 2, direction: 0 }),
-          historyRow({ timestamp: 2, speed: 60, direction: 0 }),
-        ],
-        intl
-      );
-
-      assert.notStrictEqual(
-        calm?.color,
-        strong?.color,
-        'a calm reading and a strong reading fall into different wind-speed colour bands'
-      );
+      assert.strictEqual(point?.direction, 315);
     });
 
-    test('it builds a cardinal + degrees tooltip for each direction', function (this: TestContext, assert) {
-      const intl = this.owner.lookup('service:intl');
-
-      const [point] = windbarbSeriesFor(
-        [historyRow({ timestamp: 1, speed: 10, direction: 315 })],
-        intl
-      );
-
-      assert.strictEqual(point?.customTooltip, 'NW 315°');
-    });
-
-    test('it drops a reading with a non-finite speed or direction', function (this: TestContext, assert) {
-      const intl = this.owner.lookup('service:intl');
-
+    test('it drops a reading with a non-finite speed or direction', function (assert) {
       assert.deepEqual(
-        windbarbSeriesFor(
-          [historyRow({ timestamp: 1, speed: NaN, direction: 90 })],
-          intl
-        ),
+        windbarbSeriesFor([
+          historyRow({ timestamp: 1, speed: NaN, direction: 90 }),
+        ]),
         []
       );
     });

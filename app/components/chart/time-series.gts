@@ -39,7 +39,7 @@ export interface TimeSeriesSignature {
 // apart.
 const DEFAULT_RANGE_SELECTOR_INDEX = 4;
 
-interface TimeSeriesSeries extends ChartOptions {
+export interface TimeSeriesSeries extends ChartOptions {
   name: string;
   data: TimeSeriesPoint[] | WindbarbPoint[];
 }
