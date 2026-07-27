@@ -35,6 +35,11 @@ interface RenderHighchartsSignature {
       // undefined for the plain/polar chart, which has no range selector.
       stationId?: string;
       defaultRangeSelectorIndex?: number;
+      // Only the wind history chart sets this: it's the one stock chart
+      // with a `windbarb` series (wind direction), which needs its own
+      // module beyond `highcharts/modules/stock`. Left undefined/false for
+      // every other chart so they don't pay for a module they never use.
+      needsWindbarb?: boolean;
     };
   };
 }
@@ -86,6 +91,7 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     {
       stationId,
       defaultRangeSelectorIndex,
+      needsWindbarb,
     }: RenderHighchartsSignature['Args']['Named']
   ) {
     const callId = ++this.latestCallId;
@@ -97,7 +103,8 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       chartOptions,
       seriesData,
       stationId,
-      defaultRangeSelectorIndex
+      defaultRangeSelectorIndex,
+      needsWindbarb
     );
   }
 
@@ -108,7 +115,8 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     chartOptions: ChartOptions,
     seriesData: NamedSeriesOptions[] | undefined,
     stationId: string | undefined,
-    defaultRangeSelectorIndex: number | undefined
+    defaultRangeSelectorIndex: number | undefined,
+    needsWindbarb: boolean | undefined
   ) {
     // Wrapped in `waitForPromise` so test helpers' `await settled()` (and
     // `render()`, which awaits it internally) wait for this async chart
@@ -117,6 +125,10 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
 
     if (kind === 'stockChart') {
       await waitForPromise(import('highcharts/modules/stock'));
+
+      if (needsWindbarb) {
+        await waitForPromise(import('highcharts/modules/windbarb'));
+      }
     } else {
       // Polar support (the pane, radial axes, `chart.polar: true`) lives in
       // this module, not core Highcharts.

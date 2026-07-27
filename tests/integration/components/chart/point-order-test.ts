@@ -150,6 +150,29 @@ module('Integration | Chart | point order', function (hooks) {
     );
   });
 
+  test('the wind stock chart Direction series renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
+    set(this, 'data', outOfOrderHistory);
+
+    await render(hbs`
+      <div class="h-64 w-64">
+        <Station::Wind::Presenter @history={{this.data}} @stationId="holfuy-1829" />
+      </div>
+    `);
+
+    const Highcharts = (await import('highcharts')).default;
+    const chart = Highcharts.charts.findLast((c) =>
+      c?.series.some((s) => s.name === 'Direction')
+    );
+    const series = chart?.series.find((s) => s.name === 'Direction');
+    const renderedTimestamps = series?.data.map((p) => p.x);
+
+    assert.deepEqual(
+      renderedTimestamps,
+      outOfOrderHistory.map((row) => row.timestamp),
+      'the chart mirrors the input array order verbatim, including the out-of-order entry'
+    );
+  });
+
   // Root cause of issue #111, confirmed by a real browser repro (search for
   // and click between two stations, reading the rendered SVG before/after):
   // the chart-rendering code updates an existing chart in place via

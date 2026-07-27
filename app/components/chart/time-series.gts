@@ -5,7 +5,10 @@ import {
   mergeChartOptions,
   type ChartOptions,
 } from 'winds-mobi-client-web/utils/highcharts-options';
-import { type TimeSeriesPoint } from 'winds-mobi-client-web/utils/chart-series';
+import {
+  type TimeSeriesPoint,
+  type WindbarbPoint,
+} from 'winds-mobi-client-web/utils/chart-series';
 
 interface TimeSeriesChartOptions extends ChartOptions {
   chart?: ChartOptions;
@@ -21,6 +24,9 @@ export interface TimeSeriesSignature {
     stationId: string;
     chartOptions?: TimeSeriesChartOptions;
     chartData?: TimeSeriesSeries[];
+    // Only the wind history chart's windbarb series needs this -- see
+    // render-highcharts.ts's `needsWindbarb` handling.
+    needsWindbarb?: boolean;
   };
   Blocks: {
     default: [];
@@ -35,7 +41,7 @@ const DEFAULT_RANGE_SELECTOR_INDEX = 4;
 
 interface TimeSeriesSeries extends ChartOptions {
   name: string;
-  data: TimeSeriesPoint[];
+  data: TimeSeriesPoint[] | WindbarbPoint[];
 }
 
 export default class TimeSeries extends Component<TimeSeriesSignature> {
@@ -238,6 +244,7 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
         @chartData
         stationId=@stationId
         defaultRangeSelectorIndex=DEFAULT_RANGE_SELECTOR_INDEX
+        needsWindbarb=@needsWindbarb
       }}
     ></div>
   </template>
