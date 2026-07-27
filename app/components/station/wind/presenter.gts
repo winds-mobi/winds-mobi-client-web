@@ -42,6 +42,7 @@ export default class StationWindContent extends Component<StationWindContentSign
           valueSuffix: 'km/h',
         },
         type: 'area',
+        yAxis: 1,
         zoneAxis: 'y',
         zones: this.zones,
       },
@@ -56,6 +57,7 @@ export default class StationWindContent extends Component<StationWindContentSign
         tooltip: {
           valueSuffix: 'km/h',
         },
+        yAxis: 1,
         zoneAxis: 'y',
         zones: this.zones,
       },
@@ -63,6 +65,7 @@ export default class StationWindContent extends Component<StationWindContentSign
         name: 'Direction',
         data: direction,
         type: 'windbarb',
+        yAxis: 0,
         tooltip: {
           pointFormat: '{series.name}: {point.customTooltip}<br/>',
         },
@@ -73,7 +76,30 @@ export default class StationWindContent extends Component<StationWindContentSign
   @cached
   get chartOptions() {
     return {
-      yAxis: defaultYAxis({ labels: { format: '{value:.0f} km/h' } }),
+      // Two panes, not one: the Direction series gets its own axis (index
+      // 0) pinned to a strip along the top of the chart, so the arrows read
+      // as a row above the graph rather than overlapping the Wind/Gusts
+      // lines. windbarb doesn't plot a real value against this axis (see
+      // buildWindbarbData -- its `value` drives the barb's own shape, not a
+      // y-position); it only anchors to the axis's own pixel band, so this
+      // axis needs no visible scale of its own. The Wind/Gusts axis (index
+      // 1, what `defaultYAxis` already returns) moves into the remaining
+      // space below it.
+      yAxis: [
+        {
+          top: '0%',
+          height: '18%',
+          gridLineWidth: 0,
+          title: { text: null },
+          labels: { enabled: false },
+        },
+        {
+          ...defaultYAxis({ labels: { format: '{value:.0f} km/h' } }),
+          top: '25%',
+          height: '75%',
+          offset: 0,
+        },
+      ],
     };
   }
 

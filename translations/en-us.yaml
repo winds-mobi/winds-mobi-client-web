@@ -129,7 +129,7 @@ help:
       lastHourTitle: Last hour
       lastHourDescription: Trend values and a compact wind-direction history for the last hour.
       windHistoryTitle: Wind history
-      windHistoryDescription: Wind speed, gusts, and direction over time.
+      windHistoryDescription: Wind speed and gusts over time, with small arrows along the top showing which way the wind was blowing — coloured the same as the map markers.
       airHistoryTitle: Air history
       airHistoryDescription: Temperature, humidity, and rain over time.
   colors:
