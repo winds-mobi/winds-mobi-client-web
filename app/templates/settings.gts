@@ -160,9 +160,7 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   @name="windDirectionHistoryEnabled"
                   class="border-t border-amber-200 pt-3"
                 >
-                  <SettingsShowcaseWindDirection
-                    @enabled={{this.settings.windDirectionHistoryEnabled}}
-                  />
+                  <SettingsShowcaseWindDirection />
                 </SettingsRow>
               {{/if}}
             </div>

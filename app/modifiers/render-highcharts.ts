@@ -35,17 +35,16 @@ interface RenderHighchartsSignature {
       // undefined for the plain/polar chart, which has no range selector.
       stationId?: string;
       defaultRangeSelectorIndex?: number;
-      // Set by any chart with a `windbarb` series (wind direction): the
-      // wind history stock chart, and the settings page's mini showcase
-      // preview of it. Left undefined/false for every other chart so they
-      // don't pay for a module they never use.
+      // Set by the wind history stock chart (the only chart with a
+      // `windbarb` series -- the settings page's showcase preview reuses
+      // that same component, rather than driving this modifier directly).
+      // Left undefined/false for every other chart so they don't pay for a
+      // module they never use.
       needsWindbarb?: boolean;
       // Set by the polar wind-direction chart: the pane/radial-axis support
       // `chart.polar: true` needs lives in `highcharts/highcharts-more`, not
-      // core Highcharts. Previously assumed true for every non-stock chart,
-      // which was fine while the polar chart was the only other consumer,
-      // but a plain (non-polar) `chart` kind -- e.g. the settings windbarb
-      // showcase -- has no use for it and shouldn't pay for it either.
+      // core Highcharts. Every other `chart`-kind consumer has no use for it
+      // and shouldn't pay for it.
       needsPolarSupport?: boolean;
     };
   };
@@ -142,21 +141,11 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     }
 
     if (needsWindbarb) {
-      // windbarb registers its own custom data-grouping approximation
-      // (a vector-average weighted by speed) into Highcharts' shared
-      // `dataGrouping.approximations` registry on load -- that registry
-      // only exists at all once either Highcharts Stock (`modules/stock`,
-      // already loaded above whenever kind is 'stockChart') or this
-      // standalone module has run; core Highcharts alone has no data
-      // grouping and no such registry, so loading windbarb without one of
-      // the two first throws (`_Highcharts.dataGrouping.approximations` is
-      // undefined) -- confirmed live, this only surfaced for the settings
-      // showcase's plain (non-stock) preview chart, since every other
-      // windbarb consumer is a stock chart.
-      if (kind !== 'stockChart') {
-        await waitForPromise(import('highcharts/modules/datagrouping'));
-      }
-
+      // windbarb registers its own custom data-grouping approximation (a
+      // vector-average weighted by speed) into Highcharts' shared
+      // `dataGrouping.approximations` registry on load -- that registry only
+      // exists once `modules/stock` has run, already loaded above since
+      // `needsWindbarb` is only ever set on a `stockChart`.
       await waitForPromise(import('highcharts/modules/windbarb'));
     }
 

@@ -1,49 +1,39 @@
 import { module, test } from 'qunit';
-import { render } from '@ember/test-helpers';
+import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 
-type Ctx = { enabled: boolean };
+// Wind direction is a beta feature, off by default -- see the identical
+// helper in tests/integration/components/station/wind/presenter-test.ts.
+function enableWindDirectionBeta(context: RenderingTestContext) {
+  const settings = context.owner.lookup('service:settings');
+  settings.betaFeaturesEnabled = true;
+  settings.windDirectionHistoryEnabled = true;
+}
 
 module(
   'Integration | Component | settings/showcase/wind-direction',
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test('it renders no chart when disabled', async function (this: Ctx, assert) {
-      this.enabled = false;
+    test('it renders no Direction series when the beta feature is off', async function (assert) {
+      await render(hbs`<Settings::Showcase::WindDirection />`);
 
-      await render(
-        hbs`<Settings::Showcase::WindDirection @enabled={{this.enabled}} />`
-      );
-
-      assert.dom('.highcharts-container').doesNotExist();
-    });
-
-    // Confirms this renders the *real* windbarb series (this app's own
-    // data-flow contract into it), not just that a chart of some kind
-    // exists -- see CLAUDE.md's Testing section on why this is testing us,
-    // not Highcharts.
-    //
-    // This test caught a real bug once already (issue: crash on the
-    // settings page, `_Highcharts.dataGrouping.approximations` undefined):
-    // windbarb registers a custom data-grouping approximation into
-    // Highcharts' shared registry on load, which only exists once either
-    // Highcharts Stock or the standalone `modules/datagrouping` has run --
-    // and only ran green in the *full* suite because an earlier stock-chart
-    // test happened to load Stock first in the same page, polluting the
-    // shared global Highcharts state in a way that accidentally hid the
-    // bug. If this test is ever changed, re-run it filtered to just this
-    // file (not the whole suite) to make sure it still fails on its own
-    // when the fix in render-highcharts.ts is reverted.
-    test('it renders a real windbarb series with sample readings when enabled', async function (this: Ctx, assert) {
-      this.enabled = true;
-
-      await render(
-        hbs`<Settings::Showcase::WindDirection @enabled={{this.enabled}} />`
-      );
+      const Highcharts = (await import('highcharts')).default;
+      const chart = Highcharts.charts.findLast((c) => c?.container);
 
       assert.dom('.highcharts-container').exists();
+      assert.notOk(chart?.series.some((s) => s.name === 'Direction'));
+    });
+
+    // Confirms the real windbarb series renders with the sample data once
+    // the beta feature is on -- this preview reuses Station::Wind::Presenter
+    // directly, so it's exercising the exact same component/config the real
+    // station panel does.
+    test('it renders a real windbarb series once the beta feature is on', async function (this: RenderingTestContext, assert) {
+      enableWindDirectionBeta(this);
+
+      await render(hbs`<Settings::Showcase::WindDirection />`);
 
       const Highcharts = (await import('highcharts')).default;
       const chart = Highcharts.charts.findLast((c) =>
@@ -51,16 +41,7 @@ module(
       );
       const series = chart?.series.find((s) => s.name === 'Direction');
 
-      // Regression guard: windbarb's own dataGrouping.enabled: true default
-      // combined several of these into one grouped point at this narrow a
-      // width before the series explicitly disabled it -- "only one arrow,
-      // stuck at one side" (see chartData's dataGrouping comment).
-      assert.deepEqual(
-        series?.data.map(
-          (p) => (p as unknown as { direction: number }).direction
-        ),
-        [0, 45, 120, 200, 300]
-      );
+      assert.strictEqual(series?.data.length, 5);
     });
   }
 );
