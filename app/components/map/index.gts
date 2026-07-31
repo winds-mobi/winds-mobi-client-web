@@ -23,10 +23,12 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
+import { flyToCoordinates } from 'winds-mobi-client-web/utils/locate';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import {
   OSM_SWISS_STYLE,
@@ -35,7 +37,6 @@ import {
 import {
   boundsFromMap,
   roundBoundsForRequest,
-  focusQueryParamsFor,
   mapBoundsEqual,
   mapViewCenter,
   mapViewsEqual,
@@ -253,27 +254,21 @@ export default class Map extends Component<MapSignature> {
     return mapViewsEqual(this.mapView, parseMapView());
   }
 
-  @action
-  handleMapLoaded() {
-    // On a fresh load with the default Switzerland view, fly to the user's
-    // location if it's already known -- no geolocation request happens here.
-    // `ApplicationRoute#beforeModel` already awaits `nearbyLocation.syncPermissionState()`
-    // before anything renders, and that already requests the position itself
-    // when permission is already granted, so `coordinates` is normally already
-    // populated by the time the map ever mounts. `coordinates` being set at all
-    // implies granted permission (see `updateFromPosition`), so there's nothing
-    // else to check. The user's own pan or the locate button (a fresh, explicit
-    // request) handle every other case, including permission not yet granted
-    // and a transient geolocation failure at boot.
-    if (!this.isInitialDefaultView || config.environment === 'test') return;
-
-    const { coordinates } = this.nearbyLocation;
-
-    if (coordinates) {
-      void this.router.replaceWith({
-        queryParams: focusQueryParamsFor(coordinates),
-      });
-    }
+  // Gates the `flyToUserLocation` modifier below: on a fresh load with the default
+  // Switzerland view, fly to the user's location once it's known -- no geolocation
+  // request happens here (that's `nearbyLocation.requestCurrentPosition`, already
+  // triggered by `ApplicationRoute#beforeModel`'s `syncPermissionState`). `coordinates`
+  // being set at all implies granted permission (see `updateFromPosition`), so there's
+  // nothing else to check. Not awaited there, so for an already-granted returning user
+  // `coordinates` typically resolves *after* the map has already mounted on the default
+  // view -- the modifier reacts whenever `coordinates` arrives, not just at mount, and
+  // `isInitialDefaultView` self-disarms once `flyToCoordinates` moves the routed view
+  // away from the default. The user's own pan or the locate button (a fresh, explicit
+  // request via `utils/locate`'s `requestAndFly`) handle every other case, including
+  // permission not yet granted and a transient geolocation failure at boot. Also don't
+  // fly in tests.
+  get shouldFlyToUserLocation() {
+    return this.isInitialDefaultView && config.environment !== 'test';
   }
 
   @action
@@ -341,12 +336,16 @@ export default class Map extends Component<MapSignature> {
       {{onRouteChange this.router this.handleRouteChange}}
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
+      {{flyToUserLocation
+        this.nearbyLocation.coordinates
+        this.shouldFlyToUserLocation
+        (fn flyToCoordinates this.router this.nearbyLocation)
+      }}
     >
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"
         @initOptions={{this.initOptions}}
-        @mapLoaded={{this.handleMapLoaded}}
         @reuseMaps={{false}}
         as |map|
       >
