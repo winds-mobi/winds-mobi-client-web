@@ -4,12 +4,23 @@ import type { History } from 'winds-mobi-client-web/services/store.js';
 import { service } from '@ember/service';
 import { type IntlService } from 'ember-intl';
 import Polar from 'winds-mobi-client-web/components/chart/polar';
+import {
+  cardinalOnlyDirectionLabel,
+  COMPASS_LABEL_FONT_FAMILY,
+} from 'winds-mobi-client-web/utils/compass-labels';
 import { windDirectionMarkerColours } from 'winds-mobi-client-web/utils/wind-direction-marker';
 
 export interface WindDirectionGraphSignature {
   Args: {
     data: History[];
-    hideAxisLabels?: boolean;
+    // For a consumer that's always small by design (e.g. the nearby-list
+    // thumbnail), not just incidentally narrow. Polar's own maxWidth:90
+    // responsive rule already drops to cardinal-only labels based on the
+    // chart's *measured* width, but a compact grid card can easily render
+    // wider than that threshold depending on viewport/column count while
+    // still being "the small one" by intent -- this forces the same
+    // cardinal-only label set regardless of actual measured width.
+    compact?: boolean;
   };
   Blocks: {
     default: [];
@@ -83,11 +94,25 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
       pane: {
         size: '99%',
       },
-      // Omit `xAxis` entirely rather than setting it to `undefined` — Polar's
-      // shallow merge spreads override keys over defaults, so an explicit
-      // `undefined` would clobber the default xAxis instead of falling back to it.
-      ...(this.args.hideAxisLabels
-        ? { xAxis: { labels: { enabled: false } } }
+      // Matches the distance/font-size Polar's own maxWidth:90 responsive
+      // rule uses for a genuinely narrow chart, so a compact consumer looks
+      // the same whether or not its actual measured width happens to cross
+      // that threshold.
+      ...(this.args.compact
+        ? {
+            xAxis: {
+              labels: {
+                formatter: function ({ value }: { value: number }) {
+                  return cardinalOnlyDirectionLabel(value);
+                },
+                distance: '78%',
+                style: {
+                  fontSize: '10px',
+                  fontFamily: COMPASS_LABEL_FONT_FAMILY,
+                },
+              },
+            },
+          }
         : {}),
       yAxis: {
         min: minTimestamp,
