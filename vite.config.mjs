@@ -37,6 +37,15 @@ export default defineConfig(({ mode }) => ({
     tailwindcss(),
     mode === 'production'
       ? VitePWA({
+          // Deliberately '/', not CDN_URL (see PR #107): the service worker
+          // itself, registerSW.js, and manifest.webmanifest must stay
+          // same-origin with the page (winds.mobi/Caddy) -- a service worker
+          // can only be registered from the same origin as the document that
+          // registers it, so pointing this at the CDN breaks registration
+          // outright. Vite's own `base` (above) already sends the real JS/CSS
+          // bundle and pwaAssets' icon links to the CDN independently of this
+          // option. What this `base` leaves wrong is the precache manifest
+          // Workbox builds below -- see the `modifyURLPrefix` comment.
           base: '/',
           registerType: 'autoUpdate',
           pwaAssets: {
@@ -88,6 +97,31 @@ export default defineConfig(({ mode }) => ({
               /^\/admin/,
               /^\/django-static/,
             ],
+            // `base: '/'` above (needed to keep the service worker itself
+            // same-origin) means Workbox's own asset scan builds the precache
+            // manifest with root-relative URLs for everything, including the
+            // hashed JS/CSS bundle -- but that bundle is actually served from
+            // CDN_URL in production (Vite's real `base`, set at the top of
+            // this file), not from winds.mobi. Left alone, the precache list
+            // points at a copy of the bundle that exists (rsync also deploys
+            // dist/ to Caddy) but that the page never actually requests, so
+            // every first visit downloads the app twice: once from the CDN to
+            // render, once more in the background to satisfy this precache.
+            // `modifyURLPrefix` rewrites just these two prefixes -- the
+            // hashed bundle (`assets/`) and Embroider's virtual entry chunks
+            // (`@embroider/virtual/`), the only precache entries actually
+            // fetched from the CDN by the real page -- to match. `index.html`,
+            // `registerSW.js`, `manifest.webmanifest`, and the PWA icon files
+            // are deliberately left root-relative: they're served from Caddy
+            // (registerSW.js's own SW registration call must be, per the
+            // comment on `base` above), and rewriting entries with no
+            // matching prefix here is a no-op, so this can't touch them.
+            ...(process.env.CDN_URL && {
+              modifyURLPrefix: {
+                'assets/': `${process.env.CDN_URL}assets/`,
+                '@embroider/virtual/': `${process.env.CDN_URL}@embroider/virtual/`,
+              },
+            }),
             runtimeCaching: [
               {
                 // Base raster map tiles (tile.osm.ch/switzerland): roads/labels
