@@ -28,7 +28,6 @@ import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import { flyToCoordinates } from 'winds-mobi-client-web/utils/locate';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import {
   OSM_SWISS_STYLE,
@@ -41,7 +40,6 @@ import {
   mapViewCenter,
   mapViewsEqual,
   mapViewFromMap,
-  parseMapView,
   TrackedMapView,
   type MapBounds,
 } from 'winds-mobi-client-web/utils/map-view';
@@ -248,27 +246,16 @@ export default class Map extends Component<MapSignature> {
     void this.router.transitionTo('map.station', station.id);
   }
 
-  // True on a fresh load where no view is present in the URL, so the routed view
-  // still equals the whole-Switzerland default.
-  get isInitialDefaultView() {
-    return mapViewsEqual(this.mapView, parseMapView());
-  }
-
-  // Gates the `flyToUserLocation` modifier below: on a fresh load with the default
-  // Switzerland view, fly to the user's location once it's known -- no geolocation
-  // request happens here (that's `nearbyLocation.requestCurrentPosition`, already
-  // triggered by `ApplicationRoute#beforeModel`'s `syncPermissionState`). `coordinates`
-  // being set at all implies granted permission (see `updateFromPosition`), so there's
-  // nothing else to check. Not awaited there, so for an already-granted returning user
-  // `coordinates` typically resolves *after* the map has already mounted on the default
-  // view -- the modifier reacts whenever `coordinates` arrives, not just at mount, and
-  // `isInitialDefaultView` self-disarms once `flyToCoordinates` moves the routed view
-  // away from the default. The user's own pan or the locate button (a fresh, explicit
-  // request via `utils/locate`'s `requestAndFly`) handle every other case, including
-  // permission not yet granted and a transient geolocation failure at boot. Also don't
-  // fly in tests.
-  get shouldFlyToUserLocation() {
-    return this.isInitialDefaultView && config.environment !== 'test';
+  // Gates the `flyToUserLocation` modifier below: don't auto-fly during the app's
+  // own test suite, where a production geolocation-driven camera move could race a
+  // test's own assertions/URL expectations. Everything else -- whether the routed
+  // view is still the fresh-load default, whether coordinates are known -- the
+  // modifier derives and reacts to itself (it injects `router` and `nearbyLocation`
+  // directly), including the case where `coordinates` resolves after this component
+  // has already mounted, since `ApplicationRoute#beforeModel` no longer awaits
+  // `nearbyLocation.syncPermissionState()`.
+  get isFlyToUserLocationEnabled() {
+    return config.environment !== 'test';
   }
 
   @action
@@ -336,11 +323,7 @@ export default class Map extends Component<MapSignature> {
       {{onRouteChange this.router this.handleRouteChange}}
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
-      {{flyToUserLocation
-        this.nearbyLocation.coordinates
-        this.shouldFlyToUserLocation
-        (fn flyToCoordinates this.router this.nearbyLocation)
-      }}
+      {{flyToUserLocation this.isFlyToUserLocationEnabled}}
     >
       <MapLibreGL
         data-test-map-canvas
