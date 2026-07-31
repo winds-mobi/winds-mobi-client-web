@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- When a station's gusts fall in the same wind-speed band as the average, its wind-direction markers (in the station panel's last-hour graph and the compact-card wind-direction thumbnail) now draw as a hollow ring instead of a solid dot, matching the map marker's existing convention.
+
 ## v0.19.5 - 2026-07-24
 
 ### Changed
