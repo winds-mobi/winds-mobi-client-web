@@ -194,9 +194,7 @@ help:
     projectTitle: Project
     repoLabel: Repository
   changelog:
-    title: Changelog
     versionLabel: Version
-    linkText: View the full changelog on GitHub
 
 map:
   legend:

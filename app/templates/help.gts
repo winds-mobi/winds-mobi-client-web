@@ -306,7 +306,7 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        github.com/winds-mobi/winds-mobi-client-web
+                        winds-mobi/winds-mobi-client-web
                       </a>
                     </dd>
                     <HelpChangelog />

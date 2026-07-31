@@ -24,8 +24,6 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
     <dt data-test-help-changelog class="font-medium text-slate-500">{{t
         "help.changelog.versionLabel"
       }}</dt>
-    <dd data-test-help-changelog-version>{{this.version}}</dd>
-    <dt class="font-medium text-slate-500">{{t "help.changelog.title"}}</dt>
     <dd>
       <a
         data-test-help-changelog-link
@@ -34,7 +32,7 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
         target="_blank"
         rel="noopener noreferrer"
       >
-        {{t "help.changelog.linkText"}}
+        <span data-test-help-changelog-version>{{this.version}}</span>
       </a>
     </dd>
   </template>
