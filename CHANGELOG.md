@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.20.0 - 2026-07-31
+
 ### Changed
 
 - The nearby-list thumbnail version of the wind-direction graph now always shows the N/E/S/W compass labels (in a fixed-width font so they line up evenly) instead of hiding all labels.
