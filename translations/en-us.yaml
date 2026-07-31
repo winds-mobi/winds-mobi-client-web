@@ -191,14 +191,10 @@ help:
     communityDescription: >-
       Questions, bug reports, and feature requests — join our Discord.
       Scan the code or follow the link.
-    repoTitle: Repository
-    repoValue: github.com/winds-mobi/winds-mobi-client-web
-    repoDescription: For developers — browse the source or open an issue.
+    projectTitle: Project
+    repoLabel: Repository
   changelog:
-    title: Changelog
-    description: Recent shipped changes, straight from the project changelog.
-    loading: Loading changelog…
-    error: The changelog could not be loaded right now.
+    versionLabel: Version
 
 map:
   legend:

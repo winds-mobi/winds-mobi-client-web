@@ -3,7 +3,6 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
 @plugin "@frontile/theme/plugin/default";
-@plugin "@tailwindcss/typography";
 
 @source '../../node_modules/@frontile';
 

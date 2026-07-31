@@ -6,6 +6,11 @@ module.exports = function (environment) {
     environment,
     rootURL: '/',
     locationType: 'history',
+    // The release workflow sets APP_VERSION to the pushed git tag (e.g.
+    // "v0.19.5"), which is also the CHANGELOG.md heading for that release
+    // and a real git ref on GitHub. Unset outside that workflow -- local
+    // builds and PR-preview builds are not tied to a release.
+    version: process.env.APP_VERSION || 'unreleased',
     EmberENV: {
       EXTEND_PROTOTYPES: false,
       FEATURES: {

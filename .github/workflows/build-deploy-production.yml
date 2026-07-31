@@ -26,6 +26,9 @@ jobs:
         run: pnpm build
         env:
           CDN_URL: https://v2-winds-mobi.b-cdn.net/
+          # github.ref_name is the pushed tag itself for a tag-triggered
+          # run (e.g. "v0.19.5") -- see config/environment.js.
+          APP_VERSION: ${{ github.ref_name }}
 
       - name: Write ssh keys
         run: |

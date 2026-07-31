@@ -290,30 +290,30 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
               </div>
               <div class="rounded-lg bg-slate-50 p-3">
                 <dt class="font-semibold text-slate-950">{{t
-                    "help.about.repoTitle"
+                    "help.about.projectTitle"
                   }}</dt>
                 <dd class="mt-1">
-                  <p>{{t "help.about.repoDescription"}}</p>
-                  <a
-                    class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-                    href="https://github.com/winds-mobi/winds-mobi-client-web"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <dl
+                    class="grid grid-cols-[auto_1fr] items-baseline gap-x-2 gap-y-1"
                   >
-                    github.com/winds-mobi/winds-mobi-client-web
-                  </a>
+                    <dt class="font-medium text-slate-500">{{t
+                        "help.about.repoLabel"
+                      }}</dt>
+                    <dd>
+                      <a
+                        class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                        href="https://github.com/winds-mobi/winds-mobi-client-web"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        winds-mobi/winds-mobi-client-web
+                      </a>
+                    </dd>
+                    <HelpChangelog />
+                  </dl>
                 </dd>
               </div>
             </dl>
-          </div>
-        </StationSectionCard>
-
-        <StationSectionCard @title={{t "help.changelog.title"}}>
-          <div class="grid gap-4">
-            <p class="text-sm leading-6 text-slate-600">
-              {{t "help.changelog.description"}}
-            </p>
-            <HelpChangelog />
           </div>
         </StationSectionCard>
       </div>
