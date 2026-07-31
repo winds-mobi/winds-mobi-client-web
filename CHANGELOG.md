@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.20.1 - 2026-07-31
+
+### Fixed
+
+- Fixed the map not automatically flying to your location when reopening the app, if you'd previously granted location access (a regression from v0.20.0's faster startup).
+
 ## v0.20.0 - 2026-07-31
 
 ### Changed
