@@ -17,7 +17,7 @@ module(
   function (hooks) {
     setupRenderingTest(hooks);
 
-    test('it renders sorted minimum, middle, and maximum wind speeds', async function (this: StationLastHourPresenterTestContext, assert) {
+    test('it renders the minimum and mean average speed, and the maximum gust', async function (this: StationLastHourPresenterTestContext, assert) {
       this.history = [
         {
           id: 'three',
@@ -31,10 +31,12 @@ module(
           [Type]: 'history',
         },
         {
+          // The strongest gust of the hour sits on a record that is not the
+          // strongest average, so the maximum card can't pass by accident.
           id: 'one',
           direction: 180,
           speed: 12,
-          gusts: 14,
+          gusts: 24,
           temperature: 6,
           humidity: 63,
           rain: 0,
@@ -59,11 +61,13 @@ module(
       );
 
       assert.dom(this.element).includesText('Maximum');
-      assert.dom(this.element).includesText('18 km/h');
+      assert.dom(this.element).includesText('24 km/h');
       assert.dom(this.element).includesText('Mean');
       assert.dom(this.element).includesText('12 km/h');
       assert.dom(this.element).includesText('Minimum');
       assert.dom(this.element).includesText('7 km/h');
+      // The maximum reads gusts, so the strongest average is not shown.
+      assert.dom(this.element).doesNotIncludeText('18 km/h');
     });
   }
 );

@@ -29,6 +29,11 @@ export default class StationLastHourContent extends Component<StationLastHourCon
     return this.args.history.map((record) => record.speed);
   }
 
+  @cached
+  get lastHourGusts() {
+    return this.args.history.map((record) => record.gusts);
+  }
+
   get hasHistory() {
     return this.args.history.length > 0;
   }
@@ -47,12 +52,12 @@ export default class StationLastHourContent extends Component<StationLastHourCon
     return total / this.lastHourSpeeds.length;
   }
 
-  get lastHourMaximumSpeed() {
-    return this.hasHistory ? Math.max(...this.lastHourSpeeds) : undefined;
+  get lastHourMaximumGusts() {
+    return this.hasHistory ? Math.max(...this.lastHourGusts) : undefined;
   }
 
   get lastHourMaximumValueClass() {
-    return this.windClassFor(this.lastHourMaximumSpeed);
+    return this.windClassFor(this.lastHourMaximumGusts);
   }
 
   get lastHourMeanValueClass() {
@@ -77,7 +82,7 @@ export default class StationLastHourContent extends Component<StationLastHourCon
         <StationMetricCard
           @format="windSpeed"
           @label={{t "wind.maximum"}}
-          @value={{this.lastHourMaximumSpeed}}
+          @value={{this.lastHourMaximumGusts}}
           @valueClass={{this.lastHourMaximumValueClass}}
           @icon={{if this.settings.useIconLabels ArrowLineUp}}
         />
