@@ -4,6 +4,7 @@ import { module, test } from 'qunit';
 import {
   click,
   currentURL,
+  find,
   settled,
   type TestContext,
   visit,
@@ -18,6 +19,19 @@ import type { History, Station } from 'winds-mobi-client-web/services/store';
 // rest of this module exercises the panel via direct station-id fetches
 // unrelated to map bounds — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
+
+// `<map.marker>` adds its element to the map asynchronously (real WebGL
+// context/canvas setup), and Ember's test helpers have no visibility into
+// that -- `await visit(...)` resolving doesn't mean the marker DOM exists
+// yet. These tests were always skipped before this container had real
+// WebGL (see tests/helpers/webgl.ts), so this gap was never exercised.
+// Waiting for the marker directly, rather than for a broader MapLibre
+// lifecycle event, keeps this independent of the `idle`-only tests above.
+async function waitForMarker(stationId: string) {
+  await waitUntil(() => find(`[data-station-id="${stationId}"]`) !== null, {
+    timeout: 5000,
+  });
+}
 
 type DeferredRequest = {
   promise: Promise<{ content: { data: Station } }>;
@@ -489,6 +503,7 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
+      await waitForMarker('holfuy-1804');
 
       assert
         .dom('[data-station-id="holfuy-1804"].cursor-pointer')
@@ -520,6 +535,7 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
+      await waitForMarker('holfuy-1804');
 
       assert
         .dom(
@@ -540,6 +556,7 @@ module('Acceptance | map station panel', function (hooks) {
         },
       });
       await settled();
+      await waitForMarker('holfuy-2222');
 
       assert
         .dom(

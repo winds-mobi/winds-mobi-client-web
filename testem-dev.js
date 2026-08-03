@@ -82,10 +82,15 @@ module.exports = {
           : null,
         '--headless',
         '--disable-dev-shm-usage',
-        '--disable-software-rasterizer',
         // Same fix as testem.js: without this, the dev-container Chromium's
         // GPU process can crash on launch and the browser never connects to
         // testem within the timeout, failing every `test:ember:dev` run.
+        // Deliberately NOT paired with --disable-software-rasterizer (this
+        // repo used to pass both): that flag blocks headless Chromium's
+        // software WebGL fallback entirely, which is what lets MapLibre/map
+        // tests actually run instead of being permanently skipped (see
+        // tests/helpers/webgl.ts). --disable-gpu alone doesn't affect that
+        // fallback.
         '--disable-gpu',
         '--mute-audio',
         '--remote-debugging-port=0',

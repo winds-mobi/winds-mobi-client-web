@@ -14,7 +14,19 @@ import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, MapInitOptions } from 'ember-maplibre-gl';
-import { NavigationControl, TerrainControl } from 'maplibre-gl';
+import { NavigationControl, TerrainControl, setWorkerUrl } from 'maplibre-gl';
+// maplibre-gl v6 is ESM-only and resolves its worker file at runtime via
+// `new URL('./maplibre-gl-worker.mjs', import.meta.url)` relative to its own
+// module -- that only works unbundled; under Vite/Rollup, `import.meta.url`
+// resolves to wherever the bundled chunk is served from, not the real file,
+// so the worker 404s and the map never renders any tiles. Every bundler
+// consumer needs this one-time `setWorkerUrl` call (Vite's `?url` import
+// resolves to the actual built/dev-served path); must run before any `Map`
+// is constructed, so it lives at module scope here rather than inside the
+// component. See MapLibre's own v5-to-v6 migration guide.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+
+setWorkerUrl(workerUrl);
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
