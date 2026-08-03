@@ -189,14 +189,16 @@ module('Acceptance | map query params', function (hooks) {
     async function (assert) {
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await click('[data-test-navbar-logo]');
-      await waitUntil(() => currentURL().includes('zoom=7'));
+      await waitUntil(() => currentURL() === '/map');
       await settled();
 
-      assertCurrentMapUrl(assert, {
-        latitude: '46.8011',
-        longitude: '8.2275',
-        zoom: '7',
-      });
+      // The logo link's @query targets app/controllers/map.ts's own declared
+      // defaults (DEFAULT_MAP_LNG/LAT/ZOOM) exactly -- Ember's query-param
+      // serialization omits a param from the URL entirely when its value
+      // equals the controller's default, so the "reset to default" URL is
+      // bare `/map` with no query string at all, not one explicitly
+      // spelling out the defaults.
+      assertCurrentMapUrl(assert, {});
     }
   );
 });
