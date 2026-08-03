@@ -127,7 +127,7 @@ help:
       nowTitle: Now
       nowDescription: Latest wind, gusts, direction, temperature, humidity, pressure, and rain.
       lastHourTitle: Last hour
-      lastHourDescription: Trend values and a compact wind-direction history for the last hour.
+      lastHourDescription: Trend values (maximum gust, mean and minimum wind speed) and a compact wind-direction history for the last hour.
       windHistoryTitle: Wind history
       windHistoryDescription: Wind speed, gusts, and direction over time.
       airHistoryTitle: Air history
