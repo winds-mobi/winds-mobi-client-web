@@ -104,8 +104,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.4(@embroider/core@4.2.3(@glint/template@1.7.7))
       '@embroider/util':
-        specifier: ^1.13.4
-        version: 1.13.4(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
+        specifier: ^1.13.5
+        version: 1.13.5(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))
       '@embroider/vite':
         specifier: ^1.1.2
         version: 1.2.3(@embroider/core@4.2.3(@glint/template@1.7.7))(@glint/template@1.7.7)(rollup@2.80.0)(vite@6.3.2(@types/node@26.0.0)(jiti@2.6.1)(lightningcss@1.29.2)(terser@5.48.0)(yaml@2.7.1))
@@ -1753,8 +1753,8 @@ packages:
     resolution: {integrity: sha512-/SusdG+zgosc3t+9sPFVKSFOYyiSgLfXOT6lYNWoG1YtnhWDxlK4S8leZ0jhcVjemdaHln5rTyxCnq8oFLxqpQ==}
     engines: {node: 12.* || 14.* || >= 16}
 
-  '@embroider/util@1.13.4':
-    resolution: {integrity: sha512-TqA0SNQarSJUdYGv+39MBCHkiuxhr2u0iKJP/JnDmQkCiVhvuFWy3P3n5sI26fVrVwG3DJLfxE2XVnB37udFOA==}
+  '@embroider/util@1.13.5':
+    resolution: {integrity: sha512-rHhGUzAQ5iOr5Swvk7yaarVe5SJtcjK2t/C8ts9agWfhTq4DVfy8+axF0KOf1jALRiJao3l9ALRGd6letKw2ZQ==}
     engines: {node: 12.* || 14.* || >= 16}
     peerDependencies:
       '@glint/environment-ember-loose': ^1.0.0
@@ -11582,7 +11582,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@embroider/util@1.13.4(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))':
+  '@embroider/util@1.13.5(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.29.2)(postcss@8.5.3)))':
     dependencies:
       '@embroider/macros': 1.19.1(@glint/template@1.7.7)
       broccoli-funnel: 3.0.8
