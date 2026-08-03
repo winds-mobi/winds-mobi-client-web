@@ -41,11 +41,6 @@ interface RenderHighchartsSignature {
       // Left undefined/false for every other chart so they don't pay for a
       // module they never use.
       needsWindbarb?: boolean;
-      // Set by the polar wind-direction chart: the pane/radial-axis support
-      // `chart.polar: true` needs lives in `highcharts/highcharts-more`, not
-      // core Highcharts. Every other `chart`-kind consumer has no use for it
-      // and shouldn't pay for it.
-      needsPolarSupport?: boolean;
     };
   };
 }
@@ -98,7 +93,6 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       stationId,
       defaultRangeSelectorIndex,
       needsWindbarb,
-      needsPolarSupport,
     }: RenderHighchartsSignature['Args']['Named']
   ) {
     const callId = ++this.latestCallId;
@@ -111,8 +105,7 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       seriesData,
       stationId,
       defaultRangeSelectorIndex,
-      needsWindbarb,
-      needsPolarSupport
+      needsWindbarb
     );
   }
 
@@ -124,20 +117,25 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     seriesData: NamedSeriesOptions[] | undefined,
     stationId: string | undefined,
     defaultRangeSelectorIndex: number | undefined,
-    needsWindbarb: boolean | undefined,
-    needsPolarSupport: boolean | undefined
+    needsWindbarb: boolean | undefined
   ) {
     // Wrapped in `waitForPromise` so test helpers' `await settled()` (and
     // `render()`, which awaits it internally) wait for this async chart
     // creation instead of asserting against a not-yet-drawn chart.
     const Highcharts = (await waitForPromise(import('highcharts'))).default;
 
+    // Always loaded, not gated behind a "does this particular chart need
+    // it" flag: the polar wind-direction chart (the only `chart`-kind
+    // consumer, needing highcharts-more's pane/radial-axis support) renders
+    // on every station panel, right alongside the stock charts -- there is
+    // no real page view where highcharts-more's bytes would have been
+    // avoided, only extra branching to express a distinction with no
+    // payoff. See CLAUDE.md on not adding gymnastics for cases that don't
+    // happen.
+    await waitForPromise(import('highcharts/highcharts-more'));
+
     if (kind === 'stockChart') {
       await waitForPromise(import('highcharts/modules/stock'));
-    }
-
-    if (needsPolarSupport) {
-      await waitForPromise(import('highcharts/highcharts-more'));
     }
 
     if (needsWindbarb) {
