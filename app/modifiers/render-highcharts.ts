@@ -35,6 +35,12 @@ interface RenderHighchartsSignature {
       // undefined for the plain/polar chart, which has no range selector.
       stationId?: string;
       defaultRangeSelectorIndex?: number;
+      // Set by the wind history stock chart (the only chart with a
+      // `windbarb` series -- the settings page's showcase preview reuses
+      // that same component, rather than driving this modifier directly).
+      // Left undefined/false for every other chart so they don't pay for a
+      // module they never use.
+      needsWindbarb?: boolean;
     };
   };
 }
@@ -86,6 +92,7 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     {
       stationId,
       defaultRangeSelectorIndex,
+      needsWindbarb,
     }: RenderHighchartsSignature['Args']['Named']
   ) {
     const callId = ++this.latestCallId;
@@ -97,7 +104,8 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       chartOptions,
       seriesData,
       stationId,
-      defaultRangeSelectorIndex
+      defaultRangeSelectorIndex,
+      needsWindbarb
     );
   }
 
@@ -108,19 +116,35 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
     chartOptions: ChartOptions,
     seriesData: NamedSeriesOptions[] | undefined,
     stationId: string | undefined,
-    defaultRangeSelectorIndex: number | undefined
+    defaultRangeSelectorIndex: number | undefined,
+    needsWindbarb: boolean | undefined
   ) {
     // Wrapped in `waitForPromise` so test helpers' `await settled()` (and
     // `render()`, which awaits it internally) wait for this async chart
     // creation instead of asserting against a not-yet-drawn chart.
     const Highcharts = (await waitForPromise(import('highcharts'))).default;
 
+    // Always loaded, not gated behind a "does this particular chart need
+    // it" flag: the polar wind-direction chart (the only `chart`-kind
+    // consumer, needing highcharts-more's pane/radial-axis support) renders
+    // on every station panel, right alongside the stock charts -- there is
+    // no real page view where highcharts-more's bytes would have been
+    // avoided, only extra branching to express a distinction with no
+    // payoff. See CLAUDE.md on not adding gymnastics for cases that don't
+    // happen.
+    await waitForPromise(import('highcharts/highcharts-more'));
+
     if (kind === 'stockChart') {
       await waitForPromise(import('highcharts/modules/stock'));
-    } else {
-      // Polar support (the pane, radial axes, `chart.polar: true`) lives in
-      // this module, not core Highcharts.
-      await waitForPromise(import('highcharts/highcharts-more'));
+    }
+
+    if (needsWindbarb) {
+      // windbarb registers its own custom data-grouping approximation (a
+      // vector-average weighted by speed) into Highcharts' shared
+      // `dataGrouping.approximations` registry on load -- that registry only
+      // exists once `modules/stock` has run, already loaded above since
+      // `needsWindbarb` is only ever set on a `stockChart`.
+      await waitForPromise(import('highcharts/modules/windbarb'));
     }
 
     if (callId !== this.latestCallId) {

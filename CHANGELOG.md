@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- **🧪 Beta:** The wind history chart can now show wind direction alongside speed and gusts, as a row of small arrows along the top — rotated to the wind's direction and coloured/shaped by gust strength, matching the map markers. Off by default; turn it on under Settings → Beta features.
+
+### Changed
+
+- The last-hour panel's Maximum card now shows the hour's peak gust instead of peak wind speed, matching the "gust" wording used elsewhere in the app.
+
 ## v0.20.1 - 2026-07-31
 
 ### Fixed

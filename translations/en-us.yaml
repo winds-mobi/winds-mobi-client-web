@@ -101,6 +101,11 @@ settings:
     description: >-
       Show the Favourites view in navigation and a heart on each station
       panel to save it — stored in this browser only, no account needed.
+  windDirectionHistoryEnabled:
+    label: Wind direction on the wind history chart
+    description: >-
+      Show small arrows along the top of the wind history chart, pointing
+      which way the gusts were blowing at each reading.
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-
@@ -129,7 +134,7 @@ help:
       lastHourTitle: Last hour
       lastHourDescription: Trend values (maximum gust, mean and minimum wind speed) and a compact wind-direction history for the last hour.
       windHistoryTitle: Wind history
-      windHistoryDescription: Wind speed, gusts, and direction over time.
+      windHistoryDescription: Wind speed and gusts over time, with small arrows along the top showing which way the gusts were blowing — coloured the same as the map markers.
       airHistoryTitle: Air history
       airHistoryDescription: Temperature, humidity, and rain over time.
   colors:

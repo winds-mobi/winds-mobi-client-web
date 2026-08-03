@@ -213,6 +213,14 @@ state, route models, and query params.
   syntax. If newer ember-concurrency APIs would require installing/upgrading, stop and tell the user first.
 - Don't add speculative component arguments as override points with no real call site. If a component has an internal
   default and no external caller overrides it, remove the argument rather than keeping a "future-proof" escape hatch.
+- **Don't build conditional-loading gymnastics (a flag gating a dynamic `import()`, a lazy branch, etc.) for a case
+  that doesn't actually happen.** A dynamic import only pays off when the gated code is genuinely optional for some
+  real page view — e.g. `render-highcharts.ts`'s `needsWindbarb`, gated behind a beta feature that's off by default,
+  so most renders really do skip that module. `needsPolarSupport` was the same shape but not the same substance: it
+  gated `highcharts/highcharts-more` behind a flag that every actual caller passed `true` — the polar wind-direction
+  chart always renders on every station panel, right alongside the stock charts that need their own modules anyway,
+  so there was no page view where the branch ever evaluated false. It was removed; `highcharts-more` now just always
+  loads. If a "future case" for the branch isn't real yet, don't pay for the indirection until it is.
 - Don't add trivial passthrough getters just to feed translated strings/direct values to a child — use `{{t ...}}`
   directly in the template when no class logic is needed.
 - Prefer Tailwind responsive classes for layout/breakpoint variants; don't add component args or class logic to switch

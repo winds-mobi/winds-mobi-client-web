@@ -12,6 +12,7 @@ import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settin
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
 import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
 import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
+import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
@@ -152,6 +153,14 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   <SettingsShowcaseRefreshSpin
                     @enabled={{this.settings.refreshButtonSpin}}
                   />
+                </SettingsRow>
+
+                <SettingsRow
+                  @settings={{this.settings}}
+                  @name="windDirectionHistoryEnabled"
+                  class="border-t border-amber-200 pt-3"
+                >
+                  <SettingsShowcaseWindDirection />
                 </SettingsRow>
               {{/if}}
             </div>

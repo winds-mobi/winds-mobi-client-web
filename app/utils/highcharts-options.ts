@@ -1,5 +1,5 @@
 import type { History } from 'winds-mobi-client-web/services/store.js';
-import { buildTimeSeriesData } from './chart-series';
+import { buildTimeSeriesData, buildWindbarbData } from './chart-series';
 
 export type ChartOptions = Record<string, unknown>;
 
@@ -45,6 +45,27 @@ export function seriesFor(history: History[], key: NumericHistoryKey) {
     history,
     (elm) => elm.timestamp,
     (elm) => elm[key]
+  );
+}
+
+// Highcharts' windbarb series expects wind speed in meters per second (its
+// barb shape is derived from Beaufort thresholds defined in m/s) -- this
+// app stores and displays speed in km/h everywhere else. Exported so
+// callers can convert their own km/h thresholds (e.g. windColourZones) to
+// the same unit -- see wind/presenter.gts's windbarbZones.
+export const KM_H_PER_M_S = 3.6;
+
+// Keyed by gusts, not average speed: pilots reading the direction arrows
+// care most about which way the strongest gusts came from (e.g. a takeoff
+// shielded from the average wind but exposed to gusts from another angle),
+// and the average-speed series is already drawn directly underneath as its
+// own line -- barbing it too would just repeat that series' information.
+export function windbarbSeriesFor(history: History[]) {
+  return buildWindbarbData(
+    history,
+    (elm) => elm.timestamp,
+    (elm) => elm.gusts / KM_H_PER_M_S,
+    (elm) => elm.direction
   );
 }
 

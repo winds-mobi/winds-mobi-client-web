@@ -86,6 +86,17 @@ export default class SettingsService extends Service {
   })
   favoritesFeatureEnabled!: boolean;
 
+  // Beta feature: wind direction arrows on the wind history chart
+  // (app/components/station/wind/presenter.gts). Its own toggle defaults
+  // off, unlike the two beta features above -- this one is new, not an
+  // already-shipped feature being retroactively gated -- so opting in takes
+  // two deliberate steps (betaFeaturesEnabled, then this) rather than one.
+  @trackedInLocalStorage({
+    keyName: 'settings.windDirectionHistoryEnabled',
+    defaultValue: false,
+  })
+  windDirectionHistoryEnabled!: boolean;
+
   // Early access to in-development features. Off by default; turning it on
   // reveals each individual beta feature's own toggle below it (see
   // app/templates/settings.gts for the warning shown alongside this toggle).
@@ -109,6 +120,7 @@ export type BooleanSettingKey =
   | 'useIconLabels'
   | 'refreshButtonSpin'
   | 'favoritesFeatureEnabled'
+  | 'windDirectionHistoryEnabled'
   | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {
