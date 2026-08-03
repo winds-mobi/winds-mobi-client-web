@@ -105,7 +105,7 @@ settings:
     label: Wind direction on the wind history chart
     description: >-
       Show small arrows along the top of the wind history chart, pointing
-      which way the wind was blowing at each reading.
+      which way the gusts were blowing at each reading.
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-
@@ -134,7 +134,7 @@ help:
       lastHourTitle: Last hour
       lastHourDescription: Trend values and a compact wind-direction history for the last hour.
       windHistoryTitle: Wind history
-      windHistoryDescription: Wind speed and gusts over time, with small arrows along the top showing which way the wind was blowing — coloured the same as the map markers.
+      windHistoryDescription: Wind speed and gusts over time, with small arrows along the top showing which way the gusts were blowing — coloured the same as the map markers.
       airHistoryTitle: Air history
       airHistoryDescription: Temperature, humidity, and rain over time.
   colors:

@@ -186,10 +186,11 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
       // Alternating between two clearly different readings: any group
       // spanning more than one raw point averages to a value/direction
       // that doesn't equal either raw reading, so a stale field would be
-      // visibly wrong, not coincidentally right.
+      // visibly wrong, not coincidentally right. Gusts alternate (not
+      // speed) because the Direction series is keyed off gusts.
       direction: i % 2 === 0 ? 10 : 90,
-      speed: i % 2 === 0 ? 3 : 45,
-      gusts: 22,
+      speed: 22,
+      gusts: i % 2 === 0 ? 3 : 45,
       temperature: 6,
       humidity: 60,
       rain: 0,
@@ -262,12 +263,12 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
 
     this.history = Array.from({ length: 400 }, (_, i) => ({
       id: `history-${i}`,
-      // Constant direction, alternating speed only: forces grouping (same
+      // Constant direction, alternating gusts only: forces grouping (same
       // as the test above) while keeping the vector average exactly 200°
       // (recovered by atan2 as -160°) rather than some other blend.
       direction: 200,
-      speed: i % 2 === 0 ? 3 : 45,
-      gusts: 22,
+      speed: 22,
+      gusts: i % 2 === 0 ? 3 : 45,
       temperature: 6,
       humidity: 60,
       rain: 0,

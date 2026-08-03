@@ -28,9 +28,9 @@ function historyRow(overrides: Partial<History>): History {
 // back, in wind/presenter.gts, not here.
 module('Unit | Utility | highcharts-options', function () {
   module('windbarbSeriesFor', function () {
-    test('it converts speed from km/h to m/s', function (assert) {
+    test('it converts gusts from km/h to m/s', function (assert) {
       const [point] = windbarbSeriesFor([
-        historyRow({ timestamp: 1, speed: 36, direction: 90 }),
+        historyRow({ timestamp: 1, gusts: 36, direction: 90 }),
       ]);
 
       assert.strictEqual(point?.value, 10, '36 km/h is 10 m/s');
@@ -38,16 +38,16 @@ module('Unit | Utility | highcharts-options', function () {
 
     test('it passes direction through unchanged', function (assert) {
       const [point] = windbarbSeriesFor([
-        historyRow({ timestamp: 1, speed: 10, direction: 315 }),
+        historyRow({ timestamp: 1, gusts: 10, direction: 315 }),
       ]);
 
       assert.strictEqual(point?.direction, 315);
     });
 
-    test('it drops a reading with a non-finite speed or direction', function (assert) {
+    test('it drops a reading with a non-finite gusts or direction', function (assert) {
       assert.deepEqual(
         windbarbSeriesFor([
-          historyRow({ timestamp: 1, speed: NaN, direction: 90 }),
+          historyRow({ timestamp: 1, gusts: NaN, direction: 90 }),
         ]),
         []
       );

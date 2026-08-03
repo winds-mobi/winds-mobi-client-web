@@ -55,11 +55,16 @@ export function seriesFor(history: History[], key: NumericHistoryKey) {
 // the same unit -- see wind/presenter.gts's windbarbZones.
 export const KM_H_PER_M_S = 3.6;
 
+// Keyed by gusts, not average speed: pilots reading the direction arrows
+// care most about which way the strongest gusts came from (e.g. a takeoff
+// shielded from the average wind but exposed to gusts from another angle),
+// and the average-speed series is already drawn directly underneath as its
+// own line -- barbing it too would just repeat that series' information.
 export function windbarbSeriesFor(history: History[]) {
   return buildWindbarbData(
     history,
     (elm) => elm.timestamp,
-    (elm) => elm.speed / KM_H_PER_M_S,
+    (elm) => elm.gusts / KM_H_PER_M_S,
     (elm) => elm.direction
   );
 }
