@@ -2,20 +2,34 @@
 
 ## Dependency bumps (branch `mb/deps-update`)
 
-- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed, needs manual
-  verification.** `pnpm test:ember:dev` regresses in this container: 26 acceptance tests fail
-  (not the usual 8 WebGL-related skips) with `TypeError: Cannot read properties of undefined
-(reading 'destroy')` thrown from inside `ember-maplibre-gl`'s own component teardown code,
-  which QUnit treats as a global failure and cascades to fail the rest of each affected test
-  module. This container's headless Chromium has no WebGL (see CLAUDE.md), so the map never
-  finishes initializing — meaning teardown always runs on a half-initialized instance here,
-  which may be what's triggering it; could not confirm whether this also reproduces with real
-  WebGL. Production `pnpm build` succeeds and `pnpm lint` (including `lint:types`) is clean. The
-  one breaking change in MapLibre's v5→v6 migration guide that looked relevant (default export
-  removed, ESM-only distribution) doesn't affect this app — `app/components/map/index.gts`
-  already uses a named import (`{ NavigationControl, TerrainControl }`), not the removed
-  default. Landed anyway for manual testing in a real browser instead of the automated suite —
-  **if the map doesn't work right when tested manually, this is the first thing to revert.**
+- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed; 3 real test
+  failures found and not yet root-caused.** Originally landed with the dev container unable to
+  run any MapLibre-dependent test for real (no WebGL — see the Dockerfile history), which
+  produced 26 acceptance failures with `TypeError: Cannot read properties of undefined (reading
+'destroy')` from `ember-maplibre-gl`'s teardown code. **That failure mode is confirmed gone**
+  now that the container has real software WebGL (Debian + Mesa, see the Dockerfile) — it was
+  specifically caused by tearing down a Map instance that never finished initializing, not a
+  real incompatibility. With real WebGL, only 3 failures remain, all in tests gated by
+  `test.if(..., webGLAvailable, ...)` that had literally never executed before (always skipped),
+  so it isn't yet known whether these are new regressions from this bump or pre-existing bugs
+  the tests just never caught:
+  - `Acceptance | map query params: it resets to the default view when the logo is clicked` —
+    `waitUntil timed out`.
+  - `Acceptance | map station panel: the map marker element itself gets the pointer cursor, not
+just its inner content` and `...the selected-station ring lives on the map marker element
+and follows selection` — both expect `.maplibregl-marker` (the class MapLibre's `Marker`
+    puts on its own root element) to also carry the app's `className` option (`cursor-pointer`,
+    the selection-ring class) via `:has()` selectors, and it doesn't show up. Partially traced:
+    read `maplibre-gl@6.1.0`'s own bundled source directly (`dist/maplibre-gl-dev.mjs`) and
+    confirmed `Marker`'s constructor still applies a custom `element`, `maplibregl-marker`, and
+    `options.className` to the exact same `this._element` as before — unchanged from what v5
+    presumably did. Also read `ember-maplibre-gl@0.7.0`'s (unminified) marker component source
+    and it still spreads `initOptions` straight into the `Marker` constructor. Neither read
+    explains the failure by itself — likely a timing/lifecycle difference not yet isolated.
+  - **Next step to actually answer "is this a regression":** with the container now fixed,
+    re-run these same 3 tests against the _old_ `maplibre-gl@5.20.2`/`ember-maplibre-gl@0.6.2` —
+    if they already failed there too, this was always a latent bug in the feature (or the
+    tests), not something this bump introduced.
 
 ## Exploratory
 

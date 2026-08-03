@@ -76,9 +76,9 @@ docker compose exec ui chromium --headless --disable-gpu --no-sandbox --disable-
 docker cp winds-mobi-client-web-ui-1:/tmp/shot.png ./shot.png
 ```
 
-Map/canvas routes are the one caveat: MapLibre needs WebGL, which this headless setup doesn't provide (see
-`tests/helpers/webgl.ts`), so a map screenshot will render blank/broken — expected, not a bug in the shot.
-Everything else (Settings, station panels, nearby/favourites lists, etc.) renders normally. Still run
+Map/canvas routes render normally too: the dev container's Debian base (not Alpine — see the Dockerfile's own
+comment) ships Mesa's software Vulkan driver, so headless Chromium here has real (software) WebGL and MapLibre
+initializes properly, unlike a bare Alpine `chromium` package. Still run
 `pnpm lint` and the relevant tests as the actual verification; a screenshot is a visual aid on top; it doesn't replace them.
 
 ## Architecture
@@ -392,12 +392,13 @@ a function`) when the chart tries to render it.
   `RenderedTestContext` from `tests/helpers` (it narrows `element` to `Element`, which qunit-dom's target/rootElement
   params require); non-rendering contexts extend `@ember/test-helpers`'s `TestContext`. A context type that extends
   neither leaves `this.owner`/`this.element` untyped and cascades into `no-unsafe-*` errors downstream.
-- Some acceptance tests need MapLibre's `idle` event, which never fires in this dev container (no WebGL in headless
-  Chromium here). These fail locally but should pass in a real browser/CI with WebGL; don't chase them as regressions
-  without checking whether they're in this category first (symptom: `waitUntil timed out` + a `Failed to initialize
-map (likely WebGL issue)` console error in the failure output). Because each of these burns a long timeout, a full
-  unfiltered `pnpm test:ember:dev` run in the container is very slow — prefer filtered runs
-  (`pnpm test:ember:dev --test_page "tests/index.html?hidepassed&filter=<pattern>"`). If the testem browser ever
+- The dev container has real (software) WebGL, so MapLibre-dependent acceptance tests (gated with `test.if(...,
+webGLAvailable, ...)`, see `tests/helpers/webgl.ts`) actually run here — they are not permanently skipped. If one
+  hangs waiting on MapLibre's `idle` event (symptom: `waitUntil timed out` + a `Failed to initialize map (likely
+WebGL issue)` console error), suspect the environment has genuinely lost WebGL (e.g. a stale/corrupted container —
+  rebuild it) before assuming it's an expected skip. Because a from-scratch container needs the GPU process to spin
+  up, a full unfiltered `pnpm test:ember:dev` run is slower on first invocation — prefer filtered runs
+  (`pnpm test:ember:dev --test_page "tests/index.html?hidepassed&filter=<pattern>"`) while iterating. If the testem browser ever
   again fails to connect at all ("testem.js not loaded?"), suspect the proxy target in `testem-dev.js` first — it
   must stay plain-http localhost, not the OrbStack HTTPS domain, because node's https client rejects OrbStack's CA
   and 500s every proxied page request (root-caused 2026-07-11).

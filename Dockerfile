@@ -1,18 +1,27 @@
 ARG API_HOST
 
 ### Stage 1: base installation
-FROM node:24.4-alpine AS base
+# Debian, not Alpine: headless Chromium needs working software WebGL
+# (SwiftShader/Vulkan or Mesa llvmpipe) to run this app's MapLibre-dependent
+# tests at all. Alpine's musl-based chromium package ships no Vulkan ICD and
+# its ANGLE build fails on headless Vulkan surface init; Google's own Chrome
+# (which bundles a complete SwiftShader and is what GitHub Actions'
+# ubuntu-latest runners have preinstalled -- see .github/workflows/ci.yml,
+# which relies on it with no explicit browser setup) is amd64-only, no arm64
+# build exists. Debian's own chromium package plus Mesa's Vulkan software
+# rasterizer is the best-supported combination on arm64 (Apple Silicon/OrbStack).
+FROM node:24.4-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   rsync \
   bash \
   curl \
   chromium \
-  nss \
-  freetype \
-  harfbuzz \
-  ttf-freefont \
-  fontconfig
+  mesa-vulkan-drivers \
+  libnss3 \
+  fonts-freefont-ttf \
+  fontconfig \
+  && rm -rf /var/lib/apt/lists/*
 SHELL ["/bin/bash", "-c"]
 ENV SHELL=bash
 ENV PNPM_HOME="/root/.local/share/pnpm"

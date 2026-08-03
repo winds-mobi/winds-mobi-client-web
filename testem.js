@@ -18,14 +18,18 @@ if (typeof module !== 'undefined') {
             : null,
           '--headless',
           '--disable-dev-shm-usage',
-          '--disable-software-rasterizer',
           // GitHub Actions runners have no real GPU; without this, Chromium's
           // GPU process intermittently crashes on launch ("Network service
           // crashed", "GpuControl.CreateCommandBuffer" errors) and the whole
           // browser then never connects to testem within the 120s timeout,
           // failing every test in the run rather than just the WebGL-dependent
-          // ones. Doesn't change which tests pass/fail otherwise — WebGL/map
-          // tests already can't run here regardless (see TODO.md).
+          // ones. Deliberately NOT paired with --disable-software-rasterizer
+          // (this repo used to pass both): that flag blocks headless Chromium's
+          // software WebGL fallback entirely, which is what let MapLibre/map
+          // tests actually run at all instead of being permanently skipped
+          // (see tests/helpers/webgl.ts, TODO.md). --disable-gpu alone doesn't
+          // affect that fallback — verified directly against this same
+          // Chromium build.
           '--disable-gpu',
           '--mute-audio',
           '--remote-debugging-port=0',
