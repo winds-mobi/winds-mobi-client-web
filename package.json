@@ -64,7 +64,6 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@tailwindcss/vite": "^4.3.3",
     "@tsconfig/ember": "^3.0.10",
-    "@types/eslint__js": "^8.42.3",
     "@types/qunit": "^2.19.12",
     "@types/rsvp": "^4.0.9",
     "@vite-pwa/assets-generator": "^1.0.1",
