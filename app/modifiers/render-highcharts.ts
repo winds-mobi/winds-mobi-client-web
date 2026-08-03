@@ -1,5 +1,5 @@
 import Modifier, { type ArgsFor } from 'ember-modifier';
-import { registerDestructor } from '@ember/destroyable';
+import { isDestroying, registerDestructor } from '@ember/destroyable';
 import { waitForPromise } from '@ember/test-waiters';
 import type Owner from '@ember/owner';
 import type { Chart, Options } from 'highcharts';
@@ -147,7 +147,15 @@ export default class RenderHighchartsModifier extends Modifier<RenderHighchartsS
       await waitForPromise(import('highcharts/modules/windbarb'));
     }
 
-    if (callId !== this.latestCallId) {
+    // `sync` awaits dynamic imports before touching `this.chart`, so the
+    // modifier can be torn down (component destroyed, e.g. the panel
+    // closing mid-refresh) while a call is still in flight. The destructor
+    // above calls `this.chart?.destroy()` synchronously, but doesn't stop
+    // this continuation from resuming afterward -- without this guard it
+    // would call `updateChart`/create a chart on an already-destroyed
+    // Highcharts instance, which throws deep inside Highcharts' own
+    // internals (e.g. `setResponsive` reading a nulled-out property).
+    if (callId !== this.latestCallId || isDestroying(this)) {
       return;
     }
 
