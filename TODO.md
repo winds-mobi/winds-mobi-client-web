@@ -2,34 +2,42 @@
 
 ## Dependency bumps (branch `mb/deps-update`)
 
-- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed; 3 real test
-  failures found and not yet root-caused.** Originally landed with the dev container unable to
-  run any MapLibre-dependent test for real (no WebGL — see the Dockerfile history), which
-  produced 26 acceptance failures with `TypeError: Cannot read properties of undefined (reading
-'destroy')` from `ember-maplibre-gl`'s teardown code. **That failure mode is confirmed gone**
-  now that the container has real software WebGL (Debian + Mesa, see the Dockerfile) — it was
-  specifically caused by tearing down a Map instance that never finished initializing, not a
-  real incompatibility. With real WebGL, only 3 failures remain, all in tests gated by
-  `test.if(..., webGLAvailable, ...)` that had literally never executed before (always skipped),
-  so it isn't yet known whether these are new regressions from this bump or pre-existing bugs
-  the tests just never caught:
-  - `Acceptance | map query params: it resets to the default view when the logo is clicked` —
-    `waitUntil timed out`.
+- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed, fully resolved.**
+  Originally landed with the dev container unable to run any MapLibre-dependent test for real (no
+  WebGL — see the Dockerfile history), which produced 26 acceptance failures with `TypeError:
+Cannot read properties of undefined (reading 'destroy')` from `ember-maplibre-gl`'s teardown
+  code — confirmed caused by tearing down a Map instance that never finished initializing, not a
+  real incompatibility, and gone once the container got real software WebGL (Debian + Mesa, see
+  the Dockerfile). That also exposed the v6 bump's own real bug: `maplibre-gl` v6 is ESM-only and
+  resolves its worker file at runtime via `import.meta.url`, which only works unbundled — under
+  Vite the worker 404s and the map never renders tiles. Fixed with a one-time `setWorkerUrl()`
+  call in `app/components/map/index.gts` (Vite's `?url` import resolves the real built/dev-served
+  path); verified via a production build producing a real `dist/assets/maplibre-gl-worker-*.mjs`
+  chunk.
+  With WebGL and the worker both fixed, 3 test failures remained — all in tests gated by
+  `test.if(..., webGLAvailable, ...)` that had literally never executed before (always skipped).
+  All 3 are now root-caused and fixed, and none were regressions from this bump:
+  - `Acceptance | map query params: it resets to the default view when the logo is clicked` — the
+    test's own expectation was wrong, not the app: Ember's router omits a query param from the URL
+    entirely when its value equals the controller's declared default, so the post-reset URL is
+    bare `/map`, not one spelling out the defaults explicitly. Fixed the assertion.
   - `Acceptance | map station panel: the map marker element itself gets the pointer cursor, not
-just its inner content` and `...the selected-station ring lives on the map marker element
-and follows selection` — both expect `.maplibregl-marker` (the class MapLibre's `Marker`
-    puts on its own root element) to also carry the app's `className` option (`cursor-pointer`,
-    the selection-ring class) via `:has()` selectors, and it doesn't show up. Partially traced:
-    read `maplibre-gl@6.1.0`'s own bundled source directly (`dist/maplibre-gl-dev.mjs`) and
-    confirmed `Marker`'s constructor still applies a custom `element`, `maplibregl-marker`, and
-    `options.className` to the exact same `this._element` as before — unchanged from what v5
-    presumably did. Also read `ember-maplibre-gl@0.7.0`'s (unminified) marker component source
-    and it still spreads `initOptions` straight into the `Marker` constructor. Neither read
-    explains the failure by itself — likely a timing/lifecycle difference not yet isolated.
-  - **Next step to actually answer "is this a regression":** with the container now fixed,
-    re-run these same 3 tests against the _old_ `maplibre-gl@5.20.2`/`ember-maplibre-gl@0.6.2` —
-    if they already failed there too, this was always a latent bug in the feature (or the
-    tests), not something this bump introduced.
+just its inner content` and `...the selected-station ring lives on the map marker element and
+follows selection` — pure test-timing gap: `<map.marker>` adds its element to the map
+    asynchronously, and `await visit(...)` resolving doesn't mean the marker DOM exists yet (never
+    exercised before, since these tests always used to be skipped). Confirmed via reading v6's own
+    bundled `Marker` source that its `className`/`maplibregl-marker` handling is unchanged from
+    what these tests were written against. Fixed with a `waitForMarker(stationId)` test helper.
+  - A 4th, intermittent (~1-in-3-4 runs) failure surfaced during verification, unrelated to the
+    bump itself: `Acceptance | map station panel: it auto refreshes map and station requests
+after the refresh interval` occasionally hit `TypeError: Cannot read properties of undefined
+(reading 'responsive')` inside Highcharts internals. Root cause: `app/modifiers/
+render-highcharts.ts`'s async `sync()` could resume and call `updateChart()` on an
+    already-destroyed chart if the modifier was torn down mid-flight (e.g. panel closing during a
+    fast background refresh) — a real, pre-existing race, just never stressed until these tests
+    ran for real. Fixed by also bailing on `isDestroying(this)` in the existing stale-call guard.
+    Verified: 5 consecutive full `pnpm test:ember:dev` runs, 250/250 pass, 0 skip, 0 fail; `pnpm
+lint` clean (css, js, format, hbs, types).
 
 ## Exploratory
 
