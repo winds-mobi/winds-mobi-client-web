@@ -9,6 +9,7 @@ import {
   COMPASS_LABEL_FONT_FAMILY,
 } from 'winds-mobi-client-web/utils/compass-labels';
 import { windDirectionMarkerColours } from 'winds-mobi-client-web/utils/wind-direction-marker';
+import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 
 export interface WindDirectionGraphSignature {
   Args: {
@@ -40,44 +41,28 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   // "changed" args on every access and re-run its update mid-render -- the
   // root cause of this component's flaky marker-rendering (see TODO.md).
 
-  // The radial window spans exactly the given data's own oldest-to-newest
-  // range -- not a fixed 1-hour span anchored off either end (issue #120).
-  // Anchoring to a fixed duration (e.g. `newest - 1 hour`) was tried first
-  // and was wrong two ways: anchoring off wall-clock `Date.now()` let the
-  // window drift away from a station that had gone quiet, leaving the graph
-  // looking sparse or empty; anchoring the span off the newest reading
-  // instead still assumed the returned data always covers a full hour, so
-  // any time it covered less (a quiet spell, a station just back online)
-  // the real oldest reading sat inside that assumed boundary while nothing
-  // else moved to match -- not itself a visible bug, but proof the window
-  // and the data could disagree. Deriving both ends directly from the
-  // data's own extremes make that impossible by construction: no point can
-  // ever fall outside axis bounds that are its own dataset's bounds. `data`
-  // is chronological (oldest first, see app/handlers/history.ts), so the
-  // first/last elements are the two extremes.
+  // The radial window is always exactly one hour wide, anchored on the newest
+  // reading: the outer ring is the last measurement and the center is exactly
+  // an hour before it, whether or not a reading exists at that instant. That
+  // makes the radius a constant time scale, so radial distance always means
+  // the same number of minutes and a quiet spell reads as an empty inner (or
+  // outer) area rather than silently rescaling the whole graph.
+  //
+  // The anchor is the newest reading, never wall-clock `Date.now()`: anchoring
+  // off `Date.now()` (tried in issue #120) let the window drift away from a
+  // station that had gone quiet, leaving the graph looking sparse or empty.
+  // The historic API returns the last `duration` seconds relative to the
+  // station's own latest entry, so with `duration` of 1 hour no reading can
+  // fall outside these bounds. `data` is chronological (oldest first, see
+  // app/handlers/history.ts), so the last element is the newest reading.
   @cached
   get windowBounds() {
     const data = this.args.data ?? [];
+    // With no data at all there is no reading to anchor to; show the hour
+    // ending now, so the empty graph still draws its ring at a sane scale.
+    const newest = data[data.length - 1]?.timestamp ?? Date.now();
 
-    if (data.length === 0) {
-      const now = Date.now();
-
-      return { min: now - LAST_HOUR, max: now };
-    }
-
-    // A single reading has no range of its own to derive from -- fall back
-    // to a 1-hour span so it still draws as a spoke (see `points` below)
-    // instead of collapsing both axis ends onto the same value.
-    if (data.length === 1) {
-      const only = data[0]!.timestamp;
-
-      return { min: only - LAST_HOUR, max: only };
-    }
-
-    return {
-      min: data[0]!.timestamp,
-      max: data[data.length - 1]!.timestamp,
-    };
+    return { min: newest - LAST_HOUR, max: newest };
   }
 
   @cached
@@ -119,7 +104,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
         max: maxTimestamp,
         // Highcharts' radial axis places `min` at the pane center and `max`
         // at the outer edge by default, so the newest reading lands right
-        // on the outer ring and the oldest reading sits at the center, with
+        // on the outer ring and an hour earlier sits at the center, with
         // everything else spread linearly between (issue #120). A point
         // exactly at the center can't show a direction (the angle is
         // meaningless at radius 0), so this deliberately keeps the newest
@@ -139,6 +124,38 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
         gridLineWidth: 0,
       },
     };
+  }
+
+  // Mirrors the markup Highcharts' own default tooltip uses, which is what
+  // the wind history chart renders (see chart/time-series.gts): a smaller
+  // time header, then one line per value made of a wind-band-coloured
+  // bullet, the label, and the value in bold. Highcharts parses this subset
+  // of HTML inside its SVG text, so the tooltip needs no `useHTML` -- and a
+  // `var(--color-wind-NN)` colour resolves there just as it already does for
+  // the wind chart's zone-coloured bullets. Gusts come first to match the
+  // "Last hour" panel's own cards, which lead with the hour's maximum gust.
+  #tooltipFor(reading: History) {
+    const time = this.intl.formatTime(reading.timestamp, {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+    const rows = [
+      { label: this.intl.t('wind.gusts'), value: reading.gusts },
+      { label: this.intl.t('wind.speed'), value: reading.speed },
+    ];
+
+    return [
+      `<span style="font-size: 0.8em">${time}</span>`,
+      ...rows.map(
+        ({ label, value }) =>
+          `<span style="color:${windToColour(
+            value
+          )}">●</span> ${label}: <b>${this.intl.formatNumber(value, {
+            format: 'windSpeed',
+          })}</b>`
+      ),
+    ].join('<br/>');
   }
 
   @cached
@@ -164,13 +181,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
           lineColor,
           fillColor,
         },
-        customTooltip: `${this.intl.formatTime(elm.timestamp, {
-          hour: 'numeric',
-          minute: 'numeric',
-          hour12: false,
-        })} ${this.intl.formatNumber(elm.speed, {
-          format: 'windSpeed',
-        })}`,
+        customTooltip: this.#tooltipFor(elm),
       };
     });
 

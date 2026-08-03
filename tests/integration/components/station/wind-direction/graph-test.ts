@@ -96,14 +96,11 @@ module(
       assert.dom('.highcharts-container').exists();
     });
 
-    // issue #120: the window is derived from the data's own oldest/newest
-    // timestamps, not anchored to wall-clock `Date.now()` or to a fixed
-    // 1-hour span off either end. Anchoring off `Date.now()` let the window
-    // drift away from a station that had gone quiet; anchoring a fixed
-    // 1-hour span off the newest reading instead assumed the returned data
-    // always covers a full hour, which isn't guaranteed -- so a reading
-    // could fall outside the assumed span. Deriving both axis ends from the
-    // data itself rules that out by construction.
+    // issue #120: the hour-wide window is anchored on the newest reading in
+    // the data, never on wall-clock `Date.now()`. Anchoring off `Date.now()`
+    // let the window drift away from a station that had gone quiet -- here,
+    // one that last reported almost three hours ago -- pushing every reading
+    // it did return outside the window and leaving the graph empty.
     test('it keeps stale readings on screen instead of anchoring the window to wall-clock time', async function (this: WindDirectionGraphTestContext, assert) {
       const lastReadingTimestamp = Date.now() - 170 * 60 * 1000;
 
@@ -134,23 +131,33 @@ module(
 
       await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
 
-      const series = (await renderedPolarChart())?.series[0];
+      const chart = await renderedPolarChart();
 
       assert.deepEqual(
-        series?.data.map((p) => p.y),
+        chart?.series[0]?.data.map((p) => p.y),
         this.data.map((row) => row.timestamp),
         'both stale readings still render, none clipped by a real-time window'
       );
+      assert.strictEqual(
+        chart?.yAxis[0]?.max,
+        lastReadingTimestamp,
+        "the outer edge is the stale station's last reading, not the current time"
+      );
+      assert.strictEqual(
+        chart?.yAxis[0]?.min,
+        lastReadingTimestamp - LAST_HOUR,
+        'the center is an hour before that reading, not an hour before now'
+      );
     });
 
-    test('it sizes the axis to the data span it was actually given, not a fixed 1-hour offset', async function (this: WindDirectionGraphTestContext, assert) {
+    test('it spans exactly one hour ending at the newest reading, even when the data covers less', async function (this: WindDirectionGraphTestContext, assert) {
       const now = Date.now();
 
-      // Only 12 minutes apart -- far short of a full hour. Under a fixed
-      // `newest - 1 hour` window this data would still render fine (nothing
-      // falls outside a *wider* assumed span), but the axis and the data
-      // would disagree about what "the edge" means; deriving the axis from
-      // the data itself keeps them in lockstep, which is what this test pins.
+      // Only 12 minutes apart -- far short of a full hour. The window is
+      // still a full hour wide, so these two readings occupy just the outer
+      // fifth of the radius and the missing 48 minutes read as an empty
+      // center, rather than the axis shrinking to the data's own span and
+      // making radial distance mean something different per station.
       this.data = [
         {
           id: 'oldest',
@@ -182,13 +189,13 @@ module(
 
       assert.strictEqual(
         chart?.yAxis[0]?.min,
-        this.data[0]!.timestamp,
-        'axis min is the oldest reading in the data, not an hour before the newest'
+        this.data[1]!.timestamp - LAST_HOUR,
+        'the center is exactly one hour before the newest reading, not the oldest reading in the data'
       );
       assert.strictEqual(
         chart?.yAxis[0]?.max,
         this.data[1]!.timestamp,
-        'axis max is the newest reading in the data'
+        'the outer edge is the newest reading in the data'
       );
     });
 
@@ -303,6 +310,65 @@ module(
       assert.strictEqual(formatter?.({ value: 90 }), 'E');
       assert.strictEqual(formatter?.({ value: 45 }), '');
       assert.strictEqual(formatter?.({ value: 315 }), '');
+    });
+
+    // The tooltip mirrors the wind history chart's: a time header, then one
+    // line per value with a wind-band-coloured bullet, the label, and the
+    // value in bold. Reading the string back off the rendered point checks
+    // what this component actually handed Highcharts -- how Highcharts then
+    // paints that markup is its own business, not ours to assert.
+    test('it builds a tooltip listing the gust and the average wind, each with a coloured bullet and a bold speed', async function (this: WindDirectionGraphTestContext, assert) {
+      this.data = [
+        {
+          id: 'reading',
+          direction: 180,
+          // Two different wind bands, so each bullet has to pick up its own
+          // value's colour rather than sharing one.
+          speed: 12,
+          gusts: 24,
+          temperature: 6,
+          humidity: 60,
+          rain: 0,
+          timestamp: Date.now(),
+          [Type]: 'history',
+        },
+      ];
+
+      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+
+      const series = (await renderedPolarChart())?.series[0];
+      const tooltip =
+        (
+          series?.data[0]?.options as unknown as
+            | { customTooltip?: string }
+            | undefined
+        )?.customTooltip ?? '';
+
+      // Whitespace between the number and its unit is whatever `Intl` emits
+      // for the locale (a plain space or a non-breaking one), so match either
+      // rather than pinning the exact formatted string.
+      assert.true(
+        /<span style="color:var\(--color-wind-25\)">●<\/span> Gusts: <b>24\s?km\/h<\/b>/.test(
+          tooltip
+        ),
+        'the gust row leads with a bullet in the gust’s own wind-band colour and shows the speed in bold'
+      );
+      assert.true(
+        /<span style="color:var\(--color-wind-15\)">●<\/span> Wind: <b>12\s?km\/h<\/b>/.test(
+          tooltip
+        ),
+        'the average-wind row leads with a bullet in its own wind-band colour and shows the speed in bold'
+      );
+      assert.true(
+        tooltip.indexOf('Gusts:') < tooltip.indexOf('Wind:'),
+        'the gust is listed first, matching the panel’s own cards'
+      );
+      assert.true(
+        /^<span style="font-size: 0\.8em">\d{1,2}:\d{2}<\/span><br\/>/.test(
+          tooltip
+        ),
+        'the reading’s time heads the tooltip, in a smaller type size'
+      );
     });
   }
 );

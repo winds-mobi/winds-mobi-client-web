@@ -113,6 +113,12 @@ export default class Polar extends Component<PolarSignature> {
       showLastLabel: false,
     },
     tooltip: {
+      // This chart is small -- a station card, and a ~80px thumbnail in the
+      // compact nearby/favourites rows -- so a multi-line tooltip would be
+      // clipped by the chart box it is drawn inside by default. `outside`
+      // renders it in its own container on top of the page instead, the same
+      // way the wind/air charts' tooltips already do.
+      outside: true,
       formatter: function (this: { point: { customTooltip: string } }) {
         return this.point.customTooltip;
       },
