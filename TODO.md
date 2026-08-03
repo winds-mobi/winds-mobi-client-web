@@ -1,25 +1,21 @@
 # TODO
 
-## Deferred dependency bumps (branch `mb/deps-update`)
+## Dependency bumps (branch `mb/deps-update`)
 
-- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — attempted, reverted.**
-  `ember-maplibre-gl@0.7.0`'s peer range (`maplibre-gl >=5.0.0`, no upper bound) allows 6.x, and
-  the only breaking change in MapLibre's own v5→v6 migration guide that looked relevant
-  (default export removed, ESM-only distribution) doesn't affect this app — `app/components/
-map/index.gts` already uses a named import (`{ NavigationControl, TerrainControl }`), not the
-  removed default. Production `pnpm build` succeeds and `pnpm lint` (including `lint:types`) is
-  clean at the bumped versions. But `pnpm test:ember:dev` regresses hard: 26 acceptance tests
-  fail (not the usual 8 WebGL-related skips) with `TypeError: Cannot read properties of
-undefined (reading 'destroy')` thrown from inside `ember-maplibre-gl`'s own component teardown
-  code, which QUnit treats as a global failure and cascades to fail the rest of each affected
-  test module. This container's headless Chromium has no WebGL (see CLAUDE.md), so the map never
+- **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed, needs manual
+  verification.** `pnpm test:ember:dev` regresses in this container: 26 acceptance tests fail
+  (not the usual 8 WebGL-related skips) with `TypeError: Cannot read properties of undefined
+(reading 'destroy')` thrown from inside `ember-maplibre-gl`'s own component teardown code,
+  which QUnit treats as a global failure and cascades to fail the rest of each affected test
+  module. This container's headless Chromium has no WebGL (see CLAUDE.md), so the map never
   finishes initializing — meaning teardown always runs on a half-initialized instance here,
-  which may be what's triggering it. Could not confirm whether this also reproduces with real
-  WebGL (this sandbox can't test that), and `ember-maplibre-gl@0.7.0` is its own latest release
-  (no newer patch to try). Reverted both packages to their original pins rather than land an
-  unverified risk in the app's most core feature. **To pick this back up:** reproduce in a real
-  browser (or CI with WebGL) before trying again, or watch for a newer `ember-maplibre-gl`
-  release.
+  which may be what's triggering it; could not confirm whether this also reproduces with real
+  WebGL. Production `pnpm build` succeeds and `pnpm lint` (including `lint:types`) is clean. The
+  one breaking change in MapLibre's v5→v6 migration guide that looked relevant (default export
+  removed, ESM-only distribution) doesn't affect this app — `app/components/map/index.gts`
+  already uses a named import (`{ NavigationControl, TerrainControl }`), not the removed
+  default. Landed anyway for manual testing in a real browser instead of the automated suite —
+  **if the map doesn't work right when tested manually, this is the first thing to revert.**
 
 ## Exploratory
 
