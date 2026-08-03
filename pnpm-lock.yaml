@@ -197,8 +197,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))
       ember-maplibre-gl:
-        specifier: ^0.6.2
-        version: 0.6.2(@babel/core@7.28.4)(@glimmer/component@2.0.0)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))(maplibre-gl@5.20.2)
+        specifier: ^0.7.0
+        version: 0.7.0(@babel/core@7.28.4)(@glimmer/component@2.0.0)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))(maplibre-gl@6.1.0)
       ember-modifier:
         specifier: ^4.2.0
         version: 4.2.0(@babel/core@7.28.4)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))
@@ -248,8 +248,8 @@ importers:
         specifier: ^15.15.0
         version: 15.15.0
       maplibre-gl:
-        specifier: 5.20.2
-        version: 5.20.2
+        specifier: 6.1.0
+        version: 6.1.0
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -2422,41 +2422,34 @@ packages:
     resolution: {integrity: sha512-F5z53uvRIF4dYfFfJP3a2Cqg+4P1dgJchJsFnsZE0eZp0LK8X7g2J0CsJHRgns+skpXOlM7n5vFGwkWCWj8qJg==}
     engines: {node: 12.* || >= 14}
 
-  '@mapbox/jsonlint-lines-primitives@2.0.2':
-    resolution: {integrity: sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ==}
-    engines: {node: '>= 0.6'}
+  '@mapbox/jsonlint-lines-primitives@2.0.3':
+    resolution: {integrity: sha512-0SElaV0uMxEnxzBhhX9WTuPyUeMsAN/SS0i16tjuba4/mio63MG9khjC1a0JAiPGXAwvwm4UfHJURCN7nyudQg==}
+    engines: {node: '>= 22'}
 
   '@mapbox/point-geometry@1.1.0':
     resolution: {integrity: sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ==}
 
-  '@mapbox/tiny-sdf@2.0.7':
-    resolution: {integrity: sha512-25gQLQMcpivjOSA40g3gO6qgiFPDpWRoMfd+G/GoppPIeP6JDaMMkMrEJnMZhKyyS6iKwVt5YKu02vCUyJM3Ug==}
+  '@mapbox/tiny-sdf@2.2.0':
+    resolution: {integrity: sha512-LVL4wgI9YAum5V+LNVQO6QgFBPw7/MIIY4XJPNsPDMrjEwcE+JfKk1LuIl8GnF197ejVdC9QdPaxrx5gfgdGXg==}
 
-  '@mapbox/unitbezier@0.0.1':
-    resolution: {integrity: sha512-nMkuDXFv60aBr9soUG5q+GvZYL+2KZHVvsqFCzqnkGEf46U2fvmytHaEVc1/YZbiLn8X+eR3QzX1+dwDO1lxlw==}
+  '@mapbox/unitbezier@1.0.0':
+    resolution: {integrity: sha512-fqd515fjBmANKGGsQ286E2Wvj/XvDFpGzwJxq4CI6jMQue6Oy04uCKp+JWKF00xRTmk6cEu1jPJ9p3xqH8YWqQ==}
 
-  '@mapbox/vector-tile@2.0.4':
-    resolution: {integrity: sha512-AkOLcbgGTdXScosBWwmmD7cDlvOjkg/DetGva26pIRiZPdeJYjYKarIlb4uxVzi6bwHO6EWH82eZ5Nuv4T5DUg==}
+  '@mapbox/vector-tile@3.0.0':
+    resolution: {integrity: sha512-Qf10S1uIHMk20ri/IVBnpS+esUEkVaR5Hftmz88jTInrpmWgPGJfPe3LVjjlE77trLx8tH6qjTG7uWH9hIq/0Q==}
 
-  '@mapbox/whoots-js@3.1.0':
-    resolution: {integrity: sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==}
-    engines: {node: '>=6.0.0'}
+  '@maplibre/geojson-vt@6.1.1':
+    resolution: {integrity: sha512-FVMOcmSP/yqol45t7StApEyTL5/vmqBCuFhH9n+fFuINenhaX+YgHHIt1yJ86S8kln3uJLcMvmEU2cfn6E2eCQ==}
 
-  '@maplibre/geojson-vt@5.0.4':
-    resolution: {integrity: sha512-KGg9sma45S+stfH9vPCJk1J0lSDLWZgCT9Y8u8qWZJyjFlP8MNP1WGTxIMYJZjDvVT3PDn05kN1C95Sut1HpgQ==}
-
-  '@maplibre/geojson-vt@6.0.4':
-    resolution: {integrity: sha512-HYv3POhMRCdhP3UPPATM/hfcy6/WuVIf5FKboH8u/ZuFMTnAIcSVlq5nfOqroLokd925w2QtE7YwquFOIacwVQ==}
-
-  '@maplibre/maplibre-gl-style-spec@24.7.0':
-    resolution: {integrity: sha512-Ed7rcKYU5iELfablg9Mj+TVCsXsPBgdMyXPRAxb2v7oWg9YJnpQdZ5msDs1LESu/mtXy3Z48Vdppv2t/x5kAhw==}
+  '@maplibre/maplibre-gl-style-spec@26.2.1':
+    resolution: {integrity: sha512-QFKCXkOeSzOr8jF75jm6kySOg+dUvOehPhRi68gcOYPHb7U5JloUq0dJW0Y5/fZV8ygfT0Vp2RWodvq+fyxFWA==}
     hasBin: true
 
-  '@maplibre/mlt@1.1.8':
-    resolution: {integrity: sha512-8vtfYGidr1rNkv5IwIoU2lfe3Oy+Wa8HluzQYcQi9cveU9K3pweAal/poQj4GJ0K/EW4bTQp2wVAs09g2yDRZg==}
+  '@maplibre/mlt@1.1.12':
+    resolution: {integrity: sha512-ZeK5w2TTeHOajcLaEQs1KZXw2V9wIKo1PmThlxlsHoXsQsYlBqLJzPOd6tJHRtGTChUY3DPPmjXRArYVvAbmZw==}
 
-  '@maplibre/vt-pbf@4.3.0':
-    resolution: {integrity: sha512-jIvp8F5hQCcreqOOpEt42TJMUlsrEcpf/kI1T2v85YrQRV6PPXUcEXUg5karKtH6oh47XJZ4kHu56pUkOuqA7w==}
+  '@maplibre/vt-pbf@4.3.2':
+    resolution: {integrity: sha512-j6p0AdjvAR19Z3XaCysle7A4ZSo08tYOzxD0Y9NQylwPAkwJJeYub5b2eVucdeDh7erhv69DahoLOevDRERRUw==}
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
@@ -2878,9 +2871,6 @@ packages:
 
   '@types/serve-static@1.15.7':
     resolution: {integrity: sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==}
-
-  '@types/supercluster@7.1.3':
-    resolution: {integrity: sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA==}
 
   '@types/symlink-or-copy@1.2.2':
     resolution: {integrity: sha512-MQ1AnmTLOncwEf9IVU+B2e4Hchrku5N67NkgcAHW0p3sdzPe0FNMANxEm6OJUzPniEQGkeT3OROLlCwZJLWFZA==}
@@ -4379,8 +4369,8 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
-  earcut@3.0.2:
-    resolution: {integrity: sha512-X7hshQbLyMJ/3RPhyObLARM2sNxxmRALLKx1+NVFFnQ9gKzmCrxm9+uLIAdBcvc8FNLpctqlQ2V6AE92Ol9UDQ==}
+  earcut@3.2.3:
+    resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
 
   editions@1.3.4:
     resolution: {integrity: sha512-gzao+mxnYDzIysXKMQi/+M1mjy/rjestjg6OPoYTtI+3Izp23oiGZitsl9lPDPiTGXbcSIk1iJWhliSaglxnUg==}
@@ -4541,12 +4531,12 @@ packages:
     peerDependencies:
       ember-source: '>= 5'
 
-  ember-maplibre-gl@0.6.2:
-    resolution: {integrity: sha512-/XKynm4khpEdOJk8XnM839L4wiFzGvtqyVIKNQjFtijqmCESlkz5Y8R2hI4jN50xrPZMwsRsAsJHK9PO4VJX/A==}
+  ember-maplibre-gl@0.7.0:
+    resolution: {integrity: sha512-xLNFIYCv9WtC4tFXORtemh3VhG5XmEPmH+kOQcL+MY26uhGMxEJMKPqZtZRKsdT+VDrO6NV8tg/FDX7uXiZ+wg==}
     peerDependencies:
       '@glimmer/component': '>= 1.1.2 || >= 2.0.0'
       ember-source: '>= 3.28.0'
-      maplibre-gl: ^5.0.0
+      maplibre-gl: '>=5.0.0'
     peerDependenciesMeta:
       '@glimmer/component':
         optional: true
@@ -6020,8 +6010,8 @@ packages:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
 
-  kdbush@4.0.2:
-    resolution: {integrity: sha512-WbCVYJ27Sz8zi9Q7Q0xHC+05iwkm3Znipc2XTlrnJbsHMYktW4hPhXUE8Ys1engBrvffoSCqbil1JQAa7clRpA==}
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -6280,8 +6270,8 @@ packages:
     resolution: {integrity: sha512-4y7uGv8bd2WdM9vpQsiQNo41Ln1NvhvDRuVt0k2JZQ+ezN2uaQes7lZeZ+QQUHOLQAtDaBJ+7wCbi+ab/KFs+w==}
     engines: {node: '>=0.10.0'}
 
-  maplibre-gl@5.20.2:
-    resolution: {integrity: sha512-0UzMWOe+GZmIUmOA99yTI1vRh15YcGnHxADVB2s+JF3etpjj2/MBCqbPEuu4BP9mLsJWJcpHH0Nzr9uuimmbuQ==}
+  maplibre-gl@6.1.0:
+    resolution: {integrity: sha512-vLRukjvbUai4SXW2/jKo8rPsw6YMXuA/b4fKFVSulZKFVRHkOvk4ZmNlDSVZpTYPV0/7/iTqq8ltYdyr764b7w==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
   markdown-it-terminal@0.4.0:
@@ -6800,8 +6790,8 @@ packages:
     resolution: {integrity: sha512-5HviZNaZcfqP95rwpv+1HDgUamezbqdSYTyzjTvwtJSnIH+3vnbmWsItli8OFEndS984VT55M3jduxZbX351gg==}
     engines: {node: '>=12'}
 
-  pbf@4.0.1:
-    resolution: {integrity: sha512-SuLdBvS42z33m8ejRbInMapQe8n0D3vN/Xd5fmWM3tufNgRQFBpaW2YVJxQZV4iPNqb0vEFvssMEo5w9c6BTIA==}
+  pbf@5.1.2:
+    resolution: {integrity: sha512-mnvGdvOrIvJOBGUEdGkrVXjN8E/VkIJCkf2eS1DH2yv82ORUlLttmDt0rWY38yYZmVwciZwBUvHM20qxBZf40w==}
     hasBin: true
 
   picocolors@1.0.1:
@@ -7257,9 +7247,6 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
-  rw@1.3.3:
-    resolution: {integrity: sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ==}
-
   rxjs@6.6.7:
     resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
     engines: {npm: '>=2.0.0'}
@@ -7692,9 +7679,6 @@ packages:
     resolution: {integrity: sha512-OXb68qzesv7J70BSbFwfK3yTVLEVXiQ/ro6wUE4UrSbKCMjLLA02S8Qq3LC01DxKyVjk7z8xh35aB4JzO3/sNA==}
     engines: {node: '>=18.12.0'}
     hasBin: true
-
-  supercluster@8.0.1:
-    resolution: {integrity: sha512-IiOea5kJ9iqzD2t7QJq/cREyLHTtSmUT6gQsweojg9WH2sYJqZK9SswTu6jrscO6D1G5v5vYZ9ru/eq85lXeZQ==}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -11023,7 +11007,7 @@ snapshots:
       '@embroider/shared-internals': 3.1.1
       broccoli-funnel: 3.0.8
       common-ancestor-path: 1.0.1
-      semver: 7.7.4
+      semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
 
@@ -11136,7 +11120,7 @@ snapshots:
       find-up: 5.0.0
       lodash: 4.18.1
       resolve: 1.22.12
-      semver: 7.7.4
+      semver: 7.8.5
     optionalDependencies:
       '@glint/template': 1.7.7
     transitivePeerDependencies:
@@ -11145,13 +11129,13 @@ snapshots:
   '@embroider/macros@1.19.0(@glint/template@1.7.7)':
     dependencies:
       '@embroider/shared-internals': 3.0.1
-      assert-never: 1.3.0
+      assert-never: 1.4.0
       babel-import-util: 3.0.1
       ember-cli-babel: 7.26.11
       find-up: 5.0.0
-      lodash: 4.17.21
-      resolve: 1.22.8
-      semver: 7.7.2
+      lodash: 4.18.1
+      resolve: 1.22.12
+      semver: 7.8.5
     optionalDependencies:
       '@glint/template': 1.7.7
     transitivePeerDependencies:
@@ -11237,7 +11221,7 @@ snapshots:
       pkg-entry-points: 1.1.1
       resolve-package-path: 4.0.3
       resolve.exports: 2.0.3
-      semver: 7.7.4
+      semver: 7.8.5
       typescript-memoize: 1.1.1
     transitivePeerDependencies:
       - supports-color
@@ -11255,7 +11239,7 @@ snapshots:
       pkg-entry-points: 1.1.1
       resolve-package-path: 4.0.3
       resolve.exports: 2.0.3
-      semver: 7.7.4
+      semver: 7.8.5
       typescript-memoize: 1.1.1
     transitivePeerDependencies:
       - supports-color
@@ -11291,7 +11275,7 @@ snapshots:
       pkg-entry-points: 1.1.1
       resolve-package-path: 4.0.3
       resolve.exports: 2.0.3
-      semver: 7.7.4
+      semver: 7.8.5
       typescript-memoize: 1.1.1
     transitivePeerDependencies:
       - supports-color
@@ -12142,51 +12126,42 @@ snapshots:
       tslib: 2.8.1
       upath: 2.0.1
 
-  '@mapbox/jsonlint-lines-primitives@2.0.2': {}
+  '@mapbox/jsonlint-lines-primitives@2.0.3': {}
 
   '@mapbox/point-geometry@1.1.0': {}
 
-  '@mapbox/tiny-sdf@2.0.7': {}
+  '@mapbox/tiny-sdf@2.2.0': {}
 
-  '@mapbox/unitbezier@0.0.1': {}
+  '@mapbox/unitbezier@1.0.0': {}
 
-  '@mapbox/vector-tile@2.0.4':
+  '@mapbox/vector-tile@3.0.0':
     dependencies:
       '@mapbox/point-geometry': 1.1.0
       '@types/geojson': 7946.0.16
-      pbf: 4.0.1
+      pbf: 5.1.2
 
-  '@mapbox/whoots-js@3.1.0': {}
-
-  '@maplibre/geojson-vt@5.0.4': {}
-
-  '@maplibre/geojson-vt@6.0.4':
+  '@maplibre/geojson-vt@6.1.1':
     dependencies:
-      kdbush: 4.0.2
+      kdbush: 4.1.0
 
-  '@maplibre/maplibre-gl-style-spec@24.7.0':
+  '@maplibre/maplibre-gl-style-spec@26.2.1':
     dependencies:
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/unitbezier': 0.0.1
+      '@mapbox/jsonlint-lines-primitives': 2.0.3
+      '@mapbox/unitbezier': 1.0.0
       json-stringify-pretty-compact: 4.0.0
       minimist: 1.2.8
       quickselect: 3.0.0
-      rw: 1.3.3
       tinyqueue: 3.0.0
 
-  '@maplibre/mlt@1.1.8':
+  '@maplibre/mlt@1.1.12':
     dependencies:
       '@mapbox/point-geometry': 1.1.0
 
-  '@maplibre/vt-pbf@4.3.0':
+  '@maplibre/vt-pbf@4.3.2':
     dependencies:
       '@mapbox/point-geometry': 1.1.0
-      '@mapbox/vector-tile': 2.0.4
-      '@maplibre/geojson-vt': 5.0.4
       '@types/geojson': 7946.0.16
-      '@types/supercluster': 7.1.3
-      pbf: 4.0.1
-      supercluster: 8.0.1
+      pbf: 5.1.2
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     dependencies:
@@ -12551,10 +12526,6 @@ snapshots:
       '@types/node': 22.2.0
       '@types/send': 0.17.4
 
-  '@types/supercluster@7.1.3':
-    dependencies:
-      '@types/geojson': 7946.0.16
-
   '@types/symlink-or-copy@1.2.2': {}
 
   '@types/trusted-types@2.0.7': {}
@@ -12614,7 +12585,7 @@ snapshots:
       fast-glob: 3.3.3
       is-glob: 4.0.3
       minimatch: 9.0.5
-      semver: 7.7.4
+      semver: 7.8.5
       ts-api-utils: 2.1.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -12641,7 +12612,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       '@ember/string': 4.0.1
       '@ember/test-waiters': 4.1.2
-      '@embroider/addon-shim': 1.10.2
+      '@embroider/addon-shim': 1.10.3
       '@embroider/macros': 1.17.0-alpha.8(@glint/template@1.7.7)
       '@glint/template': 1.7.7
       ember-modifier: 4.2.0(@babel/core@7.28.4)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))
@@ -13122,7 +13093,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       babel-import-util: 2.1.1
-      semver: 7.7.2
+      semver: 7.8.5
 
   babel-plugin-ember-data-packages-polyfill@0.1.2:
     dependencies:
@@ -13547,7 +13518,7 @@ snapshots:
       debug: 4.4.3
       fs-tree-diff: 2.0.1
       heimdalljs: 0.2.6
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       walk-sync: 2.2.0
     transitivePeerDependencies:
       - supports-color
@@ -14297,7 +14268,7 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
-  earcut@3.0.2: {}
+  earcut@3.2.3: {}
 
   editions@1.3.4: {}
 
@@ -14790,14 +14761,14 @@ snapshots:
     dependencies:
       ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3))
 
-  ember-maplibre-gl@0.6.2(@babel/core@7.28.4)(@glimmer/component@2.0.0)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))(maplibre-gl@5.20.2):
+  ember-maplibre-gl@0.7.0(@babel/core@7.28.4)(@glimmer/component@2.0.0)(@glint/template@1.7.7)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))(maplibre-gl@6.1.0):
     dependencies:
-      '@embroider/addon-shim': 1.10.2
-      decorator-transforms: 2.3.1(@babel/core@7.28.4)
+      '@embroider/addon-shim': 1.10.3
+      decorator-transforms: 2.4.0(@babel/core@7.28.4)
       ember-modifier: 4.2.0(@babel/core@7.28.4)(ember-source@6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3)))
       ember-resources: 7.0.7(@glimmer/component@2.0.0)(@glint/template@1.7.7)
       ember-source: 6.3.0(@glimmer/component@2.0.0)(@glint/template@1.7.7)(rsvp@4.8.5)(webpack@5.94.0(lightningcss@1.32.0)(postcss@8.5.3))
-      maplibre-gl: 5.20.2
+      maplibre-gl: 6.1.0
     optionalDependencies:
       '@glimmer/component': 2.0.0
     transitivePeerDependencies:
@@ -16763,7 +16734,7 @@ snapshots:
 
   jsonpointer@5.0.1: {}
 
-  kdbush@4.0.2: {}
+  kdbush@4.1.0: {}
 
   keyv@4.5.4:
     dependencies:
@@ -16989,24 +16960,22 @@ snapshots:
     dependencies:
       object-visit: 1.0.1
 
-  maplibre-gl@5.20.2:
+  maplibre-gl@6.1.0:
     dependencies:
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
       '@mapbox/point-geometry': 1.1.0
-      '@mapbox/tiny-sdf': 2.0.7
-      '@mapbox/unitbezier': 0.0.1
-      '@mapbox/vector-tile': 2.0.4
-      '@mapbox/whoots-js': 3.1.0
-      '@maplibre/geojson-vt': 6.0.4
-      '@maplibre/maplibre-gl-style-spec': 24.7.0
-      '@maplibre/mlt': 1.1.8
-      '@maplibre/vt-pbf': 4.3.0
+      '@mapbox/tiny-sdf': 2.2.0
+      '@mapbox/unitbezier': 1.0.0
+      '@mapbox/vector-tile': 3.0.0
+      '@maplibre/geojson-vt': 6.1.1
+      '@maplibre/maplibre-gl-style-spec': 26.2.1
+      '@maplibre/mlt': 1.1.12
+      '@maplibre/vt-pbf': 4.3.2
       '@types/geojson': 7946.0.16
-      earcut: 3.0.2
+      earcut: 3.2.3
       gl-matrix: 3.4.4
-      kdbush: 4.0.2
+      kdbush: 4.1.0
       murmurhash-js: 1.0.0
-      pbf: 4.0.1
+      pbf: 5.1.2
       potpack: 2.1.0
       quickselect: 3.0.0
       tinyqueue: 3.0.0
@@ -17275,7 +17244,7 @@ snapshots:
     dependencies:
       hosted-git-info: 8.1.0
       proc-log: 5.0.0
-      semver: 7.7.4
+      semver: 7.8.5
       validate-npm-package-name: 6.0.0
 
   npm-run-path@2.0.2:
@@ -17507,7 +17476,7 @@ snapshots:
 
   path-type@5.0.0: {}
 
-  pbf@4.0.1:
+  pbf@5.1.2:
     dependencies:
       resolve-protobuf-schema: 2.1.0
 
@@ -17966,8 +17935,6 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
-  rw@1.3.3: {}
-
   rxjs@6.6.7:
     dependencies:
       tslib: 1.14.1
@@ -18369,7 +18336,7 @@ snapshots:
       get-stdin: 9.0.0
       git-hooks-list: 3.2.0
       is-plain-obj: 4.1.0
-      semver: 7.7.4
+      semver: 7.8.5
       sort-object-keys: 1.1.3
       tinyglobby: 0.2.13
 
@@ -18598,10 +18565,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
-
-  supercluster@8.0.1:
-    dependencies:
-      kdbush: 4.0.2
 
   supports-color@5.5.0:
     dependencies:
@@ -19140,7 +19103,7 @@ snapshots:
   validate-peer-dependencies@1.2.0:
     dependencies:
       resolve-package-path: 3.1.0
-      semver: 7.7.4
+      semver: 7.8.5
 
   vary@1.1.2: {}
 
@@ -19245,7 +19208,7 @@ snapshots:
       '@types/minimatch': 3.0.5
       ensure-posix-path: 1.1.1
       matcher-collection: 2.0.1
-      minimatch: 3.1.2
+      minimatch: 3.1.5
 
   walker@1.0.8:
     dependencies:
