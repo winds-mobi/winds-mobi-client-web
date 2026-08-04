@@ -17,7 +17,15 @@ module.exports = {
     [
       'babel-plugin-ember-template-compilation',
       {
-        compilerPath: 'ember-source/dist/ember-template-compiler.js',
+        // ember-source v7+ no longer ships the flat dist/ember-template-compiler.js
+        // file this hardcoded string used to point at -- the compiler now lives
+        // behind package exports instead. Resolve it explicitly rather than
+        // relying on the plugin's own runtime auto-detection, which goes through
+        // `import-meta-resolve` and can fail unpredictably inside Vite's own
+        // process (see TODO.md's Ember 7 upgrade section).
+        compilerPath: require.resolve(
+          'ember-source/ember-template-compiler/index.js'
+        ),
         enableLegacyModules: [
           'ember-cli-htmlbars',
           'ember-cli-htmlbars-inline-precompile',

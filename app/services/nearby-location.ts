@@ -109,7 +109,7 @@ export default class NearbyLocationService extends Service {
     try {
       const permissionStatus = await navigator.permissions.query({
         name: 'geolocation',
-      } as PermissionDescriptor);
+      });
 
       this.#permissionStatus = permissionStatus;
       this.#permissionStatus.onchange = () => {

@@ -5,7 +5,7 @@ stations for free-flight (paragliding/hang-gliding) pilots. It renders a MapLibr
 map of stations with real-time readings, per-station detail panels with Highcharts
 time series, a geolocation-backed nearby view, favourites, and search.
 
-Built with Ember 6 (Octane, `.gts`/TypeScript), Vite + Embroider, Warp Drive /
+Built with Ember 7 (Octane, `.gts`/TypeScript), Vite + Embroider, Warp Drive /
 EmberData, Frontile, and Tailwind CSS v4.
 
 ## Community

@@ -39,6 +39,47 @@ render-highcharts.ts`'s async `sync()` could resume and call `updateChart()` on 
     Verified: 5 consecutive full `pnpm test:ember:dev` runs, 250/250 pass, 0 skip, 0 fail; `pnpm
 lint` clean (css, js, format, hbs, types).
 
+## Ember 7 upgrade (branch `mb/ember-7-upgrade`)
+
+- **Landed**: `ember-source`/`ember-cli` 6.3.x → 7.1.0, the whole `@embroider/*` family to their
+  latest mutually-compatible versions, and `@warp-drive/*`/`@ember-data/*` 5.8.0 → 5.8.2 (that
+  WarpDrive patch exists specifically to "ensure support for Ember v7" per its own release notes).
+  Also swapped `tsconfig.json`'s base from the community `@tsconfig/ember` to the official
+  `@ember/app-tsconfig` successor, matching the current `@ember/app-blueprint` template.
+- **Root-caused and fixed the template-compiler crash directly — no dependency patch needed.**
+  `ember-source@7` removed the flat `dist/ember-template-compiler.js` file (the compiler now lives
+  behind package `exports` at `ember-source/ember-template-compiler/index.js`). The actual bug was
+  in **our own** `babel.config.cjs`, which hardcoded `compilerPath:
+'ember-source/dist/ember-template-compiler.js'` — that stale string, not anything upstream, is what
+  crashed both `pnpm start` and `pnpm build`. A lot of the investigation time went into wrongly
+  suspecting Embroider's own `ember-source` v1-compat-adapter before finding this. Fixed by computing
+  the path correctly instead of hardcoding it:
+  `compilerPath: require.resolve('ember-source/ember-template-compiler/index.js')`.
+- **Separately, `babel-plugin-ember-template-compilation@3.x+` broke ESLint.** That package rewrote
+  its compiler resolution to be async (`await import(...)`) instead of the old synchronous
+  `require()`, which `@babel/eslint-parser`'s synchronous `parseSync` can't call at all ("you appear
+  to be using an async plugin/preset, but Babel has been called synchronously") — a known, still-open
+  upstream issue: https://github.com/emberjs/babel-plugin-ember-template-compilation/issues/101. Fixed
+  the same way the official `@ember/app-blueprint` did: switched `eslint.config.mjs` to
+  `@babel/eslint-parser/experimental-worker`, which runs Babel in a worker thread and bridges it back
+  to ESLint's sync API. With that in place, `babel-plugin-ember-template-compilation` stayed on the
+  blessed `^4.0.0`.
+- **Two remaining `lint:types` errors are a genuine, unfixed `@frontile/overlays@0.17.1` /
+  ember-source-7 type gap**, not a bug in our code: `Popover`/`Drawer`'s yielded block params
+  (`popover.anchor`, `drawer.Header`, etc.) are typed via `@glint/template`'s `ModifierLike`, which no
+  longer structurally matches ember-source 7's `InvokableInstance`/`[Invoke]` shape. Tried bumping
+  `@glint/ember-tsc`/`@glint/template` and `ember-modifier` in several combinations — every one made
+  it worse (more cascading errors elsewhere), not better, and Frontile has no newer stable release
+  (`0.18.0` is alpha-only) to pick up a fix from. Suppressed with two scoped, commented
+  `{{! @glint-expect-error: ... }}` directives in `app/components/navbar/menu/mobile.gts` and
+  `app/components/navbar/search.gts` — Glint will itself error if either directive stops matching a
+  real error, so remove them the moment a Frontile release actually fixes this.
+- **Not in scope, flagged for a future bump**: the current `@ember/app-blueprint` template also
+  pins `vite` `^8.1.0` (we're on `^6.0.0`, two majors behind), `typescript` `^6.0.3` (on `^5.9.3`),
+  `stylelint` `^17.14.0` (on `^16.16.0`), and `eslint-config-prettier` `^10.1.8` (on `^9.1.0`) — each
+  a real major bump with its own risk/testing surface, deliberately not bundled into the Ember bump
+  itself.
+
 ## Exploratory
 
 - **Render map station markers as native MapLibre GL layers instead of per-station DOM

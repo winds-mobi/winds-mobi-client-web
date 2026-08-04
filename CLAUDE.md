@@ -9,7 +9,7 @@ a live wind/weather station map for free-flight (paragliding/hang-gliding) pilot
 MapLibre map of stations, per-station detail panels with Highcharts time series, a nearby-stations
 view backed by geolocation, and search.
 
-Stack: Ember 6 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive / EmberData
+Stack: Ember 7 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive / EmberData
 5.8 (schema-record reactive store), Frontile components, Tailwind CSS v4, ember-intl, ember-concurrency,
 ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers, no wrapper addon — see
 Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is pinned in `engines`.

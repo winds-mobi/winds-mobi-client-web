@@ -1,9 +1,4 @@
-import type {
-  Chart,
-  Options,
-  PointOptionsType,
-  SeriesOptionsType,
-} from 'highcharts';
+import type { Chart, PointOptionsType, SeriesOptionsType } from 'highcharts';
 import type { ChartOptions } from 'winds-mobi-client-web/utils/highcharts-options';
 
 // Highcharts' real `SeriesOptionsType` is a big discriminated union requiring
@@ -34,7 +29,7 @@ export function updateChart(
   chartOptions: ChartOptions,
   seriesData: NamedSeriesOptions[] | undefined
 ): void {
-  chart.update(chartOptions as Options, false);
+  chart.update(chartOptions, false);
 
   if (!seriesData) {
     return;

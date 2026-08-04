@@ -17,7 +17,7 @@ export default function (defaults) {
   });
 
   setConfig(app, new URL('.', import.meta.url).pathname, {
-    compatWith: '4.12',
+    compatWith: '5.8',
     deprecations: {},
   });
 

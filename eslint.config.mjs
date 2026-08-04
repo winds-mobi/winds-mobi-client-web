@@ -23,7 +23,15 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import qunit from 'eslint-plugin-qunit';
 import n from 'eslint-plugin-n';
 
-import babelParser from '@babel/eslint-parser';
+// The experimental-worker variant runs Babel in a worker thread and bridges
+// ESLint's synchronous parser API to it -- required because
+// babel-plugin-ember-template-compilation v3+ resolves the Ember template
+// compiler asynchronously (via `import()`), which the plain
+// `@babel/eslint-parser` (a synchronous `parseSync` call) can't support at
+// all ("you appear to be using an async plugin/preset, but Babel has been
+// called synchronously"). Same fix the official `@ember/app-blueprint`
+// adopted for this exact issue: https://github.com/emberjs/babel-plugin-ember-template-compilation/issues/101
+import babelParser from '@babel/eslint-parser/experimental-worker';
 
 const parserOptions = {
   esm: {

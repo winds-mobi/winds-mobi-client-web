@@ -129,9 +129,7 @@ export function parseMapView(queryParams?: MapQueryParams): MapView {
 // The routed view parsed from the router's current query params — the `mapView`
 // getter shared by the map and station-panel components.
 export function currentMapView(router: RouterService): MapView {
-  return parseMapView(
-    router.currentRoute?.queryParams as MapQueryParams | undefined
-  );
+  return parseMapView(router.currentRoute?.queryParams);
 }
 
 export function mapViewFromMap(map: MaplibreMap): MapView {

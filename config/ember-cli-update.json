@@ -1,1 +1,31 @@
-{"schemaVersion":"1.0.0","packages":[{"name":"@embroider/app-blueprint","version":"0.24.2","blueprints":[{"name":"@embroider/app-blueprint","isBaseBlueprint":true,"options":["--package-manager pnpm"]}]}]}
+{
+  "schemaVersion": "1.0.0",
+  "packages": [
+    {
+      "name": "@embroider/app-blueprint",
+      "version": "0.24.2",
+      "blueprints": [
+        {
+          "name": "@embroider/app-blueprint",
+          "options": ["--package-manager pnpm"]
+        }
+      ]
+    },
+    {
+      "name": "@ember/app-blueprint",
+      "version": "7.1.1",
+      "blueprints": [
+        {
+          "name": "@ember/app-blueprint",
+          "isBaseBlueprint": true,
+          "options": [
+            "--no-welcome",
+            "--pnpm",
+            "--ci-provider=github",
+            "--typescript"
+          ]
+        }
+      ]
+    }
+  ]
+}
