@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- The map now shows last session's stations instantly on reload instead of a blank map while the fresh data loads — it still refreshes in the background right away, and a stale reading is shown as stale (dimmed, "updated Xm ago") the same as always.
+
 ## v0.21.0 - 2026-08-04
 
 ### Added

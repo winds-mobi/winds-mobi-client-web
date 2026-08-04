@@ -152,6 +152,36 @@ export default defineConfig(({ mode }) => ({
                   cacheableResponse: { statuses: [0, 200] },
                 },
               },
+              {
+                // Issue #143 item 5: answer instantly from the last session's
+                // cached response while refetching in the background, so the
+                // map has something to show before the network round-trip
+                // completes. roundBoundsForRequest (app/utils/map-view.ts)
+                // snaps map bounds to a grid, so reopening the same view is a
+                // byte-identical URL and should cache-hit; the existing
+                // 2-minute map-refresh poll then picks up whatever the
+                // background revalidation fetched. maxAgeSeconds mirrors
+                // STALE_STATION_COLOUR's 24h "this station has gone quiet"
+                // threshold in station-arrow.ts, so the SW stops treating a
+                // response as usable at the same point the UI already calls a
+                // reading stale on its own. Safety gate: every reading
+                // already carries its own last.timestamp, and the
+                // per-station "updated Xm ago" text/marker dimming
+                // (reading-freshness.ts, station-arrow.ts) is driven off
+                // that timestamp, not off when the request happened -- so a
+                // cache hit here still shows correctly stale-looking data,
+                // not falsely-fresh data.
+                urlPattern: /^https:\/\/winds\.mobi\/api\/2\.3\/stations/,
+                handler: 'StaleWhileRevalidate',
+                options: {
+                  cacheName: 'stations-api',
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 60 * 24,
+                  },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
             ],
           },
         })

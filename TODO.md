@@ -281,39 +281,45 @@ pull `maplibre-gl` back in statically; and the acceptance tests that already fig
 MapLibre's `idle` event in this container (see CLAUDE.md) are the ones most likely to break.
 Confirm the split actually happens by re-running the sourcemap attribution before committing.
 
-### 5. Show last session's data instantly instead of waiting for the network (spike)
+### 5. Show last session's data instantly instead of waiting for the network — ✅ done
 
-Where it lives: the `runtimeCaching` block in [vite.config.mjs](vite.config.mjs), and
-[app/services/store.ts](app/services/store.ts).
+Where it lives: the `runtimeCaching` block in [vite.config.mjs](vite.config.mjs).
 
-Problem: today the first markers cannot appear until a full serial chain completes — JS
-parse → MapLibre init → style/WebGL → the `idle` event → `captureBounds` → the stations
-request (~190 ms TTFB, 104 kB uncompressed). Nothing from the previous session is reused.
+Problem: the first markers couldn't appear until a full serial chain completed — JS parse →
+MapLibre init → style/WebGL → the `idle` event → `captureBounds` → the stations request
+(~190 ms TTFB, 104 kB uncompressed). Nothing from the previous session was reused.
 
-Two candidate approaches, cheapest first:
+Two candidates were evaluated, first on a throwaway spike, then landed for real:
 
-- **Workbox `StaleWhileRevalidate` for `^https://winds\.mobi/api/2\.3/stations`.** Zero app
-  code: the SW answers from Cache Storage immediately and refreshes in the background, and
-  the existing 2-minute auto-refresh ([app/services/map-refresh.ts](app/services/map-refresh.ts))
-  picks the fresh copy up on its next tick. Cache-hit rate should be high because
-  `roundBoundsForRequest` ([app/utils/map-view.ts](app/utils/map-view.ts)) snaps bounds to a
-  grid, so reloading the same view produces a byte-identical URL. Set a short
-  `expiration.maxAgeSeconds` and a bounded `maxEntries`.
-- **`DocumentStorage` from `@warp-drive/experiments/document-storage`** (already a
-  dependency, currently unused) — an OPFS-backed, `BroadcastChannel`-synced persistence
-  layer built specifically for WarpDrive's cache and request documents, so the store
-  rehydrates its documents on boot rather than replaying HTTP. More faithful to what was
-  asked ("WarpDrive re-uses the cached data from last time") but it is an **experimental**
-  package; treat adopting it as the addon-vetting exercise CLAUDE.md describes — install,
-  exercise the real API in a throwaway component, and confirm `pnpm build` (production, not
-  just dev) succeeds before committing either way.
+- **Workbox `StaleWhileRevalidate` for `^https://winds\.mobi/api/2\.3/stations` — landed.**
+  Zero app code: the SW answers from Cache Storage immediately and refreshes in the
+  background, and the existing 2-minute auto-refresh
+  ([app/services/map-refresh.ts](app/services/map-refresh.ts)) picks the fresh copy up on its
+  next tick. Cache-hit rate is high because `roundBoundsForRequest`
+  ([app/utils/map-view.ts](app/utils/map-view.ts)) snaps bounds to a grid, so reloading the
+  same view produces a byte-identical URL. `maxAgeSeconds` mirrors `STALE_STATION_COLOUR`'s
+  24h "gone quiet" threshold; `maxEntries: 50` bounds the cache.
+  Verified for real, not just via the generated `dist/sw.js` registering the rule: served a
+  real production build, confirmed a `stations-api` Cache Storage entry populates after the
+  first SW-controlled load (a service worker never controls the page load that first
+  registered it — this project doesn't set `skipWaiting`/`clientsClaim`, so a genuine test
+  needs _load, reload once online, then_ go offline), then confirmed going offline and
+  reloading again still renders the last-known markers.
+- **`DocumentStorage` from `@warp-drive/experiments/document-storage` — spiked, not landed.**
+  Explored on the separate branch `mb/143-5-reuse-last-session-data` (WarpDrive-native, but
+  OPFS-backed with no built-in cache eviction, and needs a custom request `Handler` to
+  integrate for real — see that branch for the spike's own findings). A newer, more turnkey
+  `@warp-drive/experiments/storage` (`CacheStorage`, browser-Cache-API-backed) was considered
+  as an alternative but confirmed **not actually published** — it only exists as unreleased
+  code on WarpDrive's GitHub `main`, absent from the real installed
+  `@warp-drive/experiments@0.2.8`. Left unmerged; revisit if a real need for WarpDrive-native
+  persistence (e.g. cross-tab sync) shows up later.
 
-**Safety gate — do this in the same commit, not "later":** these readings are what pilots
-decide to fly on. Serving a cached station list with no visible marker that it is stale is a
-real hazard, not a cosmetic gap. Whichever approach is taken, ship it together with a
-staleness indicator driven off `station.last.timestamp` (the `time-ago` helper already
-renders exactly this wording) and, ideally, a dimmed/greyed marker treatment past some age
-threshold. Do not land item 5 without it.
+**Safety gate — satisfied for free, no new UI work needed.** The staleness indicator
+(`app/utils/reading-freshness.ts`'s `textClassForReadingAge`) and marker dimming
+(`app/utils/station-arrow.ts`'s `colourForWindReading`/`scaleForReadingAge`) both key off
+`station.last.timestamp`, not fetch recency — a cache hit shows correctly stale data
+immediately, no matter where it came from.
 
 ### 6. Keep `marked` off the critical path — ✅ done, superseded by dropping it entirely
 
