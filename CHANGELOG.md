@@ -10,7 +10,9 @@
 
 - The last-hour panel's Maximum card now shows the hour's peak gust instead of peak wind speed, matching the "gust" wording used elsewhere in the app.
 - Upgraded the underlying map library (MapLibre GL JS) to its latest major version.
+  - *aka: we swapped some engine parts under the map. Should feel exactly the same to drive — if it doesn't, that's a bug, not a feature.*
 - Upgraded the app's build tooling — Vite and TypeScript — to their latest major versions, and switched to Ember's current official application blueprint.
+  - *aka: the developers moved furniture around in a room you'll never see. Nothing here should affect you at all, which is the whole point — and also exactly the kind of change most likely to sneak a bug past us.*
 
 ## v0.20.1 - 2026-07-31
 
