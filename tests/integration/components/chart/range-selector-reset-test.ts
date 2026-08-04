@@ -71,6 +71,7 @@ module('Integration | Chart | range selector reset', function (hooks) {
 
     const Highcharts = (await import('highcharts')).default;
     const findChart = () =>
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- false positive: without this, `rangeSelector` below doesn't type-check (`Property 'rangeSelector' does not exist on type 'Chart'`).
       Highcharts.charts.findLast(
         (c) => c && c.series.some((s) => s.name === 'Wind')
       ) as ChartWithRangeSelector | undefined;

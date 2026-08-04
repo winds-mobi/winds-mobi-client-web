@@ -155,10 +155,7 @@ class FakeStoreService extends Service {
 
     if (url.includes('/stations/holfuy-2222/?')) {
       if (this.deferredSecondaryStationRequest) {
-        cachedRequest = this.deferredSecondaryStationRequest
-          .promise as Promise<{
-          content: { data: History[] | Station | Station[] };
-        }>;
+        cachedRequest = this.deferredSecondaryStationRequest.promise;
         this.requestCache.set(url, cachedRequest);
         return cachedRequest;
       }
