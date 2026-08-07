@@ -14,7 +14,12 @@ import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, MapInitOptions } from 'ember-maplibre-gl';
-import { NavigationControl, TerrainControl, setWorkerUrl } from 'maplibre-gl';
+import {
+  NavigationControl,
+  TerrainControl,
+  setWorkerUrl,
+  type IControl,
+} from 'maplibre-gl';
 // maplibre-gl v6 is ESM-only and resolves its worker file at runtime via
 // `new URL('./maplibre-gl-worker.mjs', import.meta.url)` relative to its own
 // module -- that only works unbundled; under Vite/Rollup, `import.meta.url`
@@ -35,6 +40,7 @@ import MapLegend, {
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
@@ -70,6 +76,13 @@ export default class Map extends Component<MapSignature> {
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
+  // The buttons and the wind legend live in the top-right corner, the one area
+  // neither shape of the station panel covers (a bottom sheet in portrait, a
+  // side panel in landscape and on desktop) now that the panel overlays the map
+  // instead of shrinking it. MapLibre stacks them there itself, in the order
+  // they're added in the template below. The map credit stays where MapLibre
+  // puts it, bottom-right, and so is covered by the bottom sheet while a
+  // station is open on a phone — visible again as soon as it's closed.
   private navigationControl = new NavigationControl({
     showCompass: true,
     visualizePitch: true,
@@ -81,6 +94,21 @@ export default class Map extends Component<MapSignature> {
           source: 'terrainSource',
           exaggeration: 1,
         });
+
+  // The wind legend as a control of MapLibre's own, so it stacks under the
+  // buttons natively rather than being positioned against them by hand. The
+  // element is created up front instead of inside `onAdd`, so the `{{in-element}}`
+  // that fills it with `<MapLegend>` never has to wait on (or react to) MapLibre
+  // adopting the control.
+  legendElement = Object.assign(document.createElement('div'), {
+    // MapLibre's own control class: it floats and spaces the legend in the
+    // corner exactly like the buttons above it.
+    className: 'maplibregl-ctrl',
+  });
+  private legendControl: IControl = {
+    onAdd: () => this.legendElement,
+    onRemove: () => this.legendElement.remove(),
+  };
 
   // See `TrackedMapView` for why this needs to be more than `currentMapView(this.router)`
   // read directly (issue #131). `handleRouteChange`, wired to the `onRouteChange`
@@ -118,6 +146,10 @@ export default class Map extends Component<MapSignature> {
     }
 
     return undefined;
+  }
+
+  get isStationPanelOpen(): boolean {
+    return this.selectedStationId !== undefined;
   }
 
   isStationSelected = (station: Station): boolean => {
@@ -313,20 +345,15 @@ export default class Map extends Component<MapSignature> {
     }
   }
 
-  // Cached so the reference is stable across re-renders (stations loading, each
-  // refresh tick): the declarative `<map.call @func="flyTo">` re-fires only when
-  // this reference changes, so it fires only on a real routed-view change rather
-  // than on every render. Without this a refresh tick could re-issue a fly-to
-  // mid-gesture, before `moveend` writes the new view back, yanking the camera
-  // to the stale routed view. Invalidates when `mapView` (the routed query
-  // params) changes, which is exactly when the map should move.
-  @cached
-  get flyToOptions() {
-    return {
-      center: mapViewCenter(this.mapView),
-      zoom: this.mapView.zoom,
-    };
-  }
+  // MapLibre's own instance, for `driveMapCamera` on the overlay slot — which
+  // lives outside `<MapLibreGL>`'s block (and so outside the block param that
+  // yields it) so the panel renders immediately on a cold deep link instead of
+  // waiting for the map to load.
+  @tracked private mapInstance?: MaplibreMap;
+
+  handleMapLoaded = (map: MaplibreMap) => {
+    this.mapInstance = map;
+  };
 
   <template>
     <div
@@ -341,20 +368,17 @@ export default class Map extends Component<MapSignature> {
         data-test-map-canvas
         class="h-full w-full"
         @initOptions={{this.initOptions}}
+        @mapLoaded={{this.handleMapLoaded}}
         @reuseMaps={{false}}
         as |map|
       >
-        <map.call
-          @func="flyTo"
-          @positionalArguments={{array this.flyToOptions}}
-        />
-
         <map.on @event="idle" @action={{this.captureBounds}} />
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />
+        <map.control @control={{this.legendControl}} @position="top-right" />
         <map.control
           @control={{this.navigationControl}}
-          @position="bottom-right"
+          @position="top-right"
         />
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
@@ -390,12 +414,31 @@ export default class Map extends Component<MapSignature> {
           </map.marker>
         {{/each}}
 
-        <MapLegend
-          class="pointer-events-none absolute left-2.5 top-2.5 z-10"
-          @bands={{this.legendBands}}
-          @title={{t "map.legend.windSpeed"}}
-        />
+        {{#in-element this.legendElement insertBefore=null}}
+          <MapLegend
+            class="pointer-events-none"
+            @bands={{this.legendBands}}
+            @title={{t "map.legend.windSpeed"}}
+          />
+        {{/in-element}}
       </MapLibreGL>
+
+      {{! The station panel's slot. Sized by CSS whether or not a panel is
+      rendered in it — a bottom sheet in portrait, a side panel in landscape and
+      on desktop — which is what lets `mapPaddingFromOverlay` measure the area a
+      panel covers without waiting for one to render, and what keeps that
+      measurement out of any breakpoint duplicated in TypeScript. It overlays
+      the map rather than shrinking it: the map's own box never resizes, so
+      MapLibre never re-centres itself into a new one, which is what made
+      opening a station visibly heave the whole map around (#155). Transparent
+      to pointer events so the covered map still pans and zooms while nothing
+      is open. }}
+      <div
+        class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-96 landscape:inset-x-auto landscape:left-0 landscape:top-0 landscape:h-auto landscape:w-[min(32rem,50vw)] md:inset-x-auto md:left-0 md:top-0 md:h-auto md:w-[32rem]"
+        {{driveMapCamera this.mapInstance this.mapView this.isStationPanelOpen}}
+      >
+        {{yield}}
+      </div>
     </div>
   </template>
 }
