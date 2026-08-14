@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.22.0 - 2026-08-14
+
 ### Fixed
 
 - Tapping a station on the map no longer makes the map jump. The station's panel now slides in _over_ the map — a sheet from the bottom on phones, a side panel on wider screens — instead of squeezing it into a smaller space, so the map itself stays exactly where you left it while you read a station and after you close it again. Opening a station from a link, from search or from Nearby still brings it into view, and now places it in the part of the map the panel leaves visible instead of behind the panel. ([#155](https://github.com/winds-mobi/winds-mobi-client-web/issues/155))
