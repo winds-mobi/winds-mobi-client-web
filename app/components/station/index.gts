@@ -38,9 +38,12 @@ export default class StationIndex extends Component<StationIndexSignature> {
   }
 
   <template>
+    {{! Fills the map's overlay slot, which owns the panel's size and where it
+    sits (`app/components/map/index.gts`) — the map measures that slot to know
+    how much of itself the panel covers. }}
     <section
       data-test-station-panel
-      class="flex h-[24rem] w-full shrink-0 flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 landscape:h-full landscape:w-[min(32rem,50vw)] landscape:border-r landscape:border-t-0 landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)] md:h-full md:w-[32rem] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
+      class="pointer-events-auto flex h-full w-full flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 landscape:border-r landscape:border-t-0 landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
     >
       <div
         class="relative z-10 shrink-0 flex items-start justify-between gap-4 px-4 py-2 shadow-md shadow-slate-900/10"

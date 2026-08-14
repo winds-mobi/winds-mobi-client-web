@@ -33,6 +33,26 @@ async function waitForMarker(stationId: string) {
   });
 }
 
+// Where MapLibre currently draws a station's marker, relative to the map's own
+// box, so it measures the camera rather than where the page happens to sit.
+function markerPosition(stationId: string) {
+  const map = find('[data-test-map-container]')?.getBoundingClientRect();
+  const marker = find(
+    `[data-station-id="${stationId}"]`
+  )?.getBoundingClientRect();
+
+  return map && marker
+    ? { x: marker.x - map.x, y: marker.y - map.y, width: marker.width }
+    : undefined;
+}
+
+// MapLibre's camera animations run outside anything `settled()` knows about, so
+// a map that is merely slow to leave still looks still right after a click.
+// Long enough for MapLibre's own default ease (500ms) to have visibly started.
+function afterAnyCameraAnimation() {
+  return new Promise((resolve) => setTimeout(resolve, 400));
+}
+
 type DeferredRequest = {
   promise: Promise<{ content: { data: Station } }>;
   resolve: (value: { content: { data: Station } }) => void;
@@ -512,6 +532,84 @@ module('Acceptance | map station panel', function (hooks) {
           '.maplibregl-marker.cursor-pointer:has([data-station-id="holfuy-1804"])'
         )
         .exists('the outer MapLibre marker element carries it instead');
+    }
+  );
+
+  // #155: opening the panel used to shrink the map's own box, and MapLibre
+  // keeps its geographic centre through a resize, so everything on screen slid
+  // by half the panel. The panel overlays the map now, and the padding that
+  // tells the camera about the covered area is applied so the view holds still
+  // (`applyMapPadding`) -- both of which are invisible to any assertion about
+  // the DOM alone. Where MapLibre actually draws a marker is the observable
+  // proof, and it's proof about our own layout and camera handling rather than
+  // about how MapLibre chooses to draw: any correct implementation leaves that
+  // marker on the same pixel.
+  test.if(
+    'opening a station panel leaves the map exactly where it was',
+    webGLAvailable,
+    async function (assert) {
+      await visit('/map?latitude=46.67719&longitude=7.86323&zoom=13');
+      await waitForMarker('holfuy-2222');
+
+      const before = markerPosition('holfuy-2222');
+
+      await click('[data-station-id="holfuy-1804"]');
+      await waitForMarker('holfuy-2222');
+
+      assert.dom('[data-test-station-panel]').exists('the panel opened');
+      assert.deepEqual(
+        markerPosition('holfuy-2222'),
+        before,
+        'the other station’s marker has not moved on screen'
+      );
+
+      await afterAnyCameraAnimation();
+
+      assert.deepEqual(
+        markerPosition('holfuy-2222'),
+        before,
+        'and has not drifted once any camera animation would have run'
+      );
+
+      await click('[data-test-station-close]');
+      await waitForMarker('holfuy-2222');
+
+      assert.deepEqual(
+        markerPosition('holfuy-2222'),
+        before,
+        'and closing the panel puts nothing back either — it never moved'
+      );
+    }
+  );
+
+  // The flip side of the test above: an overlaying panel hides part of the map,
+  // so a station the app deliberately focuses (a search result, a nearby card,
+  // its own title here) has to land in the part the panel leaves visible, not
+  // behind it. That's what MapLibre's padding buys once it's set -- without it
+  // this station would sit in the middle of the whole map, which on a phone is
+  // under the sheet.
+  test.if(
+    'focusing a station frames it in the part of the map the panel leaves visible',
+    webGLAvailable,
+    async function (assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.70719&longitude=7.91323&zoom=8'
+      );
+      await waitForMarker('holfuy-1804');
+
+      await click('[data-test-station-title]');
+      await waitForMarker('holfuy-1804');
+      await afterAnyCameraAnimation();
+
+      // Same units as `markerPosition`, which measures against this same box.
+      const mapWidth =
+        find('[data-test-map-container]')?.getBoundingClientRect().width ?? 0;
+      const marker = markerPosition('holfuy-1804');
+
+      assert.ok(
+        marker && marker.x + marker.width / 2 > mapWidth / 2,
+        'the focused station sits clear of the panel, not at the centre of the whole map'
+      );
     }
   );
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- Tapping a station on the map no longer makes the map jump. The station's panel now slides in _over_ the map — a sheet from the bottom on phones, a side panel on wider screens — instead of squeezing it into a smaller space, so the map itself stays exactly where you left it while you read a station and after you close it again. Opening a station from a link, from search or from Nearby still brings it into view, and now places it in the part of the map the panel leaves visible instead of behind the panel. ([#155](https://github.com/winds-mobi/winds-mobi-client-web/issues/155))
+
+### Changed
+
+- The wind-speed legend moved to the top-right corner alongside the zoom, compass and 3D buttons, so it stays visible whichever side the station panel opens from.
+
 ## v0.21.0 - 2026-08-04
 
 ### Added
