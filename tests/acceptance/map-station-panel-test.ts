@@ -350,6 +350,31 @@ module('Acceptance | map station panel', function (hooks) {
     }
   );
 
+  // The zoom, compass and 3D buttons and the wind legend all live in MapLibre's
+  // own control container, a sibling of the canvas container it listens on — a
+  // click on one never reaches the map at all, so none of them has to opt out of
+  // the dismiss above, now or when another control is added.
+  test.if(
+    'it stays open when a map control is clicked',
+    webGLAvailable,
+    async function (this: MapStationPanelTestContext, assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+      await waitForMarker('holfuy-1804');
+
+      await click('.maplibregl-ctrl-zoom-in');
+      await afterAnyCameraAnimation();
+
+      assert.dom('[data-test-station-panel]').exists('the panel is still open');
+      assert.strictEqual(
+        new URL(currentURL(), 'https://winds.mobi').pathname,
+        '/map/holfuy-1804',
+        'and the station is still the routed one'
+      );
+    }
+  );
+
   // A marker's click reaches the map too, so without the marker consuming it
   // this would open the other station and then immediately close it again.
   test.if(
