@@ -315,9 +315,9 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel]').doesNotExist();
   });
 
-  test('it does not close when clicking outside the panel', async function (this: MapStationPanelTestContext, assert) {
+  test('it stays open when the panel itself is clicked', async function (this: MapStationPanelTestContext, assert) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
-    await click('[data-test-map-container]');
+    await click('[data-test-station-panel]');
 
     assertCurrentRoute(assert, '/map/holfuy-1804', {
       latitude: '46.67719',
@@ -326,6 +326,51 @@ module('Acceptance | map station panel', function (hooks) {
     });
     assert.dom('[data-test-station-panel]').exists();
   });
+
+  // #157. The click has to land on MapLibre's own canvas, the element inside
+  // the container that MapLibre actually listens on — a click on the outer
+  // container never reaches it, so it would prove nothing.
+  test.if(
+    'it closes when the map itself is clicked and preserves map query params',
+    webGLAvailable,
+    async function (this: MapStationPanelTestContext, assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+      await waitForMarker('holfuy-1804');
+
+      await click('.maplibregl-canvas');
+
+      assertCurrentRoute(assert, '/map', {
+        latitude: '46.67719',
+        longitude: '7.86323',
+        zoom: '13',
+      });
+      assert.dom('[data-test-station-panel]').doesNotExist();
+    }
+  );
+
+  // A marker's click reaches the map too, so without the marker consuming it
+  // this would open the other station and then immediately close it again.
+  test.if(
+    'it switches stations when another marker is clicked, rather than closing',
+    webGLAvailable,
+    async function (this: MapStationPanelTestContext, assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+      await waitForMarker('holfuy-2222');
+
+      await click('[data-station-id="holfuy-2222"]');
+
+      assertCurrentRoute(assert, '/map/holfuy-2222', {
+        latitude: '46.67719',
+        longitude: '7.86323',
+        zoom: '13',
+      });
+      assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
+    }
+  );
 
   test('it keeps the current map view when transitioning to another station', async function (assert) {
     const router = this.owner.lookup('service:router');

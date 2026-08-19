@@ -281,13 +281,37 @@ export default class Map extends Component<MapSignature> {
   }
 
   @action
-  stationSelected(station: Station) {
+  stationSelected(station: Station, event: { originalEvent?: Event }) {
+    // A marker lives inside the element MapLibre listens on for map clicks, so
+    // this same click also reaches `handleMapClick` below, which would read it
+    // as a click on the map itself and close the panel this is about to open.
+    // Consuming it here leaves that decision with the element that handled it,
+    // rather than having the map guess from the click's target. Only `click` is
+    // stopped, so double-clicking a marker still zooms the map.
+    event.originalEvent?.stopPropagation();
+
     // Opens the panel without moving the map. Recentering here used to race the
     // panel-open resize of the *already-mounted* map (#61) — clicking a marker
     // means the station is already visible, so the simplest fix is to not try:
     // the map stays exactly as the user left it, panel opens in place. Omitting
     // queryParams leaves the current routed view untouched (Ember's sticky QPs).
     void this.router.transitionTo('map.station', station.id);
+  }
+
+  // Clicking the map dismisses the open station panel (#157). Only clicks on
+  // the map itself get here: the panel overlays the map as a sibling element,
+  // the map controls sit in MapLibre's own control container, station markers
+  // consume their click above, and MapLibre suppresses the click that ends a
+  // drag — so panning to look around never closes the panel either.
+  @action
+  handleMapClick() {
+    if (!this.isStationPanelOpen) {
+      return;
+    }
+
+    void this.router.transitionTo('map', {
+      queryParams: this.mapView,
+    });
   }
 
   // Gates the `flyToUserLocation` modifier below: don't auto-fly during the app's
@@ -372,6 +396,7 @@ export default class Map extends Component<MapSignature> {
         @reuseMaps={{false}}
         as |map|
       >
+        <map.on @event="click" @action={{this.handleMapClick}} />
         <map.on @event="idle" @action={{this.captureBounds}} />
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />

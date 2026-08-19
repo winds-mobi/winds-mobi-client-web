@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Clicking or tapping the map now closes the open station panel, so you no longer have to aim for the close button. Clicking another station still switches straight to it, and panning the map leaves the panel open. ([#157](https://github.com/winds-mobi/winds-mobi-client-web/issues/157))
+
 ## v0.22.0 - 2026-08-14
 
 ### Fixed
