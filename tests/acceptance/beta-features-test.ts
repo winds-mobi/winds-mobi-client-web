@@ -141,6 +141,20 @@ module('Acceptance | beta features gating', function (hooks) {
     assert.dom('[data-test-station-favorite]').doesNotExist();
   });
 
+  test('the map-click-dismiss setting is hidden by default', async function (assert) {
+    await visit('/settings');
+
+    assert.dom('[data-test-setting="mapClickClosesPanel"]').doesNotExist();
+  });
+
+  test('enabling beta features reveals the map-click-dismiss setting, unchecked by default', async function (assert) {
+    await visit('/settings');
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    assert.dom('[data-test-setting="mapClickClosesPanel"]').isNotChecked();
+  });
+
   test('the master beta toggle sits above the individual beta features it reveals', async function (assert) {
     await visit('/settings');
 
@@ -159,6 +173,10 @@ module('Acceptance | beta features gating', function (hooks) {
     assert.true(
       betaIndex < settingNames.indexOf('refreshButtonSpin'),
       'the master toggle comes before the refresh-spin toggle'
+    );
+    assert.true(
+      betaIndex < settingNames.indexOf('mapClickClosesPanel'),
+      'the master toggle comes before the map-click-dismiss toggle'
     );
   });
 });

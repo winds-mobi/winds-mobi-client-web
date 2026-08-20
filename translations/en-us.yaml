@@ -106,6 +106,12 @@ settings:
     description: >-
       Show small arrows along the top of the wind history chart, pointing
       which way the gusts were blowing at each reading.
+  mapClickClosesPanel:
+    label: Close the station panel by clicking the map
+    description: >-
+      Click or tap anywhere on the map to close the open station panel, instead
+      of only its close button doing that. Clicking another station still
+      switches straight to it, and panning the map leaves the panel open.
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-
