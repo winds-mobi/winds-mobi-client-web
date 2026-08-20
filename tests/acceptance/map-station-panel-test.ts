@@ -241,6 +241,17 @@ function assertCurrentRoute(
   );
 }
 
+// Opts into the click-the-map-to-dismiss beta feature, which needs both the
+// master beta toggle and its own. Written through the real settings service so
+// its in-memory cell and localStorage stay in step; `setupApplicationTest`
+// clears both before every test.
+function enableMapClickDismiss(context: TestContext) {
+  const settings = context.owner.lookup('service:settings');
+
+  settings.betaFeaturesEnabled = true;
+  settings.mapClickClosesPanel = true;
+}
+
 function countStationListRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations/?')).length;
 }
@@ -327,13 +338,37 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel]').exists();
   });
 
-  // #157. The click has to land on MapLibre's own canvas, the element inside
-  // the container that MapLibre actually listens on — a click on the outer
-  // container never reaches it, so it would prove nothing.
+  // #157, a beta feature: clicking the map dismisses the panel only once both
+  // "Enable beta features" and its own toggle are on (see
+  // app/services/settings.ts). The click has to land on MapLibre's own canvas,
+  // the element inside the container that MapLibre actually listens on — a
+  // click on the outer container never reaches it, so it would prove nothing.
+  test.if(
+    'it does not close when the map is clicked while the beta feature is off',
+    webGLAvailable,
+    async function (this: MapStationPanelTestContext, assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+      await waitForMarker('holfuy-1804');
+
+      await click('.maplibregl-canvas');
+
+      assertCurrentRoute(assert, '/map/holfuy-1804', {
+        latitude: '46.67719',
+        longitude: '7.86323',
+        zoom: '13',
+      });
+      assert.dom('[data-test-station-panel]').exists();
+    }
+  );
+
   test.if(
     'it closes when the map itself is clicked and preserves map query params',
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
+      enableMapClickDismiss(this);
+
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
@@ -358,6 +393,8 @@ module('Acceptance | map station panel', function (hooks) {
     'it stays open when a map control is clicked',
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
+      enableMapClickDismiss(this);
+
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
@@ -381,6 +418,8 @@ module('Acceptance | map station panel', function (hooks) {
     'it switches stations when another marker is clicked, rather than closing',
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
+      enableMapClickDismiss(this);
+
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );

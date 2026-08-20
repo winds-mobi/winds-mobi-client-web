@@ -97,6 +97,18 @@ export default class SettingsService extends Service {
   })
   windDirectionHistoryEnabled!: boolean;
 
+  // Beta feature: clicking the map closes the open station panel
+  // (app/components/map/index.gts), instead of only the panel's own close
+  // button doing that. Its own toggle defaults off, like
+  // windDirectionHistoryEnabled -- it changes what an existing gesture does
+  // rather than adding something new to the page, so opting in takes two
+  // deliberate steps.
+  @trackedInLocalStorage({
+    keyName: 'settings.mapClickClosesPanel',
+    defaultValue: false,
+  })
+  mapClickClosesPanel!: boolean;
+
   // Early access to in-development features. Off by default; turning it on
   // reveals each individual beta feature's own toggle below it (see
   // app/templates/settings.gts for the warning shown alongside this toggle).
@@ -121,6 +133,7 @@ export type BooleanSettingKey =
   | 'refreshButtonSpin'
   | 'favoritesFeatureEnabled'
   | 'windDirectionHistoryEnabled'
+  | 'mapClickClosesPanel'
   | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {

@@ -13,6 +13,7 @@ import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/setting
 import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
 import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
+import SettingsShowcaseMapClickDismiss from 'winds-mobi-client-web/components/settings/showcase/map-click-dismiss';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
@@ -161,6 +162,16 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   class="border-t border-amber-200 pt-3"
                 >
                   <SettingsShowcaseWindDirection />
+                </SettingsRow>
+
+                <SettingsRow
+                  @settings={{this.settings}}
+                  @name="mapClickClosesPanel"
+                  class="border-t border-amber-200 pt-3"
+                >
+                  <SettingsShowcaseMapClickDismiss
+                    @enabled={{this.settings.mapClickClosesPanel}}
+                  />
                 </SettingsRow>
               {{/if}}
             </div>
