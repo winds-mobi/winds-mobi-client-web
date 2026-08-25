@@ -117,7 +117,13 @@ export default class Polar extends Component<PolarSignature> {
       // compact nearby/favourites rows -- so a multi-line tooltip would be
       // clipped by the chart box it is drawn inside by default. `outside`
       // renders it in its own container on top of the page instead, the same
-      // way the wind/air charts' tooltips already do.
+      // way the wind/air charts' tooltips already do. That container only
+      // gets a z-index of 3 by default (Tooltip.js: `(chartStyle?.zIndex ||
+      // 0) + 3`), so without a higher one it sorts behind the station
+      // panel overlay's `z-20` (map/index.gts) and renders underneath it.
+      style: {
+        zIndex: 9999,
+      },
       outside: true,
       formatter: function (this: { point: { customTooltip: string } }) {
         return this.point.customTooltip;

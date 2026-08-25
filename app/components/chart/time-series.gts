@@ -184,6 +184,15 @@ export default class TimeSeries extends Component<TimeSeriesSignature> {
       xDateFormat: '%e %b %H:%M',
       shared: true,
       crosshairs: true,
+      // `outside: true` renders the tooltip in its own container appended
+      // straight to <body>, escaping the chart's own clipping box. But
+      // Highcharts only gives that container a z-index of 3 by default
+      // (Tooltip.js: `(chartStyle?.zIndex || 0) + 3`), so without this it
+      // sorts behind the station panel overlay's `z-20` (map/index.gts) and
+      // renders underneath it.
+      style: {
+        zIndex: 9999,
+      },
       outside: true,
       valueDecimals: 0,
     },
