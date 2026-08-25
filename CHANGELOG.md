@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Chart tooltips (wind, air, wind-direction) no longer render invisibly behind the station panel when hovering over a data point.
+
 ## v0.23.0 - 2026-08-20
 
 ### Added
