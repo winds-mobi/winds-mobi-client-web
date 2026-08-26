@@ -121,8 +121,10 @@ export default class Polar extends Component<PolarSignature> {
       // gets a z-index of 3 by default (Tooltip.js: `(chartStyle?.zIndex ||
       // 0) + 3`), so without a higher one it sorts behind the station
       // panel overlay's `z-20` (map/index.gts) and renders underneath it.
+      // 30 is the minimum that clears that overlay, still well below the
+      // app's actual top layer, PortalTarget's `z-[2001]` (application.gts).
       style: {
-        zIndex: 9999,
+        zIndex: 30,
       },
       outside: true,
       formatter: function (this: { point: { customTooltip: string } }) {
