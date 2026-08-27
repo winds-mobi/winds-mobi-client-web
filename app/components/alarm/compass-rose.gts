@@ -49,11 +49,8 @@ interface ArmedThreshold {
   minSpeed: number;
 }
 
-// Exported so settings-modal.gts's metric picker can reuse the exact same
-// glyphs on its wind/gusts toggle buttons -- one JS-level constant per
-// symbol, not a literal string written a second time elsewhere.
-export const WIND_READING_SYMBOL = '○';
-export const GUSTS_READING_SYMBOL = '●';
+const WIND_READING_SYMBOL = '○';
+const GUSTS_READING_SYMBOL = '●';
 
 interface CurrentReadingMark {
   key: string;
