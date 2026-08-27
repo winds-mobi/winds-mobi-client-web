@@ -9,7 +9,10 @@ import { Modal } from '@frontile/overlays';
 import { t } from 'ember-intl';
 import eq from 'ember-truth-helpers/helpers/eq';
 import not from 'ember-truth-helpers/helpers/not';
-import AlarmCompassRose from 'winds-mobi-client-web/components/alarm/compass-rose';
+import AlarmCompassRose, {
+  WIND_READING_SYMBOL,
+  GUSTS_READING_SYMBOL,
+} from 'winds-mobi-client-web/components/alarm/compass-rose';
 import type AlarmsService from 'winds-mobi-client-web/services/alarms';
 import type { AlarmConfig } from 'winds-mobi-client-web/services/alarms';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -37,6 +40,26 @@ export default class AlarmSettingsModal extends Component<AlarmSettingsModalSign
   // existed for this station when the modal opened (per the issue) — not
   // whenever the in-progress edit happens to be armed.
   existingConfigAtOpen: AlarmConfig | undefined;
+
+  // Drives the metric ButtonGroup below -- one entry per ToggleButton, so
+  // the two (near-identical apart from value/symbol/label) buttons don't
+  // need to be hand-duplicated in the template.
+  metricOptions: {
+    value: 'wind' | 'gusts';
+    symbol: string;
+    translationKey: string;
+  }[] = [
+    {
+      value: 'wind',
+      symbol: WIND_READING_SYMBOL,
+      translationKey: 'alarms.metric.wind',
+    },
+    {
+      value: 'gusts',
+      symbol: GUSTS_READING_SYMBOL,
+      translationKey: 'alarms.metric.gusts',
+    },
+  ];
 
   constructor(owner: Owner, args: AlarmSettingsModalSignature['Args']) {
     super(owner, args);
@@ -116,31 +139,25 @@ export default class AlarmSettingsModal extends Component<AlarmSettingsModalSign
             @currentGusts={{@station.last.gusts}}
           />
 
-          {{! The trailing (○)/(●) mirror the compass rose's own
-            current-reading marks (see compass-rose.gts's
-            currentReadingMarks) -- same symbol, same meaning, so the two
-            controls read as one system. }}
+          {{! The leading ○/● mirror the compass rose's own current-reading
+            marks (see compass-rose.gts's currentReadingMarks) -- same
+            symbol, same meaning, so the two controls read as one system. }}
           <ButtonGroup
             data-test-alarm-metric-switch
-            @intent="primary"
+            @intent="default"
             class="self-center"
             aria-label={{t "alarms.modal.metric.label"}}
             as |g|
           >
-            <g.ToggleButton
-              data-test-alarm-metric="wind"
-              @isSelected={{eq this.metric "wind"}}
-              @onChange={{fn this.setMetric "wind"}}
-            >
-              {{concat (t "alarms.metric.wind") " (○)"}}
-            </g.ToggleButton>
-            <g.ToggleButton
-              data-test-alarm-metric="gusts"
-              @isSelected={{eq this.metric "gusts"}}
-              @onChange={{fn this.setMetric "gusts"}}
-            >
-              {{concat (t "alarms.metric.gusts") " (●)"}}
-            </g.ToggleButton>
+            {{#each this.metricOptions as |option|}}
+              <g.ToggleButton
+                data-test-alarm-metric={{option.value}}
+                @isSelected={{eq this.metric option.value}}
+                @onChange={{fn this.setMetric option.value}}
+              >
+                {{concat option.symbol " " (t option.translationKey)}}
+              </g.ToggleButton>
+            {{/each}}
           </ButtonGroup>
         </div>
       </modal.Body>

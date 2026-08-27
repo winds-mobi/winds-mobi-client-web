@@ -49,9 +49,15 @@ interface ArmedThreshold {
   minSpeed: number;
 }
 
+// Exported so settings-modal.gts's metric picker can reuse the exact same
+// glyphs on its wind/gusts toggle buttons -- one JS-level constant per
+// symbol, not a literal string written a second time elsewhere.
+export const WIND_READING_SYMBOL = '○';
+export const GUSTS_READING_SYMBOL = '●';
+
 interface CurrentReadingMark {
   key: string;
-  symbol: '○' | '●';
+  symbol: typeof WIND_READING_SYMBOL | typeof GUSTS_READING_SYMBOL;
   x: number;
   y: number;
 }
@@ -145,7 +151,7 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
 
       marks.push({
         key: `${direction}-${windBand}-wind`,
-        symbol: '○',
+        symbol: WIND_READING_SYMBOL,
         x: point.x,
         y: point.y,
       });
@@ -158,7 +164,7 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
 
     marks.push({
       key: `${direction}-${gustsBand}-gusts`,
-      symbol: '●',
+      symbol: GUSTS_READING_SYMBOL,
       x: gustsPoint.x,
       y: gustsPoint.y,
     });
