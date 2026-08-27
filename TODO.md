@@ -79,10 +79,14 @@ type="range">` or `<select>` per direction, visually hidden but reachable, mirro
    modal's Save button (item 4) stays disabled while every direction is `null`. **Landed, plus
    a visible threshold readout added afterward:** once a direction is armed, its actual km/h
    threshold (the armed band's `min`, not `max` — band-or-higher semantics mean the alarm first
-   fires exactly at that lower boundary) renders as a second, smaller SVG `<tspan>` line right
-   under that direction's own letter — not a separate legend elsewhere. `CENTER`/`LABEL_RADIUS`
-   were widened (a 220×220 viewBox instead of 200×200) specifically to leave room for that
-   second line without clipping at the edge. **Also added:** the station's current reading
+   fires exactly at that lower boundary) is listed below the rose (`armedThresholds`, one `<li>`
+   per armed direction, standard Tailwind `text-xs`). **Went back and forth on where this
+   lives**: a below-rose list first → moved onto the rose itself as a second `<tspan>` line
+   under each direction letter (widening `CENTER`/`LABEL_RADIUS`/viewBox twice to fit it,
+   first to a 7px arbitrary size, then to standard `text-xs` with more margin) → moved back to
+   the original below-rose list, reverting the geometry to its original single-line values
+   (`CENTER`/`LABEL_RADIUS`/viewBox back to 100/96/200×200). **Also added:** the station's
+   current reading
    (`@currentDirection`/`@currentSpeed`/`@currentGusts`, passed in from `settings-modal.gts`'s
    `@station.last`) highlights its own direction sector's cells regardless of the fill color
    underneath — a solid dark outline on the current wind-speed cell, a dashed one on the current

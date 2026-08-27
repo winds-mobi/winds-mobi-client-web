@@ -25,16 +25,14 @@ export interface AlarmCompassRoseSignature {
   Element: HTMLDivElement;
 }
 
-// CENTER/LABEL_RADIUS leave enough margin past the rose's own outer edge
-// (INNER_RADIUS + 10 * BAND_WIDTH = 90) for a two-line label: the direction
-// letter plus, once armed, its threshold right underneath it in a standard
-// Tailwind `text-xs` (12px) rather than a smaller arbitrary value — CENTER
-// carries a 25-unit margin past LABEL_RADIUS specifically to give that
-// bigger second line room without clipping past the viewBox edge.
-const CENTER = 125;
+// CENTER/LABEL_RADIUS leave a small margin past the rose's own outer edge
+// (INNER_RADIUS + 10 * BAND_WIDTH = 90) for the single-line direction
+// letter. The armed threshold itself is a separate list below the rose
+// (see `armedThresholds`), not a second line here.
+const CENTER = 100;
 const INNER_RADIUS = 20;
 const BAND_WIDTH = 7;
-const LABEL_RADIUS = 100;
+const LABEL_RADIUS = 96;
 
 interface Cell {
   key: string;
@@ -51,7 +49,11 @@ interface DirectionLabel {
   text: string;
   x: number;
   y: number;
-  isArmed: boolean;
+}
+
+interface ArmedThreshold {
+  direction: number;
+  directionLabel: string;
   minSpeed: number;
 }
 
@@ -100,9 +102,9 @@ function annularSectorPath(
 // (topmost filled) ring again clears that direction back to off. The
 // station's current reading (`@currentDirection`/`@currentSpeed`/
 // `@currentGusts`) is highlighted for context regardless of what's armed —
-// its direction sector's wind-speed cell gets a solid dark outline, its
-// gusts cell a dashed one, so the user can see where "now" sits relative to
-// whatever threshold they're setting.
+// its direction sector's wind-speed cell and its gusts cell both get the
+// same thin solid black outline, so the user can see where "now" sits
+// relative to whatever threshold they're setting.
 //
 // The SVG is the primary pointer/touch surface and is marked `aria-hidden`;
 // a parallel, visually-hidden `<select>` per direction (one of the real,
@@ -114,9 +116,9 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
   // The cell(s) the station's current reading falls in: same direction
   // sector, one ring for average wind speed and one for gusts (usually
   // different bands, occasionally the same cell). Highlighted below with a
-  // dark outline (solid for wind, dashed for gusts) regardless of that
-  // cell's fill color, so the reading stays visible whether or not the user
-  // has armed anything there yet.
+  // thin solid black outline regardless of that cell's fill color, so the
+  // reading stays visible whether or not the user has armed anything there
+  // yet.
   get currentDirectionIndex(): number {
     return directionIndexForAzimuth(this.args.currentDirection);
   }
@@ -146,14 +148,10 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
         const isCurrentGusts =
           isCurrentDirection && band === this.currentGustsBandIndex;
 
-        let stroke = 'stroke: var(--color-white); stroke-width: 0.5;';
-
-        if (isCurrentWind) {
-          stroke = 'stroke: var(--color-slate-900); stroke-width: 2.5;';
-        } else if (isCurrentGusts) {
-          stroke =
-            'stroke: var(--color-slate-900); stroke-width: 2.5; stroke-dasharray: 2 1.5;';
-        }
+        const stroke =
+          isCurrentWind || isCurrentGusts
+            ? 'stroke: var(--color-black); stroke-width: 1;'
+            : 'stroke: var(--color-white); stroke-width: 0.5;';
 
         cells.push({
           key: `${direction}-${band}`,
@@ -185,28 +183,36 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
     });
   }
 
-  // One label per direction, letter plus (once armed) its threshold right
-  // underneath — the armed band's own `min`, not `max`: band-or-higher
-  // semantics mean the alarm first fires exactly at that band's lower
-  // boundary, so that's the number worth showing (e.g. arming "wind-10"
-  // reads as "N >5 km/h", not "N >10 km/h"). `isArmed` is tracked
-  // separately from `minSpeed` rather than using `minSpeed`/`null` alone,
-  // since the lowest band's own min is legitimately 0 — `{{if}}` would
-  // treat that as falsy and hide the threshold that's actually armed.
   get directionLabels(): DirectionLabel[] {
     return DIRECTIONS.map((text, direction) => {
       const point = polarPoint(LABEL_RADIUS, direction * 45);
+
+      return { direction, text, x: point.x, y: point.y };
+    });
+  }
+
+  // Armed directions only, each paired with the actual km/h threshold —
+  // the armed band's own `min`, not `max`: band-or-higher semantics mean
+  // the alarm first fires exactly at that band's lower boundary, so that's
+  // the number worth showing (e.g. arming "wind-10" reads as "N >5 km/h",
+  // not "N >10 km/h"). Rendered as a list below the rose rather than a
+  // second line under each letter — keeps the rose itself small and lets
+  // this use a standard Tailwind text size without needing extra margin
+  // baked into the rose's own geometry.
+  get armedThresholds(): ArmedThreshold[] {
+    return DIRECTIONS.map((directionLabel, direction) => {
       const band = this.args.directionBands[direction] ?? null;
 
-      return {
+      return { direction, directionLabel, band };
+    })
+      .filter(
+        (entry): entry is typeof entry & { band: number } => entry.band !== null
+      )
+      .map(({ direction, directionLabel, band }) => ({
         direction,
-        text,
-        x: point.x,
-        y: point.y,
-        isArmed: band !== null,
-        minSpeed: band === null ? 0 : WIND_COLOUR_BANDS[band]!.min,
-      };
-    });
+        directionLabel,
+        minSpeed: WIND_COLOUR_BANDS[band]!.min,
+      }));
   }
 
   @action
@@ -233,7 +239,7 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
       <svg
         aria-hidden="true"
         class="w-full"
-        viewBox="0 0 250 250"
+        viewBox="0 0 200 200"
         data-test-alarm-compass-rose
       >
         {{! Purely a pointer/touch surface, deliberately aria-hidden -- the
@@ -266,17 +272,23 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
             dominant-baseline="middle"
             style="fill: var(--color-slate-500); font-size: 10px; font-weight: 600;"
             data-test-alarm-compass-label={{label.text}}
-          >
-            <tspan x={{label.x}}>{{label.text}}</tspan>
-            {{#if label.isArmed}}
-              <tspan x={{label.x}} dy="12" class="text-xs font-medium">{{t
-                  "alarms.compassRose.threshold"
-                  value=label.minSpeed
-                }}</tspan>
-            {{/if}}
-          </text>
+          >{{label.text}}</text>
         {{/each}}
       </svg>
+
+      {{#if this.armedThresholds.length}}
+        <ul
+          class="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-600"
+          data-test-alarm-compass-thresholds
+        >
+          {{#each this.armedThresholds as |entry|}}
+            <li data-test-alarm-compass-threshold={{entry.directionLabel}}>
+              <span class="font-semibold">{{entry.directionLabel}}</span>
+              {{t "alarms.compassRose.threshold" value=entry.minSpeed}}
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
 
       <fieldset class="sr-only">
         <legend>{{t "alarms.compassRose.legend"}}</legend>
