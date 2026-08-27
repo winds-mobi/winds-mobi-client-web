@@ -4,7 +4,7 @@
 
 ### Added
 
-- **🧪 Beta:** Wind threshold alarms. Tap the new bell on a station panel to set a per-direction wind/gust alert — pick a threshold for each compass direction on a radial dial, using the same colour scale as the map, and choose whether it watches average wind speed or gusts; the dial also shows where the station's current reading falls. While the app is open, a station that crosses its threshold gets a sound alert, a glowing border on its card/panel, and a ring on the map marker, and all your alarmed stations are listed under the new Alarms view alongside Favourites. Off by default; turn it on under Settings → Beta features. ([#161](https://github.com/winds-mobi/winds-mobi-client-web/issues/161))
+- **🧪 Beta:** Wind threshold alarms. Tap the new bell on a station panel to set a per-direction wind/gust alert — pick a threshold for each compass direction on a radial dial, using the same colour scale as the map, and choose whether it watches average wind speed or gusts; the dial shows each threshold you've set right on its own ring, alongside where the station's current reading falls. While the app is open, a station that crosses its threshold gets a sound alert, a glowing border on its card/panel, and a ring on the map marker, and all your alarmed stations are listed under the new Alarms view alongside Favourites. Off by default; turn it on under Settings → Beta features. ([#161](https://github.com/winds-mobi/winds-mobi-client-web/issues/161))
 
 ## v0.23.1 - 2026-08-26
 
