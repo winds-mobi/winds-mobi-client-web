@@ -25,14 +25,15 @@ export interface AlarmCompassRoseSignature {
   Element: HTMLDivElement;
 }
 
-// CENTER/LABEL_RADIUS leave a small margin past the rose's own outer edge
-// (INNER_RADIUS + 10 * BAND_WIDTH = 90) for the single-line direction
-// letter. The armed threshold itself is a separate list below the rose
-// (see `armedThresholds`), not a second line here.
+// No direction letters on the rose itself (the sr-only fieldset below still
+// names each direction for the accessible fallback) — the coloured rings
+// span almost the full viewBox, from INNER_RADIUS out to OUTER_RADIUS. The
+// armed threshold itself is a separate list below the rose (see
+// `armedThresholds`), not drawn on the rose.
 const CENTER = 100;
-const INNER_RADIUS = 20;
-const BAND_WIDTH = 7;
-const LABEL_RADIUS = 96;
+const INNER_RADIUS = 22;
+const OUTER_RADIUS = 96;
+const BAND_WIDTH = (OUTER_RADIUS - INNER_RADIUS) / 10;
 
 interface Cell {
   key: string;
@@ -40,13 +41,6 @@ interface Cell {
   band: number;
   path: string;
   style: SafeString;
-}
-
-interface DirectionLabel {
-  direction: number;
-  text: string;
-  x: number;
-  y: number;
 }
 
 interface ArmedThreshold {
@@ -57,21 +51,9 @@ interface ArmedThreshold {
 
 interface CurrentReadingMark {
   key: string;
-  symbol: '<' | '«';
+  symbol: '○' | '●';
   x: number;
   y: number;
-  rotation: number;
-}
-
-// Both `<` and `«` point west (screen left) in their default, unrotated
-// orientation -- bearing 270° in this file's clockwise-from-north
-// convention (see `polarPoint`). A cell at bearing `b` needs its mark
-// rotated to point at the compass centre, i.e. toward bearing `b + 180`;
-// `rotate(angle, x, y)` in SVG turns clockwise for positive `angle`, the
-// same direction bearings already increase in, so the rotation needed is
-// just the difference: (b + 180) - 270 = b - 90.
-function markRotation(bearingDeg: number): number {
-  return bearingDeg - 90;
 }
 
 // Point on the circle of the given radius at `bearingDeg` clockwise from
@@ -118,11 +100,13 @@ function annularSectorPath(
 // threshold are picked in a single gesture. Clicking the already-armed
 // (topmost filled) ring again clears that direction back to off. The
 // station's current reading (`@currentDirection`/`@currentSpeed`/
-// `@currentGusts`) is marked for context regardless of what's armed — a "<"
-// pointing at the compass centre on its wind-speed cell, a "«" on its gusts
-// cell (see `currentReadingMarks`; when both land in the same band, only
-// the "«" is drawn), so the user can see where "now" sits relative to
-// whatever threshold they're setting.
+// `@currentGusts`) is marked for context regardless of what's armed — a "○"
+// on its wind-speed cell, a "●" on its gusts cell (see
+// `currentReadingMarks`; when both land in the same band, only the "●" is
+// drawn), so the user can see where "now" sits relative to whatever
+// threshold they're setting. Plain dots, deliberately: no orientation to
+// get right, unlike an arrow/chevron that would need rotating to point
+// anywhere in particular.
 //
 // The SVG is the primary pointer/touch surface and is marked `aria-hidden`;
 // a parallel, visually-hidden `<select>` per direction (one of the real,
@@ -143,15 +127,14 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
     return WIND_COLOUR_BANDS.indexOf(windBandForSpeed(this.args.currentGusts));
   }
 
-  // A "<" on the current wind-speed cell, a "«" on the current gusts cell.
-  // When both land in the same band, only the "«" is drawn — a single "<"
-  // there would just sit inside/overlap it, adding nothing.
+  // A "○" on the current wind-speed cell, a "●" on the current gusts cell.
+  // When both land in the same band, only the "●" is drawn — a "○" there
+  // would just sit inside/overlap it, adding nothing.
   get currentReadingMarks(): CurrentReadingMark[] {
     const direction = this.currentDirectionIndex;
     const windBand = this.currentWindBandIndex;
     const gustsBand = this.currentGustsBandIndex;
     const bearing = direction * 45;
-    const rotation = markRotation(bearing);
     const marks: CurrentReadingMark[] = [];
 
     if (windBand !== gustsBand) {
@@ -162,10 +145,9 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
 
       marks.push({
         key: `${direction}-${windBand}-wind`,
-        symbol: '<',
+        symbol: '○',
         x: point.x,
         y: point.y,
-        rotation,
       });
     }
 
@@ -176,10 +158,9 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
 
     marks.push({
       key: `${direction}-${gustsBand}-gusts`,
-      symbol: '«',
+      symbol: '●',
       x: gustsPoint.x,
       y: gustsPoint.y,
-      rotation,
     });
 
     return marks;
@@ -224,14 +205,6 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
       const band = this.args.directionBands[direction] ?? null;
 
       return band === null ? '' : String(band);
-    });
-  }
-
-  get directionLabels(): DirectionLabel[] {
-    return DIRECTIONS.map((text, direction) => {
-      const point = polarPoint(LABEL_RADIUS, direction * 45);
-
-      return { direction, text, x: point.x, y: point.y };
     });
   }
 
@@ -304,23 +277,11 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
           <text
             x={{mark.x}}
             y={{mark.y}}
-            transform="rotate({{mark.rotation}} {{mark.x}} {{mark.y}})"
             text-anchor="middle"
             dominant-baseline="middle"
-            style="font-size: 8px; font-weight: 700;"
+            style="font-size: 5px; font-weight: 700;"
             data-test-alarm-compass-current-mark={{mark.key}}
           >{{mark.symbol}}</text>
-        {{/each}}
-
-        {{#each this.directionLabels as |label|}}
-          <text
-            x={{label.x}}
-            y={{label.y}}
-            text-anchor="middle"
-            dominant-baseline="middle"
-            style="fill: var(--color-slate-500); font-size: 10px; font-weight: 600;"
-            data-test-alarm-compass-label={{label.text}}
-          >{{label.text}}</text>
         {{/each}}
       </svg>
 

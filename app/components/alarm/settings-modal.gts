@@ -2,12 +2,12 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { hash } from '@ember/helper';
+import { concat, fn } from '@ember/helper';
 import type Owner from '@ember/owner';
-import { Button } from '@frontile/buttons';
+import { Button, ButtonGroup } from '@frontile/buttons';
 import { Modal } from '@frontile/overlays';
-import { RadioGroup } from '@frontile/forms';
 import { t } from 'ember-intl';
+import eq from 'ember-truth-helpers/helpers/eq';
 import not from 'ember-truth-helpers/helpers/not';
 import AlarmCompassRose from 'winds-mobi-client-web/components/alarm/compass-rose';
 import type AlarmsService from 'winds-mobi-client-web/services/alarms';
@@ -59,9 +59,14 @@ export default class AlarmSettingsModal extends Component<AlarmSettingsModalSign
     this.directionBands = next;
   }
 
+  // ToggleButtons toggle independently rather than as a mutually exclusive
+  // group, so a press on the already-selected one fires `isSelected: false`
+  // — ignore that instead of letting it clear `metric` back to nothing.
   @action
-  setMetric(metric: 'wind' | 'gusts'): void {
-    this.metric = metric;
+  setMetric(metric: 'wind' | 'gusts', isSelected: boolean): void {
+    if (isSelected) {
+      this.metric = metric;
+    }
   }
 
   @action
@@ -111,28 +116,32 @@ export default class AlarmSettingsModal extends Component<AlarmSettingsModalSign
             @currentGusts={{@station.last.gusts}}
           />
 
-          {{! The group's own visible label is hidden (sr-only) rather than
-            omitted -- "Wind"/"Gusts" on the two radios already say what
-            this picks, no separate heading needed; keeping the label
-            element (rather than passing none) preserves its accessible
-            name. }}
-          <RadioGroup
+          {{! The trailing (○)/(●) mirror the compass rose's own
+            current-reading marks (see compass-rose.gts's
+            currentReadingMarks) -- same symbol, same meaning, so the two
+            controls read as one system. }}
+          <ButtonGroup
             data-test-alarm-metric-switch
+            @intent="primary"
             class="self-center"
-            @classes={{hash label="sr-only"}}
-            @label={{t "alarms.modal.metric.label"}}
-            @value={{this.metric}}
-            @onChange={{this.setMetric}}
-            @orientation="horizontal"
-            as |Radio|
+            aria-label={{t "alarms.modal.metric.label"}}
+            as |g|
           >
-            {{! @glint-expect-error: same Frontile/ember-source-7 type gap as
-              Modal/Drawer/Popover -- RadioGroup's yielded `Radio` is typed
-              against the same outdated ModifierLike shape. }}
-            <Radio @value="wind" @label={{t "alarms.metric.wind"}} />
-            {{! @glint-expect-error: same Frontile/ember-source-7 type gap }}
-            <Radio @value="gusts" @label={{t "alarms.metric.gusts"}} />
-          </RadioGroup>
+            <g.ToggleButton
+              data-test-alarm-metric="wind"
+              @isSelected={{eq this.metric "wind"}}
+              @onChange={{fn this.setMetric "wind"}}
+            >
+              {{concat (t "alarms.metric.wind") " (○)"}}
+            </g.ToggleButton>
+            <g.ToggleButton
+              data-test-alarm-metric="gusts"
+              @isSelected={{eq this.metric "gusts"}}
+              @onChange={{fn this.setMetric "gusts"}}
+            >
+              {{concat (t "alarms.metric.gusts") " (●)"}}
+            </g.ToggleButton>
+          </ButtonGroup>
         </div>
       </modal.Body>
 

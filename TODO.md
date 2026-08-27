@@ -85,13 +85,19 @@ type="range">` or `<select>` per direction, visually hidden but reachable, mirro
    under each direction letter (widening `CENTER`/`LABEL_RADIUS`/viewBox twice to fit it,
    first to a 7px arbitrary size, then to standard `text-xs` with more margin) → moved back to
    the original below-rose list, reverting the geometry to its original single-line values
-   (`CENTER`/`LABEL_RADIUS`/viewBox back to 100/96/200×200). **Also added:** the station's
-   current reading
-   (`@currentDirection`/`@currentSpeed`/`@currentGusts`, passed in from `settings-modal.gts`'s
-   `@station.last`) highlights its own direction sector's cells regardless of the fill color
-   underneath — a solid dark outline on the current wind-speed cell, a dashed one on the current
-   gusts cell (same cell if they land in the same band) — so the user can see where "now" sits
-   relative to whatever threshold they're picking.
+   (`CENTER`/`LABEL_RADIUS`/viewBox back to 100/96/200×200). **Also added, then iterated
+   further:** the station's current reading (`@currentDirection`/`@currentSpeed`/
+   `@currentGusts`, from `settings-modal.gts`'s `@station.last`) marks its own direction
+   sector's cells regardless of the fill color underneath — first a solid outline on the
+   current wind-speed cell plus a dashed one on the gusts cell, then a hand-drawn "X"/chevron
+   pair requiring trig to compute rotation, then `<`/`«` text glyphs (still rotated to point
+   at the sector), and **finally plain `○`/`●` UTF-8 dot glyphs with no rotation at all** — a
+   hollow circle marks the current wind-speed cell, a filled one the current gusts cell (only
+   the filled one is drawn when both land in the same band) — "we don't need to draw it by
+   hand" plus "not two symbols in a row, just one utf-8 symbol." The direction letters
+   (N/NE/E/...) were also removed from the rose entirely (the sr-only `<fieldset>` below still
+   names each direction for accessibility) so the compass could span the modal's full width
+   instead of leaving margin for the labels.
 
 3. **Wind/gusts toggle.** Default `'gusts'`. **Went through several designs before landing:**
    Frontile `<Switch>` with its own label + description text → a boolean-on/off `Switch` was
@@ -103,11 +109,16 @@ type="range">` or `<select>` per direction, visually hidden but reachable, mirro
    dropped as redundant once flanking "Wind"/"Gusts" text labels were added outside the switch
    → `@intent="default"` found to render Frontile's switch track as neutral grey regardless of
    selected state (only `primary`/`success`/`warning`/`danger` tint it), addressing "no notion
-   of on/off" — **final landed form**: `<RadioGroup>`/`<Radio>` (`@orientation="horizontal"`,
-   group label hidden via `@classes={{hash label="sr-only"}}` rather than omitted, so the
-   accessible name survives), per "the switch is a bit clunky." Needed the same
-   `@glint-expect-error` as `Modal`/`Drawer`/`Popover` on the yielded `Radio`, unlike
-   `ButtonGroup` which typechecked clean.
+   of on/off" — briefly landed on `<RadioGroup>`/`<Radio>` (`@orientation="horizontal"`, group
+   label hidden via `@classes={{hash label="sr-only"}}` rather than omitted, so the accessible
+   name survives), per "the switch is a bit clunky." That needed the same `@glint-expect-error`
+   as `Modal`/`Drawer`/`Popover` on the yielded `Radio` — then reverted right back to
+   `<ButtonGroup>`/`<g.ToggleButton>` ("change the Radio Buttons back to Button Group and to
+   Toggle Button"), which typechecks clean with no `@glint-expect-error` needed. **Final landed
+   form**: `<ButtonGroup @intent="primary">`/`<g.ToggleButton @isSelected @onChange>`, each
+   button's own label carrying a trailing `(○)`/`(●)` — the same dot symbols the compass rose
+   uses to mark the current wind/gusts reading (see item 2) — so the two controls read as one
+   system.
 
 4. **Alarm settings modal.** First real usage of Frontile `<Modal>` in this app (confirmed:
    `@frontile/overlays@0.17.1` ships a `Modal` export, but nothing in the app imports it today
