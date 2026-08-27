@@ -52,6 +52,14 @@ export default class SettingsService extends Service {
   })
   favoritesCompactList!: boolean;
 
+  // Show the /alarms stations list as dense rows instead of full cards,
+  // mirroring favoritesCompactList.
+  @trackedInLocalStorage({
+    keyName: 'settings.alarmsCompactList',
+    defaultValue: false,
+  })
+  alarmsCompactList!: boolean;
+
   // Replace the Now/Last hour cards' text labels with small icons, so each
   // value shrinks to fit its content instead of stretching full width.
   @trackedInLocalStorage({
@@ -85,6 +93,16 @@ export default class SettingsService extends Service {
     defaultValue: true,
   })
   favoritesFeatureEnabled!: boolean;
+
+  // Beta feature: wind threshold alarms — the bell on a station panel
+  // (app/components/station/header.gts) and the /alarms view. Its own
+  // toggle defaults off, since this is a brand-new feature, not an
+  // already-shipped one being retroactively gated.
+  @trackedInLocalStorage({
+    keyName: 'settings.alarmsFeatureEnabled',
+    defaultValue: false,
+  })
+  alarmsFeatureEnabled!: boolean;
 
   // Beta feature: wind direction arrows on the wind history chart
   // (app/components/station/wind/presenter.gts). Its own toggle defaults
@@ -129,9 +147,11 @@ export type BooleanSettingKey =
   | 'shrinkOldData'
   | 'nearbyCompactList'
   | 'favoritesCompactList'
+  | 'alarmsCompactList'
   | 'useIconLabels'
   | 'refreshButtonSpin'
   | 'favoritesFeatureEnabled'
+  | 'alarmsFeatureEnabled'
   | 'windDirectionHistoryEnabled'
   | 'mapClickClosesPanel'
   | 'betaFeaturesEnabled';

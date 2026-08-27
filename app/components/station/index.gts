@@ -11,6 +11,8 @@ import StationAir from './air';
 import StationWind from './wind';
 import { t } from 'ember-intl';
 import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
+import { ALARM_GLOW_CLASS } from 'winds-mobi-client-web/utils/alarm-color';
+import type AlarmsService from 'winds-mobi-client-web/services/alarms';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationIndexSignature {
@@ -24,10 +26,18 @@ export interface StationIndexSignature {
 }
 
 export default class StationIndex extends Component<StationIndexSignature> {
+  @service declare alarms: AlarmsService;
   @service declare router: RouterService;
 
   get mapView() {
     return currentMapView(this.router);
+  }
+
+  get isAlarmTriggered(): boolean {
+    return (
+      this.args.station !== undefined &&
+      this.alarms.triggeredStationIds.has(this.args.station.id)
+    );
   }
 
   @action
@@ -43,7 +53,9 @@ export default class StationIndex extends Component<StationIndexSignature> {
     how much of itself the panel covers. }}
     <section
       data-test-station-panel
-      class="pointer-events-auto flex h-full w-full flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 landscape:border-r landscape:border-t-0 landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]"
+      data-test-alarm-glow={{if this.isAlarmTriggered "true"}}
+      class="pointer-events-auto flex h-full w-full flex-col overflow-hidden border-t border-slate-200 bg-white shadow-md shadow-slate-900/12 landscape:border-r landscape:border-t-0 landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)] md:border-r md:border-t-0 md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]
+        {{if this.isAlarmTriggered ALARM_GLOW_CLASS}}"
     >
       <div
         class="relative z-10 shrink-0 flex items-start justify-between gap-4 px-4 py-2 shadow-md shadow-slate-900/10"

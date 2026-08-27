@@ -12,6 +12,7 @@ import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settin
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
 import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
 import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
+import SettingsShowcaseAlarms from 'winds-mobi-client-web/components/settings/showcase/alarms';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import SettingsShowcaseMapClickDismiss from 'winds-mobi-client-web/components/settings/showcase/map-click-dismiss';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -101,6 +102,17 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
           </StationSectionCard>
 
           <StationSectionCard
+            @title={{t "settings.alarmsCompactList.label"}}
+            @titleClass="sr-only"
+          >
+            <SettingsRow @settings={{this.settings}} @name="alarmsCompactList">
+              <SettingsShowcaseCompactList
+                @enabled={{this.settings.alarmsCompactList}}
+              />
+            </SettingsRow>
+          </StationSectionCard>
+
+          <StationSectionCard
             @title={{t "settings.useIconLabels.label"}}
             @titleClass="sr-only"
           >
@@ -143,6 +155,16 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                 >
                   <SettingsShowcaseFavorites
                     @enabled={{this.settings.favoritesFeatureEnabled}}
+                  />
+                </SettingsRow>
+
+                <SettingsRow
+                  @settings={{this.settings}}
+                  @name="alarmsFeatureEnabled"
+                  class="border-t border-amber-200 pt-3"
+                >
+                  <SettingsShowcaseAlarms
+                    @enabled={{this.settings.alarmsFeatureEnabled}}
                   />
                 </SettingsRow>
 

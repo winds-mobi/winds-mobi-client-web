@@ -10,6 +10,8 @@ import SettingsWindArrow from 'winds-mobi-client-web/components/settings/wind-ar
 import StationMetaItem from './meta-item';
 import StationUpdatedMeta from './updated-meta';
 import StationWindDirectionThumbnail from './wind-direction-thumbnail';
+import { ALARM_GLOW_CLASS } from 'winds-mobi-client-web/utils/alarm-color';
+import type AlarmsService from 'winds-mobi-client-web/services/alarms';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
@@ -24,13 +26,20 @@ export interface StationCompactCardSignature {
 }
 
 export default class StationCompactCard extends Component<StationCompactCardSignature> {
+  @service declare alarms: AlarmsService;
   @service declare settings: SettingsService;
+
+  get isAlarmTriggered(): boolean {
+    return this.alarms.triggeredStationIds.has(this.args.station.id);
+  }
 
   <template>
     <article
       ...attributes
-      class="flex aspect-[3/2] min-h-0 flex-col gap-1 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-md shadow-slate-900/12"
+      class="flex aspect-[3/2] min-h-0 flex-col gap-1 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-md shadow-slate-900/12
+        {{if this.isAlarmTriggered ALARM_GLOW_CLASS}}"
       data-test-nearby-station-card-compact={{@station.id}}
+      data-test-alarm-glow={{if this.isAlarmTriggered "true"}}
     >
       <div class="flex min-w-0 items-center justify-between gap-2">
         <LinkTo
