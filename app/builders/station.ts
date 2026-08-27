@@ -182,6 +182,17 @@ function favoritesQuery<T extends TypedRecordInstance>(
   );
 }
 
+// Fetches an explicit set of stations (a user's alarmed stations) by id.
+// Same shape as favoritesQuery — both fetch an explicit id list, just from a
+// different local source (see app/services/alarms.ts).
+function alarmsQuery<T extends TypedRecordInstance>(
+  type: TypeFromInstance<T>,
+  ids: string[],
+  options?: ConstrainedRequestOptions
+): QueryRequestOptions<{ data: T[] }> {
+  return favoritesQuery<T>(type, ids, options);
+}
+
 function searchQuery<T extends TypedRecordInstance>(
   type: TypeFromInstance<T>,
   search: string,
@@ -206,6 +217,7 @@ function searchQuery<T extends TypedRecordInstance>(
 }
 
 export {
+  alarmsQuery,
   favoritesQuery,
   findRecord,
   mapQuery,

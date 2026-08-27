@@ -1,5 +1,256 @@
 # TODO
 
+## Wind threshold alarm (issue #161, branch `mb/wind-threshold-alarm`)
+
+A per-station alarm: for each of the 8 compass directions, arm a wind-speed/gust threshold by
+clicking a band on a radial compass-rose picker (each direction's own mini bar chart, using the
+app's existing 10-band wind-color scale); get alerted (sound, pulsing bell, red marker ring)
+whenever a station's latest reading crosses the armed threshold for its direction. Beta
+feature, same local-storage-only / no-account model as favorites.
+
+**Scope split, decided up front:** Phase 1 below is the whole client-side feature working
+while the app (tab or installed PWA) is open in the foreground or backgrounded-but-not-killed.
+Phase 2 ("alerts while the app is fully closed") is a separate, much larger, cross-repo
+initiative — see its own section at the end for why it doesn't belong in this branch.
+
+**Decisions confirmed with the issue author before implementation:**
+
+- **No separate speed slider.** Superseded the original slider-based design: the compass rose
+  itself is the speed control. Each of the 8 direction wedges is subdivided into 10 concentric
+  rings, one per `WIND_COLOUR_BANDS` entry (`app/helpers/wind-to-colour.ts` — `wind-05` through
+  `wind-50`, already the app's one canonical wind-speed color scale). Clicking a ring in a wedge
+  arms that direction at that band, filling the wedge solid (in each band's own real color) from
+  the center out to the clicked ring — i.e. "this direction, at this speed/gust or higher."
+- **Un-arm gesture:** clicking the currently-topmost (armed) ring in a wedge again clears that
+  direction back to off. Clicking a different ring in an already-armed direction just moves the
+  threshold.
+- **Threshold semantics: band-or-higher, not exact-band.** Arming `wind-30` for a direction
+  means "alert at 30 km/h+ from that direction," not only-when-in-that-exact-band — evaluation
+  compares band _index_ (`WIND_COLOUR_BANDS.findIndex`), not the raw km/h number.
+- **All-directions-off is prevented, not given meaning.** The Save button stays disabled until
+  at least one direction is armed — no "all-off = fires anywhere" behavior to implement or
+  reason about in the evaluation engine.
+- **8 sectors, not 16.** Reuses the app's existing `azimuth-to-cardinal.ts` (`DIRECTIONS` +
+  its 45°-bucket logic) directly for both the compass-rose selector and evaluation — no new
+  compass utility file needed.
+- **Metric default**: gusts, per the issue.
+
+### Phase 1 — client-side feature (this branch)
+
+1. **`app/services/alarms.ts`.** Mirrors `app/services/favorites.ts`'s
+   `@trackedInLocalStorage` pattern, confirmed to support arbitrary JSON-serializable values
+   (not just primitives — the addon's `setItem`/`getItem` just `JSON.stringify`/`parse`), but
+   stores a keyed object instead of favorites' plain id array:
+
+   ```ts
+   interface AlarmConfig {
+     stationId: string;
+     // length 8, indexed like DIRECTIONS in azimuth-to-cardinal.ts (N, NE, E, SE, S, SW, W, NW).
+     // Each entry is an index into WIND_COLOUR_BANDS (0-9), or null if that direction is unarmed.
+     directionBands: (number | null)[];
+     metric: 'wind' | 'gusts';
+     createdAt: number; // ms epoch, for the alarms-list sort order
+   }
+   @trackedInLocalStorage({ keyName: 'alarms.config', defaultValue: {} as Record<string, AlarmConfig> })
+   configs!: Record<string, AlarmConfig>;
+   ```
+
+   `has`/`get`/`save`/`delete` methods, analogous to favorites' `has`/`add`/`remove`/`toggle`.
+   Register the service typing in `@ember/service`'s `Registry` per convention. Note (from
+   reading the addon source): the "omit from storage while equal to default" check is
+   reference equality, so `delete()` returning a new object won't auto-clear the localStorage
+   key back to absent the way it does for favorites' array — cosmetic only (reads back fine),
+   not worth working around.
+
+2. **Compass-rose selector component — spike first.** New
+   `app/components/alarm/compass-rose.gts`: 8 wedges (45° each, reusing `DIRECTIONS` from
+   `app/helpers/azimuth-to-cardinal.ts` for labels/indexing) × 10 concentric clickable rings
+   (one per `WIND_COLOUR_BANDS` entry), bound to a `directionBands: (number | null)[]` arg.
+   Click behavior: clicking ring `i` in wedge `d` sets `directionBands[d] = i` unless it's
+   already `i`, in which case it clears to `null` (the confirmed un-arm gesture). Rendering:
+   for an armed direction, fill rings `0..directionBands[d]` in each band's own real color
+   (`WIND_COLOUR_BANDS[n].color`); rings above the armed index (or the whole wedge, if unarmed)
+   render as a muted outline. No interactive/clickable SVG component exists in this app today —
+   `chart/polar.gts` is Highcharts-rendered and read-only, not a template to copy directly for
+   hit-testing; spike the wedge/ring geometry and click hit-testing before committing to the
+   full build. Also needs a keyboard/screen-reader-operable path (e.g. one native `<input
+type="range">` or `<select>` per direction, visually hidden but reachable, mirroring the same
+   `directionBands` state) — plan this alongside the visual build, not as a follow-up. The
+   modal's Save button (item 4) stays disabled while every direction is `null`. **Landed, plus
+   a visible threshold readout added afterward:** once a direction is armed, its actual km/h
+   threshold (the armed band's `min`, not `max` — band-or-higher semantics mean the alarm first
+   fires exactly at that lower boundary) renders as a second, smaller SVG `<tspan>` line right
+   under that direction's own letter — not a separate legend elsewhere. `CENTER`/`LABEL_RADIUS`
+   were widened (a 220×220 viewBox instead of 200×200) specifically to leave room for that
+   second line without clipping at the edge. **Also added:** the station's current reading
+   (`@currentDirection`/`@currentSpeed`/`@currentGusts`, passed in from `settings-modal.gts`'s
+   `@station.last`) highlights its own direction sector's cells regardless of the fill color
+   underneath — a solid dark outline on the current wind-speed cell, a dashed one on the current
+   gusts cell (same cell if they land in the same band) — so the user can see where "now" sits
+   relative to whatever threshold they're picking.
+
+3. **Wind/gusts toggle.** Default `'gusts'`. **Went through several designs before landing:**
+   Frontile `<Switch>` with its own label + description text → a boolean-on/off `Switch` was
+   the wrong shape for a 2-way choice, so a segmented Wind/Gusts button pair (hand-rolled
+   `<Button>`s with `!`-forced Tailwind classes) → that hand-rolled pair replaced with
+   `@frontile/buttons`' real `<ButtonGroup>`/`<g.ToggleButton>` (confirmed shipped in the
+   installed `0.17.1`) → reconsidered again ("the switch was better") back to `<Switch>`, now
+   with `:startContent`/`:endContent` icons and no visible label/description text → icons
+   dropped as redundant once flanking "Wind"/"Gusts" text labels were added outside the switch
+   → `@intent="default"` found to render Frontile's switch track as neutral grey regardless of
+   selected state (only `primary`/`success`/`warning`/`danger` tint it), addressing "no notion
+   of on/off" — **final landed form**: `<RadioGroup>`/`<Radio>` (`@orientation="horizontal"`,
+   group label hidden via `@classes={{hash label="sr-only"}}` rather than omitted, so the
+   accessible name survives), per "the switch is a bit clunky." Needed the same
+   `@glint-expect-error` as `Modal`/`Drawer`/`Popover` on the yielded `Radio`, unlike
+   `ButtonGroup` which typechecked clean.
+
+4. **Alarm settings modal.** First real usage of Frontile `<Modal>` in this app (confirmed:
+   `@frontile/overlays@0.17.1` ships a `Modal` export, but nothing in the app imports it today
+   — `Drawer` (`navbar/menu/mobile.gts`) and `Popover` (`navbar/search.gts`) are the closest
+   existing call sites to mirror for the yielded-block API, both of which already carry a
+   `@glint-expect-error` for a known 0.17.1/ember-source-7 typing gap on those yielded blocks —
+   `Modal` needed the same). Composes the compass rose (2) + metric toggle (3) + Save button
+   (disabled while every direction is unarmed), with a Delete button that only renders once a
+   config already exists for the station (per issue). Renders through the existing app-root
+   `<PortalTarget>`. **Revised:** the intro paragraph explaining how to tap the compass was
+   removed outright — "if it needs explanation, then we did UX wrong" — rather than reworded;
+   the compass-rose's own `max-w-64` cap was also dropped so it fills the modal's full width
+   instead of sitting small and centered, per "maximise the real estate" feedback.
+
+5. **Bell icon on `station/header.gts`.** Sits in the same flex row as the existing `<Heart>`
+   favorite button, same `<Button appearance="minimal" size="xs">` + aria-pressed pattern,
+   `ember-phosphor-icons`' Bell. Three static color states: outlined/slate (no config), filled
+   amber (configured, not triggered), filled rose (triggered). Opens the modal from item 4.
+   **Revised after landing:** the "triggered" signal does _not_ live on the bell button itself
+   (red background) — moved to the whole card/panel instead (item 6 below), since
+   `station/compact-card.gts` never renders this bell at all and would otherwise show no
+   triggered signal whatsoever.
+
+6. **Card/panel alarm glow.** New shared `ALARM_GLOW_CLASS` constant
+   (`app/utils/alarm-glow-class.ts`) applied conditionally to `station/nearby-card.gts`,
+   `station/compact-card.gts` (both converted to inject `@service alarms` if not already a class
+   component), and `station/index.gts` (the map's station detail panel) whenever
+   `alarms.triggeredStationIds` contains that station. Visible everywhere the station is shown
+   as a card/panel, regardless of whether the bell itself is rendered there. **Revised twice
+   after landing:** first from an `outline`-based approach to a plain `border-rose-500!` +
+   `shadow-rose-500/50` pairing per explicit feedback ("just border & shadow") — the forced
+   `border` override follows this app's existing `!`-suffix convention for same-property
+   conflicts (see CLAUDE.md's Button `class` note), while the shadow color composes without
+   needing it since it's a different custom property from the base `shadow-md`/`shadow-*` size
+   utility; only the station detail panel's landscape/md breakpoints (an arbitrary `shadow-[...]`
+   value that bakes its own color in) don't pick up the shadow tint, though the border still
+   shows there. Second: dropped `animate-pulse` entirely — "the blinking part is annoying."
+
+7. **`alarms` route + list page.** `this.route('alarms')` in `app/router.ts`, next to
+   `favorites`. Template `app/templates/alarms.gts` mirrors `favorites.gts` exactly — not just
+   its data-fetching structure (`Request`/`getRequestState`, `commitResolvedStations` modifier,
+   `registerLoadingProbe`, built from `alarmsService`'s configured station ids via the new
+   `alarmsQuery` builder), but its actual rendering too: the same `StationNearbyCard`/
+   `StationCompactCard` components, switched on a new `settings.alarmsCompactList` (mirroring
+   `favoritesCompactList`). Both cards already render `station/header.gts` internally, so the
+   bell (item 5) — with its edit/delete access to the item-4 modal — comes for free, exactly
+   the same control as on the station panel; no separate list-row component needed.
+
+8. **Navbar entry.** Add an `alarms` item to `NAVBAR_MENU_ITEMS`
+   (`app/components/navbar/menu/items.ts`) next to Favorites, extend its route union type, and
+   gate visibility behind a new `settings.alarmsFeatureEnabled` beta flag mirroring
+   `favoritesFeatureEnabled` — the issue explicitly calls this out as "New beta feature."
+
+9. **Alarm evaluation engine.** An always-on watcher, mounted once at the app root
+   (`app/templates/application.gts`, alongside the existing `<PortalTarget>`) so it runs
+   regardless of the active route:
+
+   - No need to activate `map-refresh` itself — turns out `Navbar`
+     (`app/components/navbar/index.gts`) already holds a permanent, unconditional activation
+     token via the existing `activate-map-refresh` modifier, and `Navbar` is always mounted
+     (`app/templates/application.gts`). The watcher just reads `mapRefresh.lastRefresh` on each
+     tick, same as `favorites.gts`/the new `alarms.gts` already do — no new modifier needed here.
+   - Each tick, requests exactly the alarmed station ids with a narrow `keys` set (direction/
+     speed/gusts/timestamp only) — same request-then-react shape as `commitResolvedStations`,
+     used elsewhere to act on every resolved payload regardless of why it refetched.
+   - For each resolved station: bucket its direction via `azimuthToCardinal`
+     (`app/helpers/azimuth-to-cardinal.ts`) to get the 0-7 direction index, look up that
+     direction's armed band index in `AlarmConfig.directionBands`, compute the reading's own
+     band index via `WIND_COLOUR_BANDS.findIndex(...)` against the chosen `metric` (wind vs
+     gusts), and trigger when the reading's band index >= the armed index (band-or-higher, per
+     the confirmed semantics). Write the result into a `@tracked triggeredStationIds:
+Set<string>` on the alarms service.
+   - Edge-detect: diff against the previous tick's set so sound/pulse start exactly once per
+     trigger transition, not on every refresh while a station stays above threshold.
+   - Extract the actual matching logic (direction bucket + band comparison) as a plain,
+     unit-testable function separate from the modifier/service plumbing — see item 12.
+
+10. **Red marker ring on the map.** Extended `app/modifiers/select-map-marker.ts` to also accept
+    `@isAlarmTriggered`, on the same MapLibre-owned parent element `SELECTED_CLASSES` already
+    uses (required because MapLibre only reads `className` once at construction). **Revised
+    after landing:** the alarm ring is a real, separate appended SVG `<circle>` element, not more
+    classes on the same node selection uses — Tailwind's `ring-*` utilities all compose into one
+    shared `box-shadow`, so a second `ring-*` for alarm would silently overwrite (not layer
+    alongside) the selection ring's own, and a plain-class approach also couples the two
+    indicators' shapes together for no reason. A separate element keeps them independently
+    restylable (either could become a different shape later) and lets both render at once,
+    concentrically — the alarm circle's radius went `r="46"` → `r="30"` (too snug — "just make it
+    tiny bit smaller than the selection one") → `r="43"`, the final value, tucked just inside the
+    selection ring's edge-hugging one. Marker sizing already uses real width/height, not CSS
+    `scale`, so both track zoom/age scaling for free — no extra work there.
+    Landed with a pulsing stroke, then dropped the pulse per the same "blinking is annoying"
+    feedback as item 6 — now a plain static rose stroke.
+
+11. **Alarm sound.** Add a short alarm audio asset under `public/`, played via the native
+    `Audio` API from the evaluation engine (9) on each new trigger edge. **Real risk, not a
+    detail:** browser autoplay policies block audio with no prior user gesture in the tab; this
+    generally holds once the user has interacted with the app at all that session on
+    Chrome/Firefox, but needs explicit manual verification on mobile Safari specifically, since
+    pilots are overwhelmingly on phones and Safari's policy is the strictest. If blocked, the
+    card/panel glow (6) and marker ring (10) are the real fallback signal — call this out
+    explicitly in the PR, don't assume audio always plays.
+
+12. **Tests.**
+
+    - Unit: `alarms` service (save/get/delete), and the extracted matching function from item 9
+      (direction bucketing, band-index comparison for both metrics, band-or-higher semantics).
+    - Integration: bell icon's three states on `station/header`, modal open/save/delete flow
+      (including the disabled-Save-while-unarmed state), compass-rose click/toggle behavior
+      (keyboard path included).
+    - Acceptance: configure an alarm, feed a fake-store response (existing
+      fake-store-by-URL pattern, not mirage) that exceeds the threshold, assert bell/marker/
+      alarms-list all reflect triggered state.
+
+13. **Changelog.** `CHANGELOG.md` entry marked `**🧪 Beta:**` once functionally complete, per
+    the project's beta/stable convention.
+
+### Phase 2 — alerts while the app is fully closed (separate initiative, not this branch)
+
+The issue also asks for background checking "even when the app is not running" as an
+installed PWA. This is a materially different problem from Phase 1 — no client-side code runs
+at all once the app/tab is fully closed, so this cannot be an incremental extension of the
+Phase 1 work:
+
+- **No reliable client-only mechanism exists.** The Periodic Background Sync API is the only
+  candidate and it's Chromium-only, has no guaranteed interval (throttled by an internal
+  site-engagement heuristic, often hours apart), and has zero support on iOS/Safari — a large
+  fraction of actual pilots. It can't be the real mechanism here, only a best-effort extra.
+- **Needs server-side evaluation + Web Push**, which means:
+  - Somewhere to persist alarm configs server-side, since a closed client can't read its own
+    localStorage. This app's alarms (and favorites) are deliberately local-only/no-account
+    today — extending that needs either reviving the currently-disabled login (`TODO: Remove
+login` in the session/auth code) or a login-free device-registration model (push
+    subscription + config keyed by a device id). Decide which fits the product's existing
+    no-account stance before starting.
+  - `winds-mobi-providers` (the only writer of new readings, already scheduler-driven) is the
+    natural place to add a per-station threshold-check pass after each new reading lands —
+    cross-repo work with its own CI/versioning, per the workspace `CLAUDE.md`'s
+    working-across-repos guidance.
+  - Web Push infrastructure: VAPID keys, a subscription-storage endpoint (`winds-mobi-api` or
+    a small new service), and this app's service worker gaining a real `push` handler — today
+    it's Workbox's default `generateSW` strategy with no custom SW code at all (confirmed: no
+    `PushManager`/`Notification`/push-event code anywhere in the repo); a handler needs the
+    `injectManifest` strategy instead.
+- **Recommendation:** ship Phase 1 in full, get real usage on the compass-rose/threshold UX,
+  then scope Phase 2 as its own cross-repo initiative — it's larger than the rest of this
+  feature combined and touches the account/sync model, not just this app.
+
 ## Dependency bumps (branch `mb/deps-update`)
 
 - **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed, fully resolved.**

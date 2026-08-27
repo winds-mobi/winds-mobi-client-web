@@ -18,6 +18,7 @@ import type { Station } from 'winds-mobi-client-web/services/store';
 
 export interface MapStationMarkerSignature {
   Args: {
+    isAlarmTriggered?: boolean;
     isSelected?: boolean;
     station: Station;
     zoom: number;
@@ -145,7 +146,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
       data-test-map-station-marker
       class={{this.markerClass}}
       style={{this.sizeStyle}}
-      {{selectMapMarker @isSelected}}
+      {{selectMapMarker @isSelected @isAlarmTriggered}}
     >
       {{! template-lint-enable no-inline-styles }}
       <svg aria-hidden="true" class="h-full w-full" viewBox={{this.viewBox}}>

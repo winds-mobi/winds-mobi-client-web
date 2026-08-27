@@ -1,9 +1,13 @@
 import { modifier } from 'ember-modifier';
+import { ALARM_COLOR } from 'winds-mobi-client-web/utils/alarm-color';
 
 interface SelectMapMarkerSignature {
   Element: HTMLElement;
   Args: {
-    Positional: [isSelected: boolean | undefined];
+    Positional: [
+      isSelected: boolean | undefined,
+      isAlarmTriggered?: boolean | undefined,
+    ];
   };
 }
 
@@ -29,8 +33,43 @@ const SELECTED_CLASSES = [
   'ring-slate-500/70',
 ];
 
+// A station whose latest reading exceeds its wind-alarm threshold (see
+// app/services/alarms.ts, app/components/alarm/watcher.gts). Deliberately a
+// real, separate child SVG element appended into the same marker element
+// above -- not more classes on it -- so selection and alarm can never fight
+// over one shared class list / composed `box-shadow`, and so either one can
+// independently change shape later (e.g. this circle becoming a star) without
+// touching the other. Sized just inside SELECTED_CLASSES' edge-hugging ring
+// (`r="43"` of a 0-50 radius, vs the marker's own full-bleed edge at 50) so
+// both read as clearly distinct, concentric circles when a station is
+// selected and alarming at the same time.
+const ALARM_RING_ATTR = 'data-map-alarm-ring';
+const ALARM_RING_CLASSES = ['pointer-events-none', 'absolute', 'inset-0'];
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function createAlarmRing(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+
+  svg.setAttribute(ALARM_RING_ATTR, '');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add(...ALARM_RING_CLASSES);
+
+  const circle = document.createElementNS(SVG_NS, 'circle');
+
+  circle.setAttribute('cx', '50');
+  circle.setAttribute('cy', '50');
+  circle.setAttribute('r', '43');
+  circle.setAttribute('fill', 'none');
+  circle.setAttribute('stroke', ALARM_COLOR);
+  circle.setAttribute('stroke-width', '5');
+  svg.append(circle);
+
+  return svg;
+}
+
 const selectMapMarker = modifier<SelectMapMarkerSignature>(
-  (element, [isSelected]) => {
+  (element, [isSelected, isAlarmTriggered]) => {
     const parent = element.parentElement;
 
     if (!parent) {
@@ -43,7 +82,22 @@ const selectMapMarker = modifier<SelectMapMarkerSignature>(
       parent.classList.remove(...SELECTED_CLASSES);
     }
 
-    return () => parent.classList.remove(...SELECTED_CLASSES);
+    const existingAlarmRing = parent.querySelector(
+      `:scope > [${ALARM_RING_ATTR}]`
+    );
+
+    if (isAlarmTriggered) {
+      if (!existingAlarmRing) {
+        parent.append(createAlarmRing());
+      }
+    } else {
+      existingAlarmRing?.remove();
+    }
+
+    return () => {
+      parent.classList.remove(...SELECTED_CLASSES);
+      parent.querySelector(`:scope > [${ALARM_RING_ATTR}]`)?.remove();
+    };
   }
 );
 

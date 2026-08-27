@@ -19,6 +19,23 @@
 }
 
 @theme {
+  /* The one colour used everywhere a station's wind alarm needs to stand
+     out: the map marker ring (app/modifiers/select-map-marker.ts) and the
+     triggered card/panel glow (app/utils/alarm-color.ts). Aliased to
+     Tailwind's own rose-500 today — change this one value (or point it at a
+     literal color) to retune both at once, and every `*-alarm` utility
+     class (`bg-alarm`, `text-alarm`, `border-alarm`, `outline-alarm`,
+     `shadow-alarm`, ...) and `var(--color-alarm)` reference follows —
+     including the `ALARM_COLOR` JS constant in app/utils/alarm-color.ts,
+     which is what the marker ring (an SVG attribute, no Tailwind class
+     available) actually imports and uses, rather than writing
+     `var(--color-alarm)` as a literal string a second time. Deliberately
+     *not* used by the bell icon (app/components/station/header.gts —
+     grey/amber only) or the compass rose's threshold text
+     (app/components/alarm/compass-rose.gts — neutral slate, since it's a
+     readout of the picked value, not itself an alarm signal). */
+  --color-alarm: var(--color-rose-500);
+
   --color-wind-05: rgb(9 179 0);
   --color-wind-10: rgb(0 179 71);
   --color-wind-15: rgb(0 179 152);

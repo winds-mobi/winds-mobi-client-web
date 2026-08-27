@@ -16,7 +16,8 @@ export default class NavbarMenuDesktop extends Component<NavbarMenuDesktopSignat
   get visibleItems() {
     return visibleNavbarMenuItems(
       this.settings.betaFeaturesEnabled,
-      this.settings.favoritesFeatureEnabled
+      this.settings.favoritesFeatureEnabled,
+      this.settings.alarmsFeatureEnabled
     );
   }
 

@@ -35,11 +35,32 @@ favorites:
   #   Sign in to see the favourite stations from your winds.mobi profile and
   #   compare their live readings at a glance.
 
+alarms:
+  title: Wind alarms
+  loading: Loading your wind alarms…
+  requestError: Your alarmed stations could not be loaded right now.
+  empty: >-
+    You have no wind alarms yet. Open a station and tap the bell to set one.
+  modal:
+    title: Alarm for {name}
+    metric:
+      label: Wind or gusts threshold
+    save: Save
+    delete: Delete
+  compassRose:
+    legend: Alarm thresholds by direction
+    off: 'Off'
+    threshold: '>{value} km/h'
+  metric:
+    wind: Wind
+    gusts: Gusts
+
 navigation:
   menu: Menu
   map: Map
   nearby: Nearby
   favorites: Favourites
+  alarms: Alarms
   settings: Settings
   help: Help
   search:
@@ -82,6 +103,12 @@ settings:
       Show favourite stations as compact cards (name, altitude, wind, gusts,
       last update, and a small wind-direction thumbnail) instead of full-size
       cards, so more stations fit on screen without scrolling.
+  alarmsCompactList:
+    label: Compact alarm cards
+    description: >-
+      Show alarmed stations as compact cards (name, altitude, wind, gusts,
+      last update, and a small wind-direction thumbnail) instead of full-size
+      cards, so more stations fit on screen without scrolling.
   useIconLabels:
     label: Use icons for labels
     description: >-
@@ -101,6 +128,13 @@ settings:
     description: >-
       Show the Favourites view in navigation and a heart on each station
       panel to save it — stored in this browser only, no account needed.
+  alarmsFeatureEnabled:
+    label: Wind alarms
+    description: >-
+      Show the Alarms view in navigation and a bell on each station panel to
+      set a per-direction wind/gust threshold — stored in this browser only,
+      no account needed. Alerts (sound, pulsing bell, red marker) fire while
+      this app is open.
   windDirectionHistoryEnabled:
     label: Wind direction on the wind history chart
     description: >-
@@ -237,6 +271,8 @@ station:
   favorite:
     add: Add to favourites
     remove: Remove from favourites
+  alarm:
+    open: Open alarm settings
   meta:
     altitude: Altitude
     updated: Updated

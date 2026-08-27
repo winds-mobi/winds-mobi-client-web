@@ -1,0 +1,166 @@
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
+import { service } from '@ember/service';
+import { hash } from '@ember/helper';
+import type Owner from '@ember/owner';
+import { Button } from '@frontile/buttons';
+import { Modal } from '@frontile/overlays';
+import { RadioGroup } from '@frontile/forms';
+import { t } from 'ember-intl';
+import not from 'ember-truth-helpers/helpers/not';
+import AlarmCompassRose from 'winds-mobi-client-web/components/alarm/compass-rose';
+import type AlarmsService from 'winds-mobi-client-web/services/alarms';
+import type { AlarmConfig } from 'winds-mobi-client-web/services/alarms';
+import type { Station } from 'winds-mobi-client-web/services/store';
+
+export interface AlarmSettingsModalSignature {
+  Args: {
+    station: Station;
+    isOpen: boolean;
+    onClose: () => void;
+  };
+  Element: HTMLDivElement;
+}
+
+// Editing surface for one station's alarm (see app/services/alarms.ts). Only
+// ever rendered while `@isOpen` is true (see station/header.gts), so a fresh
+// instance is created each time it opens and reading the existing config in
+// the constructor is safe — no stale-args tracking needed.
+export default class AlarmSettingsModal extends Component<AlarmSettingsModalSignature> {
+  @service declare alarms: AlarmsService;
+
+  @tracked directionBands: (number | null)[];
+  @tracked metric: 'wind' | 'gusts';
+
+  // Captured once at open time: "Delete" only appears once a config already
+  // existed for this station when the modal opened (per the issue) — not
+  // whenever the in-progress edit happens to be armed.
+  existingConfigAtOpen: AlarmConfig | undefined;
+
+  constructor(owner: Owner, args: AlarmSettingsModalSignature['Args']) {
+    super(owner, args);
+
+    const existing = this.alarms.get(args.station.id);
+
+    this.existingConfigAtOpen = existing;
+    this.directionBands = existing
+      ? [...existing.directionBands]
+      : new Array<number | null>(8).fill(null);
+    this.metric = existing?.metric ?? 'gusts';
+  }
+
+  get canSave(): boolean {
+    return this.directionBands.some((band) => band !== null);
+  }
+
+  @action
+  updateDirectionBands(next: (number | null)[]): void {
+    this.directionBands = next;
+  }
+
+  @action
+  setMetric(metric: 'wind' | 'gusts'): void {
+    this.metric = metric;
+  }
+
+  @action
+  save(): void {
+    this.alarms.save({
+      stationId: this.args.station.id,
+      directionBands: this.directionBands,
+      metric: this.metric,
+      createdAt: this.existingConfigAtOpen?.createdAt ?? Date.now(),
+    });
+    this.args.onClose();
+  }
+
+  @action
+  delete(): void {
+    this.alarms.delete(this.args.station.id);
+    this.args.onClose();
+  }
+
+  <template>
+    <Modal
+      @isOpen={{@isOpen}}
+      @onClose={{@onClose}}
+      @size="md"
+      data-test-alarm-modal
+      as |modal|
+    >
+      {{! @glint-expect-error: @frontile/overlays@0.17.1's Modal signature types
+        its yielded block params' Header/Body/Footer against an older
+        ember-modifier ModifierLike shape that no longer structurally matches
+        ember-source 7's InvokableInstance -- a Frontile/ember-source-7 type
+        gap, not a real bug here (see the same workaround on Drawer/Popover). }}
+      <modal.Header>
+        <h2 class="pr-6 text-base font-semibold text-slate-950">
+          {{t "alarms.modal.title" name=@station.name}}
+        </h2>
+      </modal.Header>
+
+      {{! @glint-expect-error: same Frontile/ember-source-7 type gap as above }}
+      <modal.Body>
+        <div class="flex flex-col gap-4">
+          <AlarmCompassRose
+            @directionBands={{this.directionBands}}
+            @onChange={{this.updateDirectionBands}}
+            @currentDirection={{@station.last.direction}}
+            @currentSpeed={{@station.last.speed}}
+            @currentGusts={{@station.last.gusts}}
+          />
+
+          {{! The group's own visible label is hidden (sr-only) rather than
+            omitted -- "Wind"/"Gusts" on the two radios already say what
+            this picks, no separate heading needed; keeping the label
+            element (rather than passing none) preserves its accessible
+            name. }}
+          <RadioGroup
+            data-test-alarm-metric-switch
+            class="self-center"
+            @classes={{hash label="sr-only"}}
+            @label={{t "alarms.modal.metric.label"}}
+            @value={{this.metric}}
+            @onChange={{this.setMetric}}
+            @orientation="horizontal"
+            as |Radio|
+          >
+            {{! @glint-expect-error: same Frontile/ember-source-7 type gap as
+              Modal/Drawer/Popover -- RadioGroup's yielded `Radio` is typed
+              against the same outdated ModifierLike shape. }}
+            <Radio @value="wind" @label={{t "alarms.metric.wind"}} />
+            {{! @glint-expect-error: same Frontile/ember-source-7 type gap }}
+            <Radio @value="gusts" @label={{t "alarms.metric.gusts"}} />
+          </RadioGroup>
+        </div>
+      </modal.Body>
+
+      {{! @glint-expect-error: same Frontile/ember-source-7 type gap as above }}
+      <modal.Footer>
+        <div class="flex w-full items-center justify-end gap-2">
+          {{#if this.existingConfigAtOpen}}
+            <Button
+              data-test-alarm-delete
+              @appearance="minimal"
+              @intent="danger"
+              class="mr-auto"
+              @onPress={{this.delete}}
+            >
+              {{t "alarms.modal.delete"}}
+            </Button>
+          {{/if}}
+
+          <Button
+            data-test-alarm-save
+            @intent="primary"
+            disabled={{not this.canSave}}
+            @onPress={{this.save}}
+          >
+            {{t "alarms.modal.save"}}
+          </Button>
+        </div>
+      </modal.Footer>
+    </Modal>
+  </template>
+}

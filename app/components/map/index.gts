@@ -44,6 +44,7 @@ import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
+import type AlarmsService from 'winds-mobi-client-web/services/alarms';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -76,6 +77,7 @@ export default class Map extends Component<MapSignature> {
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
+  @service declare alarms: AlarmsService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
@@ -156,6 +158,10 @@ export default class Map extends Component<MapSignature> {
 
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
+  };
+
+  isStationAlarmTriggered = (station: Station): boolean => {
+    return this.alarms.triggeredStationIds.has(station.id);
   };
 
   // The map's current visible bounds in lng/lat, captured from MapLibre's own
@@ -439,6 +445,7 @@ export default class Map extends Component<MapSignature> {
             as |marker|
           >
             <MapStationMarker
+              @isAlarmTriggered={{this.isStationAlarmTriggered station}}
               @isSelected={{this.isStationSelected station}}
               @station={{station}}
               @zoom={{this.mapView.zoom}}
