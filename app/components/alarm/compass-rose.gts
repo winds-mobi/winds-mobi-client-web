@@ -28,8 +28,8 @@ export interface AlarmCompassRoseSignature {
 // No direction letters on the rose itself (the sr-only fieldset below still
 // names each direction for the accessible fallback) — the coloured rings
 // span almost the full viewBox, from INNER_RADIUS out to OUTER_RADIUS. The
-// armed threshold itself is a separate list below the rose (see
-// `armedThresholds`), not drawn on the rose.
+// armed threshold's own value is drawn inside the armed ring itself (see
+// `thresholdMarks`), not in a separate list.
 const CENTER = 100;
 const INNER_RADIUS = 22;
 const OUTER_RADIUS = 96;
@@ -43,10 +43,11 @@ interface Cell {
   style: SafeString;
 }
 
-interface ArmedThreshold {
-  direction: number;
-  directionLabel: string;
+interface ThresholdMark {
+  key: string;
   minSpeed: number;
+  x: number;
+  y: number;
 }
 
 const WIND_READING_SYMBOL = '○';
@@ -211,28 +212,32 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
     });
   }
 
-  // Armed directions only, each paired with the actual km/h threshold —
-  // the armed band's own `min`, not `max`: band-or-higher semantics mean
-  // the alarm first fires exactly at that band's lower boundary, so that's
-  // the number worth showing (e.g. arming "wind-10" reads as "N >5 km/h",
-  // not "N >10 km/h"). Rendered as a list below the rose rather than a
-  // second line under each letter — keeps the rose itself small and lets
-  // this use a standard Tailwind text size without needing extra margin
-  // baked into the rose's own geometry.
-  get armedThresholds(): ArmedThreshold[] {
-    return DIRECTIONS.map((directionLabel, direction) => {
+  // One mark per armed direction, centred in its own armed ring — the
+  // armed band's own `min`, not `max`: band-or-higher semantics mean the
+  // alarm first fires exactly at that band's lower boundary, so that's the
+  // number worth showing (e.g. arming "wind-10" reads as ">5", not ">10").
+  get thresholdMarks(): ThresholdMark[] {
+    return DIRECTIONS.map((_, direction) => {
       const band = this.args.directionBands[direction] ?? null;
 
-      return { direction, directionLabel, band };
+      return { direction, band };
     })
       .filter(
         (entry): entry is typeof entry & { band: number } => entry.band !== null
       )
-      .map(({ direction, directionLabel, band }) => ({
-        direction,
-        directionLabel,
-        minSpeed: WIND_COLOUR_BANDS[band]!.min,
-      }));
+      .map(({ direction, band }) => {
+        const point = polarPoint(
+          INNER_RADIUS + (band + 0.5) * BAND_WIDTH,
+          direction * 45
+        );
+
+        return {
+          key: `${direction}-${band}-threshold`,
+          minSpeed: WIND_COLOUR_BANDS[band]!.min,
+          x: point.x,
+          y: point.y,
+        };
+      });
   }
 
   @action
@@ -276,6 +281,19 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
         {{/each}}
         {{! template-lint-enable no-invalid-interactive }}
 
+        {{#each this.thresholdMarks as |mark|}}
+          <text
+            x={{mark.x}}
+            y={{mark.y}}
+            text-anchor="middle"
+            dominant-baseline="middle"
+            style="font-size: 7px; font-weight: 700; fill: var(--color-white);
+              stroke: rgb(0 0 0 / 55%); stroke-width: 2px;
+              paint-order: stroke;"
+            data-test-alarm-compass-threshold={{mark.key}}
+          >{{t "alarms.compassRose.threshold" value=mark.minSpeed}}</text>
+        {{/each}}
+
         {{#each this.currentReadingMarks as |mark|}}
           <text
             x={{mark.x}}
@@ -287,20 +305,6 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
           >{{mark.symbol}}</text>
         {{/each}}
       </svg>
-
-      {{#if this.armedThresholds.length}}
-        <ul
-          class="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-600"
-          data-test-alarm-compass-thresholds
-        >
-          {{#each this.armedThresholds as |entry|}}
-            <li data-test-alarm-compass-threshold={{entry.directionLabel}}>
-              <span class="font-semibold">{{entry.directionLabel}}</span>
-              {{t "alarms.compassRose.threshold" value=entry.minSpeed}}
-            </li>
-          {{/each}}
-        </ul>
-      {{/if}}
 
       <fieldset class="sr-only">
         <legend>{{t "alarms.compassRose.legend"}}</legend>

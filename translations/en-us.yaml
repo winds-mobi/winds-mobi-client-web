@@ -50,7 +50,7 @@ alarms:
   compassRose:
     legend: Alarm thresholds by direction
     off: 'Off'
-    threshold: '>{value} km/h'
+    threshold: '>{value}'
   metric:
     wind: Wind
     gusts: Gusts
