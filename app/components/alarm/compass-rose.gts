@@ -40,8 +40,6 @@ interface Cell {
   band: number;
   path: string;
   style: SafeString;
-  isCurrentWind: boolean;
-  isCurrentGusts: boolean;
 }
 
 interface DirectionLabel {
@@ -55,6 +53,25 @@ interface ArmedThreshold {
   direction: number;
   directionLabel: string;
   minSpeed: number;
+}
+
+interface CurrentReadingMark {
+  key: string;
+  symbol: '<' | '«';
+  x: number;
+  y: number;
+  rotation: number;
+}
+
+// Both `<` and `«` point west (screen left) in their default, unrotated
+// orientation -- bearing 270° in this file's clockwise-from-north
+// convention (see `polarPoint`). A cell at bearing `b` needs its mark
+// rotated to point at the compass centre, i.e. toward bearing `b + 180`;
+// `rotate(angle, x, y)` in SVG turns clockwise for positive `angle`, the
+// same direction bearings already increase in, so the rotation needed is
+// just the difference: (b + 180) - 270 = b - 90.
+function markRotation(bearingDeg: number): number {
+  return bearingDeg - 90;
 }
 
 // Point on the circle of the given radius at `bearingDeg` clockwise from
@@ -101,10 +118,11 @@ function annularSectorPath(
 // threshold are picked in a single gesture. Clicking the already-armed
 // (topmost filled) ring again clears that direction back to off. The
 // station's current reading (`@currentDirection`/`@currentSpeed`/
-// `@currentGusts`) is highlighted for context regardless of what's armed —
-// its direction sector's wind-speed cell and its gusts cell both get the
-// same thin solid black outline, so the user can see where "now" sits
-// relative to whatever threshold they're setting.
+// `@currentGusts`) is marked for context regardless of what's armed — a "<"
+// pointing at the compass centre on its wind-speed cell, a "«" on its gusts
+// cell (see `currentReadingMarks`; when both land in the same band, only
+// the "«" is drawn), so the user can see where "now" sits relative to
+// whatever threshold they're setting.
 //
 // The SVG is the primary pointer/touch surface and is marked `aria-hidden`;
 // a parallel, visually-hidden `<select>` per direction (one of the real,
@@ -113,12 +131,6 @@ function annularSectorPath(
 export default class AlarmCompassRose extends Component<AlarmCompassRoseSignature> {
   bandOptions = WIND_COLOUR_BANDS.map((band, index) => ({ band, index }));
 
-  // The cell(s) the station's current reading falls in: same direction
-  // sector, one ring for average wind speed and one for gusts (usually
-  // different bands, occasionally the same cell). Highlighted below with a
-  // thin solid black outline regardless of that cell's fill color, so the
-  // reading stays visible whether or not the user has armed anything there
-  // yet.
   get currentDirectionIndex(): number {
     return directionIndexForAzimuth(this.args.currentDirection);
   }
@@ -131,6 +143,48 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
     return WIND_COLOUR_BANDS.indexOf(windBandForSpeed(this.args.currentGusts));
   }
 
+  // A "<" on the current wind-speed cell, a "«" on the current gusts cell.
+  // When both land in the same band, only the "«" is drawn — a single "<"
+  // there would just sit inside/overlap it, adding nothing.
+  get currentReadingMarks(): CurrentReadingMark[] {
+    const direction = this.currentDirectionIndex;
+    const windBand = this.currentWindBandIndex;
+    const gustsBand = this.currentGustsBandIndex;
+    const bearing = direction * 45;
+    const rotation = markRotation(bearing);
+    const marks: CurrentReadingMark[] = [];
+
+    if (windBand !== gustsBand) {
+      const point = polarPoint(
+        INNER_RADIUS + (windBand + 0.5) * BAND_WIDTH,
+        bearing
+      );
+
+      marks.push({
+        key: `${direction}-${windBand}-wind`,
+        symbol: '<',
+        x: point.x,
+        y: point.y,
+        rotation,
+      });
+    }
+
+    const gustsPoint = polarPoint(
+      INNER_RADIUS + (gustsBand + 0.5) * BAND_WIDTH,
+      bearing
+    );
+
+    marks.push({
+      key: `${direction}-${gustsBand}-gusts`,
+      symbol: '«',
+      x: gustsPoint.x,
+      y: gustsPoint.y,
+      rotation,
+    });
+
+    return marks;
+  }
+
   get cells(): Cell[] {
     const cells: Cell[] = [];
 
@@ -138,20 +192,10 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
       const armedBand = this.args.directionBands[direction] ?? null;
       const startDeg = direction * 45 - 22.5;
       const endDeg = direction * 45 + 22.5;
-      const isCurrentDirection = direction === this.currentDirectionIndex;
 
       for (const [band, colourBand] of WIND_COLOUR_BANDS.entries()) {
         const filled = armedBand !== null && band <= armedBand;
         const fill = filled ? colourBand.color : 'var(--color-slate-200)';
-        const isCurrentWind =
-          isCurrentDirection && band === this.currentWindBandIndex;
-        const isCurrentGusts =
-          isCurrentDirection && band === this.currentGustsBandIndex;
-
-        const stroke =
-          isCurrentWind || isCurrentGusts
-            ? 'stroke: var(--color-black); stroke-width: 1;'
-            : 'stroke: var(--color-white); stroke-width: 0.5;';
 
         cells.push({
           key: `${direction}-${band}`,
@@ -163,9 +207,9 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
             startDeg,
             endDeg
           ),
-          style: htmlSafe(`fill: ${fill}; ${stroke}`),
-          isCurrentWind,
-          isCurrentGusts,
+          style: htmlSafe(
+            `fill: ${fill}; stroke: var(--color-white); stroke-width: 0.5;`
+          ),
         });
       }
     }
@@ -251,18 +295,22 @@ export default class AlarmCompassRose extends Component<AlarmCompassRoseSignatur
             d={{cell.path}}
             style={{cell.style}}
             data-test-alarm-compass-cell="{{cell.direction}}-{{cell.band}}"
-            data-test-alarm-compass-current-wind={{if
-              cell.isCurrentWind
-              "true"
-            }}
-            data-test-alarm-compass-current-gusts={{if
-              cell.isCurrentGusts
-              "true"
-            }}
             {{on "click" (fn this.armDirection cell.direction cell.band)}}
           />
         {{/each}}
         {{! template-lint-enable no-invalid-interactive }}
+
+        {{#each this.currentReadingMarks as |mark|}}
+          <text
+            x={{mark.x}}
+            y={{mark.y}}
+            transform="rotate({{mark.rotation}} {{mark.x}} {{mark.y}})"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            style="font-size: 8px; font-weight: 700;"
+            data-test-alarm-compass-current-mark={{mark.key}}
+          >{{mark.symbol}}</text>
+        {{/each}}
 
         {{#each this.directionLabels as |label|}}
           <text
