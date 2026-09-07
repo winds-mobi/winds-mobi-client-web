@@ -12,13 +12,38 @@ already use.
 
 - **Fixed: desktop panel slid in from the middle instead of from off-screen-left.** `@placement`
   doesn't just pick which CSS edge classes apply (that part really is cosmetically absorbed by
-  the slot's own sizing) — it *also* independently selects Drawer's enter-transition direction
+  the slot's own sizing) — it _also_ independently selects Drawer's enter-transition direction
   (`slide-from-${placement}`), and each direction is a `transform: translateX/Y(±100%)`
   **relative to the element's own box**, not the viewport. The panel's resting box sits at the
-  *left* edge of the screen, but was set to `@placement="right"` (`slideFromRight`, starting at
-  `translateX(+100%)` — 100% of its own ~32rem width to the *right* of its resting spot, i.e.
+  _left_ edge of the screen, but was set to `@placement="right"` (`slideFromRight`, starting at
+  `translateX(+100%)` — 100% of its own ~32rem width to the _right_ of its resting spot, i.e.
   roughly mid-screen on desktop). Fixed by using `@placement="left"` for the side-panel case
   (`bottom` stays correct for the mobile sheet, verified visually not to have the same bug).
+
+- **Fixed (found while rebuilding this on the Frontile v0.18 bump): `aria-labelledby` silently
+  stopped resolving.** v0.18's `Drawer` changed `aria-labelledby` from an unconditional
+  `this.headerId` to `this.labelledById`, which only returns the id once a real `drawer.Header`
+  has rendered and self-registered (`registerSelf`/`hasHeader`, tracked via a render count — see
+  `drawer.gts`'s own extensive comment on why a `ref` couldn't do this instead). Our panel
+  deliberately avoided `drawer.Header` (to dodge the now-fixed Glint type gap, see the Frontile
+  bump section below) and instead put `id={{d.headerId}}` directly on our own `<h2>` — which still
+  carries the id, but nothing points `aria-labelledby` at it anymore, so the dialog silently loses
+  its accessible name. Fixed by wrapping the existing title+close-button row in `<d.Header
+@class="...">` instead of a plain `<div>` (its own default classes replaced via `@class`, merged
+  through `DrawerHeader`'s internal `twMerge`) — this is now safe to do since the Glint gap that
+  originally ruled it out is gone. `StationHeader`'s `@headerId` passthrough arg was reverted along
+  with it (the id now lives on `drawer.Header`'s own wrapping element, not the inner `<h2>`).
+
+- **Fixed (found the same way): a stray rounded corner and a border on all four sides.**
+  v0.18's `theme/components/overlays.ts` gave `Drawer`'s base slot a `rounded-2xl` and an
+  all-sides `border border-surface-overlay-mild` — v0.17.1's base had neither. Visible directly:
+  a rounded top corner where the panel should be flush against the map, and (confirmed by
+  zooming into a screenshot) a thin border along every edge instead of just the one edge that
+  actually separates the panel from the map. `panelClasses.base` (`station/index.gts`) now
+  explicitly resets `rounded-none!` and states every side's border width individually
+  (`border-t! border-r-0! border-b-0! border-l-0!`, mirrored per breakpoint) rather than a bare
+  `border-t`/`border-r` that relies on the _other_ three sides staying unset — a partial override
+  left v0.18's own border showing through on whichever sides it didn't touch.
 
 - **Open: a mobile-only "push, then correct, then jump back" artifact when the panel opens**,
   reported live after the desktop fix landed. Investigation so far (no fix applied yet):
@@ -43,10 +68,10 @@ already use.
     overlay design), so there's no obvious mechanism for opening it to trigger a viewport change.
   - **Best-evidenced lead, not yet fixed: Drawer's un-forwarded `preventAutoFocus`.**
     `Overlay.gts`'s `setupContent` modifier does `later(() => { ...; el.focus(); },
-    transitionDuration)` whenever `disableFocusTrap === true` and `preventAutoFocus` isn't
+transitionDuration)` whenever `disableFocusTrap === true` and `preventAutoFocus` isn't
     `true` — exactly our config (`@disableFocusTrap={{true}}`, no way to also pass
     `preventAutoFocus`, since `DrawerArgs` doesn't include it in its `Pick<OverlaySignature['Args'],
-    ...>` list — this is precisely the gap the Frontile maintainer flagged in their own comment on
+...>` list — this is precisely the gap the Frontile maintainer flagged in their own comment on
     [frontile#447](https://github.com/josemarluedke/frontile/issues/447): "the overlay still calls
     `.focus()` on itself once when it opens... `preventAutoFocus` isn't forwarded by `<Drawer>`
     yet"). Confirmed directly (not just theoretically): sampling `document.activeElement` every
@@ -56,7 +81,10 @@ already use.
     call — is forced to 0 during tests via `macroCondition(isTesting())`). In production this
     `.focus()` call on a large `tabindex="0"` bottom-anchored div would land right as the slide-in
     animation finishes — a very plausible trigger for a mobile browser's scroll-into-view/viewport
-    behavior, matching the reported timing.
+    behavior, matching the reported timing. **Still true on `frontile@0.18.0-alpha.17`**, checked
+    directly against the actual `Overlay`/`Drawer` source on `main` after the v0.18 bump (see the
+    Frontile bump section below) — `preventAutoFocus` still isn't in `DrawerArgs`' `Pick<...>` list,
+    and `setupContent`'s auto-focus logic is byte-for-byte the same. Not fixed by the bump.
   - **Dead end worth recording: acceptance tests cannot observe the slide animation at all.**
     `Overlay.gts`'s `isAnimationEnabled` getter unconditionally returns `false` under
     `macroCondition(isTesting())`, regardless of `@disableTransitions`. A `requestAnimationFrame`-
@@ -75,9 +103,9 @@ already use.
        guarding `el.focus()` never runs. Traps Tab-key keyboard focus inside the panel while
        open — a real UX tradeoff (the map/rest of the page stays mouse/touch-interactive either
        way; only Tab-reachability changes), not just a workaround.
-    Per this repo's "don't patch around a library's own behavior" convention, monkey-patching
-    `.focus()`/`Element.prototype` from our own code was explicitly ruled out rather than
-    attempted.
+       Per this repo's "don't patch around a library's own behavior" convention, monkey-patching
+       `.focus()`/`Element.prototype` from our own code was explicitly ruled out rather than
+       attempted.
 
 ## Dependency bumps (branch `mb/deps-update`)
 
