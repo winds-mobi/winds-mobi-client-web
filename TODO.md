@@ -28,22 +28,29 @@ already use.
   deliberately avoided `drawer.Header` (to dodge the now-fixed Glint type gap, see the Frontile
   bump section below) and instead put `id={{d.headerId}}` directly on our own `<h2>` — which still
   carries the id, but nothing points `aria-labelledby` at it anymore, so the dialog silently loses
-  its accessible name. Fixed by wrapping the existing title+close-button row in `<d.Header
-@class="...">` instead of a plain `<div>` (its own default classes replaced via `@class`, merged
-  through `DrawerHeader`'s internal `twMerge`) — this is now safe to do since the Glint gap that
-  originally ruled it out is gone. `StationHeader`'s `@headerId` passthrough arg was reverted along
-  with it (the id now lives on `drawer.Header`'s own wrapping element, not the inner `<h2>`).
+  its accessible name. Fixed by wrapping the title in `<d.Header>` instead of a plain `<div>` —
+  now safe to do since the Glint gap that originally ruled it out is gone.
 
-- **Fixed (found the same way): a stray rounded corner and a border on all four sides.**
-  v0.18's `theme/components/overlays.ts` gave `Drawer`'s base slot a `rounded-2xl` and an
-  all-sides `border border-surface-overlay-mild` — v0.17.1's base had neither. Visible directly:
-  a rounded top corner where the panel should be flush against the map, and (confirmed by
-  zooming into a screenshot) a thin border along every edge instead of just the one edge that
-  actually separates the panel from the map. `panelClasses.base` (`station/index.gts`) now
-  explicitly resets `rounded-none!` and states every side's border width individually
-  (`border-t! border-r-0! border-b-0! border-l-0!`, mirrored per breakpoint) rather than a bare
-  `border-t`/`border-r` that relies on the _other_ three sides staying unset — a partial override
-  left v0.18's own border showing through on whichever sides it didn't touch.
+- **Decided against fighting v0.18's own Drawer chrome — went stock instead.** v0.18's
+  `theme/components/overlays.ts` gave `Drawer`'s base slot a `rounded-2xl` and an all-sides
+  `border border-surface-overlay-mild` that v0.17.1's base had neither of, and an initial fix
+  overrode both (`rounded-none!` plus every border side stated individually per breakpoint) to
+  keep the panel flush against the map on the un-bordered sides, matching the pre-Drawer design.
+  Reconsidered: the panel shell now just uses Frontile's stock Drawer appearance outright — no
+  border/radius overrides at all. `pointer-events-auto` is the one non-stock class left, and it's
+  load-bearing rather than decorative — the map's overlay slot this Drawer renders into is
+  `pointer-events-none`, so the panel has to opt back in or clicks pass straight through it too.
+
+- **Tried, then reverted: Drawer's own built-in header/close-button chrome.** `@allowCloseButton`
+  at its default plus a bare `<d.Header>` gives a centered title with Frontile's own `CloseButton`
+  floating top-right — technically stock, but the close button is _always_ `position: absolute`
+  (no arg makes it a flex sibling of the title), so it floats over a separately-centered title
+  instead of sharing a row with it. No Frontile option changes that. Reverted to a custom flex row
+  (`<d.Header @class="flex items-start justify-between gap-4 px-4 py-2">` holding the title and
+  our own close `<Button>` side by side) — `d.Header`'s own default classes are still what's being
+  replaced, but its auto-generated id is what makes `aria-labelledby` resolve, so it stays in use
+  rather than a plain `<div>`. The explicit-close-button acceptance tests click
+  `[data-test-station-close]`, same hook as before this whole Drawer migration.
 
 - **Open: a mobile-only "push, then correct, then jump back" artifact when the panel opens**,
   reported live after the desktop fix landed. Investigation so far (no fix applied yet):

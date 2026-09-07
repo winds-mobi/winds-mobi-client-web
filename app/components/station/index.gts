@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
+import { hash } from '@ember/helper';
 import type RouterService from '@ember/routing/router-service';
 import { Button } from '@frontile/buttons';
 import { Drawer } from '@frontile/overlays';
@@ -45,27 +46,6 @@ export default class StationIndex extends Component<StationIndexSignature> {
     return this.isSidePanel ? 'left' : 'bottom';
   }
 
-  // Frontile v0.18's Drawer base classes added a default `rounded-2xl` and an
-  // all-sides `border` (previously the base had neither) — every value below
-  // that ends in `!` is undoing one of those two, not decorating on top of
-  // them. Each side's width is stated explicitly (rather than a bare
-  // `border-t`/`border-r` relying on the *other* sides staying unset) because
-  // v0.18's own border would otherwise still show through on whichever three
-  // sides a partial override doesn't touch.
-  get panelClasses(): { base: string } {
-    return {
-      base: [
-        'pointer-events-auto flex-col overflow-hidden rounded-none!',
-        'bg-white! shadow-md! shadow-slate-900/12!',
-        'border-t! border-r-0! border-b-0! border-l-0! border-slate-200!',
-        'landscape:border-r! landscape:border-t-0! landscape:border-b-0! landscape:border-l-0! landscape:border-slate-200!',
-        'landscape:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]!',
-        'md:border-r! md:border-t-0! md:border-b-0! md:border-l-0! md:border-slate-200!',
-        'md:shadow-[12px_0_28px_-12px_rgba(15,23,42,0.42)]!',
-      ].join(' '),
-    };
-  }
-
   get mapView() {
     return currentMapView(this.router);
   }
@@ -95,12 +75,21 @@ export default class StationIndex extends Component<StationIndexSignature> {
     intentionally not merged with it — it only reacts to clicks on the map
     itself, not anywhere outside the panel.
 
-    drawer.Header wraps the title+close row (rather than a plain div) so
-    Drawer's own aria-labelledby actually resolves: v0.18 only points it at
-    drawer.headerId once a real Header registers itself, so a manually-set id
-    with no matching Header renders no accessible name at all. @class
-    replaces Header's own default classes via its internal twMerge, same as
-    Frontile's other @classes-style overrides elsewhere in this app.
+    Deliberately kept to Frontile's own stock Drawer appearance otherwise —
+    no shell styling overrides. pointer-events-auto is the one non-stock
+    class here, and it is load-bearing rather than decorative: the map's
+    overlay slot this Drawer renders into is pointer-events-none so the map
+    stays clickable around it, and the panel has to opt back in or clicks
+    would pass straight through it too.
+
+    The header row is the one place this still steps outside Drawer's own
+    chrome: Frontile's built-in close button is always position: absolute
+    (there is no arg to make it a flex sibling of the title), which floats
+    it over a separately-centered title rather than sharing a row with it —
+    not a bug, just not the layout this panel wants. @allowCloseButton is
+    off and @class replaces drawer.Header's own default classes (its
+    default id is still what makes aria-labelledby resolve) with a plain
+    flex row holding the title and our own close Button side by side.
 
     (This comment avoids backtick-quoted inline code: 6 or more
     backtick-quoted spans in one hbs comment crash ember-eslint-parser's own
@@ -120,12 +109,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
       @closeOnOutsideClick={{false}}
       @closeOnEscapeKey={{true}}
       @allowCloseButton={{false}}
-      @classes={{this.panelClasses}}
+      @classes={{hash base="pointer-events-auto"}}
       as |d|
     >
-      <d.Header
-        @class="relative z-10 shrink-0 flex items-start justify-between gap-4 px-4 py-2 shadow-md shadow-slate-900/10"
-      >
+      <d.Header @class="flex items-start justify-between gap-4 px-4 py-2">
         <div class="min-w-0">
           {{#if @station}}
             <StationHeader @station={{@station}} />
