@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- The station panel can now be closed with the Escape key, not just its close button. ([#163](https://github.com/winds-mobi/winds-mobi-client-web/issues/163))
+
 ### Changed
 
 - Upgraded the underlying UI component library (Frontile) to its next major version.

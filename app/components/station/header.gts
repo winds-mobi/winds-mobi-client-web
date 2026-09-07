@@ -13,6 +13,7 @@ import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
 export interface StationHeaderSignature {
   Args: {
     station: Station;
+    headerId?: string;
   };
   Blocks: {
     default: [];
@@ -45,7 +46,7 @@ export default class StationHeader extends Component<StationHeaderSignature> {
 
   <template>
     <div class="flex min-w-0 items-start justify-between gap-2">
-      <h2 class="min-w-0 flex-1">
+      <h2 id={{@headerId}} class="min-w-0 flex-1">
         <LinkTo
           data-test-station-title
           @route="map.station"
