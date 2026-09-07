@@ -63,7 +63,12 @@ export default class StationIndex extends Component<StationIndexSignature> {
           @onPress={{this.close}}
           class="self-start rounded-md! text-slate-500! transition hover:bg-slate-100 hover:text-slate-900"
         >
-          <X @size={{20}} />
+          {{! size-5! forces the icon past Frontile's own Button base class
+          (its [&_svg]:size-[1em] rule scales icons to the button's own
+          font-size), which otherwise silently overrides @size entirely --
+          CSS width/height always beats an SVG's own presentation
+          attributes, regardless of specificity. }}
+          <X @size={{20}} class="size-5!" />
         </Button>
       </div>
 

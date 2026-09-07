@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
+- Upgraded the underlying UI component library (Frontile) to its next major version.
+  - _aka: more furniture-moving under the hood — buttons, toggles, and menus should look and behave exactly the same. If something looks off, that's a bug, not a feature._
+
 ## v0.23.1 - 2026-08-26
 
 ### Fixed

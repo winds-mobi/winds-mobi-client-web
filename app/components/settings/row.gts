@@ -42,7 +42,6 @@ export default class SettingsRow extends Component<SettingsRowSignature> {
           data-test-setting={{@name}}
           @isSelected={{this.enabled}}
           @onChange={{this.update}}
-          @intent="success"
           @label={{t (concat "settings." @name ".label")}}
           @description={{t (concat "settings." @name ".description")}}
         />
