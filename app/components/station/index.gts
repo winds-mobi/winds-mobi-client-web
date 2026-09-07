@@ -41,8 +41,8 @@ export default class StationIndex extends Component<StationIndexSignature> {
     this.isSidePanel = matches;
   };
 
-  get placement(): 'right' | 'bottom' {
-    return this.isSidePanel ? 'right' : 'bottom';
+  get placement(): 'left' | 'bottom' {
+    return this.isSidePanel ? 'left' : 'bottom';
   }
 
   get panelClasses(): { base: string } {

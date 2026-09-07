@@ -1,5 +1,84 @@
 # TODO
 
+## Station panel → Frontile `<Drawer>` (issue #163)
+
+Context: the routed station panel (`app/components/station/index.gts`) was moved from a
+hand-rolled `<section>` to Frontile's `<Drawer>`, on the theory (issue #163's own note-to-self)
+that it duplicates Drawer's lifecycle behavior by hand, worse. `@placement` is driven by a
+hand-rolled `app/modifiers/track-media-query.ts` (`ember-responsive` was evaluated and
+**rejected** — breaks `pnpm build`, see CLAUDE.md's addon-first section) matching the same
+`(orientation: landscape), (min-width: 768px)` condition the overlay slot's own Tailwind classes
+already use.
+
+- **Fixed: desktop panel slid in from the middle instead of from off-screen-left.** `@placement`
+  doesn't just pick which CSS edge classes apply (that part really is cosmetically absorbed by
+  the slot's own sizing) — it *also* independently selects Drawer's enter-transition direction
+  (`slide-from-${placement}`), and each direction is a `transform: translateX/Y(±100%)`
+  **relative to the element's own box**, not the viewport. The panel's resting box sits at the
+  *left* edge of the screen, but was set to `@placement="right"` (`slideFromRight`, starting at
+  `translateX(+100%)` — 100% of its own ~32rem width to the *right* of its resting spot, i.e.
+  roughly mid-screen on desktop). Fixed by using `@placement="left"` for the side-panel case
+  (`bottom` stays correct for the mobile sheet, verified visually not to have the same bug).
+
+- **Open: a mobile-only "push, then correct, then jump back" artifact when the panel opens**,
+  reported live after the desktop fix landed. Investigation so far (no fix applied yet):
+  - **Ruled out: the map camera/padding system (`drive-map-camera.ts`/`map-padding.ts`).**
+    `applyMapPadding` uses `map.jumpTo(...)` — an instant, non-animated snap, not an eased
+    `flyTo` (that only fires when the routed lat/lng/zoom actually changes, which a plain
+    marker-click open/close never does). Verified empirically: sampled a station marker's
+    on-screen position (the same technique the #61/#155 regression tests use) every animation
+    frame across a full mobile open transition — completely flat, zero movement, the whole time.
+    The padding math is a rigid translation specifically designed to cancel itself out (see the
+    comment in `map-padding.ts`), and it does.
+  - **Ruled out (at least the "stale default" variant): `@placement` flipping mid-open.**
+    Considered because `isSidePanel` starts at its `@tracked` field initializer (`false`) before
+    `track-media-query`'s modifier runs its setup and calls back with the real value — a
+    plausible one-frame "wrong value" race. Sampled `data-test-station-panel-placement` every
+    frame across the same mobile transition: stayed `"bottom"` for all 48 samples, never flipped.
+    Not fully closed: the test's `stubMatchMedia` helper returns a fixed value with a no-op
+    listener, so it can't simulate a genuine `matchMedia` `'change'` event firing mid-transition
+    (e.g. from a real mobile browser's address-bar hide/show altering viewport dimensions) — but
+    structurally this is a weak candidate anyway, since the bottom sheet is `position: absolute`
+    and never changes the document's own height/scroll extent (the entire point of the #61/#155
+    overlay design), so there's no obvious mechanism for opening it to trigger a viewport change.
+  - **Best-evidenced lead, not yet fixed: Drawer's un-forwarded `preventAutoFocus`.**
+    `Overlay.gts`'s `setupContent` modifier does `later(() => { ...; el.focus(); },
+    transitionDuration)` whenever `disableFocusTrap === true` and `preventAutoFocus` isn't
+    `true` — exactly our config (`@disableFocusTrap={{true}}`, no way to also pass
+    `preventAutoFocus`, since `DrawerArgs` doesn't include it in its `Pick<OverlaySignature['Args'],
+    ...>` list — this is precisely the gap the Frontile maintainer flagged in their own comment on
+    [frontile#447](https://github.com/josemarluedke/frontile/issues/447): "the overlay still calls
+    `.focus()` on itself once when it opens... `preventAutoFocus` isn't forwarded by `<Drawer>`
+    yet"). Confirmed directly (not just theoretically): sampling `document.activeElement` every
+    frame shows it moving from `<body>` to a real DOM element within ~1-2 frames of mount (in the
+    test env; production would delay this to the real `transitionDuration`, ~200ms, since
+    `isAnimationEnabled` — and so the local `transitionDuration` used by this specific `later()`
+    call — is forced to 0 during tests via `macroCondition(isTesting())`). In production this
+    `.focus()` call on a large `tabindex="0"` bottom-anchored div would land right as the slide-in
+    animation finishes — a very plausible trigger for a mobile browser's scroll-into-view/viewport
+    behavior, matching the reported timing.
+  - **Dead end worth recording: acceptance tests cannot observe the slide animation at all.**
+    `Overlay.gts`'s `isAnimationEnabled` getter unconditionally returns `false` under
+    `macroCondition(isTesting())`, regardless of `@disableTransitions`. A `requestAnimationFrame`-
+    sampling diagnostic test can still catch non-CSS side effects (marker position, active
+    element, attribute values) but can never reproduce the animation itself — confirming or
+    denying a purely visual/compositing glitch needs a real browser (the Claude-in-Chrome
+    extension wasn't connected this session) or a physical device.
+  - **Proposed fixes, not yet decided between:**
+    1. Drop `<Drawer>` down to Frontile's lower-level `<Overlay>` directly (which does support
+       `@preventAutoFocus`), reimplementing Drawer's placement/size classes ourselves (a handful
+       of Tailwind classes, already known from reading `@frontile/theme`'s `overlays.ts`) — stays
+       within Frontile's supported API, no patching.
+    2. Accept the auto-focus for now and file/comment upstream on frontile#447 asking for
+       `preventAutoFocus` forwarding; revisit once fixed upstream.
+    3. Set `@disableFocusTrap={{false}}` (enable the real focus trap) so the whole `if` branch
+       guarding `el.focus()` never runs. Traps Tab-key keyboard focus inside the panel while
+       open — a real UX tradeoff (the map/rest of the page stays mouse/touch-interactive either
+       way; only Tab-reachability changes), not just a workaround.
+    Per this repo's "don't patch around a library's own behavior" convention, monkey-patching
+    `.focus()`/`Element.prototype` from our own code was explicitly ruled out rather than
+    attempted.
+
 ## Dependency bumps (branch `mb/deps-update`)
 
 - **`maplibre-gl` 5.20.2 → 6.1.0 / `ember-maplibre-gl` 0.6.2 → 0.7.0 — landed, fully resolved.**

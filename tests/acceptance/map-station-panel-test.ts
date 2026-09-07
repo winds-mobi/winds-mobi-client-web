@@ -302,7 +302,7 @@ module('Acceptance | map station panel', function (hooks) {
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
-      assert.dom('[data-test-station-panel-placement="right"]').exists();
+      assert.dom('[data-test-station-panel-placement="left"]').exists();
     } finally {
       restoreMatchMedia();
     }
