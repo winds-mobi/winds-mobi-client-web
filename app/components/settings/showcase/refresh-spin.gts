@@ -64,7 +64,10 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
           class="inline-flex transition-transform duration-500 ease-in-out"
           style={{this.spinStyle}}
         >
-          <ArrowClockwise />
+          {{! size-4! forces the icon past Frontile's own Button base class
+        (its [&_svg]:size-[1em] rule scales icons to the button's own
+        font-size — much larger since v0.18's typography rescale). }}
+          <ArrowClockwise class="size-4!" />
         </span>
         {{! template-lint-enable no-inline-styles }}
       </Button>

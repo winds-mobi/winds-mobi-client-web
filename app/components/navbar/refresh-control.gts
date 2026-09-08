@@ -63,8 +63,12 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
         class="inline-flex transition-transform duration-500 ease-in-out"
         style={{this.spinStyle}}
       >
+        {{! size-4! forces the icon past Frontile's own Button base class
+        (its [&_svg]:size-[1em] rule), which scales every icon to the
+        button's own font-size -- now much larger per v0.18's typography
+        rescale, making unscaled icons look oversized. }}
         <ArrowClockwise
-          class={{if this.mapRefresh.isRefreshing "animate-spin"}}
+          class="size-4! {{if this.mapRefresh.isRefreshing 'animate-spin'}}"
         />
       </span>
       {{! template-lint-enable no-inline-styles }}

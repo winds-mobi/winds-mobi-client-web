@@ -12,50 +12,26 @@ export const NO_MAP_PADDING: MapPadding = {
   right: 0,
 };
 
-// Sub-pixel layout rounding: a full-bleed overlay can miss its container's own
-// size by a fraction, so "spans the whole width/height" is a near-comparison
-// rather than an exact one.
-const EDGE_TOLERANCE = 1;
+// The same condition the station panel's overlay slot uses to switch shape
+// (see `app/components/map/index.gts`'s slot div: default is a bottom sheet,
+// `landscape:`/`md:` switch to a side panel) and the Drawer uses to switch
+// slide direction (`app/components/station/index.gts`). One shared constant
+// so the three can't drift apart.
+export const SIDE_PANEL_QUERY = '(orientation: landscape), (min-width: 768px)';
 
 // How much of the map the station panel covers, in MapLibre `padding` terms
-// (its own "edge insets" / vanishing-point concept). Measured from the overlay
-// slot's real geometry rather than re-declaring the panel's Tailwind sizes and
-// breakpoints in TypeScript, so the two can't drift.
-//
-// The slot always covers a full-width or full-height slab against one edge of
-// the map (a bottom sheet in portrait, a side panel in landscape and on
-// desktop), which is what makes the uncovered area a rectangle MapLibre can
-// express as padding: whichever edge the slab sits against gets its thickness,
-// the other three stay 0.
-export function mapPaddingFromOverlay(overlay: HTMLElement): MapPadding {
-  // The slot is absolutely positioned inside the map's own box, so its offset
-  // geometry is already relative to exactly the box MapLibre pads. Offsets
-  // rather than `getBoundingClientRect`, because MapLibre's padding is in the
-  // map's own CSS pixels: a bounding rect is measured in *rendered* pixels and
-  // comes back scaled wherever an ancestor carries a transform, which is how
-  // Ember's own test container renders the whole app (`scale(0.5)`).
-  const container = overlay.offsetParent;
+// (its own "edge insets" / vanishing-point concept). Hardcoded to Frontile's
+// own `--drawer-sm` (30rem, at the default 16px root font size) rather than
+// measured from the panel's rendered geometry — the station panel's
+// `@size="sm"` is Frontile's own size for the panel in both placements, so
+// this is the actual size the Drawer renders at, not an app-invented number.
+// Keep in sync with `@size` on the Drawer in `app/components/station/index.gts`.
+const DRAWER_SM_PX = 480;
 
-  if (!(container instanceof HTMLElement)) {
-    return NO_MAP_PADDING;
-  }
-
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  if (overlay.offsetWidth >= width - EDGE_TOLERANCE) {
-    return overlay.offsetTop > 0
-      ? { ...NO_MAP_PADDING, bottom: height - overlay.offsetTop }
-      : { ...NO_MAP_PADDING, top: overlay.offsetHeight };
-  }
-
-  if (overlay.offsetHeight >= height - EDGE_TOLERANCE) {
-    return overlay.offsetLeft > 0
-      ? { ...NO_MAP_PADDING, right: width - overlay.offsetLeft }
-      : { ...NO_MAP_PADDING, left: overlay.offsetWidth };
-  }
-
-  return NO_MAP_PADDING;
+export function mapPaddingForPlacement(isSidePanel: boolean): MapPadding {
+  return isSidePanel
+    ? { ...NO_MAP_PADDING, left: DRAWER_SM_PX }
+    : { ...NO_MAP_PADDING, bottom: DRAWER_SM_PX };
 }
 
 export function mapPaddingsEqual(

@@ -44,9 +44,11 @@ import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
+import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
+import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import {
   OSM_SWISS_STYLE,
@@ -153,6 +155,15 @@ export default class Map extends Component<MapSignature> {
   get isStationPanelOpen(): boolean {
     return this.selectedStationId !== undefined;
   }
+
+  // Mirrors the overlay slot's own bottom-sheet/side-panel breakpoint (see the
+  // slot div's `landscape:`/`md:` classes below), so `driveMapCamera` can pad
+  // the map for whichever shape the panel actually takes without measuring it.
+  @tracked isSidePanel = false;
+
+  setIsSidePanel = (matches: boolean) => {
+    this.isSidePanel = matches;
+  };
 
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
@@ -459,19 +470,26 @@ export default class Map extends Component<MapSignature> {
         {{/in-element}}
       </MapLibreGL>
 
-      {{! The station panel's slot. Sized by CSS whether or not a panel is
-      rendered in it — a bottom sheet in portrait, a side panel in landscape and
-      on desktop — which is what lets `mapPaddingFromOverlay` measure the area a
-      panel covers without waiting for one to render, and what keeps that
-      measurement out of any breakpoint duplicated in TypeScript. It overlays
-      the map rather than shrinking it: the map's own box never resizes, so
-      MapLibre never re-centres itself into a new one, which is what made
-      opening a station visibly heave the whole map around (#155). Transparent
-      to pointer events so the covered map still pans and zooms while nothing
-      is open. }}
+      {{! The station panel's slot: covers the whole map so the Drawer rendered
+      into it (renderInPlace) can fill it and let its own size and placement
+      args — Frontile's own sizing, not a size this app invents — decide how
+      much space it actually takes (a bottom sheet in portrait, a side panel in
+      landscape and on desktop). It overlays the map rather than shrinking it:
+      the map's own box never resizes, so MapLibre never re-centres itself into
+      a new one, which is what made opening a station visibly heave the whole
+      map around (#155). Transparent to pointer events so the covered map
+      still pans and zooms while nothing is open. mapPaddingForPlacement
+      hardcodes the padding to Frontile's own --drawer-sm size — keep it in
+      sync with the Drawer's size argument if that ever changes. }}
       <div
-        class="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-96 landscape:inset-x-auto landscape:left-0 landscape:top-0 landscape:h-auto landscape:w-[min(32rem,50vw)] md:inset-x-auto md:left-0 md:top-0 md:h-auto md:w-[32rem]"
-        {{driveMapCamera this.mapInstance this.mapView this.isStationPanelOpen}}
+        class="pointer-events-none absolute inset-0 z-20"
+        {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
+        {{driveMapCamera
+          this.mapInstance
+          this.mapView
+          this.isStationPanelOpen
+          this.isSidePanel
+        }}
       >
         {{yield}}
       </div>

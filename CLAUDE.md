@@ -205,7 +205,15 @@ state, route models, and query params.
     [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: also a classic addon,
     but it builds cleanly, and its per-owner `service:tracked-local-storage` architecture is a genuine improvement
     over the module-scope singleton the hand-rolled version used.
-  - The verification method that told these two apart: install it, exercise its actual API in a throwaway scratch
+  - `ember-responsive` (breakpoint/`matchMedia` service, considered for driving a Frontile `<Drawer>`'s `@placement`
+    off a media query) was **rejected**: last published 2022 (`5.0.0`), a classic addon never updated for Embroider's
+    current strict-vendoring resolver. It imports `@ember/string` as a resolver "virtual peer dep," which Embroider
+    requires to be resolvable from the app's own `node_modules`, not just nested in the addon's dependency tree —
+    `pnpm build` fails with `Resolver.preHandleExternal: ember-responsive is trying to import the emberVirtualPeerDep
+"@ember/string", but it seems to be missing`. Same failure class as the `ember-cli-mirage` rejection above. A
+    small hand-rolled module-scope modifier wrapping `window.matchMedia` (matching the `onRouteChange` pattern) is the
+    right tool here instead.
+  - The verification method that told these three apart: install it, exercise its actual API in a throwaway scratch
     component/test (not just import it), then run `pnpm build` (the _production_ build, not just `pnpm test:ember`) —
     dev-mode success alone doesn't prove the Rollup/Vite production bundle will succeed. Delete the scratch files
     before committing either way.

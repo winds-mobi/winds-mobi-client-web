@@ -3,7 +3,7 @@ import { registerDestructor } from '@ember/destroyable';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   applyMapPadding,
-  mapPaddingFromOverlay,
+  mapPaddingForPlacement,
   NO_MAP_PADDING,
 } from 'winds-mobi-client-web/utils/map-padding';
 import {
@@ -19,6 +19,7 @@ interface DriveMapCameraSignature {
       map: MaplibreMap | undefined,
       view: MapView,
       isPanelOpen: boolean,
+      isSidePanel: boolean,
     ];
   };
 }
@@ -45,17 +46,22 @@ interface DriveMapCameraSignature {
 // padding is settled before the flight starts, so the flight already frames its
 // destination inside the part of the map the panel leaves visible.
 export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSignature> {
-  private element?: HTMLElement;
   private map?: MaplibreMap;
   private isPanelOpen = false;
+  private isSidePanel = false;
   private lastView?: MapView;
 
   modify(
-    element: HTMLElement,
-    [map, view, isPanelOpen]: [MaplibreMap | undefined, MapView, boolean]
+    _element: HTMLElement,
+    [map, view, isPanelOpen, isSidePanel]: [
+      MaplibreMap | undefined,
+      MapView,
+      boolean,
+      boolean,
+    ]
   ) {
-    this.element = element;
     this.isPanelOpen = isPanelOpen;
+    this.isSidePanel = isSidePanel;
 
     if (!map) {
       return;
@@ -64,11 +70,12 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
     if (map !== this.map) {
       this.map = map;
 
-      // The panel is the only thing that covers the map without resizing it, so
-      // this fires for genuine size changes only — a rotated phone, a resized
-      // window — where the slot's own measurements change with it. MapLibre's
-      // own event rather than an observer of ours, and harmless when the
-      // measurement comes back unchanged (`applyMapPadding` no-ops).
+      // The panel's padding is hardcoded per breakpoint (see
+      // `mapPaddingForPlacement`), not measured — this only needs to re-run for
+      // a rotated phone or a resized window, where the breakpoint itself may
+      // flip. MapLibre's own event rather than an observer of ours, and
+      // harmless when the recomputed padding comes back unchanged
+      // (`applyMapPadding` no-ops).
       map.on('resize', this.syncPadding);
       registerDestructor(this, () => map.off('resize', this.syncPadding));
     }
@@ -88,13 +95,15 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
   }
 
   private syncPadding = () => {
-    if (!this.map || !this.element) {
+    if (!this.map) {
       return;
     }
 
     applyMapPadding(
       this.map,
-      this.isPanelOpen ? mapPaddingFromOverlay(this.element) : NO_MAP_PADDING
+      this.isPanelOpen
+        ? mapPaddingForPlacement(this.isSidePanel)
+        : NO_MAP_PADDING
     );
   };
 }

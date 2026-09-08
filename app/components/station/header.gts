@@ -71,10 +71,16 @@ export default class StationHeader extends Component<StationHeaderSignature> {
           @size="xs"
           @onPress={{this.handleToggleFavorite}}
         >
+          {{! size-5! forces the icon past Frontile's own Button base class
+          (its [&_svg]:size-[1em] rule scales icons to the button's own
+          font-size), which otherwise silently overrides @size entirely --
+          CSS width/height always beats an SVG's own presentation
+          attributes, regardless of specificity. }}
           <Heart
             @size={{20}}
             @weight={{if this.isFavorite "fill" "regular"}}
-            class={{if this.isFavorite "text-rose-500" "text-slate-400"}}
+            class="size-5!
+              {{if this.isFavorite 'text-rose-500' 'text-slate-400'}}"
           />
         </Button>
       {{/if}}

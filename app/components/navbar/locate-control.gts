@@ -43,9 +43,13 @@ export default class NavbarLocateControl extends Component<NavbarLocateControlSi
       class="h-12"
       ...attributes
     >
+      {{! size-4! forces the icon past Frontile's own Button base class
+      (its [&_svg]:size-[1em] rule scales icons to the button's own
+      font-size — much larger since v0.18's typography rescale). }}
       <CrosshairSimple
         @weight={{if this.isLocated "fill"}}
-        class={{if this.nearbyLocation.isRequestingLocation "animate-spin"}}
+        class="size-4!
+          {{if this.nearbyLocation.isRequestingLocation 'animate-spin'}}"
       />
     </Button>
   </template>

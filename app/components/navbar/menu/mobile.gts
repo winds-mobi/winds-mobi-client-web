@@ -56,7 +56,10 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
         class="h-12"
         @onPress={{this.open}}
       >
-        <List />
+        {{! size-4! forces the icon past Frontile's own Button base class
+        (its [&_svg]:size-[1em] rule scales icons to the button's own
+        font-size — much larger since v0.18's typography rescale). }}
+        <List class="size-4!" />
       </Button>
 
       {{#if this.isOpen}}
@@ -69,11 +72,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           data-test-navbar-mobile-menu
           as |drawer|
         >
-          {{! @glint-expect-error: @frontile/overlays@0.17.1's Drawer signature types
-            its yielded block params' Header/Body against an older ember-modifier
-            ModifierLike shape that no longer structurally matches ember-source 7's
-            InvokableInstance -- a Frontile/ember-source-7 type gap, not a real bug
-            here (no newer stable Frontile release fixes it yet). }}
           <drawer.Header>
             <div class="pr-10">
               <h2 class="text-base font-semibold text-slate-950">
@@ -82,7 +80,6 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
             </div>
           </drawer.Header>
 
-          {{! @glint-expect-error: same Frontile/ember-source-7 type gap as above }}
           <drawer.Body>
             <div class="flex w-full flex-col items-stretch gap-2">
               {{#each this.visibleItems as |item|}}

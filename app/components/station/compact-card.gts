@@ -20,7 +20,7 @@ export interface StationCompactCardSignature {
   Blocks: {
     default: [];
   };
-  Element: HTMLDivElement;
+  Element: HTMLElement;
 }
 
 export default class StationCompactCard extends Component<StationCompactCardSignature> {

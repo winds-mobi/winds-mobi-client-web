@@ -206,11 +206,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
         @placement="bottom-start"
         as |popover|
       >
-        {{! @glint-expect-error: @frontile/overlays@0.17.1's Popover signature types
-          its yielded block params' anchor/Content against an older ember-modifier
-          ModifierLike shape that no longer structurally matches ember-source 7's
-          InvokableInstance -- a Frontile/ember-source-7 type gap, not a real bug
-          here (no newer stable Frontile release fixes it yet). }}
         <div {{popover.anchor}} class="w-full">
           {{! @onInput is Frontile Input's supported public API, not a native event handler }}
           {{! template-lint-disable no-passed-in-event-handlers }}
@@ -235,7 +230,6 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
         </div>
 
         {{#if this.isPopoverOpen}}
-          {{! @glint-expect-error: same Frontile/ember-source-7 type gap as above }}
           <popover.Content
             @blockScroll={{false}}
             @class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-xl shadow-slate-900/12"

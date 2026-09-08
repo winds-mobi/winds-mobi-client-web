@@ -7,11 +7,13 @@ import {
   find,
   settled,
   type TestContext,
+  triggerKeyEvent,
   visit,
   waitUntil,
 } from '@ember/test-helpers';
 import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
@@ -290,6 +292,50 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-summary-section]').exists();
     assert.dom('[data-test-station-wind-section]').exists();
     assert.dom('[data-test-station-air-section]').exists();
+  });
+
+  test('it uses a side-panel placement in landscape/desktop', async function (assert) {
+    const restoreMatchMedia = stubMatchMedia(true);
+
+    try {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      assert.dom('[data-test-station-panel-placement="left"]').exists();
+    } finally {
+      restoreMatchMedia();
+    }
+  });
+
+  test('it uses a bottom-sheet placement in portrait/mobile', async function (assert) {
+    const restoreMatchMedia = stubMatchMedia(false);
+
+    try {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      assert.dom('[data-test-station-panel-placement="bottom"]').exists();
+    } finally {
+      restoreMatchMedia();
+    }
+  });
+
+  test('it closes on escape and preserves map query params', async function (assert) {
+    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await triggerKeyEvent('[data-test-station-panel]', 'keydown', 'Escape');
+
+    await waitUntil(() =>
+      new URL(currentURL(), 'https://winds.mobi').pathname.startsWith('/map')
+    );
+
+    assertCurrentRoute(assert, '/map', {
+      latitude: '46.67719',
+      longitude: '7.86323',
+      zoom: '13',
+    });
+    assert.dom('[data-test-station-panel]').doesNotExist();
   });
 
   test('it renders the wind and air history charts with the loaded history', async function (assert) {

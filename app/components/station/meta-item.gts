@@ -9,7 +9,7 @@ export interface StationMetaItemSignature {
   Blocks: {
     default: [];
   };
-  Element: HTMLDivElement;
+  Element: HTMLElement;
 }
 
 const StationMetaItem: TOC<StationMetaItemSignature> = <template>

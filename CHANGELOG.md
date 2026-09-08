@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## v0.24.0 - 2026-09-08
+
+### Added
+
+- The station panel can now be closed with the Escape key, not just its close button. ([#163](https://github.com/winds-mobi/winds-mobi-client-web/issues/163))
+
+### Changed
+
+- Upgraded the underlying UI component library (Frontile) to its next major version.
+  - _aka: more furniture-moving under the hood — buttons, toggles, and menus should look and behave exactly the same. If something looks off, that's a bug, not a feature._
+- The station panel's width/height now matches Frontile's own default panel size instead of a size this app picked itself.
+
 ## v0.23.1 - 2026-08-26
 
 ### Fixed
