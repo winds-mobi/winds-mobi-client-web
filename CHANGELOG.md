@@ -10,7 +10,7 @@
 
 - Upgraded the underlying UI component library (Frontile) to its next major version.
   - _aka: more furniture-moving under the hood — buttons, toggles, and menus should look and behave exactly the same. If something looks off, that's a bug, not a feature._
-- The station panel now opens instantly instead of sliding in, and its width/height matches Frontile's own default panel size instead of a size this app picked itself.
+- The station panel's width/height now matches Frontile's own default panel size instead of a size this app picked itself.
 
 ## v0.23.1 - 2026-08-26
 

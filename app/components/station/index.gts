@@ -68,7 +68,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
     issue 447 on GitHub). The separate map-click-to-dismiss beta feature
     (#157, map/index.gts's handleMapClick) is unrelated to this and
     intentionally not merged with it — it only reacts to clicks on the map
-    itself, not anywhere outside the panel.
+    itself, not anywhere outside the panel. @preventAutoFocus stops Overlay's
+    own auto-focus-on-open call too — @disableFocusTrap alone does not (see
+    josemarluedke/frontile issue 551); Drawer only started forwarding this arg
+    in v0.18.0-alpha.18.
 
     Deliberately kept to Frontile's own stock Drawer appearance otherwise —
     no shell styling overrides. pointer-events-auto is the one non-stock
@@ -101,7 +104,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
       @size="sm"
       @backdrop="none"
       @disableFocusTrap={{true}}
-      @disableTransitions={{true}}
+      @preventAutoFocus={{true}}
       @closeOnOutsideClick={{false}}
       @closeOnEscapeKey={{true}}
       @allowCloseButton={{false}}
