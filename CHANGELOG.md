@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.24.0 - 2026-09-08
+
 ### Added
 
 - The station panel can now be closed with the Escape key, not just its close button. ([#163](https://github.com/winds-mobi/winds-mobi-client-web/issues/163))
