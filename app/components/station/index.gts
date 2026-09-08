@@ -14,14 +14,9 @@ import StationAir from './air';
 import StationWind from './wind';
 import { t } from 'ember-intl';
 import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
+import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-
-// Mirrors the exact condition the map's own overlay slot uses to switch shape
-// (see `app/components/map/index.gts`'s slot div: default is a bottom sheet,
-// `landscape:`/`md:` switch to a side panel) so the Drawer's slide direction
-// always matches the box Tailwind is actually drawing.
-const SIDE_PANEL_QUERY = '(orientation: landscape), (min-width: 768px)';
 
 export interface StationIndexSignature {
   Args: {
@@ -103,9 +98,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
       @onClose={{this.close}}
       @renderInPlace={{true}}
       @placement={{this.placement}}
-      @size="lg"
+      @size="sm"
       @backdrop="none"
       @disableFocusTrap={{true}}
+      @disableTransitions={{true}}
       @closeOnOutsideClick={{false}}
       @closeOnEscapeKey={{true}}
       @allowCloseButton={{false}}
