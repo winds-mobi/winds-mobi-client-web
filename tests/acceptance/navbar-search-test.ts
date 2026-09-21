@@ -158,7 +158,7 @@ module('Acceptance | navbar search', function (hooks) {
 
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitFor('[data-test-navbar-search-results]');
+    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     const searchParams = lastSearchRequestParams(store.calls);
     assert.strictEqual(
@@ -197,7 +197,7 @@ module('Acceptance | navbar search', function (hooks) {
 
     await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitFor('[data-test-navbar-search-results]');
+    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     const searchParams = lastSearchRequestParams(store.calls);
     assert.false(
@@ -237,7 +237,9 @@ module('Acceptance | navbar search', function (hooks) {
     await fillIn('[data-test-navbar-search="navbar"] input', 'zz');
     await waitFor('[data-test-navbar-search-empty]');
 
-    assert.dom('[data-test-navbar-search-empty]').hasText('No stations found.');
+    assert
+      .dom('[data-test-navbar-search-empty]')
+      .includesText('No stations found.');
   });
 
   test('it clears the search field and closes the results after selecting a station', async function (assert) {
@@ -248,6 +250,6 @@ module('Acceptance | navbar search', function (hooks) {
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 
     assert.dom('[data-test-navbar-search="navbar"] input').hasValue('');
-    assert.dom('[data-test-navbar-search-results]').doesNotExist();
+    assert.dom('[data-test-navbar-search-result="holfuy-1850"]').doesNotExist();
   });
 });

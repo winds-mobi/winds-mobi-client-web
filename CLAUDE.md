@@ -81,6 +81,25 @@ comment) ships Mesa's software Vulkan driver, so headless Chromium here has real
 initializes properly, unlike a bare Alpine `chromium` package. Still run
 `pnpm lint` and the relevant tests as the actual verification; a screenshot is a visual aid on top; it doesn't replace them.
 
+**That one-shot screenshot recipe only shows a route's default, static state** (page load, no interaction) —
+it can't type into an input, click something open, or otherwise reach a state that only exists after a user
+action. For anything interactive (does typing open a dropdown at the right width, does a class actually apply
+once a popover is open, what does a controlled component's real DOM look like mid-session), don't reach for
+a browser-automation extension or try to script one — **use the app's own working test pipeline instead**:
+add a temporary `console.log` inside a real (or throwaway) `test:ember:dev` acceptance test, drive the
+interaction with the usual test helpers (`fillIn`, `click`, `waitFor`), and read the value back from testem's
+own captured `browser log` lines in the CLI output — then delete the debug lines once you have your answer,
+same as the "capture it empirically via a throwaway debug render" pattern in Testing below. This was the
+fastest, most reliable method found in practice (found while tracking down an Autocomplete popover-width
+bug) — it needs no extra tooling, reuses the exact same real Chrome + testem pipeline `pnpm test:ember:dev`
+already runs, and unlike a browser-automation extension it doesn't depend on anything being connected outside the
+container. Concretely tried and rejected first: `claude-in-chrome` (the extension wasn't connected in this
+environment) and hand-rolling raw CDP/puppeteer-style scripting against headless Chromium (no such package is
+installed here, and it's a lot of one-off tooling for a single measurement). `getBoundingClientRect()` inside
+that debug log is itself a trap — it can catch an element mid CSS-transition (a popover's own open/close
+transform) and report a stale/scaled size; read `window.getComputedStyle(...)` and, better, just assert the
+expected utility class is present rather than measuring pixels at all.
+
 ## Architecture
 
 ### Data flow: builders → store.request → handlers → schema-record
