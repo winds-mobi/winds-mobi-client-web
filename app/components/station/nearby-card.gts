@@ -22,7 +22,9 @@ const StationNearbyCard: TOC<StationNearbyCardSignature> = <template>
   >
     <div class="mb-4">
       <div class="flex min-w-0 items-start justify-between gap-2">
-        <StationHeader @station={{@station}} />
+        <h2 class="min-w-0 font-bold text-slate-950">
+          <StationHeader @station={{@station}} />
+        </h2>
         <StationFavoriteButton @station={{@station}} />
       </div>
       <StationMeta @station={{@station}} class="mt-1.5" />

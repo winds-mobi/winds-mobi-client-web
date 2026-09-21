@@ -57,6 +57,9 @@ module('Integration | Component | station/nearby-card', function (hooks) {
 
     assert.dom('[data-test-nearby-station-card]').exists();
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
+    assert
+      .dom('h2 [data-test-station-title]')
+      .exists('the station name is a heading, not just styled text');
     assert.dom('[data-test-station-summary-section]').exists();
   });
 });
