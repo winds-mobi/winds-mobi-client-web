@@ -2,15 +2,13 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
-import { LinkTo } from '@ember/routing';
 import type RouterService from '@ember/routing/router-service';
-import { Button } from '@frontile/buttons';
-import { Drawer } from '@frontile/overlays';
+import { Button } from 'frontile/buttons';
+import { Drawer } from 'frontile/overlays';
 import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
-import { visibleNavbarMenuItems } from './items';
+import NavbarMenuLinks from './links';
 
 export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
@@ -22,16 +20,8 @@ export interface NavbarMenuMobileSignature {
 
 export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignature> {
   @service declare router: RouterService;
-  @service declare settings: SettingsService;
 
   @tracked isOpen = false;
-
-  get visibleItems() {
-    return visibleNavbarMenuItems(
-      this.settings.betaFeaturesEnabled,
-      this.settings.favoritesFeatureEnabled
-    );
-  }
 
   @action
   open() {
@@ -52,51 +42,35 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
       <Button
         aria-label={{t "navigation.menu"}}
         data-test-navbar-mobile-menu-button
-        @appearance="outlined"
+        @variant="outline"
         class="h-12"
         @onPress={{this.open}}
       >
-        <List />
+        {{! size-4! forces the icon past Frontile's own Button base class
+        (its [&_svg]:size-[1em] rule scales icons to the button's own
+        font-size — much larger since v0.18's typography rescale). }}
+        <List class="size-4!" />
       </Button>
 
       {{#if this.isOpen}}
+        {{! @variant="flat" keeps every region on one surface -- Frontile
+        v0.18's default, "sectioned", adds a black header band and a solid
+        footer that this drawer isn't designed against (same reasoning as
+        the station panel's own Drawer, see station/index.gts). }}
         <Drawer
           @allowCloseButton={{true}}
           @isOpen={{this.isOpen}}
           @onClose={{this.close}}
           @placement="right"
           @size="sm"
+          @variant="flat"
           data-test-navbar-mobile-menu
           as |drawer|
         >
-          {{! @glint-expect-error: @frontile/overlays@0.17.1's Drawer signature types
-            its yielded block params' Header/Body against an older ember-modifier
-            ModifierLike shape that no longer structurally matches ember-source 7's
-            InvokableInstance -- a Frontile/ember-source-7 type gap, not a real bug
-            here (no newer stable Frontile release fixes it yet). }}
-          <drawer.Header>
-            <div class="pr-10">
-              <h2 class="text-base font-semibold text-slate-950">
-                {{t "navigation.menu"}}
-              </h2>
-            </div>
-          </drawer.Header>
+          <drawer.Header @title={{t "navigation.menu"}} />
 
-          {{! @glint-expect-error: same Frontile/ember-source-7 type gap as above }}
           <drawer.Body>
-            <div class="flex w-full flex-col items-stretch gap-2">
-              {{#each this.visibleItems as |item|}}
-                <LinkTo
-                  @route={{item.route}}
-                  @activeClass="border-wind-20 bg-wind-20 font-semibold text-white shadow-sm hover:bg-wind-20 hover:text-white"
-                  data-test-navbar-link={{item.route}}
-                  class="inline-flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                >
-                  <item.icon @size={{16}} />
-                  <span>{{t item.labelKey}}</span>
-                </LinkTo>
-              {{/each}}
-            </div>
+            <NavbarMenuLinks @variant="mobile" />
           </drawer.Body>
         </Drawer>
       {{/if}}
