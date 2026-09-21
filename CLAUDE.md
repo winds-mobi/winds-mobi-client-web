@@ -47,11 +47,23 @@ Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); No
 - **Ember best-practices skill**: also installed at `.claude/skills/ember-best-practices`
   (`npx skills add ember-tooling/agent-skills --skill ember-best-practices --agent claude-code`, from the
   `ember-tooling` GitHub org) — a second, more agent-oriented source alongside the `ember-mcp` tools above.
-- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: https://warp-drive.io/llms-full.txt.
-  No installable skill for Warp Drive or Tailwind CSS exists from either project's own maintainers (checked
-  2026-09-21 via `npx skills find`) — only unaffiliated third-party skills with little-to-no adoption turned up,
-  and skills run with full agent permissions, so none were installed for either. Don't install one on a whim;
-  ask the user first, same as for any other unvetted-dependency call in this file.
+- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: Warp Drive ships its own
+  official agent knowledge base as a real npm package, `@warp-drive/memory-alpha` — **installed** here as a
+  devDependency (this app is on warp-drive `5.8.2`; installed at `5.9.1`, the closest published stable release,
+  since `5.8.x` predates the package). It ships no `.claude/skills` wiring of its own (deliberately
+  tool-agnostic, no YAML frontmatter) — consume it as a routing table, not a pile of docs to read wholesale:
+  1. Read `node_modules/@warp-drive/memory-alpha/skills/index.md` first. It's a one-row-per-task table (e.g.
+     defining a resource schema, fetching/caching data through the Store) pointing at exactly one file each —
+     read **only** the single matching file, not the whole `skills/` tree.
+  2. If the task doesn't match any row, fall back to `https://warp-drive.io/llms.txt` (index) or
+     `https://warp-drive.io/llms-full.txt` (everything) for broader questions the routing table doesn't cover.
+     Re-run `docker compose exec ui pnpm up @warp-drive/memory-alpha` alongside any future `@warp-drive/*` version
+     bump to keep it roughly in step (it isn't required to match exactly — it's markdown, not compiled code).
+- No installable skill for **Tailwind CSS** exists from its own maintainers (checked 2026-09-21 via
+  `npx skills find`) — only unaffiliated third-party skills turned up, and skills run with full agent
+  permissions, so none was installed. Don't install one on a whim; ask the user first, same as for any other
+  unvetted-dependency call in this file. (Warp Drive was also checked this way and wrongly assumed to have
+  nothing official — it does, see above; `npx skills find` only searches one GitHub-based registry, not npm.)
 
 ## Commands
 
