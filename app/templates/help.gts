@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import { ExternalLink } from 'frontile/navigation';
 import HelpChangelog from 'winds-mobi-client-web/components/help/changelog';
 import HelpLiveStation from 'winds-mobi-client-web/components/help/live-station';
 import MapLegend from 'winds-mobi-client-web/components/map/legend';
@@ -234,14 +235,12 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                   }}</dt>
                 <dd class="mt-1">
                   <p>{{t "help.faq.items.fixAnswer"}}</p>
-                  <a
-                    class="mt-1 inline-block underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-                    href="https://sosm.ch/"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <ExternalLink
+                    class="mt-1 inline-block decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                    @href="https://sosm.ch/"
                   >
                     sosm.ch
-                  </a>
+                  </ExternalLink>
                 </dd>
               </div>
               <div class="rounded-lg bg-slate-50 p-3">
@@ -276,15 +275,13 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                   />
                   <span>
                     {{t "help.about.communityDescription"}}
-                    <a
+                    <ExternalLink
                       data-test-help-discord-link
-                      class="block underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-                      href="https://discord.gg/6VU23xDv5v"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      class="block decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                      @href="https://discord.gg/6VU23xDv5v"
                     >
                       discord.gg/6VU23xDv5v
-                    </a>
+                    </ExternalLink>
                   </span>
                 </dd>
               </div>
@@ -300,14 +297,12 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
                         "help.about.repoLabel"
                       }}</dt>
                     <dd>
-                      <a
-                        class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-                        href="https://github.com/winds-mobi/winds-mobi-client-web"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <ExternalLink
+                        class="decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+                        @href="https://github.com/winds-mobi/winds-mobi-client-web"
                       >
                         winds-mobi/winds-mobi-client-web
-                      </a>
+                      </ExternalLink>
                     </dd>
                     <HelpChangelog />
                   </dl>

@@ -1,5 +1,6 @@
 import Component from '@glimmer/component';
 import { t } from 'ember-intl';
+import { ExternalLink } from 'frontile/navigation';
 import config from 'winds-mobi-client-web/config/environment';
 import { changelogUrlForVersion } from 'winds-mobi-client-web/utils/changelog-link';
 
@@ -25,15 +26,13 @@ export default class HelpChangelog extends Component<HelpChangelogSignature> {
         "help.changelog.versionLabel"
       }}</dt>
     <dd>
-      <a
+      <ExternalLink
         data-test-help-changelog-link
-        class="underline decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
-        href={{this.changelogUrl}}
-        target="_blank"
-        rel="noopener noreferrer"
+        class="decoration-slate-300 underline-offset-3 hover:text-slate-900 hover:decoration-slate-500"
+        @href={{this.changelogUrl}}
       >
         <span data-test-help-changelog-version>{{this.version}}</span>
-      </a>
+      </ExternalLink>
     </dd>
   </template>
 }
