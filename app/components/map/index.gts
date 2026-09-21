@@ -25,11 +25,25 @@ import {
 // module -- that only works unbundled; under Vite/Rollup, `import.meta.url`
 // resolves to wherever the bundled chunk is served from, not the real file,
 // so the worker 404s and the map never renders any tiles. Every bundler
-// consumer needs this one-time `setWorkerUrl` call (Vite's `?url` import
-// resolves to the actual built/dev-served path); must run before any `Map`
-// is constructed, so it lives at module scope here rather than inside the
-// component. See MapLibre's own v5-to-v6 migration guide.
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+// consumer needs this one-time `setWorkerUrl` call; must run before any
+// `Map` is constructed, so it lives at module scope here rather than inside
+// the component. See MapLibre's own v5-to-v6 migration guide.
+//
+// `?worker&url` (not plain `?url`) is required, not optional: the worker
+// file itself has a relative `import ... from "./maplibre-gl-shared.mjs"`
+// to a sibling chunk. Plain `?url` just returns a URL to the file copied
+// verbatim -- it does not follow or emit that sibling import, so the copy
+// in `dist/assets/` still points at a `maplibre-gl-shared.mjs` that was
+// never built. That 404s in any real deployment (worked in dev only
+// because Vite's dev server resolves the relative import against
+// `node_modules` transparently) -- and since our production assets are
+// served from a different-origin CDN, the browser reports that 404 as a
+// CORS failure instead, which is what made this look CDN/CORS-related
+// (issue #164) rather than a missing file. `?worker&url` bundles the
+// worker's own dependency chunk into one self-contained file instead, per
+// MapLibre's own Vite integration test:
+// https://github.com/maplibre/maplibre-gl-js/blob/main/test/integration/bundler/vite-rollup-esbuild/src/main.ts
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 setWorkerUrl(workerUrl);
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';

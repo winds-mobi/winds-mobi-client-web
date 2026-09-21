@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.23.2 - 2026-09-21
+
+### Fixed
+
+- The 3D terrain toggle works again in production. ([#164](https://github.com/winds-mobi/winds-mobi-client-web/issues/164))
+
 ## v0.23.1 - 2026-08-26
 
 ### Fixed
