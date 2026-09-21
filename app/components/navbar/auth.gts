@@ -7,7 +7,7 @@ import { cached } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
-import { Dropdown } from '@frontile/collections';
+import { Dropdown } from 'frontile/collections';
 import { getRequestState } from '@warp-drive/core/reactive';
 import type { Future } from '@warp-drive/core/request';
 import { t } from 'ember-intl';
@@ -80,7 +80,7 @@ export default class NavbarAuth extends Component<NavbarAuthSignature> {
       <d.Trigger
         aria-label={{t "auth.menu.label"}}
         data-test-navbar-auth
-        @appearance="outlined"
+        @variant="outline"
         class="h-12"
       >
         {{#if this.profile.picture}}

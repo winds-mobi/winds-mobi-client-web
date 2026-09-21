@@ -1,7 +1,7 @@
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
 import Navbar from 'winds-mobi-client-web/components/navbar';
-import { PortalTarget } from '@frontile/overlays';
+import { PortalTarget } from 'frontile/overlays';
 
 <template>
   {{pageTitle (t "application.name")}}

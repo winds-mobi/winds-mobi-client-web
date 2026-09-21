@@ -16,7 +16,7 @@ export interface StationUpdatedMetaSignature {
     // "5m ago" reading with its clock icon (station header, full cards).
     isCompact?: boolean;
   };
-  Element: HTMLDivElement;
+  Element: HTMLElement;
 }
 
 export default class StationUpdatedMeta extends Component<StationUpdatedMetaSignature> {

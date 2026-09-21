@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
-import { Button } from '@frontile/buttons';
+import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import CrosshairSimple from 'ember-phosphor-icons/components/ph-crosshair-simple';
 import type RouterService from '@ember/routing/router-service';
@@ -37,15 +37,19 @@ export default class NavbarLocateControl extends Component<NavbarLocateControlSi
       aria-label={{t "map.locate.ariaLabel"}}
       data-test-navbar-locate
       disabled={{this.isDisabled}}
-      @appearance="outlined"
-      @intent={{if this.isLocated "primary" undefined}}
+      @variant="outline"
+      @color={{if this.isLocated "primary" undefined}}
       @onPress={{this.locate}}
       class="h-12"
       ...attributes
     >
+      {{! size-4! forces the icon past Frontile's own Button base class
+      (its [&_svg]:size-[1em] rule scales icons to the button's own
+      font-size — much larger since v0.18's typography rescale). }}
       <CrosshairSimple
         @weight={{if this.isLocated "fill"}}
-        class={{if this.nearbyLocation.isRequestingLocation "animate-spin"}}
+        class="size-4!
+          {{if this.nearbyLocation.isRequestingLocation 'animate-spin'}}"
       />
     </Button>
   </template>

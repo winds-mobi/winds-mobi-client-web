@@ -323,11 +323,13 @@ obvious from the decorator call site:
 
 - Reuse existing Frontile + Tailwind patterns for shared UI before introducing new ones.
 - **Always use Frontile's `<Button>` (`@frontile/buttons`) instead of a bare HTML `<button>`.** Use `@onPress`
-  (not an `{{on "click" ...}}` modifier). Reach for `@appearance="custom"` (plus an explicit `@intent="default"`,
-  since `custom`'s own default intent resolves to `primary`) when a button needs fully bespoke, non-thematic
+  (not an `{{on "click" ...}}` modifier). Reach for `@variant="custom"` (plus an explicit `@color="neutral"`,
+  since `custom`'s own default color resolves to `primary`) when a button needs fully bespoke, non-thematic
   coloring — `custom` has no background/hover compound classes of its own to fight, unlike
-  `minimal`/`outlined`/`default`. Only a handful of _non-button_ clickable custom elements are legitimate
-  exceptions (e.g. `<LinkTo>` navigation) — a plain `<button>` standing in for one is not.
+  `plain`/`outline`/`solid`. (Frontile v0.18 renamed `@appearance`/`@intent` to `@variant`/`@color` — the old
+  names still work but warn and are removed in v0.19; `default` became `neutral`, `outlined` became `outline`,
+  `minimal` became `plain`.) Only a handful of _non-button_ clickable custom elements are legitimate exceptions
+  (e.g. `<LinkTo>` navigation) — a plain `<button>` standing in for one is not.
   - **The on-map station marker ([map/station-marker.gts](app/components/map/station-marker.gts)) is a
     deliberate exception, and isn't a button at all — not even Frontile's.** It's a plain, non-interactive
     `<div>`; selecting a station is wired up in [map/index.gts](app/components/map/index.gts) via
