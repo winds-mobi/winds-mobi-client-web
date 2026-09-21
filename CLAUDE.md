@@ -21,11 +21,37 @@ Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); No
   Do not grep/cat minified `node_modules/.pnpm/.../dist/*.js` to reverse-engineer Frontile/Ember/addon internals —
   that's slower and less reliable than the docs tools and is a known time sink in past sessions. Only fall back to
   reading dist files if `ember-mcp` and the package's own README/CHANGELOG come up empty.
-- **Frontile component docs/API/theming/migrations:** Frontile has no `llms.txt`; fetch the relevant markdown
-  straight from the source repo, e.g. `https://raw.githubusercontent.com/josemarluedke/frontile/main/docs/<path>.md`
-  (browse `https://github.com/josemarluedke/frontile/tree/main/docs` for the index — component docs, `theming/`,
-  `migrations/`). Check this before falling back to dist-file archaeology.
-- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: https://warp-drive.io/llms-full.txt
+- **Frontile component docs/API/theming/migrations:** Frontile ships real AI-tooling support (its own
+  `docs/get-started/ai/` explains all three) — use it in this priority order, each tier only when the one above
+  doesn't answer the question:
+  1. **Type declarations for the exact installed version**, in the container at
+     `/app/node_modules/.pnpm/frontile@<version>*/node_modules/frontile/declarations/**/*.d.ts` (`find` by
+     component name, e.g. `-iname '*tab-nav*'`) — exact args/defaults/deprecation notices for what's actually
+     installed here, not "should be documented" prose. This is fine to read (it's a public, non-minified `.d.ts`,
+     unlike the minified `dist/*.js` archaeology this file already warns against above).
+  2. **Component docs as raw markdown**, fetched straight from the source repo. They live **next to each
+     component's source**, not under a top-level `docs/` folder:
+     `https://raw.githubusercontent.com/josemarluedke/frontile/main/packages/frontile/src/components/<category>/<component>.md`
+     (e.g. `.../components/navigation/tab-nav.md`). `docs/` itself only holds the cross-cutting guides —
+     `theming/`, `migrations/`, `accessibility/`, `get-started/` — fetched the same way, e.g.
+     `.../main/docs/theming/<path>.md`. Browse either tree via `gh api "repos/josemarluedke/frontile/git/trees/main?recursive=true"`
+     when the exact filename isn't obvious. The live site also mirrors every page as plain markdown at its own
+     URL plus `.md` (e.g. `https://frontile.dev/components/navigation/tab-nav.md`) if the raw-GitHub fetch 404s.
+  3. **`https://frontile.dev/llms.txt`** as a last-resort index when the component name itself isn't known yet —
+     it links out to the per-component/per-guide pages above.
+  4. An installable Claude Code skill also exists and **is installed** in this repo (frozen at install time, not
+     auto-updated with the `frontile` dependency) at `.claude/skills/frontile` and
+     `.claude/skills/frontile-contributor-docs` — reinstall via
+     `npx skills add josemarluedke/frontile --agent claude-code` after a Frontile upgrade to refresh it.
+     Check all of this before falling back to dist-file archaeology.
+- **Ember best-practices skill**: also installed at `.claude/skills/ember-best-practices`
+  (`npx skills add ember-tooling/agent-skills --skill ember-best-practices --agent claude-code`, from the
+  `ember-tooling` GitHub org) — a second, more agent-oriented source alongside the `ember-mcp` tools above.
+- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: https://warp-drive.io/llms-full.txt.
+  No installable skill for Warp Drive or Tailwind CSS exists from either project's own maintainers (checked
+  2026-09-21 via `npx skills find`) — only unaffiliated third-party skills with little-to-no adoption turned up,
+  and skills run with full agent permissions, so none were installed for either. Don't install one on a whim;
+  ask the user first, same as for any other unvetted-dependency call in this file.
 
 ## Commands
 
