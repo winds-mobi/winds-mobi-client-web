@@ -72,14 +72,14 @@ export default class StationIndex extends Component<StationIndexSignature> {
     in v0.18.0-alpha.18.
 
     Deliberately kept to Frontile's own stock Drawer appearance otherwise —
-    no shell styling overrides. @variant="flat" keeps every region on one
-    surface; Frontile v0.18's new default, "sectioned", adds a black header
-    band and a solid footer that this panel's own header row (below) isn't
-    designed against. pointer-events-auto is the one non-stock class here,
-    and it is load-bearing rather than decorative: the map's overlay slot
-    this Drawer renders into is pointer-events-none so the map stays
-    clickable around it, and the panel has to opt back in or clicks would
-    pass straight through it too.
+    no shell styling overrides beyond d.Body's own padding (below).
+    @variant="flat" keeps every region on one surface; Frontile v0.18's new
+    default, "sectioned", adds a black header band and a solid footer that
+    this panel's own header row (below) isn't designed against.
+    pointer-events-auto is load-bearing rather than decorative: the map's
+    overlay slot this Drawer renders into is pointer-events-none so the map
+    stays clickable around it, and the panel has to opt back in or clicks
+    would pass straight through it too.
 
     The header now uses Drawer's own current API (v0.18 gave d.Header a real
     :actions block and a closeButton rendered out of flow beside it, rather
@@ -132,7 +132,23 @@ export default class StationIndex extends Component<StationIndexSignature> {
         </:actions>
       </d.Header>
 
-      <div class="min-h-0 flex-1 overflow-y-auto">
+      {{! d.Body carries data-drawer-body, which dragToDismiss's
+      scrollSelector (see Drawer's own drag-to-dismiss modifier) needs to
+      tell a scroll inside this content from a dismiss drag -- without it,
+      every downward drag reads as "no scroll container found here" and
+      commits to dismissing, even mid-scroll through the wind/air charts.
+      Drag-to-close defaults to on for @placement="bottom", which this panel
+      uses on mobile, so this isn't cosmetic. min-h-0 overrides the theme's
+      plain grow: a flex child needs it to actually shrink and let
+      overflow-y-auto scroll, rather than growing to fit its content. px-0/
+      py-0 override the theme's own px-8/py-6 -- this panel's padding lives
+      on the content grid below instead, sized to match its own px-4/py-3
+      rather than a full dialog's wider padding. This has to be @class (the
+      component's own twMerge-aware arg), not a plain class="..." attribute
+      -- the latter goes through ...attributes and Ember's own splattribute
+      merge just concatenates it onto the component's classes with no
+      dedup, so px-8/py-6 would silently keep winning the cascade. }}
+      <d.Body @class="min-h-0 px-0 py-0">
         {{#if @station}}
           <div class="grid gap-3 px-4 py-3 sm:px-5 md:gap-4 md:py-4">
             <StationMeta @station={{@station}} />
@@ -141,7 +157,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
             <StationAir @stationId={{@station.id}} />
           </div>
         {{/if}}
-      </div>
+      </d.Body>
     </Drawer>
   </template>
 }
