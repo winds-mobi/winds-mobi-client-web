@@ -189,7 +189,7 @@ module('Acceptance | app walkthrough', function (hooks) {
     assert.dom('[data-test-station-air-section]').exists();
 
     // Close the panel; the map view is preserved.
-    await click('[data-test-station-close]');
+    await click('[data-part="header-close-button"]');
 
     assert.dom('[data-test-station-panel]').doesNotExist();
 

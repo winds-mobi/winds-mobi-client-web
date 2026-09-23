@@ -5,6 +5,7 @@ import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
+import { Alert } from 'frontile/status';
 import { favoritesQuery } from 'winds-mobi-client-web/builders/station';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
@@ -116,27 +117,25 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
             @title={{t "favorites.title"}}
             @titleClass="text-rose-700"
           >
-            <p class="py-10 text-center text-sm font-medium text-rose-700">
-              {{t "favorites.requestError"}}
-            </p>
+            <Alert @status="danger" @title={{t "favorites.requestError"}} />
           </StationSectionCard>
         {{else if this.hasNoFavorites}}
           <StationSectionCard
             data-test-favorites-empty
             @title={{t "favorites.title"}}
           >
-            <p class="py-10 text-center text-sm font-medium text-slate-500">
-              {{t "favorites.empty"}}
-            </p>
+            <Alert
+              @status="neutral"
+              @title={{t "favorites.emptyTitle"}}
+              @description={{t "favorites.emptyDescription"}}
+            />
           </StationSectionCard>
         {{else if this.isInitialLoad}}
           <StationSectionCard
             data-test-favorites-loading
             @title={{t "favorites.title"}}
           >
-            <p class="py-10 text-center text-sm font-medium text-slate-500">
-              {{t "favorites.loading"}}
-            </p>
+            <Alert @status="neutral" @title={{t "favorites.loading"}} />
           </StationSectionCard>
         {{else if this.settings.favoritesCompactList}}
           <div

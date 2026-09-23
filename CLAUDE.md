@@ -21,11 +21,49 @@ Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); No
   Do not grep/cat minified `node_modules/.pnpm/.../dist/*.js` to reverse-engineer Frontile/Ember/addon internals —
   that's slower and less reliable than the docs tools and is a known time sink in past sessions. Only fall back to
   reading dist files if `ember-mcp` and the package's own README/CHANGELOG come up empty.
-- **Frontile component docs/API/theming/migrations:** Frontile has no `llms.txt`; fetch the relevant markdown
-  straight from the source repo, e.g. `https://raw.githubusercontent.com/josemarluedke/frontile/main/docs/<path>.md`
-  (browse `https://github.com/josemarluedke/frontile/tree/main/docs` for the index — component docs, `theming/`,
-  `migrations/`). Check this before falling back to dist-file archaeology.
-- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: https://warp-drive.io/llms-full.txt
+- **Frontile component docs/API/theming/migrations:** Frontile ships real AI-tooling support (its own
+  `docs/get-started/ai/` explains all three) — use it in this priority order, each tier only when the one above
+  doesn't answer the question:
+  1. **Type declarations for the exact installed version**, in the container at
+     `/app/node_modules/.pnpm/frontile@<version>*/node_modules/frontile/declarations/**/*.d.ts` (`find` by
+     component name, e.g. `-iname '*tab-nav*'`) — exact args/defaults/deprecation notices for what's actually
+     installed here, not "should be documented" prose. This is fine to read (it's a public, non-minified `.d.ts`,
+     unlike the minified `dist/*.js` archaeology this file already warns against above).
+  2. **Component docs as raw markdown**, fetched straight from the source repo. They live **next to each
+     component's source**, not under a top-level `docs/` folder:
+     `https://raw.githubusercontent.com/josemarluedke/frontile/main/packages/frontile/src/components/<category>/<component>.md`
+     (e.g. `.../components/navigation/tab-nav.md`). `docs/` itself only holds the cross-cutting guides —
+     `theming/`, `migrations/`, `accessibility/`, `get-started/` — fetched the same way, e.g.
+     `.../main/docs/theming/<path>.md`. Browse either tree via `gh api "repos/josemarluedke/frontile/git/trees/main?recursive=true"`
+     when the exact filename isn't obvious. The live site also mirrors every page as plain markdown at its own
+     URL plus `.md` (e.g. `https://frontile.dev/components/navigation/tab-nav.md`) if the raw-GitHub fetch 404s.
+  3. **`https://frontile.dev/llms.txt`** as a last-resort index when the component name itself isn't known yet —
+     it links out to the per-component/per-guide pages above.
+  4. An installable Claude Code skill also exists and **is installed** in this repo (frozen at install time, not
+     auto-updated with the `frontile` dependency) at `.claude/skills/frontile` and
+     `.claude/skills/frontile-contributor-docs` — reinstall via
+     `npx skills add josemarluedke/frontile --agent claude-code` after a Frontile upgrade to refresh it.
+     Check all of this before falling back to dist-file archaeology.
+- **Ember best-practices skill**: also installed at `.claude/skills/ember-best-practices`
+  (`npx skills add ember-tooling/agent-skills --skill ember-best-practices --agent claude-code`, from the
+  `ember-tooling` GitHub org) — a second, more agent-oriented source alongside the `ember-mcp` tools above.
+- **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: Warp Drive ships its own
+  official agent knowledge base as a real npm package, `@warp-drive/memory-alpha` — **installed** here as a
+  devDependency (this app is on warp-drive `5.8.2`; installed at `5.9.1`, the closest published stable release,
+  since `5.8.x` predates the package). It ships no `.claude/skills` wiring of its own (deliberately
+  tool-agnostic, no YAML frontmatter) — consume it as a routing table, not a pile of docs to read wholesale:
+  1. Read `node_modules/@warp-drive/memory-alpha/skills/index.md` first. It's a one-row-per-task table (e.g.
+     defining a resource schema, fetching/caching data through the Store) pointing at exactly one file each —
+     read **only** the single matching file, not the whole `skills/` tree.
+  2. If the task doesn't match any row, fall back to `https://warp-drive.io/llms.txt` (index) or
+     `https://warp-drive.io/llms-full.txt` (everything) for broader questions the routing table doesn't cover.
+     Re-run `docker compose exec ui pnpm up @warp-drive/memory-alpha` alongside any future `@warp-drive/*` version
+     bump to keep it roughly in step (it isn't required to match exactly — it's markdown, not compiled code).
+- No installable skill for **Tailwind CSS** exists from its own maintainers (checked 2026-09-21 via
+  `npx skills find`) — only unaffiliated third-party skills turned up, and skills run with full agent
+  permissions, so none was installed. Don't install one on a whim; ask the user first, same as for any other
+  unvetted-dependency call in this file. (Warp Drive was also checked this way and wrongly assumed to have
+  nothing official — it does, see above; `npx skills find` only searches one GitHub-based registry, not npm.)
 
 ## Commands
 
@@ -80,6 +118,25 @@ Map/canvas routes render normally too: the dev container's Debian base (not Alpi
 comment) ships Mesa's software Vulkan driver, so headless Chromium here has real (software) WebGL and MapLibre
 initializes properly, unlike a bare Alpine `chromium` package. Still run
 `pnpm lint` and the relevant tests as the actual verification; a screenshot is a visual aid on top; it doesn't replace them.
+
+**That one-shot screenshot recipe only shows a route's default, static state** (page load, no interaction) —
+it can't type into an input, click something open, or otherwise reach a state that only exists after a user
+action. For anything interactive (does typing open a dropdown at the right width, does a class actually apply
+once a popover is open, what does a controlled component's real DOM look like mid-session), don't reach for
+a browser-automation extension or try to script one — **use the app's own working test pipeline instead**:
+add a temporary `console.log` inside a real (or throwaway) `test:ember:dev` acceptance test, drive the
+interaction with the usual test helpers (`fillIn`, `click`, `waitFor`), and read the value back from testem's
+own captured `browser log` lines in the CLI output — then delete the debug lines once you have your answer,
+same as the "capture it empirically via a throwaway debug render" pattern in Testing below. This was the
+fastest, most reliable method found in practice (found while tracking down an Autocomplete popover-width
+bug) — it needs no extra tooling, reuses the exact same real Chrome + testem pipeline `pnpm test:ember:dev`
+already runs, and unlike a browser-automation extension it doesn't depend on anything being connected outside the
+container. Concretely tried and rejected first: `claude-in-chrome` (the extension wasn't connected in this
+environment) and hand-rolling raw CDP/puppeteer-style scripting against headless Chromium (no such package is
+installed here, and it's a lot of one-off tooling for a single measurement). `getBoundingClientRect()` inside
+that debug log is itself a trap — it can catch an element mid CSS-transition (a popover's own open/close
+transform) and report a stale/scaled size; read `window.getComputedStyle(...)` and, better, just assert the
+expected utility class is present rather than measuring pixels at all.
 
 ## Architecture
 
@@ -205,7 +262,15 @@ state, route models, and query params.
     [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: also a classic addon,
     but it builds cleanly, and its per-owner `service:tracked-local-storage` architecture is a genuine improvement
     over the module-scope singleton the hand-rolled version used.
-  - The verification method that told these two apart: install it, exercise its actual API in a throwaway scratch
+  - `ember-responsive` (breakpoint/`matchMedia` service, considered for driving a Frontile `<Drawer>`'s `@placement`
+    off a media query) was **rejected**: last published 2022 (`5.0.0`), a classic addon never updated for Embroider's
+    current strict-vendoring resolver. It imports `@ember/string` as a resolver "virtual peer dep," which Embroider
+    requires to be resolvable from the app's own `node_modules`, not just nested in the addon's dependency tree —
+    `pnpm build` fails with `Resolver.preHandleExternal: ember-responsive is trying to import the emberVirtualPeerDep
+"@ember/string", but it seems to be missing`. Same failure class as the `ember-cli-mirage` rejection above. A
+    small hand-rolled module-scope modifier wrapping `window.matchMedia` (matching the `onRouteChange` pattern) is the
+    right tool here instead.
+  - The verification method that told these three apart: install it, exercise its actual API in a throwaway scratch
     component/test (not just import it), then run `pnpm build` (the _production_ build, not just `pnpm test:ember`) —
     dev-mode success alone doesn't prove the Rollup/Vite production bundle will succeed. Delete the scratch files
     before committing either way.
@@ -323,11 +388,13 @@ obvious from the decorator call site:
 
 - Reuse existing Frontile + Tailwind patterns for shared UI before introducing new ones.
 - **Always use Frontile's `<Button>` (`@frontile/buttons`) instead of a bare HTML `<button>`.** Use `@onPress`
-  (not an `{{on "click" ...}}` modifier). Reach for `@appearance="custom"` (plus an explicit `@intent="default"`,
-  since `custom`'s own default intent resolves to `primary`) when a button needs fully bespoke, non-thematic
+  (not an `{{on "click" ...}}` modifier). Reach for `@variant="custom"` (plus an explicit `@color="neutral"`,
+  since `custom`'s own default color resolves to `primary`) when a button needs fully bespoke, non-thematic
   coloring — `custom` has no background/hover compound classes of its own to fight, unlike
-  `minimal`/`outlined`/`default`. Only a handful of _non-button_ clickable custom elements are legitimate
-  exceptions (e.g. `<LinkTo>` navigation) — a plain `<button>` standing in for one is not.
+  `plain`/`outline`/`solid`. (Frontile v0.18 renamed `@appearance`/`@intent` to `@variant`/`@color` — the old
+  names still work but warn and are removed in v0.19; `default` became `neutral`, `outlined` became `outline`,
+  `minimal` became `plain`.) Only a handful of _non-button_ clickable custom elements are legitimate exceptions
+  (e.g. `<LinkTo>` navigation) — a plain `<button>` standing in for one is not.
   - **The on-map station marker ([map/station-marker.gts](app/components/map/station-marker.gts)) is a
     deliberate exception, and isn't a button at all — not even Frontile's.** It's a plain, non-interactive
     `<div>`; selecting a station is wired up in [map/index.gts](app/components/map/index.gts) via

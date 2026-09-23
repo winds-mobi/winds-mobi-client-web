@@ -5,6 +5,7 @@ import { t } from 'ember-intl';
 import ArrowSquareUpRight from 'ember-phosphor-icons/components/ph-arrow-square-up-right';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import NavigationArrow from 'ember-phosphor-icons/components/ph-navigation-arrow';
+import { ExternalLink } from 'frontile/navigation';
 import formatDistanceKm from 'winds-mobi-client-web/helpers/format-distance-km';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
@@ -70,22 +71,23 @@ export default class StationMeta extends Component<StationMetaSignature> {
       {{/let}}
 
       {{#if this.hasProviderLink}}
-        <StationMetaItem
-          @icon={{ArrowSquareUpRight}}
-          @label={{t "station.meta.provider"}}
-        >
-          <span>
-            <a
-              data-test-station-provider-link
-              href={{@station.providerUrl}}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="underline decoration-slate-300 underline-offset-3 transition hover:text-slate-900 hover:decoration-slate-500"
-            >
-              {{@station.providerName}}
-            </a>
-          </span>
-        </StationMetaItem>
+        {{#if @station.providerUrl}}
+          <StationMetaItem
+            @icon={{ArrowSquareUpRight}}
+            @label={{t "station.meta.provider"}}
+          >
+            <span>
+              <ExternalLink
+                data-test-station-provider-link
+                @href={{@station.providerUrl}}
+                @showIcon={{false}}
+                class="decoration-slate-300 underline-offset-3 transition hover:text-slate-900 hover:decoration-slate-500"
+              >
+                {{@station.providerName}}
+              </ExternalLink>
+            </span>
+          </StationMetaItem>
+        {{/if}}
       {{/if}}
     </dl>
   </template>

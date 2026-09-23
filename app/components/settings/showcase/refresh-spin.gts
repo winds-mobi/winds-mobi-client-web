@@ -1,7 +1,7 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { htmlSafe } from '@ember/template';
-import { Button } from '@frontile/buttons';
+import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
 
@@ -55,7 +55,7 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
     >
       <Button
         aria-label={{t "settings.refreshButtonSpin.tryIt"}}
-        @appearance="outlined"
+        @variant="outline"
         @onPress={{this.handlePress}}
         class="flex! h-12 w-12 items-center justify-center p-0!"
       >
@@ -64,7 +64,10 @@ export default class SettingsShowcaseRefreshSpin extends Component<SettingsShowc
           class="inline-flex transition-transform duration-500 ease-in-out"
           style={{this.spinStyle}}
         >
-          <ArrowClockwise />
+          {{! size-4! forces the icon past Frontile's own Button base class
+        (its [&_svg]:size-[1em] rule scales icons to the button's own
+        font-size — much larger since v0.18's typography rescale). }}
+          <ArrowClockwise class="size-4!" />
         </span>
         {{! template-lint-enable no-inline-styles }}
       </Button>

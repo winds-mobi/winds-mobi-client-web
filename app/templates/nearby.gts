@@ -5,7 +5,7 @@ import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { pageTitle } from 'ember-page-title';
 import { action } from '@ember/object';
-import { Button } from '@frontile/buttons';
+import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
@@ -194,7 +194,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
                 <Button
                   data-test-nearby-location-button
                   disabled={{this.isLocationButtonDisabled}}
-                  @intent="primary"
+                  @color="primary"
                   @onPress={{this.requestLocation}}
                 >
                   {{t "nearby.location.cta"}}

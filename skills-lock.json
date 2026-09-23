@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "ember-best-practices": {
+      "source": "ember-tooling/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ember-best-practices/SKILL.md",
+      "computedHash": "34e82668e2fa1e6b025ac8cf1015634484bf5d8fbc80e8aa642489d2df79498c"
+    },
+    "frontile": {
+      "source": "josemarluedke/frontile",
+      "sourceType": "github",
+      "skillPath": "skills/frontile/SKILL.md",
+      "computedHash": "05aae689c365e878ab12fbba25f28885f8fad23dedc39c598656cf984a89a4f6"
+    },
+    "frontile-contributor-docs": {
+      "source": "josemarluedke/frontile",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/frontile-contributor-docs/SKILL.md",
+      "computedHash": "4c473affa1682ef81a09be7f0dcd82263205a440d268bad2cd6cc3debe28fd7a"
+    }
+  }
+}

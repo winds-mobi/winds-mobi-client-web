@@ -3,8 +3,10 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
 @plugin "@frontile/theme/plugin/default";
+@import '@frontile/theme';
 
 @source '../../node_modules/@frontile';
+@source '../../node_modules/frontile';
 
 @custom-variant dark (&:is(.dark *));
 

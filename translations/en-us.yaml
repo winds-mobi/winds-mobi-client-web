@@ -26,9 +26,8 @@ favorites:
   title: Favourite stations
   loading: Loading your favourite stations…
   requestError: Your favourite stations could not be loaded right now.
-  empty: >-
-    You have no favourite stations yet. Stations you favourite show up here
-    with their live readings.
+  emptyTitle: You have no favourite stations yet.
+  emptyDescription: Stations you favourite show up here with their live readings.
   # TODO: Remove login — shown when signed out; sign-in is currently disabled
   # (see app/services/session.ts). Kept for reference/restoration.
   # signedOut: >-
@@ -44,7 +43,6 @@ navigation:
   help: Help
   search:
     label: Search stations
-    loading: Searching stations…
     empty: No stations found.
 
 settings:

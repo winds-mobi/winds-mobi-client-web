@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { concat } from '@ember/helper';
 import { t } from 'ember-intl';
-import { Switch } from '@frontile/forms';
+import { Switch } from 'frontile/forms';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { BooleanSettingKey } from 'winds-mobi-client-web/services/settings';
 
@@ -42,7 +42,6 @@ export default class SettingsRow extends Component<SettingsRowSignature> {
           data-test-setting={{@name}}
           @isSelected={{this.enabled}}
           @onChange={{this.update}}
-          @intent="success"
           @label={{t (concat "settings." @name ".label")}}
           @description={{t (concat "settings." @name ".description")}}
         />

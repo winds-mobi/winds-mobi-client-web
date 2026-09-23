@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+### Changed
+
+- Links that open in a new tab (station provider links, the help page's Discord/repository/changelog/sosm.ch links) now show a small external-link icon and are announced to screen readers as opening a new tab.
+- The navbar search box now follows the standard search-combobox keyboard/screen-reader pattern (an actual `role="combobox"`), and shows a small loading spinner instead of a "Searching stations…" message while results load.
+- The favourites page's loading/empty/error states and the navbar search's "No stations found" message now show as a proper status alert (icon plus a correctly-announced role) instead of plain text.
+- The station panel's close button is now standard-sized and right-aligned instead of stretching to fill the header row.
+- **🧪 Beta:** The station favourite button now sits beside the panel's close button instead of next to the station name.
+- The mobile menu drawer's header no longer has a different background colour than the rest of the drawer.
+- The desktop navbar and the mobile menu drawer now share one navigation look (a sliding indicator in the app's primary colour behind the active link) instead of two separate custom styles. The desktop links are a little smaller and no longer bold; the mobile drawer's links are left-aligned with more padding, sit on a white background, and inactive links get a border.
+- The station name on the favourites and nearby pages' cards is now bold and marked up as a heading.
+
+## v0.24.0 - 2026-09-08
+
+### Added
+
+- The station panel can now be closed with the Escape key, not just its close button. ([#163](https://github.com/winds-mobi/winds-mobi-client-web/issues/163))
+
+### Changed
+
+- Upgraded the underlying UI component library (Frontile) to its next major version.
+  - _aka: more furniture-moving under the hood — buttons, toggles, and menus should look and behave exactly the same. If something looks off, that's a bug, not a feature._
+- The station panel's width/height now matches Frontile's own default panel size instead of a size this app picked itself.
+
 ## v0.23.2 - 2026-09-21
 
 ### Fixed
