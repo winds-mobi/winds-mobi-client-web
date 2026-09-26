@@ -141,14 +141,6 @@ module('Acceptance | navbar search', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-
-    const nearbyLocation = this.owner.lookup('service:nearby-location');
-
-    nearbyLocation.coordinates = {
-      accuracy: 10,
-      latitude: 46.69299,
-      longitude: 7.82667,
-    };
   });
 
   test('it searches from the desktop navbar and recenters on the selected station at zoom 10', async function (assert) {
@@ -163,13 +155,13 @@ module('Acceptance | navbar search', function (hooks) {
     const searchParams = lastSearchRequestParams(store.calls);
     assert.strictEqual(
       searchParams?.get('near-lat'),
-      '46.69299',
-      'the search is biased toward the known latitude'
+      '46.54321',
+      'the search is biased toward the routed map view, not any physical location'
     );
     assert.strictEqual(
       searchParams?.get('near-lon'),
-      '7.82667',
-      'the search is biased toward the known longitude'
+      '8.12345',
+      'the search is biased toward the routed map view, not any physical location'
     );
 
     assert
@@ -188,26 +180,22 @@ module('Acceptance | navbar search', function (hooks) {
     });
   });
 
-  test('it searches without a location bias when the position is unknown', async function (assert) {
+  test('it biases toward the default view on a route with no map at all', async function (assert) {
     const store = this.owner.lookup(
       'service:store'
     ) as unknown as FakeStoreService;
-    const nearbyLocation = this.owner.lookup('service:nearby-location');
-    nearbyLocation.coordinates = undefined;
 
-    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
+    await visit('/help');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
     await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     const searchParams = lastSearchRequestParams(store.calls);
-    assert.false(
-      searchParams?.has('near-lat'),
-      'no latitude bias is sent when the position is unknown'
+    assert.strictEqual(
+      searchParams?.get('near-lat'),
+      '46.8011',
+      'falls back to the mid-Switzerland default, the same one the map itself opens to'
     );
-    assert.false(
-      searchParams?.has('near-lon'),
-      'no longitude bias is sent when the position is unknown'
-    );
+    assert.strictEqual(searchParams?.get('near-lon'), '8.2275');
   });
 
   test('it uses zoom 10 when searching from a non-map route', async function (assert) {
