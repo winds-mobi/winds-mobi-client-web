@@ -483,12 +483,7 @@ export default class Map extends Component<MapSignature> {
       <div
         class="pointer-events-none absolute inset-0 z-20"
         {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
-        {{driveMapCamera
-          this.mapInstance
-          this.mapView
-          this.isStationPanelOpen
-          this.isSidePanel
-        }}
+        {{driveMapCamera this.mapInstance this.mapView this.isSidePanel}}
       >
         {{yield}}
       </div>
