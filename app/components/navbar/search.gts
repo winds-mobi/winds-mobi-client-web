@@ -11,9 +11,11 @@ import type {
   Station,
   StoreService,
 } from 'winds-mobi-client-web/services/store.js';
-import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { searchQuery } from 'winds-mobi-client-web/builders/station';
-import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
+import {
+  currentMapView,
+  focusQueryParamsFor,
+} from 'winds-mobi-client-web/utils/map-view';
 import {
   type RequestResponse,
   responseData,
@@ -36,8 +38,6 @@ interface SearchResultItem {
 
 export default class NavbarSearch extends Component<NavbarSearchSignature> {
   @service declare router: RouterService;
-  @service('nearby-location')
-  declare nearbyLocation: NearbyLocationService;
   @service declare store: StoreService;
 
   @tracked query = '';
@@ -63,12 +63,13 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
       return this.lastItems;
     }
 
+    // Biased toward whatever the map is currently pointed at, not the
+    // visitor's physical location -- search doesn't need geolocation at all.
+    // `currentMapView` already falls back to the mid-Switzerland default when
+    // there's no routed view to read (any route other than all-stations, or
+    // all-stations before its first camera move).
     const result = await this.store.request<RequestResponse<Station[]>>(
-      searchQuery<Station>(
-        'station',
-        trimmedValue,
-        this.nearbyLocation.coordinates
-      )
+      searchQuery<Station>('station', trimmedValue, currentMapView(this.router))
     );
 
     // Schema-record `Station`s throw on access to fields outside their schema
