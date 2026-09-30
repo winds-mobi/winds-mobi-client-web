@@ -8,6 +8,8 @@ import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 class FakeMapRefreshService extends Service {
   @tracked isRefreshing = false;
   @tracked refreshCount = 0;
+  @tracked elapsedMs = 0;
+  refreshIntervalMs = 120_000;
   refreshNowCallCount = 0;
 
   // Mirrors the real service: every refresh, from any trigger, bumps
@@ -32,12 +34,14 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     await render(hbs`<Navbar::RefreshControl />`);
 
-    assert.dom('svg').doesNotHaveClass('animate-spin');
+    assert
+      .dom('[data-test-navbar-refresh] span svg')
+      .doesNotHaveClass('animate-spin');
 
     mapRefresh.isRefreshing = true;
     await render(hbs`<Navbar::RefreshControl />`);
 
-    assert.dom('svg').hasClass('animate-spin');
+    assert.dom('[data-test-navbar-refresh] span svg').hasClass('animate-spin');
   });
 
   test('pressing the button triggers a refresh', async function (assert) {
@@ -104,5 +108,41 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
         /rotate\(360deg\)/,
         'a non-click refresh start still plays the one-off spin'
       );
+  });
+
+  test('the ring shows how far through the refresh interval the last refresh is', async function (assert) {
+    const mapRefresh = this.owner.lookup(
+      'service:map-refresh'
+    ) as unknown as FakeMapRefreshService;
+    const circumference = 2 * Math.PI * 20;
+
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    assert
+      .dom('[data-test-navbar-refresh-progress]')
+      .hasAttribute(
+        'style',
+        new RegExp(`stroke-dashoffset: ${circumference}px`),
+        'empty ring right after a refresh'
+      );
+
+    mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs / 2;
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    assert
+      .dom('[data-test-navbar-refresh-progress]')
+      .hasAttribute(
+        'style',
+        new RegExp(`stroke-dashoffset: ${circumference / 2}px`),
+        'half-full halfway to the next automatic refresh'
+      );
+
+    // Clamped, not overshot, however far a test double's elapsed time drifts.
+    mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs * 10;
+    await render(hbs`<Navbar::RefreshControl />`);
+
+    assert
+      .dom('[data-test-navbar-refresh-progress]')
+      .hasAttribute('style', /stroke-dashoffset: 0px/, 'full, never negative');
   });
 });
