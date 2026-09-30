@@ -51,19 +51,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
     assert.strictEqual(mapRefresh.refreshNowCallCount, 1);
   });
 
-  test('the one-off spin is off by default (beta features are off)', async function (assert) {
-    await render(hbs`<Navbar::RefreshControl />`);
-
-    await click('[data-test-navbar-refresh]');
-
-    assert
-      .dom('[data-test-navbar-refresh] span')
-      .hasAttribute('style', /rotate\(0deg\)/);
-  });
-
-  test('each refresh adds a full turn once beta features are enabled, so the transition replays every time', async function (assert) {
-    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
-
+  test('each refresh adds a full turn, so the transition replays every time', async function (assert) {
     await render(hbs`<Navbar::RefreshControl />`);
 
     assert
@@ -99,8 +87,6 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
   });
 
   test('a refresh triggered from elsewhere (e.g. the auto-refresh tick) spins the icon too, not just a button press', async function (assert) {
-    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
-
     const refreshService = this.owner.lookup(
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
@@ -118,18 +104,5 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
         /rotate\(360deg\)/,
         'a non-click refresh start still plays the one-off spin'
       );
-  });
-
-  test('the one-off spin stays off if its own setting is disabled, even with beta features on', async function (assert) {
-    const settings = this.owner.lookup('service:settings');
-    settings.betaFeaturesEnabled = true;
-    settings.refreshButtonSpin = false;
-
-    await render(hbs`<Navbar::RefreshControl />`);
-    await click('[data-test-navbar-refresh]');
-
-    assert
-      .dom('[data-test-navbar-refresh] span')
-      .hasAttribute('style', /rotate\(0deg\)/);
   });
 });
