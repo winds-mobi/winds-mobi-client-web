@@ -54,7 +54,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
       aria-label={{t "map.refresh.ariaLabel"}}
       data-test-navbar-refresh
       @onPress={{this.mapRefresh.refreshNow}}
-      @variant="outline"
+      @variant="plain"
       class="relative h-12 w-12"
       ...attributes
     >
