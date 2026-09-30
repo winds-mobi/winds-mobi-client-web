@@ -16,7 +16,10 @@ function testemProxy(targetURL) {
   const transport = target.protocol === 'https:' ? https : http;
 
   return function testemProxyHandler(app) {
-    app.all('*', (req, res, next) => {
+    // Middleware rather than `app.all('*', ...)`: testem serves through
+    // Express 5, whose path-to-regexp rejects a bare `*` route. Mounted at
+    // the root, `req.url` is still the full request URL.
+    app.use((req, res, next) => {
       let url = req.url;
 
       if (url === '/testem.js' || url.startsWith('/testem/')) {

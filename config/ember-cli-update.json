@@ -7,13 +7,15 @@
       "blueprints": [
         {
           "name": "@embroider/app-blueprint",
-          "options": ["--package-manager pnpm"]
+          "options": [
+            "--package-manager pnpm"
+          ]
         }
       ]
     },
     {
       "name": "@ember/app-blueprint",
-      "version": "7.1.1",
+      "version": "7.3.1",
       "blueprints": [
         {
           "name": "@ember/app-blueprint",
