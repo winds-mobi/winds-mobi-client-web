@@ -175,8 +175,8 @@ importers:
         specifier: ^7.9.3
         version: 7.9.3
       ember-tracked-local-storage:
-        specifier: ^2.0.1
-        version: 2.0.1(@glint/template@1.9.0)(ember-source@7.3.0(@glimmer/component@2.1.1))(webpack@5.94.0(postcss@8.5.28))
+        specifier: https://codeload.github.com/MichalBryxi/ember-tracked-local-storage/tar.gz/c5df482783b0fb63532049e63cf8902b54a50374
+        version: https://codeload.github.com/MichalBryxi/ember-tracked-local-storage/tar.gz/c5df482783b0fb63532049e63cf8902b54a50374(@babel/core@7.28.4)(ember-source@7.3.0(@glimmer/component@2.1.1))
       eslint:
         specifier: ^9.39.5
         version: 9.39.5(jiti@2.7.0)
@@ -1097,9 +1097,6 @@ packages:
 
   '@ember/app-tsconfig@2.0.0':
     resolution: {integrity: sha512-NmD1OZFtCF49k4WDaPdhGP4OKoRbPaXpTBO3AsJe0okIJeCVUiEiC8YUpfTJmld9EJOEa9mW/p0tJQS70GktOA==}
-
-  '@ember/edition-utils@1.2.0':
-    resolution: {integrity: sha512-VmVq/8saCaPdesQmftPqbFtxJWrzxNGSQ+e8x8LLe3Hjm36pJ04Q8LeORGZkAeOhldoUX9seLGmSaHeXkIqoog==}
 
   '@ember/optional-features@3.0.0':
     resolution: {integrity: sha512-HMQqZoBb16I4NyHfQglIYjopSG6folcEJah2WPa0FuolWRA/8cS5ozQmFK5BQx7cijTQJxj6viLpQK9KrXuYdw==}
@@ -3650,13 +3647,6 @@ packages:
   ember-cli-get-component-path-option@1.0.0:
     resolution: {integrity: sha512-k47TDwcJ2zPideBCZE8sCiShSxQSpebY2BHcX2DdipMmBox5gsfyVrbKJWIHeSTTKyEUgmBIvQkqTOozEziCZA==}
 
-  ember-cli-htmlbars@7.0.1:
-    resolution: {integrity: sha512-bNVAwTvBOmk7KjGCN0Vq81w8FAWQ1zXwCS1CUUHTeWdcFypRsv0qUEkTtwxho4H3BYaoqMCXPS45Js9WWtEXYw==}
-    engines: {node: '>= 20'}
-    peerDependencies:
-      '@babel/core': '>= 7'
-      ember-source: '>= 4.0.0'
-
   ember-cli-is-package-missing@1.0.0:
     resolution: {integrity: sha512-9hEoZj6Au5onlSDdcoBqYEPT8ehlYntZPxH8pBKV0GO7LNel88otSAQsCfXvbi2eKE+MaSeLG/gNaCI5UdWm9g==}
 
@@ -3806,11 +3796,11 @@ packages:
     engines: {node: ^18.18.0 || >= 20.9.0}
     hasBin: true
 
-  ember-tracked-local-storage@2.0.1:
-    resolution: {integrity: sha512-0dplzUr6Lq2j3EUxps23XA/juqk09ROE+6k5qoFvhlONPUisR2DT9vcC21WCsmzj6EYqzH4lSNTX/2yXv983qw==}
-    engines: {node: '>= 18'}
+  ember-tracked-local-storage@https://codeload.github.com/MichalBryxi/ember-tracked-local-storage/tar.gz/c5df482783b0fb63532049e63cf8902b54a50374:
+    resolution: {tarball: https://codeload.github.com/MichalBryxi/ember-tracked-local-storage/tar.gz/c5df482783b0fb63532049e63cf8902b54a50374}
+    version: 2.0.1
     peerDependencies:
-      ember-source: '>= 4.0.0'
+      ember-source: '>= 4.12.0'
 
   ember-velcro@2.2.0:
     resolution: {integrity: sha512-+5qVN0xGgr5N+CVEK1cKBGsfUNBfOQrakfz/4qOdE8YYFc0Prlo8ZXs8Je/Juop4OcZTGXMa5QlY/2okMo+X8A==}
@@ -9217,8 +9207,6 @@ snapshots:
 
   '@ember/app-tsconfig@2.0.0': {}
 
-  '@ember/edition-utils@1.2.0': {}
-
   '@ember/optional-features@3.0.0(@types/node@26.0.0)':
     dependencies:
       ember-cli-version-checker: 5.1.2
@@ -12228,23 +12216,6 @@ snapshots:
 
   ember-cli-get-component-path-option@1.0.0: {}
 
-  ember-cli-htmlbars@7.0.1(@babel/core@7.29.7)(ember-source@7.3.0(@glimmer/component@2.1.1)):
-    dependencies:
-      '@babel/core': 7.29.7
-      '@ember/edition-utils': 1.2.0
-      babel-plugin-ember-template-compilation: 2.4.1
-      broccoli-debug: 0.6.5
-      broccoli-persistent-filter: 3.1.3
-      broccoli-plugin: 4.0.7
-      ember-source: 7.3.0(@glimmer/component@2.1.1)
-      fs-tree-diff: 2.0.1
-      heimdalljs-logger: 0.1.10
-      js-string-escape: 1.0.1
-      silent-error: 1.1.1
-      walk-sync: 4.0.2
-    transitivePeerDependencies:
-      - supports-color
-
   ember-cli-is-package-missing@1.0.0: {}
 
   ember-cli-normalize-entity-name@1.0.0:
@@ -12632,19 +12603,15 @@ snapshots:
       '@lint-todo/utils': 13.1.1
       content-tag: 3.1.2
 
-  ember-tracked-local-storage@2.0.1(@glint/template@1.9.0)(ember-source@7.3.0(@glimmer/component@2.1.1))(webpack@5.94.0(postcss@8.5.28)):
+  ember-tracked-local-storage@https://codeload.github.com/MichalBryxi/ember-tracked-local-storage/tar.gz/c5df482783b0fb63532049e63cf8902b54a50374(@babel/core@7.28.4)(ember-source@7.3.0(@glimmer/component@2.1.1)):
     dependencies:
-      '@babel/core': 7.29.7
-      '@glimmer/tracking': 1.1.2
-      ember-auto-import: 2.13.1(@glint/template@1.9.0)(webpack@5.94.0(postcss@8.5.28))
-      ember-cli-babel: 8.3.2(@babel/core@7.29.7)
-      ember-cli-htmlbars: 7.0.1(@babel/core@7.29.7)(ember-source@7.3.0(@glimmer/component@2.1.1))
+      '@embroider/addon-shim': 1.10.3
+      decorator-transforms: 2.4.0(@babel/core@7.28.4)
       ember-source: 7.3.0(@glimmer/component@2.1.1)
       macro-decorators: 0.1.2
     transitivePeerDependencies:
-      - '@glint/template'
+      - '@babel/core'
       - supports-color
-      - webpack
 
   ember-velcro@2.2.0(ember-modifier@4.3.0(@babel/core@7.28.4))(ember-source@7.3.0(@glimmer/component@2.1.1)):
     dependencies:

@@ -265,9 +265,12 @@ state, route models, and query params.
     whose `read-modules.js` does a runtime `require()` that Rollup can't resolve as ESM — `pnpm build` fails outright,
     not just in dev. The existing fake-`service:store`-by-URL pattern (see Testing below) remains the right tool here.
   - `ember-tracked-local-storage` replaced this app's hand-rolled `trackedInLocalStorage` decorator (see
-    [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: also a classic addon,
-    but it builds cleanly, and its per-owner `service:tracked-local-storage` architecture is a genuine improvement
-    over the module-scope singleton the hand-rolled version used.
+    [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: its per-owner
+    `service:tracked-local-storage` architecture is a genuine improvement over the module-scope singleton the
+    hand-rolled version used. It's installed from a prebuilt v2 build (the `convert-to-v2-addon-dist` branch of
+    `MichalBryxi/ember-tracked-local-storage`, pinned to a commit tarball, because the dev container has no `git`)
+    until upstream PR adopted-ember-addons/ember-tracked-local-storage#46 is released — then switch back to a
+    normal version range.
   - `ember-responsive` (breakpoint/`matchMedia` service, considered for driving a Frontile `<Drawer>`'s `@placement`
     off a media query) was **rejected**: last published 2022 (`5.0.0`), a classic addon never updated for Embroider's
     current strict-vendoring resolver. It imports `@ember/string` as a resolver "virtual peer dep," which Embroider
