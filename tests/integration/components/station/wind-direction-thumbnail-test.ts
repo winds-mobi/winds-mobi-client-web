@@ -6,8 +6,7 @@ import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
 
-interface StationWindDirectionThumbnailTestContext
-  extends RenderingTestContext {
+interface StationWindDirectionThumbnailTestContext extends RenderingTestContext {
   stationId: string;
 }
 

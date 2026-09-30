@@ -23,9 +23,8 @@ module.exports = {
         // relying on the plugin's own runtime auto-detection, which goes through
         // `import-meta-resolve` and can fail unpredictably inside Vite's own
         // process (see TODO.md's Ember 7 upgrade section).
-        compilerPath: require.resolve(
-          'ember-source/ember-template-compiler/index.js'
-        ),
+        compilerPath:
+          require.resolve('ember-source/ember-template-compiler/index.js'),
         enableLegacyModules: [
           'ember-cli-htmlbars',
           'ember-cli-htmlbars-inline-precompile',

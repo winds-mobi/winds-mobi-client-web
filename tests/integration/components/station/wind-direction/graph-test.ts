@@ -340,8 +340,7 @@ module(
       const tooltip =
         (
           series?.data[0]?.options as unknown as
-            | { customTooltip?: string }
-            | undefined
+            { customTooltip?: string } | undefined
         )?.customTooltip ?? '';
 
       // Whitespace between the number and its unit is whatever `Intl` emits
