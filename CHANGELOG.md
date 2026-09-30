@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.25.0 - 2026-09-30
+
+### Added
+
+- **🧪 Beta:** Stations can now be hidden. An eye button, next to the favourite heart on the station panel and on station cards, hides that station from the map and the Nearby list — useful where two stations sit almost on top of each other and one of them rarely has useful wind data. Hidden stations are listed at the bottom of Settings, with a link to a page showing their live readings, where they can be unhidden again. Turn it on under Settings → Beta features → Hide stations. ([#167](https://github.com/winds-mobi/winds-mobi-client-web/issues/167))
 
 ### Changed
 
@@ -12,8 +16,6 @@
 - Search now ranks its results around wherever the map is pointed, instead of around your physical location, so they match what's on screen and search works the same without location access. ([#178](https://github.com/winds-mobi/winds-mobi-client-web/issues/178))
 - The navbar's refresh button now fills up from the left with a soft tint as the next automatic refresh approaches, so you can see at a glance when the stations will next refresh on their own. ([#180](https://github.com/winds-mobi/winds-mobi-client-web/issues/180), [#186](https://github.com/winds-mobi/winds-mobi-client-web/issues/186))
 - The navbar's locate-me, refresh and menu buttons now share one outline style. The locate-me button no longer turns blue once your location is found; its filled crosshair still shows that. ([#186](https://github.com/winds-mobi/winds-mobi-client-web/issues/186))
-
-## v0.25.0 - 2026-09-30
 
 ### Removed
 
