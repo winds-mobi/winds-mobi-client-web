@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
 import activateRefresh from 'winds-mobi-client-web/modifiers/activate-refresh';
@@ -11,10 +10,7 @@ import NavbarMenuDesktop from './menu/desktop';
 import NavbarMenuMobile from './menu/mobile';
 
 export interface NavbarSignature {
-  Args: {};
-  Blocks: {
-    default: [];
-  };
+  Args: Record<string, never>;
   Element: null;
 }
 

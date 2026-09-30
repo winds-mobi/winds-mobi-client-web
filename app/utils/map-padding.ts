@@ -34,7 +34,7 @@ export function mapPaddingForPlacement(isSidePanel: boolean): MapPadding {
     : { ...NO_MAP_PADDING, bottom: DRAWER_SM_PX };
 }
 
-export function mapPaddingsEqual(
+function mapPaddingsEqual(
   left: PaddingOptions,
   right: PaddingOptions
 ): boolean {

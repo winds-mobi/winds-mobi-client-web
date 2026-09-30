@@ -1,9 +1,6 @@
 application:
   name: winds.mobi
 
-common:
-  close: Close
-
 favorites:
   title: Favourite stations
   loading: Loading your favourite stations…
