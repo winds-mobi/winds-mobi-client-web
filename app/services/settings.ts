@@ -60,21 +60,6 @@ export default class SettingsService extends Service {
   })
   useIconLabels!: boolean;
 
-  // Beta feature: play a one-off full-rotation spin on the refresh button's
-  // arrow every time a refresh starts (app/components/navbar/refresh-control.ts),
-  // whatever triggers it — a press, the auto-refresh tick, or anything else
-  // that calls `refreshNow` — on top of the continuous spin already shown
-  // while a request is actually loading. Gives immediate feedback even when
-  // the refresh itself is near-instant. Its own toggle defaults on, but —
-  // like every beta feature — only takes effect while `betaFeaturesEnabled`
-  // is also on, and its settings row only appears once beta features are
-  // enabled.
-  @trackedInLocalStorage({
-    keyName: 'settings.refreshButtonSpin',
-    defaultValue: true,
-  })
-  refreshButtonSpin!: boolean;
-
   // Beta feature: the favourites view and the favourite heart on a station
   // panel (app/components/navbar/menu/items.ts, app/components/station/header.gts).
   // Its own toggle defaults on (this feature already shipped, gated only by
@@ -118,7 +103,6 @@ export type BooleanSettingKey =
   | 'nearbyCompactList'
   | 'favoritesCompactList'
   | 'useIconLabels'
-  | 'refreshButtonSpin'
   | 'favoritesFeatureEnabled'
   | 'windDirectionHistoryEnabled'
   | 'betaFeaturesEnabled';

@@ -10,7 +10,6 @@ import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/sho
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
-import SettingsShowcaseRefreshSpin from 'winds-mobi-client-web/components/settings/showcase/refresh-spin';
 import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -142,16 +141,6 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                 >
                   <SettingsShowcaseFavorites
                     @enabled={{this.settings.favoritesFeatureEnabled}}
-                  />
-                </SettingsRow>
-
-                <SettingsRow
-                  @settings={{this.settings}}
-                  @name="refreshButtonSpin"
-                  class="border-t border-amber-200 pt-3"
-                >
-                  <SettingsShowcaseRefreshSpin
-                    @enabled={{this.settings.refreshButtonSpin}}
                   />
                 </SettingsRow>
 

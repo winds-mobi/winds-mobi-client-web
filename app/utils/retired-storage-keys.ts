@@ -10,6 +10,9 @@ export const RETIRED_STORAGE_KEYS: readonly string[] = [
   // The "close the station panel by clicking the map" toggle; that is now
   // simply how the map behaves (#157).
   'settings.mapClickClosesPanel',
+  // The "spin the refresh button when refreshing" toggle; the button now
+  // always spins (#172).
+  'settings.refreshButtonSpin',
 ];
 
 // Goes through the tracked-local-storage service rather than raw
