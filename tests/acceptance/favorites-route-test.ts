@@ -81,7 +81,6 @@ module('Acceptance | favorites route', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
   });
 
   test('with no favourites it shows the empty state and skips the station request', async function (assert) {

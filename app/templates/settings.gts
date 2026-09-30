@@ -10,7 +10,6 @@ import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/sho
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
-import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -144,18 +143,6 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   {{t "settings.betaFeaturesEnabled.warning"}}
                 </p>
               </SettingsRow>
-
-              {{#if this.settings.betaFeaturesEnabled}}
-                <SettingsRow
-                  @settings={{this.settings}}
-                  @name="favoritesFeatureEnabled"
-                  class="border-t border-amber-200 pt-3"
-                >
-                  <SettingsShowcaseFavorites
-                    @enabled={{this.settings.favoritesFeatureEnabled}}
-                  />
-                </SettingsRow>
-              {{/if}}
             </div>
           </StationSectionCard>
         </div>

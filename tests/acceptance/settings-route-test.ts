@@ -31,7 +31,7 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the seven preferences, on by default except the compact nearby/favourite lists, icon labels, and beta features', async function (this: SettingsRouteTestContext, assert) {
+  test('it shows every preference with its default: on, except the compact lists, icon labels, wind direction, and beta features', async function (this: SettingsRouteTestContext, assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
