@@ -129,6 +129,18 @@ module('Acceptance | settings route', function (hooks) {
     );
   });
 
+  test('turning on beta features says none are in beta right now', async function (assert) {
+    await visit('/settings');
+
+    assert.dom('[data-test-beta-features-empty]').doesNotExist();
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    assert
+      .dom('[data-test-beta-features-empty]')
+      .hasText('No features are in beta right now. Check back later.');
+  });
+
   test('it navigates to settings from the mobile menu without reloading', async function (assert) {
     await visit('/map');
 

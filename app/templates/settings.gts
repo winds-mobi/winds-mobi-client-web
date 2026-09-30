@@ -143,6 +143,17 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   {{t "settings.betaFeaturesEnabled.warning"}}
                 </p>
               </SettingsRow>
+
+              {{! Nothing is in beta right now. Replace this note with the
+                beta features' own rows when the next one arrives. }}
+              {{#if this.settings.betaFeaturesEnabled}}
+                <p
+                  class="border-t border-amber-200 pt-3 text-sm text-amber-800"
+                  data-test-beta-features-empty
+                >
+                  {{t "settings.betaFeaturesEnabled.empty"}}
+                </p>
+              {{/if}}
             </div>
           </StationSectionCard>
         </div>

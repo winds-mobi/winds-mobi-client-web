@@ -71,7 +71,7 @@ export default class SettingsService extends Service {
   // Early access to in-development features. Off by default; turning it on
   // reveals each individual beta feature's own toggle below it (see
   // app/templates/settings.gts for the warning shown alongside this toggle).
-  // No feature is in beta right now, so it reveals nothing.
+  // No feature is in beta right now, so it reveals only a note saying so.
   @trackedInLocalStorage({
     keyName: 'settings.betaFeaturesEnabled',
     defaultValue: false,

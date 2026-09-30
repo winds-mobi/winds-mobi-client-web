@@ -75,6 +75,7 @@ settings:
     groupLabel: Beta features
     warning: >-
       Beta features are early access. We do not guarantee they work correctly.
+    empty: No features are in beta right now. Check back later.
 
 help:
   title: Help
