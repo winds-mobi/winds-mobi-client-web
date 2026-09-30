@@ -59,7 +59,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
     await render(hbs`<Navbar::RefreshControl />`);
 
     assert
-      .dom('[data-test-navbar-refresh] span')
+      .dom('[data-test-navbar-refresh-spin]')
       .hasAttribute(
         'style',
         /rotate\(0deg\)/,
@@ -68,12 +68,12 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     await click('[data-test-navbar-refresh]');
     assert
-      .dom('[data-test-navbar-refresh] span')
+      .dom('[data-test-navbar-refresh-spin]')
       .hasAttribute('style', /rotate\(360deg\)/, 'first press adds one turn');
 
     await click('[data-test-navbar-refresh]');
     assert
-      .dom('[data-test-navbar-refresh] span')
+      .dom('[data-test-navbar-refresh-spin]')
       .hasAttribute(
         'style',
         /rotate\(720deg\)/,
@@ -82,7 +82,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     await click('[data-test-navbar-refresh]');
     assert
-      .dom('[data-test-navbar-refresh] span')
+      .dom('[data-test-navbar-refresh-spin]')
       .hasAttribute(
         'style',
         /rotate\(1080deg\)/,
@@ -102,7 +102,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
     await render(hbs`<Navbar::RefreshControl />`);
 
     assert
-      .dom('[data-test-navbar-refresh] span')
+      .dom('[data-test-navbar-refresh-spin]')
       .hasAttribute(
         'style',
         /rotate\(360deg\)/,
@@ -110,11 +110,10 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       );
   });
 
-  test('the ring shows how far through the refresh interval the last refresh is', async function (assert) {
+  test('the button fills up as far through the refresh interval as the last refresh is', async function (assert) {
     const mapRefresh = this.owner.lookup(
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
-    const circumference = 2 * Math.PI * 20;
 
     await render(hbs`<Navbar::RefreshControl />`);
 
@@ -122,8 +121,8 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       .dom('[data-test-navbar-refresh-progress]')
       .hasAttribute(
         'style',
-        new RegExp(`stroke-dashoffset: ${circumference}px`),
-        'empty ring right after a refresh'
+        /scaleX\(0\)/,
+        'no progress right after a refresh'
       );
 
     mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs / 2;
@@ -133,7 +132,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       .dom('[data-test-navbar-refresh-progress]')
       .hasAttribute(
         'style',
-        new RegExp(`stroke-dashoffset: ${circumference / 2}px`),
+        /scaleX\(0\.5\)/,
         'half-full halfway to the next automatic refresh'
       );
 
@@ -143,6 +142,6 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     assert
       .dom('[data-test-navbar-refresh-progress]')
-      .hasAttribute('style', /stroke-dashoffset: 0px/, 'full, never negative');
+      .hasAttribute('style', /scaleX\(1\)/, 'full, never over-full');
   });
 });

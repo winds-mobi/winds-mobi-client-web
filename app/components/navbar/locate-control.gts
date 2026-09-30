@@ -38,7 +38,7 @@ export default class NavbarLocateControl extends Component<NavbarLocateControlSi
       data-test-navbar-locate
       disabled={{this.isDisabled}}
       @variant="outline"
-      @color={{if this.isLocated "primary" undefined}}
+      @color="neutral"
       @onPress={{this.locate}}
       class="h-12"
       ...attributes
