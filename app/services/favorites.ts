@@ -3,8 +3,7 @@ import { trackedInLocalStorage } from 'ember-tracked-local-storage';
 
 // Favourite station ids, persisted directly in the browser via
 // ember-tracked-local-storage (see app/services/settings.ts for the same
-// pattern). No account/profile backs this list — sign-in is currently
-// disabled (see app/services/session.ts), so favourites are device-local.
+// pattern). There are no accounts: favourites live on this device only.
 export default class FavoritesService extends Service {
   @trackedInLocalStorage({
     keyName: 'favorites.stationIds',

@@ -81,7 +81,6 @@
     "ember-phosphor-icons": "^1.0.2",
     "ember-qunit": "^9.1.0",
     "ember-resolver": "^13.2.0",
-    "ember-simple-auth": "^8.3.1",
     "ember-source": "~7.1.0",
     "ember-template-lint": "^7.9.3",
     "ember-tracked-local-storage": "^2.0.1",

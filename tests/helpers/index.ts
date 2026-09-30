@@ -48,17 +48,8 @@ function setupApplicationTest(hooks: NestedHooks, options?: SetupTestOptions) {
     resetTrackedLocalStorage(this.owner);
   });
 
-  // Additional setup for application tests can be done here.
-  //
-  // For example, if you need an authenticated session for each
-  // application test, you could do:
-  //
-  // hooks.beforeEach(async function () {
-  //   await authenticateSession(); // ember-simple-auth
-  // });
-  //
-  // This is also a good place to call test setup functions coming
-  // from other addons:
+  // Additional setup for application tests can be done here. This is also a
+  // good place to call test setup functions coming from other addons:
   //
   // setupIntl(hooks, 'en-us'); // ember-intl
 }
