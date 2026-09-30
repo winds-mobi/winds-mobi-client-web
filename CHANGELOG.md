@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **🧪 Beta:** Stations can now be hidden. An eye button, next to the favourite heart on the station panel and on station cards, hides that station from the map and the Nearby list — useful where two stations sit almost on top of each other and one of them rarely has useful wind data. Hidden stations are listed at the bottom of Settings, with a link to a page showing their live readings, where they can be unhidden again. Turn it on under Settings → Beta features → Hide stations. ([#167](https://github.com/winds-mobi/winds-mobi-client-web/issues/167))
+
 ### Changed
 
 - **🚀 Stable:** Clicking or tapping the map now always closes the open station panel, so you no longer have to aim for the close button. Clicking another station still switches straight to it, and panning the map leaves the panel open. The beta toggle for it is gone from Settings. ([#157](https://github.com/winds-mobi/winds-mobi-client-web/issues/157))
