@@ -2,7 +2,7 @@ import { module, test } from 'qunit';
 import type { NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
+import { handlerData } from 'winds-mobi-client-web/tests/helpers/handler-data';
 
 // `HistoryHandler.request` is called directly here (no store), so the
 // `context`/`next` args are faked rather than pulled from a real request
@@ -31,7 +31,7 @@ module('Unit | Handler | history', function () {
       ],
     };
 
-    const holfuyResponse = responseData(
+    const holfuyResponse = handlerData(
       await HistoryHandler.request<{
         data: { id: string }[];
       }>(
@@ -42,7 +42,7 @@ module('Unit | Handler | history', function () {
       )
     );
 
-    const otherStationResponse = responseData(
+    const otherStationResponse = handlerData(
       await HistoryHandler.request<{
         data: { id: string }[];
       }>(
@@ -59,7 +59,7 @@ module('Unit | Handler | history', function () {
   });
 
   test('it reverses newest-first historic API rows into chronological order', async function (assert) {
-    const response = responseData(
+    const response = handlerData(
       await HistoryHandler.request<{
         data: { id: string; attributes: { timestamp: number } }[];
       }>(
@@ -100,7 +100,7 @@ module('Unit | Handler | history', function () {
   });
 
   test('it only serializes history attributes present in the payload', async function (assert) {
-    const response = responseData(
+    const response = handlerData(
       await HistoryHandler.request<{
         data: {
           id: string;

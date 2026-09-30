@@ -16,10 +16,6 @@ import {
   currentMapView,
   focusQueryParamsFor,
 } from 'winds-mobi-client-web/utils/map-view';
-import {
-  type RequestResponse,
-  responseData,
-} from 'winds-mobi-client-web/utils/request-response';
 import NavbarSearchResult from './search-result';
 
 export interface NavbarSearchSignature {
@@ -68,14 +64,14 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
     // `currentMapView` already falls back to the mid-Switzerland default when
     // there's no routed view to read (any route other than all-stations, or
     // all-stations before its first camera move).
-    const result = await this.store.request<RequestResponse<Station[]>>(
+    const result = await this.store.request<{ data: Station[] }>(
       searchQuery<Station>('station', trimmedValue, currentMapView(this.router))
     );
 
     // Schema-record `Station`s throw on access to fields outside their schema
     // (e.g. `.key`), so Listbox's default key/label derivation can't run
     // directly against them — wrap each result in a plain object instead.
-    this.lastItems = responseData(result.content).map((station) => ({
+    this.lastItems = result.content.data.map((station) => ({
       key: station.id,
       label: station.name,
       station,

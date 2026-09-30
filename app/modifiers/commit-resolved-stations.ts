@@ -1,7 +1,6 @@
 import { modifier } from 'ember-modifier';
 import type { RequestState } from '@warp-drive/core/reactive';
 import type { Station } from 'winds-mobi-client-web/services/store';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
 
 interface CommitResolvedStationsSignature {
   Element: Element;
@@ -25,7 +24,7 @@ interface CommitResolvedStationsSignature {
 const commitResolvedStations = modifier<CommitResolvedStationsSignature>(
   (_element, [state, commit]) => {
     if (state?.isSuccess) {
-      commit(responseData(state.value));
+      commit(state.value.data);
     }
   }
 );

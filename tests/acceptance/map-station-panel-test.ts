@@ -624,7 +624,7 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   // `cursor-pointer` deliberately lives on MapLibre's own marker element
-  // (passed via `markerInitOptions`'s `className`), not on anything inside
+  // (passed via `STATION_MARKER_OPTIONS`'s `className`), not on anything inside
   // `<MapStationMarker>` -- that outer element is what `<marker.on
   // @event="click">` actually listens on (see `map/station-marker.gts`'s
   // top-of-file comment for why click is routed through it rather than a

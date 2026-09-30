@@ -163,9 +163,8 @@ There is no `fetch()` in app code and no classic EmberData adapters/serializers.
    the shape consumers code against. When adding a field, update the schema, the handler mapping, the builder `keys`,
    and the type together.
 
-In components, read responses through the `<Request>` component or `getRequestState`, and unwrap data with
-`responseData` from [app/utils/request-response.ts](app/utils/request-response.ts) (handles both `{data}` and
-`{content:{data}}` shapes).
+In components, read responses through the `<Request>` component (`result.data`) or `getRequestState`
+(`state.value.data`); an awaited `store.request(...)` resolves to `{ content: { data } }`.
 
 ### Map state is unidirectional and lives in query params
 

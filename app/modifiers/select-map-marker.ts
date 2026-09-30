@@ -12,7 +12,7 @@ interface SelectMapMarkerSignature {
 // renders directly inside it via `{{#in-element}}` -- not on our own inner
 // content. That outer element is the one `<marker.on @event="click">`
 // actually listens on and the one that shrink-wraps to the marker's real
-// current size (see `map/index.gts`'s `markerInitOptions` comment), so the
+// current size (see `map/index.gts`'s `STATION_MARKER_OPTIONS` comment), so the
 // ring needs to render there to match both.
 //
 // `MarkerOptions.className` (the mechanism `cursor-pointer` uses) can't

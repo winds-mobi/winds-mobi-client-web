@@ -111,7 +111,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   // `transform` only affects an element's own painted/hit-test region, never
   // the layout box an ancestor uses to size itself around it. This also
   // keeps the marker's real clickable area (the outer element, see
-  // `markerInitOptions` in map/index.gts) matching its current visual size,
+  // `STATION_MARKER_OPTIONS` in map/index.gts) matching its current visual size,
   // so neighbouring markers' click areas don't overlap more than their
   // visible arrows do at a shrunk zoom level. The svg fills this box
   // (`h-full w-full`), and MapLibre's own `anchor: 'center'` recentring is
@@ -122,7 +122,7 @@ export default class MapStationMarker extends Component<MapStationMarkerSignatur
   }
 
   // `cursor-pointer` and `rounded-full` live on the MapLibre marker element
-  // itself (`markerInitOptions` in map/index.gts, a static shape), and the
+  // itself (`STATION_MARKER_OPTIONS` in map/index.gts, a static shape), and the
   // selected-state ring lives there too, toggled by the `selectMapMarker`
   // modifier below (reactive, so it can't be a static `className` -- see the
   // modifier's own comment). Size comes entirely from `sizeStyle` above

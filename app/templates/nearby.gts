@@ -21,7 +21,6 @@ import type {
   Station,
   StoreService,
 } from 'winds-mobi-client-web/services/store';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import { locationErrorTranslationKey } from 'winds-mobi-client-web/utils/location-error-translation-key';
 
 interface NearbyTemplateSignature {
@@ -80,7 +79,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
 
   get stations(): Station[] {
     return this.requestState?.isSuccess
-      ? responseData(this.requestState.value)
+      ? this.requestState.value.data
       : this.lastStations;
   }
 
