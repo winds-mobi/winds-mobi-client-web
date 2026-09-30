@@ -13,14 +13,10 @@ interface WindPresenterTestContext extends RenderingTestContext {
   history: History[];
 }
 
-// Wind direction is a beta feature, off by default (app/services/
-// settings.ts) -- tests that exercise the Direction series must opt in
-// explicitly, the same way tests for any other beta feature do (see e.g.
-// tests/integration/components/navbar/refresh-control-test.ts).
-function enableWindDirectionBeta(context: RenderingTestContext) {
-  const settings = context.owner.lookup('service:settings');
-  settings.betaFeaturesEnabled = true;
-  settings.windDirectionHistoryEnabled = true;
+// Wind direction is a setting, off by default (app/services/settings.ts) --
+// tests that exercise the Direction series turn it on explicitly.
+function enableWindDirection(context: RenderingTestContext) {
+  context.owner.lookup('service:settings').windDirectionHistoryEnabled = true;
 }
 
 // Highcharts' base `Point` type doesn't declare `direction`/`value` -- both
@@ -88,7 +84,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
   // reaches the chart with one windbarb point per history row, each with
   // the reading's own direction. See CLAUDE.md's Testing section on why
   // this is testing us, not Highcharts.
-  test('it does not include a Direction series while the beta feature is off (the default)', async function (this: WindPresenterTestContext, assert) {
+  test('it does not include a Direction series while the setting is off (the default)', async function (this: WindPresenterTestContext, assert) {
     this.history = [
       {
         id: 'history-1',
@@ -114,12 +110,12 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
 
     assert.false(
       chart?.series.some((s) => s.name === 'Direction'),
-      'no Direction series, and no windbarb module was loaded, for a default (non-beta) render'
+      'no Direction series, and no windbarb module was loaded, for a default render'
     );
   });
 
   test('it feeds a windbarb point per reading to a Direction series', async function (this: WindPresenterTestContext, assert) {
-    enableWindDirectionBeta(this);
+    enableWindDirection(this);
 
     const now = Date.now();
 
@@ -177,7 +173,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
   // here force grouping even in the chart's default (narrowest) range, so
   // this doesn't depend on interacting with the range selector.
   test('a grouped Direction point colours and labels itself from its own (grouped) value, not a stale raw reading', async function (this: WindPresenterTestContext, assert) {
-    enableWindDirectionBeta(this);
+    enableWindDirection(this);
 
     const now = Date.now();
 
@@ -257,7 +253,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
   // indexing DIRECTIONS out of bounds and rendering the literal string
   // "undefined" in the tooltip instead of a cardinal direction.
   test('a grouped Direction point whose vector average wraps negative still renders a real cardinal, not "undefined"', async function (this: WindPresenterTestContext, assert) {
-    enableWindDirectionBeta(this);
+    enableWindDirection(this);
 
     const now = Date.now();
 

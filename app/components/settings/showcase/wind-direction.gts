@@ -22,7 +22,7 @@ const SAMPLE_HISTORY: History[] = [0, 10, 20, 30, 40].map((speed, index) => ({
 
 // Renders the real wind history chart with sample data instead of a
 // bespoke mini chart, so this preview always matches production exactly --
-// including reading the beta toggle itself via
+// including reading the setting itself via
 // StationWindContent#windDirectionEnabled, with no @enabled prop needed.
 const SettingsShowcaseWindDirection: TOC<SettingsShowcaseWindDirectionSignature> =
   <template>
