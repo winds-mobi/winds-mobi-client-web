@@ -10,7 +10,8 @@
 - **🚀 Stable:** Favourites is no longer a beta feature: the Favourites view and the heart on each station panel are now always there for everyone, with no setting to turn on. Your favourite stations stay stored in this browser only. ([#176](https://github.com/winds-mobi/winds-mobi-client-web/issues/176))
 - Turning on "Enable beta features" now tells you when nothing is in beta, instead of showing nothing. ([#176](https://github.com/winds-mobi/winds-mobi-client-web/issues/176))
 - Search now ranks its results around wherever the map is pointed, instead of around your physical location, so they match what's on screen and search works the same without location access. ([#178](https://github.com/winds-mobi/winds-mobi-client-web/issues/178))
-- The navbar's refresh button now fills up as a ring, showing how close the next automatic refresh is. ([#180](https://github.com/winds-mobi/winds-mobi-client-web/issues/180))
+- The navbar's refresh button now fills up from the left with a soft tint as the next automatic refresh approaches, so you can see at a glance when the stations will next refresh on their own. ([#180](https://github.com/winds-mobi/winds-mobi-client-web/issues/180), [#186](https://github.com/winds-mobi/winds-mobi-client-web/issues/186))
+- The navbar's locate-me, refresh and menu buttons now share one outline style. The locate-me button no longer turns blue once your location is found; its filled crosshair still shows that. ([#186](https://github.com/winds-mobi/winds-mobi-client-web/issues/186))
 
 ## v0.25.0 - 2026-09-30
 
