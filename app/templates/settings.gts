@@ -109,6 +109,18 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             </SettingsRow>
           </StationSectionCard>
 
+          <StationSectionCard
+            @title={{t "settings.windDirectionHistoryEnabled.label"}}
+            @titleClass="sr-only"
+          >
+            <SettingsRow
+              @settings={{this.settings}}
+              @name="windDirectionHistoryEnabled"
+            >
+              <SettingsShowcaseWindDirection />
+            </SettingsRow>
+          </StationSectionCard>
+
           {{! Every beta feature lives in this one visually distinguished
             (amber) container: the master toggle always sits above the
             individual beta features it reveals, so the toggle that causes
@@ -142,14 +154,6 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                   <SettingsShowcaseFavorites
                     @enabled={{this.settings.favoritesFeatureEnabled}}
                   />
-                </SettingsRow>
-
-                <SettingsRow
-                  @settings={{this.settings}}
-                  @name="windDirectionHistoryEnabled"
-                  class="border-t border-amber-200 pt-3"
-                >
-                  <SettingsShowcaseWindDirection />
                 </SettingsRow>
               {{/if}}
             </div>

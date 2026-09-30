@@ -41,6 +41,9 @@ module('Acceptance | settings route', function (hooks) {
     assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="favoritesCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
+    assert
+      .dom('[data-test-setting="windDirectionHistoryEnabled"]')
+      .isNotChecked('shown without enabling beta features, and off by default');
     assert.dom('[data-test-setting="betaFeaturesEnabled"]').isNotChecked();
     assert
       .dom(this.element)

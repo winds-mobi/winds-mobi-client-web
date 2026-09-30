@@ -71,11 +71,8 @@ export default class SettingsService extends Service {
   })
   favoritesFeatureEnabled!: boolean;
 
-  // Beta feature: wind direction arrows on the wind history chart
-  // (app/components/station/wind/presenter.gts). Its own toggle defaults
-  // off, unlike the two beta features above -- this one is new, not an
-  // already-shipped feature being retroactively gated -- so opting in takes
-  // two deliberate steps (betaFeaturesEnabled, then this) rather than one.
+  // Wind direction arrows on the wind history chart
+  // (app/components/station/wind/presenter.gts).
   @trackedInLocalStorage({
     keyName: 'settings.windDirectionHistoryEnabled',
     defaultValue: false,

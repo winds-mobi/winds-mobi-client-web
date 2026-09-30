@@ -151,12 +151,8 @@ module('Integration | Chart | point order', function (hooks) {
   });
 
   test('the wind stock chart Direction series renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
-    // Wind direction is a beta feature, off by default (app/services/
-    // settings.ts) -- opt in explicitly, the same way any other beta
-    // feature's tests do.
-    const settings = this.owner.lookup('service:settings');
-    settings.betaFeaturesEnabled = true;
-    settings.windDirectionHistoryEnabled = true;
+    // Wind direction is a setting, off by default (app/services/settings.ts).
+    this.owner.lookup('service:settings').windDirectionHistoryEnabled = true;
 
     set(this, 'data', outOfOrderHistory);
 

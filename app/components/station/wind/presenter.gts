@@ -33,16 +33,12 @@ export default class StationWindContent extends Component<StationWindContentSign
 
   zones = windColourZones();
 
-  // Beta feature (see app/services/settings.ts): the Direction windbarb
-  // series, its dedicated axis, and the extra Highcharts module it needs
-  // are all skipped entirely while this is false, not just hidden -- a
-  // user who hasn't opted in pays no extra computation, network, or axis
-  // bookkeeping for it.
+  // The Direction windbarb series, its dedicated axis, and the extra
+  // Highcharts module it needs are all skipped entirely while this setting is
+  // off, not just hidden -- a visitor who hasn't turned it on pays no extra
+  // computation, network, or axis bookkeeping for it.
   get windDirectionEnabled() {
-    return (
-      this.settings.betaFeaturesEnabled &&
-      this.settings.windDirectionHistoryEnabled
-    );
+    return this.settings.windDirectionHistoryEnabled;
   }
 
   // Same zones as Wind/Gusts (this.zones), converted to windbarb's own
