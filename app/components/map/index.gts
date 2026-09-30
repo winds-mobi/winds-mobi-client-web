@@ -58,6 +58,7 @@ import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import {
@@ -118,6 +119,7 @@ export default class Map extends Component<MapSignature> {
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
+  @service('hidden-stations') declare hiddenStations: HiddenStationsService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
@@ -272,10 +274,13 @@ export default class Map extends Component<MapSignature> {
   // the last loaded set so panning/zooming to new bounds doesn't blink markers
   // off while the new Future is pending. Because `request` is cached on the
   // routed view, `requestState` always reflects the Future for the current view.
+  // Hidden stations (#167) are left out.
   get stations(): Station[] {
-    return this.requestState?.isSuccess
-      ? this.requestState.value.data
-      : this.lastStations;
+    return this.hiddenStations.visible(
+      this.requestState?.isSuccess
+        ? this.requestState.value.data
+        : this.lastStations
+    );
   }
 
   get initOptions(): MapInitOptions {

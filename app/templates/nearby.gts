@@ -15,6 +15,7 @@ import StationSectionCard from 'winds-mobi-client-web/components/station/section
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
@@ -34,6 +35,7 @@ const NEARBY_LIMIT = 10;
 export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service declare intl: IntlService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
+  @service('hidden-stations') declare hiddenStations: HiddenStationsService;
   @service declare mapRefresh: MapRefreshService;
   @service declare settings: SettingsService;
   @service declare store: StoreService;
@@ -77,10 +79,13 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     this.lastStations = stations;
   };
 
+  // Hidden stations (#167) are left out.
   get stations(): Station[] {
-    return this.requestState?.isSuccess
-      ? this.requestState.value.data
-      : this.lastStations;
+    return this.hiddenStations.visible(
+      this.requestState?.isSuccess
+        ? this.requestState.value.data
+        : this.lastStations
+    );
   }
 
   // Reports to the shared refresh service whether nearby is currently loading, so

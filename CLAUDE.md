@@ -201,14 +201,14 @@ mid-interaction. Keep this direction; don't reintroduce imperative view bookkeep
 
 ### Routes & services
 
-Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `settings`, `help`; `index`
-redirects to `map`.
+Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `hidden` (reached from Settings,
+not the navbar), `settings`, `help`; `index` redirects to `map`.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `map-refresh`
 (ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
 (geolocation + Permissions API state machine), `settings` (persisted display preferences, see
-[Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites` (locally persisted
-favourite station ids).
+[Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites`/`hidden-stations` (locally
+persisted station id lists; `hiddenStations.visible(stations)` is the one place hidden stations are filtered out).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 

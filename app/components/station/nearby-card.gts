@@ -1,5 +1,6 @@
 import type { TOC } from '@ember/component/template-only';
 import StationFavoriteButton from './favorite-button';
+import StationHideButton from './hide-button';
 import StationHeader from './header';
 import StationMeta from './meta';
 import StationSummary from './summary';
@@ -25,7 +26,10 @@ const StationNearbyCard: TOC<StationNearbyCardSignature> = <template>
         <h2 class="min-w-0 font-bold text-slate-950">
           <StationHeader @station={{@station}} />
         </h2>
-        <StationFavoriteButton @station={{@station}} />
+        <div class="flex shrink-0 items-center">
+          <StationHideButton @station={{@station}} />
+          <StationFavoriteButton @station={{@station}} />
+        </div>
       </div>
       <StationMeta @station={{@station}} class="mt-1.5" />
     </div>

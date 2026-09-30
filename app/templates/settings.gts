@@ -11,7 +11,12 @@ import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/sh
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
+import SettingsShowcaseHidden from 'winds-mobi-client-web/components/settings/showcase/hidden';
+import SettingsHiddenStations from 'winds-mobi-client-web/components/settings/hidden-stations';
+import {
+  BETA_FEATURE_KEYS,
+  type default as SettingsService,
+} from 'winds-mobi-client-web/services/settings';
 
 interface SettingsTemplateSignature {
   Args: {
@@ -21,6 +26,14 @@ interface SettingsTemplateSignature {
 
 export default class SettingsTemplate extends Component<SettingsTemplateSignature> {
   @service declare settings: SettingsService;
+
+  get hasBetaFeatures(): boolean {
+    return BETA_FEATURE_KEYS.length > 0;
+  }
+
+  get showsHiddenStations(): boolean {
+    return this.settings.betaFeatureOn('hiddenStationsFeatureEnabled');
+  }
 
   <template>
     {{pageTitle (t "settings.title")}}
@@ -144,18 +157,34 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                 </p>
               </SettingsRow>
 
-              {{! Nothing is in beta right now. Replace this note with the
-                beta features' own rows when the next one arrives. }}
+              {{! One row per entry in BETA_FEATURE_KEYS; once that list is
+                empty, the note says nothing is in beta instead. }}
               {{#if this.settings.betaFeaturesEnabled}}
-                <p
-                  class="border-t border-amber-200 pt-3 text-sm text-amber-800"
-                  data-test-beta-features-empty
-                >
-                  {{t "settings.betaFeaturesEnabled.empty"}}
-                </p>
+                {{#if this.hasBetaFeatures}}
+                  <SettingsRow
+                    @settings={{this.settings}}
+                    @name="hiddenStationsFeatureEnabled"
+                    class="border-t border-amber-200 pt-3"
+                  >
+                    <SettingsShowcaseHidden
+                      @enabled={{this.settings.hiddenStationsFeatureEnabled}}
+                    />
+                  </SettingsRow>
+                {{else}}
+                  <p
+                    class="border-t border-amber-200 pt-3 text-sm text-amber-800"
+                    data-test-beta-features-empty
+                  >
+                    {{t "settings.betaFeaturesEnabled.empty"}}
+                  </p>
+                {{/if}}
               {{/if}}
             </div>
           </StationSectionCard>
+
+          {{#if this.showsHiddenStations}}
+            <SettingsHiddenStations />
+          {{/if}}
         </div>
       </div>
     </section>

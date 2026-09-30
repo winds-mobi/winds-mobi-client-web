@@ -68,16 +68,41 @@ export default class SettingsService extends Service {
   })
   windDirectionHistoryEnabled!: boolean;
 
+  // Beta feature: hiding a station (app/components/station/hide-button.gts)
+  // removes it from the map and the nearby list (#167), so a less useful
+  // station overlapping a better one doesn't have to be seen at all. Hidden
+  // stations are listed at the bottom of Settings and on the Hidden page
+  // (app/templates/hidden.gts). Defaults off, so opting in takes two
+  // deliberate steps (betaFeaturesEnabled, then this).
+  @trackedInLocalStorage({
+    keyName: 'settings.hiddenStationsFeatureEnabled',
+    defaultValue: false,
+  })
+  hiddenStationsFeatureEnabled!: boolean;
+
   // Early access to in-development features. Off by default; turning it on
   // reveals each individual beta feature's own toggle below it (see
   // app/templates/settings.gts for the warning shown alongside this toggle).
-  // No feature is in beta right now, so it reveals only a note saying so.
   @trackedInLocalStorage({
     keyName: 'settings.betaFeaturesEnabled',
     defaultValue: false,
   })
   betaFeaturesEnabled!: boolean;
+
+  // A beta feature is on only while beta features are enabled *and* its own
+  // toggle is: turning beta off switches every beta feature off with it
+  // (hidden stations then show again), whatever its own toggle still holds.
+  betaFeatureOn(feature: BetaFeatureKey): boolean {
+    return this.betaFeaturesEnabled && this[feature];
+  }
 }
+
+// Every feature currently in beta, by its own toggle. Settings shows each one's
+// row while this lists any, and a "nothing in beta" note once it's empty --
+// keep it in step with the beta rows in app/templates/settings.gts.
+export const BETA_FEATURE_KEYS = ['hiddenStationsFeatureEnabled'] as const;
+
+export type BetaFeatureKey = (typeof BETA_FEATURE_KEYS)[number];
 
 // The boolean preferences, named so the settings UI can drive each one through a
 // single generic row (read `settings[key]`, write `settings[key] = value`) and a
@@ -91,6 +116,7 @@ export type BooleanSettingKey =
   | 'favoritesCompactList'
   | 'useIconLabels'
   | 'windDirectionHistoryEnabled'
+  | 'hiddenStationsFeatureEnabled'
   | 'betaFeaturesEnabled';
 
 declare module '@ember/service' {

@@ -6,6 +6,7 @@ import { hash } from '@ember/helper';
 import type RouterService from '@ember/routing/router-service';
 import { Drawer } from 'frontile/overlays';
 import StationFavoriteButton from './favorite-button';
+import StationHideButton from './hide-button';
 import StationHeader from './header';
 import StationMeta from './meta';
 import StationSummary from './summary';
@@ -95,11 +96,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
     :actions block and a closeButton rendered out of flow beside it, rather
     than the position: absolute floating button earlier versions had) — no
     custom header row needed anymore. StationHeader's title link goes inside
-    h.Title as ordinary block content; StationFavoriteButton goes in :actions,
-    beside the close button, per Drawer's own documented pattern for header
-    controls — it decides for itself whether to render anything (see its own
-    comment), so this component doesn't need to know about the favourites
-    feature gate at all. The close button (left at its own default --
+    h.Title as ordinary block content; StationHideButton and
+    StationFavoriteButton go in :actions, beside the close button, per Drawer's
+    own documented pattern for header controls — each decides for itself
+    whether to render anything (see their own comments), so this component
+    doesn't need to know about the hiding feature gate at all. The close button (left at its own default --
     @allowCloseButton is on unless set otherwise) sits in its own reserved
     lane regardless and never competes with either for width.
 
@@ -141,6 +142,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
           </h.Title>
         </:default>
         <:actions>
+          <StationHideButton @station={{@station}} />
           <StationFavoriteButton @station={{@station}} />
         </:actions>
       </d.Header>

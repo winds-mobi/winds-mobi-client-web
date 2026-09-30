@@ -9,6 +9,7 @@ import type {
 } from 'winds-mobi-client-web/services/store.js';
 import StationAir from 'winds-mobi-client-web/components/station/air';
 import StationFavoriteButton from 'winds-mobi-client-web/components/station/favorite-button';
+import StationHideButton from 'winds-mobi-client-web/components/station/hide-button';
 import StationHeader from 'winds-mobi-client-web/components/station/header';
 import StationMeta from 'winds-mobi-client-web/components/station/meta';
 import StationSummary from 'winds-mobi-client-web/components/station/summary';
@@ -43,7 +44,10 @@ export default class HelpLiveStation extends Component<HelpLiveStationSignature>
           >
             <div class="flex min-w-0 items-start justify-between gap-2">
               <StationHeader @station={{result.data}} />
-              <StationFavoriteButton @station={{result.data}} />
+              <div class="flex shrink-0 items-center">
+                <StationHideButton @station={{result.data}} />
+                <StationFavoriteButton @station={{result.data}} />
+              </div>
             </div>
             <StationMeta @station={{result.data}} class="mt-1.5" />
           </div>

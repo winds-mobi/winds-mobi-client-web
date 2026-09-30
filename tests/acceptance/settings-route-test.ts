@@ -129,16 +129,19 @@ module('Acceptance | settings route', function (hooks) {
     );
   });
 
-  test('turning on beta features says none are in beta right now', async function (assert) {
+  test('turning on beta features reveals the hide-stations toggle, off by default, instead of the nothing-in-beta note', async function (assert) {
     await visit('/settings');
 
-    assert.dom('[data-test-beta-features-empty]').doesNotExist();
+    assert
+      .dom('[data-test-setting="hiddenStationsFeatureEnabled"]')
+      .doesNotExist();
 
     await click('[data-test-setting="betaFeaturesEnabled"]');
 
     assert
-      .dom('[data-test-beta-features-empty]')
-      .hasText('No features are in beta right now. Check back later.');
+      .dom('[data-test-setting="hiddenStationsFeatureEnabled"]')
+      .isNotChecked();
+    assert.dom('[data-test-beta-features-empty]').doesNotExist();
   });
 
   test('it navigates to settings from the mobile menu without reloading', async function (assert) {

@@ -11,6 +11,15 @@ favorites:
   emptyTitle: You have no favourite stations yet.
   emptyDescription: Stations you favourite show up here with their live readings.
 
+hidden:
+  title: Hidden stations
+  loading: Loading your hidden stations…
+  requestError: Your hidden stations could not be loaded right now.
+  emptyTitle: You have no hidden stations.
+  emptyDescription: >-
+    Stations you hide no longer show on the map or in the nearby list. Unhide
+    them here to bring them back.
+
 navigation:
   menu: Menu
   map: Map
@@ -68,6 +77,16 @@ settings:
     description: >-
       Show small arrows along the top of the wind history chart, pointing
       which way the gusts were blowing at each reading.
+  hiddenStationsFeatureEnabled:
+    label: Hide stations
+    description: >-
+      Show an eye button on each station panel to hide that station from the
+      map and the nearby list, for stations that overlap a more useful one.
+      Hidden stations are listed below. Stored in this browser only, no
+      account needed.
+  hiddenStations:
+    title: Hidden stations
+    link: Show hidden stations with their live readings
   betaFeaturesEnabled:
     label: Enable beta features
     description: >-
@@ -194,6 +213,9 @@ station:
   favorite:
     add: Add to favourites
     remove: Remove from favourites
+  hide:
+    add: Hide station
+    remove: Unhide station
   meta:
     altitude: Altitude
     updated: Updated

@@ -12,6 +12,7 @@ Router.map(function () {
   });
   this.route('nearby');
   this.route('favorites');
+  this.route('hidden');
   this.route('settings');
   this.route('help');
   this.route('not-found', { path: '/*path' });
