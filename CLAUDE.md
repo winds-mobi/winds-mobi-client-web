@@ -312,6 +312,12 @@ obvious from the decorator call site:
   declaration recovering type safety for both the decorator and the injectable `service:tracked-local-storage` it's
   backed by (registered on `@ember/service`'s `Registry` per the convention above) — extend that file, don't scatter
   `as any` casts, if you touch this surface.
+- **Retiring a stored value: list its key, don't just delete the field.** A visitor's browser keeps a `localStorage`
+  key forever unless something removes it, so when a setting (or any other persisted value) goes away — e.g. a beta
+  toggle whose feature becomes the default — add its key to `RETIRED_STORAGE_KEYS` in
+  [app/utils/retired-storage-keys.ts](app/utils/retired-storage-keys.ts). `ApplicationRoute#beforeModel` removes them
+  through `service:tracked-local-storage` on every boot, so each visitor is cleaned up on their next visit; removing an
+  absent key is a no-op, so entries can stay indefinitely.
 - **In tests, reset via the service, never raw `localStorage`.** The service owns an in-memory reactive cell per key
   that's seeded from `localStorage` exactly once; a bare `window.localStorage.removeItem(key)` clears the persisted
   value but leaves the cached cell stale, silently leaking a previous test's value into the next one — even across
