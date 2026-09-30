@@ -12,9 +12,6 @@ Router.map(function () {
   });
   this.route('nearby');
   this.route('favorites');
-  // TODO: Remove login — the auth-callback route backs the disabled sign-in
-  // feature (see app/services/session.ts). Restore alongside it.
-  // this.route('auth-callback', { path: '/auth/callback' });
   this.route('settings');
   this.route('help');
   this.route('not-found', { path: '/*path' });

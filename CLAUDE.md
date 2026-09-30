@@ -202,19 +202,26 @@ mid-interaction. Keep this direction; don't reintroduce imperative view bookkeep
 
 ### Routes & services
 
-Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `auth-callback` (path
-`/auth/callback`), `settings`, `help`; `index` redirects to `map`.
+Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `settings`, `help`; `index`
+redirects to `map`.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `map-refresh`
 (ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
 (geolocation + Permissions API state machine), `settings` (persisted display preferences, see
-[Settings persistence](#settings-persistence-tracked-local-storage) below), and ember-simple-auth's `session`
-(`app/authenticators/winds-mobi.ts`; sign-in is currently disabled — the code is kept commented, marked
-`TODO: Remove login`, and favourites are localStorage-only with no cross-device sync).
+[Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites` (locally persisted
+favourite station ids).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 
 ## Conventions (enforced — follow these)
+
+### No accounts, ever
+
+- **There is no sign-in and none is planned** — don't add accounts, auth, sessions, user profiles, or a
+  winds-mobi-admin user-API integration, and don't propose them as the fix for anything. Everything a visitor keeps
+  (favourites, settings) lives in this browser's localStorage only, with no cross-device sync; a
+  cross-device sync toggle was researched and rejected (no website-level browser-sync API exists). An earlier
+  Google/Facebook sign-in was shipped, withdrawn, and then deleted outright rather than kept commented out.
 
 ### Ember / reactivity
 
@@ -431,7 +438,7 @@ obvious from the decorator call site:
   fixtures (see [tests/acceptance/](tests/acceptance/)). This is deliberate over `ember-cli-mirage` — see the
   addon-first note above for why mirage doesn't work in this app at all (build-breaking, not just a style choice).
   Fake-store `request()` implementations that render history sections need to branch on `request.url` (e.g.
-  `.includes('/historic/')`) and return an **array** for history vs. a single record for a station/profile fetch —
+  `.includes('/historic/')`) and return an **array** for history vs. a single record for a station fetch —
   returning the wrong shape doesn't error at the fake-store layer, it throws deep inside Highcharts (`data.map is not
 a function`) when the chart tries to render it.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.

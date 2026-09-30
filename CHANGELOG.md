@@ -6,6 +6,13 @@
 
 - **🚀 Stable:** Clicking or tapping the map now always closes the open station panel, so you no longer have to aim for the close button. Clicking another station still switches straight to it, and panning the map leaves the panel open. The beta toggle for it is gone from Settings. ([#157](https://github.com/winds-mobi/winds-mobi-client-web/issues/157))
 
+## v0.25.0 - 2026-09-30
+
+### Removed
+
+- Removed the leftover code from the withdrawn Google/Facebook sign-in experiment, including its `/auth/callback` page. Favourite stations and settings stay stored in this browser only, with no account needed. ([#168](https://github.com/winds-mobi/winds-mobi-client-web/issues/168))
+  - _aka: less dead weight in the app you download. Nothing you can currently see changes._
+
 ## v0.24.0 - 2026-09-23
 
 ### Added
