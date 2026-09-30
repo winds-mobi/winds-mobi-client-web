@@ -9,8 +9,8 @@ import {
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
-import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // Every test in this module waits on MapLibre's `idle` event (directly or
 // via the bounds-driven station request it feeds) — see tests/helpers/webgl.ts.
@@ -20,29 +20,7 @@ type FakeStoreRequest = {
   url?: string;
 };
 
-const STATION_FIXTURES: Station[] = [
-  {
-    id: 'holfuy-1804',
-    altitude: 1804,
-    latitude: 46.67719,
-    longitude: 7.86323,
-    isPeak: false,
-    providerName: 'Holfuy',
-    providerUrl: 'https://example.com/stations/holfuy-1804',
-    name: 'Holfuy 1804',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-];
+const STATION_FIXTURES: Station[] = [stationFixture()];
 
 type StoreResponse = {
   content: { data: Station[] };

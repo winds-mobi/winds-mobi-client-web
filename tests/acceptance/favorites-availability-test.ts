@@ -1,9 +1,9 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, visit } from '@ember/test-helpers';
-import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // Favourites are always available: the nav link and the heart show for every
 // visitor, with no setting or beta toggle. Their behaviour is covered by
@@ -13,27 +13,10 @@ type FakeStoreRequest = {
   url?: string;
 };
 
-const STATION_FIXTURE: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
+const STATION_FIXTURE: Station = stationFixture({
   latitude: 46.521,
   longitude: 6.632,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+});
 
 class FakeStoreService extends Service {
   request(request: FakeStoreRequest) {

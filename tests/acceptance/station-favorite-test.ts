@@ -4,32 +4,16 @@ import { click, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 type FakeStoreRequest = {
   url?: string;
 };
 
-const STATION_FIXTURE: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
+const STATION_FIXTURE: Station = stationFixture({
   latitude: 46.521,
   longitude: 6.632,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+});
 
 const HISTORY_FIXTURES: History[] = [
   {

@@ -1,6 +1,6 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { Type } from '@warp-drive/core/types/symbols';
+
 import {
   setupRenderingTest,
   type RenderedTestContext,
@@ -8,32 +8,28 @@ import {
 import { windBandForSpeed } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import NavbarSearchResult from 'winds-mobi-client-web/components/navbar/search-result';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 interface NavbarSearchResultTestContext extends RenderedTestContext {
   station: Station;
 }
 
-const STATION: Station = {
+const STATION: Station = stationFixture({
   id: 'holfuy-1850',
   altitude: 560,
   latitude: 46.68084,
   longitude: 7.82554,
-  isPeak: false,
   providerName: 'holfuy.com',
-  providerUrl: 'https://example.com/stations/holfuy-1850',
   name: 'Lehn',
   last: {
-    timestamp: 1_710_000_000_000,
     direction: 30,
     speed: 8.5,
     gusts: 22,
     temperature: 12,
     humidity: 60,
     pressure: 1010,
-    rain: 0,
   },
-  [Type]: 'station',
-};
+});
 
 module('Integration | Component | navbar/search-result', function (hooks) {
   setupRenderingTest(hooks);

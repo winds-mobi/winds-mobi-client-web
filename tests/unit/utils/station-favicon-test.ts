@@ -1,33 +1,15 @@
 import { module, test } from 'qunit';
-import { Type } from '@warp-drive/core/types/symbols';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
 import {
   ARROW_DIRECTION_OFFSET,
   stationArrowGeometry,
 } from 'winds-mobi-client-web/utils/station-arrow';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
-const BASE_STATION: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: Date.now(),
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+const BASE_STATION: Station = stationFixture({
+  last: { timestamp: Date.now() },
+});
 
 function decode(dataUri: string): string {
   const [, payload] = dataUri.split(',');

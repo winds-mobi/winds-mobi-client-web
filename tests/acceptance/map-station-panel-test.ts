@@ -14,6 +14,7 @@ import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // Tests that drive the map itself (markers, clicks, the camera) need real
 // WebGL — see tests/helpers/webgl.ts.
@@ -53,36 +54,14 @@ type MapStationPanelTestContext = TestContext & {
   deferredSecondaryStationRequest?: DeferredRequest;
 };
 
-const PRIMARY_STATION: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+const PRIMARY_STATION: Station = stationFixture();
 
-const SECONDARY_STATION: Station = {
+const SECONDARY_STATION: Station = stationFixture({
   id: 'holfuy-2222',
   altitude: 2222,
   latitude: 46.70719,
   longitude: 7.91323,
   isPeak: true,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-2222',
   name: 'Holfuy 2222',
   last: {
     timestamp: 1_710_003_600_000,
@@ -92,10 +71,8 @@ const SECONDARY_STATION: Station = {
     temperature: 4,
     humidity: 50,
     pressure: 1009,
-    rain: 0,
   },
-  [Type]: 'station',
-};
+});
 
 const HISTORY: History[] = [
   {

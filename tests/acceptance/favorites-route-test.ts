@@ -2,56 +2,31 @@ import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 type FakeStoreRequest = {
   url?: string;
 };
 
 const STATION_FIXTURES: Station[] = [
-  {
-    id: 'holfuy-1804',
-    altitude: 1804,
-    latitude: 46.521,
-    longitude: 6.632,
-    isPeak: false,
-    providerName: 'Holfuy',
-    providerUrl: 'https://example.com/stations/holfuy-1804',
-    name: 'Holfuy 1804',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-  {
+  stationFixture({ latitude: 46.521, longitude: 6.632 }),
+  stationFixture({
     id: 'holfuy-2222',
     altitude: 2222,
     latitude: 46.53,
     longitude: 6.64,
     isPeak: true,
-    providerName: 'Holfuy',
-    providerUrl: 'https://example.com/stations/holfuy-2222',
     name: 'Holfuy 2222',
     last: {
-      timestamp: 1_710_000_000_000,
       direction: 220,
       speed: 20,
       gusts: 28,
       temperature: 3,
       humidity: 58,
       pressure: 1008,
-      rain: 0,
     },
-    [Type]: 'station',
-  },
+  }),
 ];
 
 class FakeStoreService extends Service {

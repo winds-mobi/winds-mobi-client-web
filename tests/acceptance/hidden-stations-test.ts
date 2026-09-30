@@ -2,57 +2,11 @@ import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-import { Type } from '@warp-drive/core/types/symbols';
-import type { Station } from 'winds-mobi-client-web/services/store';
+import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 type FakeStoreRequest = {
   url?: string;
 };
-
-const STATION_FIXTURES: Station[] = [
-  {
-    id: 'meteoswiss-PMA',
-    altitude: 2500,
-    latitude: 46.577,
-    longitude: 9.53,
-    isPeak: true,
-    providerName: 'MeteoSwiss',
-    providerUrl: 'https://example.com/stations/meteoswiss-PMA',
-    name: 'Piz Martegnas',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-  {
-    id: 'slf-PMA2',
-    altitude: 2450,
-    latitude: 46.5768,
-    longitude: 9.5292,
-    isPeak: false,
-    providerName: 'SLF',
-    providerUrl: 'https://example.com/stations/slf-PMA2',
-    name: 'Colms da Parsonz',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 220,
-      speed: 2,
-      gusts: 4,
-      temperature: 3,
-      humidity: 58,
-      pressure: 1008,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-];
 
 class FakeStoreService extends Service {
   calls: string[] = [];
@@ -69,7 +23,7 @@ class FakeStoreService extends Service {
       return Promise.resolve({ content: { data: [] }, request });
     }
 
-    const singleStation = STATION_FIXTURES.find((station) =>
+    const singleStation = OVERLAPPING_STATIONS.find((station) =>
       url.includes(`/stations/${station.id}/?`)
     );
 
@@ -84,8 +38,8 @@ class FakeStoreService extends Service {
       content: {
         data:
           ids.length > 0
-            ? STATION_FIXTURES.filter((station) => ids.includes(station.id))
-            : STATION_FIXTURES,
+            ? OVERLAPPING_STATIONS.filter((station) => ids.includes(station.id))
+            : OVERLAPPING_STATIONS,
       },
       // WarpDrive's `<Request>` `state.refresh()` replays the request it
       // finds echoed back on a resolved response -- without it, a refresh

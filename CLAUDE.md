@@ -495,7 +495,9 @@ obvious from the decorator call site:
 ### Testing
 
 - Acceptance tests register fake store services that satisfy requests by `url` and return typed `Station`/`History`
-  fixtures (see [tests/acceptance/](tests/acceptance/)). This is deliberate over `ember-cli-mirage` — see the
+  fixtures (see [tests/acceptance/](tests/acceptance/)). Build a `Station` with `stationFixture({...})` from
+  [tests/helpers/station-fixture.ts](tests/helpers/station-fixture.ts), passing only the fields the test depends on;
+  `OVERLAPPING_STATIONS` there is #167's pair of overlapping stations. This is deliberate over `ember-cli-mirage` — see the
   addon-first note above for why mirage doesn't work in this app at all (build-breaking, not just a style choice).
   Fake-store `request()` implementations that render history sections need to branch on `request.url` (e.g.
   `.includes('/historic/')`) and return an **array** for history vs. a single record for a station fetch —

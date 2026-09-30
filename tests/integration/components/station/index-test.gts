@@ -1,13 +1,13 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render, settled, waitUntil } from '@ember/test-helpers';
-import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import StationPanel from 'winds-mobi-client-web/components/station/index';
 import { trackedObject } from '@ember/reactive/collections';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 type FakeStoreRequest = { url?: string };
 
@@ -27,27 +27,7 @@ class FakeStoreService extends Service {
   }
 }
 
-const STATION: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+const STATION: Station = stationFixture();
 
 // The raw (pre-handler) API shape of `STATION`, under a given name.
 function stationPayload(name: string) {
