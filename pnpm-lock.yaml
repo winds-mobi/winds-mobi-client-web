@@ -204,9 +204,6 @@ importers:
       ember-resolver:
         specifier: ^13.2.0
         version: 13.2.0
-      ember-simple-auth:
-        specifier: ^8.3.1
-        version: 8.3.1(@ember/test-helpers@5.4.3(@babel/core@7.28.4))(ember-source@7.1.0(@glimmer/component@2.1.1))
       ember-source:
         specifier: ~7.1.0
         version: 7.1.0(@glimmer/component@2.1.1)
@@ -4101,12 +4098,6 @@ packages:
       '@glint/template':
         optional: true
 
-  ember-cookies@1.4.1:
-    resolution: {integrity: sha512-9uDgVQ27YGhRXSy2DO7pTd/NxVvXWBkRTFNGIhaW2tXTk9pD7q7Wp93pLzjiX38mtm4nwl/qdB28ZJ8PgfcWPw==}
-    engines: {node: '>= 16.*'}
-    peerDependencies:
-      ember-source: '>=6.0 || >=4.0'
-
   ember-css-transitions@4.5.0:
     resolution: {integrity: sha512-ZOj1Oa0T2IdBHOgjhJdM4Kx97mo9XdIfHDR5COskMB5iPoE6oI9i4M2gtG7QgicS2Epc7t2xUuD/NIT4ujbjUA==}
 
@@ -4196,15 +4187,6 @@ packages:
   ember-router-generator@2.0.0:
     resolution: {integrity: sha512-89oVHVJwmLDvGvAUWgS87KpBoRhy3aZ6U0Ql6HOmU4TrPkyaa8pM0W81wj9cIwjYprcQtN9EwzZMHnq46+oUyw==}
     engines: {node: 8.* || 10.* || >= 12}
-
-  ember-simple-auth@8.3.1:
-    resolution: {integrity: sha512-n0nKTJwvLC3Aoz29mWu9SJW6uKP8/zY5kUU1Akbml4HFXaTIMQP6zMLfqEcxpUd90tIDXflPN+gu1++vI1qOfg==}
-    peerDependencies:
-      '@ember/test-helpers': '>=4 || >= 3 || > 2.7'
-      ember-source: '>=6.0 || >=4.0'
-    peerDependenciesMeta:
-      '@ember/test-helpers':
-        optional: true
 
   ember-source@7.1.0:
     resolution: {integrity: sha512-qOHhTiVMeYcNp2UQKuAqsf33LKgNtzqvw46dQX5AqutTfXXPn4KYR0+aiGQdJaCuzs81nFvvTDJuHzELOZ5UBg==}
@@ -13376,13 +13358,6 @@ snapshots:
       - '@babel/core'
       - supports-color
 
-  ember-cookies@1.4.1(ember-source@7.1.0(@glimmer/component@2.1.1)):
-    dependencies:
-      '@embroider/addon-shim': 1.10.3
-      ember-source: 7.1.0(@glimmer/component@2.1.1)
-    transitivePeerDependencies:
-      - supports-color
-
   ember-css-transitions@4.5.0(@babel/core@7.28.4):
     dependencies:
       '@ember/test-waiters': 4.1.2
@@ -13521,17 +13496,6 @@ snapshots:
       '@babel/parser': 7.29.7
       '@babel/traverse': 7.29.7
       recast: 0.18.10
-    transitivePeerDependencies:
-      - supports-color
-
-  ember-simple-auth@8.3.1(@ember/test-helpers@5.4.3(@babel/core@7.28.4))(ember-source@7.1.0(@glimmer/component@2.1.1)):
-    dependencies:
-      '@ember/test-waiters': 4.1.2
-      '@embroider/addon-shim': 1.10.2
-      ember-cookies: 1.4.1(ember-source@7.1.0(@glimmer/component@2.1.1))
-      ember-source: 7.1.0(@glimmer/component@2.1.1)
-    optionalDependencies:
-      '@ember/test-helpers': 5.4.3(@babel/core@7.28.4)
     transitivePeerDependencies:
       - supports-color
 

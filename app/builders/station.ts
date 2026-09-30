@@ -163,7 +163,7 @@ function nearbyQuery<T extends TypedRecordInstance>(
   );
 }
 
-// Fetches an explicit set of stations (the profile's favorites) by id.
+// Fetches an explicit set of stations (the visitor's favourites) by id.
 // No duplicates filtering: the user picked these exact stations.
 function favoritesQuery<T extends TypedRecordInstance>(
   type: TypeFromInstance<T>,
@@ -174,7 +174,7 @@ function favoritesQuery<T extends TypedRecordInstance>(
     type,
     {
       // Copy: buildQueryParams sorts array params in place for stable cache
-      // URLs, and the caller's array is the profile record's favorites.
+      // URLs, and the caller's array is the favorites service's own list.
       ids: [...ids],
       limit: ids.length,
     },

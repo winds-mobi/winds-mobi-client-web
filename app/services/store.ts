@@ -3,9 +3,6 @@ import { DefaultCachePolicy } from '@warp-drive/core/store';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
-// TODO: Remove login — UserHandler backs the disabled sign-in feature (see
-// app/services/session.ts). Restore this import alongside it.
-// import UserHandler from 'winds-mobi-client-web/handlers/user';
 import { withDefaults } from '@warp-drive/core/reactive';
 import type { ObjectSchema } from '@warp-drive/core/types/schema/fields';
 import type { ObjectValue } from '@warp-drive/core/types/json/raw';
@@ -96,18 +93,6 @@ export const HistorySchema = withDefaults({
   ],
 });
 
-// TODO: Remove login — the authenticated user's profile from the
-// winds-mobi-admin user API. Favourites no longer read from this; see
-// app/services/favorites.ts. Restore alongside app/services/session.ts.
-// export const ProfileSchema = withDefaults({
-//   type: 'profile',
-//   fields: [
-//     { name: 'displayName', kind: 'field' },
-//     { name: 'picture', kind: 'field' },
-//     { name: 'favorites', kind: 'array' },
-//   ],
-// });
-
 export type Station = {
   id: string;
   altitude: number;
@@ -129,18 +114,6 @@ export type Station = {
   };
 
   [Type]: 'station';
-};
-
-// TODO: Remove login — Profile type paired with the commented-out
-// ProfileSchema above. Kept live (types are inert at runtime) so
-// app/builders/profile.ts keeps compiling.
-export type Profile = {
-  id: string;
-  displayName?: string;
-  picture?: string;
-  favorites: string[];
-
-  [Type]: 'profile';
 };
 
 export type History = {
@@ -209,11 +182,7 @@ const AppStore = useLegacyStore({
   legacyRequests: true,
   modelFragments: true,
   cache: JSONAPICache,
-  // TODO: Remove login — ProfileSchema was listed here; restore alongside it.
   schemas: [LocationSchema, StationSchema, HistorySchema],
-  // TODO: Remove login — UserHandler ran first here: it owns the user-API
-  // requests (auth header + profile reshaping) and must run before the
-  // station/history reshapers see them. Restore alongside it.
   handlers: [StationHandler, HistoryHandler],
   derivations: [unwrapDerivation, composeReadingDerivation],
   // Warp Drive's own default (30s soft / 15min hard) means a manual refresh

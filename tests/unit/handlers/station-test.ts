@@ -54,17 +54,6 @@ module('Unit | Handler | station', function () {
     assert.false('status' in response.attributes);
   });
 
-  test('it passes user-API requests through untouched', async function (assert) {
-    const upstream = { content: { _id: 'user-1', favorites: [] } };
-
-    const response = await StationHandler.request(
-      fakeContext('https://winds.mobi/user/profile/'),
-      fakeNext(upstream)
-    );
-
-    assert.strictEqual(response, upstream);
-  });
-
   test('it keeps explicit provider fields from a detail payload', async function (assert) {
     const response = responseData(
       await StationHandler.request<{
