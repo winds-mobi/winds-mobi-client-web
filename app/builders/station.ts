@@ -163,9 +163,10 @@ function nearbyQuery<T extends TypedRecordInstance>(
   );
 }
 
-// Fetches an explicit set of stations (the visitor's favourites) by id.
-// No duplicates filtering: the user picked these exact stations.
-function favoritesQuery<T extends TypedRecordInstance>(
+// Fetches an explicit set of stations by id — used by the locally persisted
+// id lists (favourites, hidden stations). No duplicates filtering: the visitor
+// picked these exact stations.
+function byIdsQuery<T extends TypedRecordInstance>(
   type: TypeFromInstance<T>,
   ids: string[],
   options?: ConstrainedRequestOptions
@@ -174,7 +175,7 @@ function favoritesQuery<T extends TypedRecordInstance>(
     type,
     {
       // Copy: buildQueryParams sorts array params in place for stable cache
-      // URLs, and the caller's array is the favorites service's own list.
+      // URLs, and the caller's array is a service's own id list.
       ids: [...ids],
       limit: ids.length,
     },
@@ -205,11 +206,4 @@ function searchQuery<T extends TypedRecordInstance>(
   );
 }
 
-export {
-  favoritesQuery,
-  findRecord,
-  mapQuery,
-  nearbyQuery,
-  query,
-  searchQuery,
-};
+export { byIdsQuery, findRecord, mapQuery, nearbyQuery, query, searchQuery };

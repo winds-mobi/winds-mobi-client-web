@@ -6,7 +6,7 @@ import { getRequestState } from '@warp-drive/core/reactive';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
 import { Alert } from 'frontile/status';
-import { favoritesQuery } from 'winds-mobi-client-web/builders/station';
+import { byIdsQuery } from 'winds-mobi-client-web/builders/station';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
@@ -51,7 +51,7 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
     void this.mapRefresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
-      favoritesQuery<Station>('station', ids)
+      byIdsQuery<Station>('station', ids)
     );
   }
 

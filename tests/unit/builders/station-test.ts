@@ -1,6 +1,6 @@
 import { module, test } from 'qunit';
 import {
-  favoritesQuery,
+  byIdsQuery,
   findRecord,
   mapQuery,
   searchQuery,
@@ -30,8 +30,8 @@ module('Unit | Builder | station', function () {
     );
   });
 
-  test('favoritesQuery fetches exactly the given station ids', function (assert) {
-    const request = favoritesQuery('station', ['holfuy-1850', 'jdc-1001']) as {
+  test('byIdsQuery fetches exactly the given station ids', function (assert) {
+    const request = byIdsQuery('station', ['holfuy-1850', 'jdc-1001']) as {
       url: string;
     };
     const url = new URL(request.url, 'https://winds.mobi');
