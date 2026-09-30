@@ -1,13 +1,13 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import HelpLiveStation from 'winds-mobi-client-web/components/help/live-station';
 
 interface HelpLiveStationTestContext extends RenderedTestContext {
   stationId: string;
@@ -63,9 +63,11 @@ module('Integration | Component | help/live-station', function (hooks) {
   });
 
   test('it renders the station once loaded', async function (this: HelpLiveStationTestContext, assert) {
-    this.stationId = 'holfuy-1804';
+    const stationId: HelpLiveStationTestContext['stationId'] = 'holfuy-1804';
 
-    await render(hbs`<Help::LiveStation @stationId={{this.stationId}} />`);
+    await render(
+      <template><HelpLiveStation @stationId={{stationId}} /></template>
+    );
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
   });
@@ -80,9 +82,11 @@ module('Integration | Component | help/live-station', function (hooks) {
       // Prevent an unhandled-rejection warning.
     });
     store.stationResponse = rejection;
-    this.stationId = 'holfuy-1804';
+    const stationId: HelpLiveStationTestContext['stationId'] = 'holfuy-1804';
 
-    await render(hbs`<Help::LiveStation @stationId={{this.stationId}} />`);
+    await render(
+      <template><HelpLiveStation @stationId={{stationId}} /></template>
+    );
 
     assert
       .dom(this.element)

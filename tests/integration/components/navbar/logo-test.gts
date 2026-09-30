@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import NavbarLogo from 'winds-mobi-client-web/components/navbar/logo';
 
 // The link's query-param reset-to-default behaviour needs a full app boot to
 // resolve the map controller's queryParams (a bare rendering test renders a
@@ -12,7 +12,7 @@ module('Integration | Component | navbar/logo', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders the app name and logo image', async function (assert) {
-    await render(hbs`<Navbar::Logo />`);
+    await render(<template><NavbarLogo /></template>);
 
     assert.dom('[data-test-navbar-logo] img').hasAttribute('src', '/logo.svg');
     assert.dom('[data-test-navbar-logo] img').hasAttribute('alt', 'winds.mobi');

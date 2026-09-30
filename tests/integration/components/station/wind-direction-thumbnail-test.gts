@@ -1,10 +1,10 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationWindDirectionThumbnail from 'winds-mobi-client-web/components/station/wind-direction-thumbnail';
 
 interface StationWindDirectionThumbnailTestContext extends RenderingTestContext {
   stationId: string;
@@ -61,10 +61,13 @@ module(
         },
       });
 
-      this.stationId = 'holfuy-1804';
+      const stationId: StationWindDirectionThumbnailTestContext['stationId'] =
+        'holfuy-1804';
 
       await render(
-        hbs`<Station::WindDirectionThumbnail @stationId={{this.stationId}} />`
+        <template>
+          <StationWindDirectionThumbnail @stationId={{stationId}} />
+        </template>
       );
 
       assert.dom('.highcharts-container').exists();
@@ -81,10 +84,13 @@ module(
         // only about how the component renders the error state.
       });
       store.response = rejection;
-      this.stationId = 'holfuy-1804';
+      const stationId: StationWindDirectionThumbnailTestContext['stationId'] =
+        'holfuy-1804';
 
       await render(
-        hbs`<Station::WindDirectionThumbnail @stationId={{this.stationId}} />`
+        <template>
+          <StationWindDirectionThumbnail @stationId={{stationId}} />
+        </template>
       );
 
       assert.dom('.highcharts-container').exists();

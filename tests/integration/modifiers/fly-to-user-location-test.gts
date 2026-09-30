@@ -1,9 +1,8 @@
 import { module, test } from 'qunit';
 import { render, settled } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
-import { set } from '@ember/object';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type RouterService from '@ember/routing/router-service';
+import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 
 function stubReplaceWith(router: RouterService) {
   const calls: unknown[] = [];
@@ -46,9 +45,13 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
       latitude: 46.521,
       longitude: 6.632,
     };
-    set(this, 'enabled', true);
+    const enabled = true;
 
-    await render(hbs`<div {{fly-to-user-location this.enabled}}></div>`);
+    await render(
+      <template>
+        <div {{flyToUserLocation enabled}}></div>
+      </template>
+    );
 
     assert.strictEqual(calls.length, 1);
     assert.deepEqual(calls[0], {
@@ -67,9 +70,13 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
       latitude: 46.521,
       longitude: 6.632,
     };
-    set(this, 'enabled', false);
+    const enabled = false;
 
-    await render(hbs`<div {{fly-to-user-location this.enabled}}></div>`);
+    await render(
+      <template>
+        <div {{flyToUserLocation enabled}}></div>
+      </template>
+    );
 
     assert.strictEqual(calls.length, 0);
   });
@@ -79,9 +86,13 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
     const calls = stubReplaceWith(router);
 
     stubCurrentRouteQueryParams(router, {});
-    set(this, 'enabled', true);
+    const enabled = true;
 
-    await render(hbs`<div {{fly-to-user-location this.enabled}}></div>`);
+    await render(
+      <template>
+        <div {{flyToUserLocation enabled}}></div>
+      </template>
+    );
 
     assert.strictEqual(calls.length, 0);
   });
@@ -101,9 +112,13 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
       latitude: 46.521,
       longitude: 6.632,
     };
-    set(this, 'enabled', true);
+    const enabled = true;
 
-    await render(hbs`<div {{fly-to-user-location this.enabled}}></div>`);
+    await render(
+      <template>
+        <div {{flyToUserLocation enabled}}></div>
+      </template>
+    );
 
     assert.strictEqual(calls.length, 0);
   });
@@ -114,9 +129,13 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
     const calls = stubReplaceWith(router);
 
     stubCurrentRouteQueryParams(router, {});
-    set(this, 'enabled', true);
+    const enabled = true;
 
-    await render(hbs`<div {{fly-to-user-location this.enabled}}></div>`);
+    await render(
+      <template>
+        <div {{flyToUserLocation enabled}}></div>
+      </template>
+    );
 
     assert.strictEqual(calls.length, 0, 'nothing yet -- coordinates unknown');
 

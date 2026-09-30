@@ -465,6 +465,11 @@ a function`) when the chart tries to render it.
   string whose exact ICU/Intl unit-format output isn't worth hand-deriving (e.g. `station/metric-card`'s
   `intl.formatNumber(..., {format: 'windSpeed'})`), capture it empirically via a throwaway debug render
   (`console.log` the text, read it from the test-runner output, delete the debug test) rather than guessing.
+- Rendering tests are `.gts` files that render `<template>` tags, importing each component they use (no `hbs`
+  strings, no resolver `::` names), so Glint type-checks their arguments. Pass values as locals the template closes
+  over; for a value a test changes after rendering, use a `trackedObject` from `@ember/reactive/collections` and
+  assign to it. Don't alias `this` into a template (`@typescript-eslint/no-this-alias` rejects `const self = this`),
+  and don't use `this.set`.
 - `pnpm lint` runs ESLint (type-aware, cached) and Glint type-checking (`lint:types`, `ember-tsc --noEmit`)
   alongside the other linters, and CI enforces all of them. The tree is typecheck-clean — keep it that way; fix new
   errors rather than working around them. When a rendering test needs a custom `this` context type, extend

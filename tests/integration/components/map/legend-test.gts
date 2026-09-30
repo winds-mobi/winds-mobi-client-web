@@ -4,9 +4,9 @@ import {
   render,
   type RenderingTestContext,
 } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { WindLegendBand } from 'winds-mobi-client-web/components/map/legend';
+import MapLegend from 'winds-mobi-client-web/components/map/legend';
 
 interface MapLegendTestContext extends RenderingTestContext {
   bands: WindLegendBand[];
@@ -16,14 +16,14 @@ module('Integration | Component | map/legend', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders the title and one entry per band', async function (this: MapLegendTestContext, assert) {
-    this.bands = [
+    const bands: MapLegendTestContext['bands'] = [
       { backgroundClass: 'bg-wind-05', label: '5' },
       { backgroundClass: 'bg-wind-10', label: '10' },
       { backgroundClass: 'bg-wind-50', label: '45+' },
     ];
 
     await render(
-      hbs`<Map::Legend @title="Wind speed" @bands={{this.bands}} />`
+      <template><MapLegend @title="Wind speed" @bands={{bands}} /></template>
     );
 
     assert.dom('[data-test-map-wind-legend] p').hasText('Wind speed');

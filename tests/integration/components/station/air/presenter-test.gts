@@ -1,9 +1,9 @@
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationAirPresenter from 'winds-mobi-client-web/components/station/air/presenter';
 
 interface AirPresenterTestContext extends RenderingTestContext {
   history: History[];
@@ -19,7 +19,7 @@ module('Integration | Component | station/air/presenter', function (hooks) {
   test('it renders the chart for recent history', async function (this: AirPresenterTestContext, assert) {
     const now = Date.now();
 
-    this.history = [
+    const history: AirPresenterTestContext['history'] = [
       {
         id: 'history-1',
         direction: 180,
@@ -45,17 +45,21 @@ module('Integration | Component | station/air/presenter', function (hooks) {
     ];
 
     await render(
-      hbs`<Station::Air::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationAirPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();
   });
 
   test('it renders the chart when there is no history', async function (this: AirPresenterTestContext, assert) {
-    this.history = [];
+    const history: AirPresenterTestContext['history'] = [];
 
     await render(
-      hbs`<Station::Air::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationAirPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();

@@ -1,10 +1,11 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
+import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
+import { trackedObject } from '@ember/reactive/collections';
 
 interface Ctx extends RenderedTestContext {
   enabled: boolean;
@@ -16,18 +17,22 @@ module(
     setupRenderingTest(hooks);
 
     test('it shows text labels when disabled and icons when enabled', async function (this: Ctx, assert) {
-      this.enabled = false;
+      const state = trackedObject({ enabled: false });
 
       await render(
-        hbs`<Settings::Showcase::IconLabels @enabled={{this.enabled}} />`
+        <template>
+          <SettingsShowcaseIconLabels @enabled={{state.enabled}} />
+        </template>
       );
       assert.dom(this.element).includesText('Temperature');
       assert.dom(this.element).includesText('Humidity');
       assert.dom('svg').doesNotExist();
 
-      this.enabled = true;
+      state.enabled = true;
       await render(
-        hbs`<Settings::Showcase::IconLabels @enabled={{this.enabled}} />`
+        <template>
+          <SettingsShowcaseIconLabels @enabled={{state.enabled}} />
+        </template>
       );
       assert.dom('svg').exists({ count: 2 });
     });

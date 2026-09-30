@@ -5,12 +5,14 @@ import {
   settled,
   type RenderingTestContext,
 } from '@ember/test-helpers';
-import { set } from '@ember/object';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationLastHour from 'winds-mobi-client-web/components/station/last-hour';
+import StationWindPresenter from 'winds-mobi-client-web/components/station/wind/presenter';
+import StationWindDirectionGraph from 'winds-mobi-client-web/components/station/wind-direction/graph';
+import { trackedObject } from '@ember/reactive/collections';
 
 interface Ctx extends RenderingTestContext {
   data: History[];
@@ -101,13 +103,15 @@ module('Integration | Chart | point order', function (hooks) {
   ];
 
   test('the polar wind-direction chart renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
-    set(this, 'data', outOfOrderHistory);
+    const data: Ctx['data'] = outOfOrderHistory;
 
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::WindDirection::Graph @data={{this.data}} />
-      </div>
-    `);
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindDirectionGraph @data={{data}} />
+        </div>
+      </template>
+    );
 
     const Highcharts = (await import('highcharts')).default;
     // QUnit renders every test's charts into the same page, so `charts`
@@ -127,13 +131,15 @@ module('Integration | Chart | point order', function (hooks) {
   });
 
   test('the wind stock chart renders points in the given array order, not sorted by time', async function (this: Ctx, assert) {
-    set(this, 'data', outOfOrderHistory);
+    const data: Ctx['data'] = outOfOrderHistory;
 
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::Wind::Presenter @history={{this.data}} @stationId="holfuy-1829" />
-      </div>
-    `);
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindPresenter @history={{data}} @stationId="holfuy-1829" />
+        </div>
+      </template>
+    );
 
     const Highcharts = (await import('highcharts')).default;
     const chart = Highcharts.charts.findLast(
@@ -154,13 +160,15 @@ module('Integration | Chart | point order', function (hooks) {
     // Wind direction is a setting, off by default (app/services/settings.ts).
     this.owner.lookup('service:settings').windDirectionHistoryEnabled = true;
 
-    set(this, 'data', outOfOrderHistory);
+    const data: Ctx['data'] = outOfOrderHistory;
 
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::Wind::Presenter @history={{this.data}} @stationId="holfuy-1829" />
-      </div>
-    `);
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindPresenter @history={{data}} @stationId="holfuy-1829" />
+        </div>
+      </template>
+    );
 
     const Highcharts = (await import('highcharts')).default;
     const chart = Highcharts.charts.findLast((c) =>
@@ -249,15 +257,17 @@ module('Integration | Chart | point order', function (hooks) {
     store.responses.set(lastHourRequestUrl('holfuy-1829'), stationA);
     store.responses.set(lastHourRequestUrl('holfuy-1808'), stationB);
 
-    set(this, 'stationId', 'holfuy-1829');
-    await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
+    const state = trackedObject({ stationId: 'holfuy-1829' });
+    await render(
+      <template><StationLastHour @stationId={{state.stationId}} /></template>
+    );
 
     const Highcharts = (await import('highcharts')).default;
     const chartBefore = Highcharts.charts.findLast(
       (c) => c && c.options.chart?.polar
     );
 
-    set(this, 'stationId', 'holfuy-1808');
+    state.stationId = 'holfuy-1808';
     await settled();
 
     const chartAfter = Highcharts.charts.findLast(
@@ -342,14 +352,16 @@ module('Integration | Chart | point order', function (hooks) {
       },
     ];
 
-    set(this, 'data', stationA);
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::WindDirection::Graph @data={{this.data}} />
-      </div>
-    `);
+    const state = trackedObject({ data: stationA });
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindDirectionGraph @data={{state.data}} />
+        </div>
+      </template>
+    );
 
-    set(this, 'data', stationB);
+    state.data = stationB;
     await settled();
 
     const Highcharts = (await import('highcharts')).default;
@@ -429,14 +441,16 @@ module('Integration | Chart | point order', function (hooks) {
       },
     ];
 
-    set(this, 'data', round1);
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::WindDirection::Graph @data={{this.data}} />
-      </div>
-    `);
+    const state = trackedObject({ data: round1 });
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindDirectionGraph @data={{state.data}} />
+        </div>
+      </template>
+    );
 
-    set(this, 'data', round2);
+    state.data = round2;
     await settled();
 
     const Highcharts = (await import('highcharts')).default;

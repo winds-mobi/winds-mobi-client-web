@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { findAll, render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 
 type Ctx = { enabled: boolean };
 
@@ -13,9 +13,11 @@ module('Integration | Component | settings/showcase/shrink', function (hooks) {
   setupRenderingTest(hooks);
 
   test('every sample stays full size when disabled', async function (this: Ctx, assert) {
-    this.enabled = false;
+    const enabled = false;
 
-    await render(hbs`<Settings::Showcase::Shrink @enabled={{this.enabled}} />`);
+    await render(
+      <template><SettingsShowcaseShrink @enabled={{enabled}} /></template>
+    );
 
     const transforms = sampleTransforms();
 
@@ -24,9 +26,11 @@ module('Integration | Component | settings/showcase/shrink', function (hooks) {
   });
 
   test('older samples shrink when enabled', async function (this: Ctx, assert) {
-    this.enabled = true;
+    const enabled = true;
 
-    await render(hbs`<Settings::Showcase::Shrink @enabled={{this.enabled}} />`);
+    await render(
+      <template><SettingsShowcaseShrink @enabled={{enabled}} /></template>
+    );
 
     const [now, tenMin, twentyMin, thirtyMin] = sampleTransforms();
 

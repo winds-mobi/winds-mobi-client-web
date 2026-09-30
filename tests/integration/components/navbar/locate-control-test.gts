@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { click, render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import NavbarLocateControl from 'winds-mobi-client-web/components/navbar/locate-control';
 
 module('Integration | Component | navbar/locate-control', function (hooks) {
   setupRenderingTest(hooks);
@@ -10,7 +10,7 @@ module('Integration | Component | navbar/locate-control', function (hooks) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     nearbyLocation.permissionState = 'checking';
 
-    await render(hbs`<Navbar::LocateControl />`);
+    await render(<template><NavbarLocateControl /></template>);
 
     assert.dom('[data-test-navbar-locate]').isDisabled();
   });
@@ -20,7 +20,7 @@ module('Integration | Component | navbar/locate-control', function (hooks) {
     nearbyLocation.permissionState = 'prompt';
     nearbyLocation.requestState = 'idle';
 
-    await render(hbs`<Navbar::LocateControl />`);
+    await render(<template><NavbarLocateControl /></template>);
 
     assert.dom('[data-test-navbar-locate]').isNotDisabled();
   });
@@ -29,7 +29,7 @@ module('Integration | Component | navbar/locate-control', function (hooks) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     nearbyLocation.permissionState = 'unsupported';
 
-    await render(hbs`<Navbar::LocateControl />`);
+    await render(<template><NavbarLocateControl /></template>);
 
     assert.dom('[data-test-navbar-locate]').isDisabled();
   });
@@ -44,7 +44,7 @@ module('Integration | Component | navbar/locate-control', function (hooks) {
       return Promise.resolve();
     };
 
-    await render(hbs`<Navbar::LocateControl />`);
+    await render(<template><NavbarLocateControl /></template>);
     await click('[data-test-navbar-locate]');
 
     assert.true(requested);

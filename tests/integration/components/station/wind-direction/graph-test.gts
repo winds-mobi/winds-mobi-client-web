@@ -1,9 +1,9 @@
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationWindDirectionGraph from 'winds-mobi-client-web/components/station/wind-direction/graph';
 
 const LAST_HOUR = 1 * 60 * 60 * 1000;
 
@@ -28,9 +28,11 @@ module(
     setupRenderingTest(hooks);
 
     test('it renders the chart when there is no history', async function (this: WindDirectionGraphTestContext, assert) {
-      this.data = [];
+      const data: WindDirectionGraphTestContext['data'] = [];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       assert.dom('.highcharts-container').exists();
     });
@@ -44,7 +46,7 @@ module(
     // (`.highcharts-container`) -- reading that confirms our option actually
     // reached and took effect on the real chart, not just that we passed it.
     test('it pins the chart to light mode regardless of the OS/browser color scheme preference', async function (this: WindDirectionGraphTestContext, assert) {
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'reading',
           direction: 180,
@@ -58,7 +60,9 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       assert
         .dom('.highcharts-container')
@@ -66,7 +70,7 @@ module(
     });
 
     test('it renders the chart for recent history', async function (this: WindDirectionGraphTestContext, assert) {
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'old-1',
           direction: 180,
@@ -91,7 +95,9 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       assert.dom('.highcharts-container').exists();
     });
@@ -104,7 +110,7 @@ module(
     test('it keeps stale readings on screen instead of anchoring the window to wall-clock time', async function (this: WindDirectionGraphTestContext, assert) {
       const lastReadingTimestamp = Date.now() - 170 * 60 * 1000;
 
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'stale-1',
           direction: 45,
@@ -129,13 +135,15 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       const chart = await renderedPolarChart();
 
       assert.deepEqual(
         chart?.series[0]?.data.map((p) => p.y),
-        this.data.map((row) => row.timestamp),
+        data.map((row) => row.timestamp),
         'both stale readings still render, none clipped by a real-time window'
       );
       assert.strictEqual(
@@ -158,7 +166,7 @@ module(
       // fifth of the radius and the missing 48 minutes read as an empty
       // center, rather than the axis shrinking to the data's own span and
       // making radial distance mean something different per station.
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'oldest',
           direction: 200,
@@ -183,18 +191,20 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       const chart = await renderedPolarChart();
 
       assert.strictEqual(
         chart?.yAxis[0]?.min,
-        this.data[1]!.timestamp - LAST_HOUR,
+        data[1]!.timestamp - LAST_HOUR,
         'the center is exactly one hour before the newest reading, not the oldest reading in the data'
       );
       assert.strictEqual(
         chart?.yAxis[0]?.max,
-        this.data[1]!.timestamp,
+        data[1]!.timestamp,
         'the outer edge is the newest reading in the data'
       );
     });
@@ -202,7 +212,7 @@ module(
     test('it places the most recently recorded reading closer to the outer edge than an older one', async function (this: WindDirectionGraphTestContext, assert) {
       const now = Date.now();
 
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'older',
           direction: 270,
@@ -227,7 +237,9 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       const chart = await renderedPolarChart();
       const series = chart?.series[0];
@@ -257,7 +269,7 @@ module(
     test('it renders a single reading as a spoke from the center to the outer edge', async function (this: WindDirectionGraphTestContext, assert) {
       const timestamp = Date.now();
 
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'only',
           direction: 135,
@@ -271,7 +283,9 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       const series = (await renderedPolarChart())?.series[0];
 
@@ -288,13 +302,15 @@ module(
     // `@compact` must force cardinal-only labels itself rather than relying
     // on the chart's actual measured width to cross that threshold.
     test('it forces cardinal-only labels when @compact is set, regardless of measured width', async function (this: WindDirectionGraphTestContext, assert) {
-      this.data = [];
+      const data: WindDirectionGraphTestContext['data'] = [];
 
-      await render(hbs`
-        <div class="h-96 w-96">
-          <Station::WindDirection::Graph @data={{this.data}} @compact={{true}} />
-        </div>
-      `);
+      await render(
+        <template>
+          <div class="h-96 w-96">
+            <StationWindDirectionGraph @data={{data}} @compact={{true}} />
+          </div>
+        </template>
+      );
 
       const chart = await renderedPolarChart();
       // The label formatter isn't part of Highcharts' public `XAxisOptions`
@@ -318,7 +334,7 @@ module(
     // what this component actually handed Highcharts -- how Highcharts then
     // paints that markup is its own business, not ours to assert.
     test('it builds a tooltip listing the gust and the average wind, each with a coloured bullet and a bold speed', async function (this: WindDirectionGraphTestContext, assert) {
-      this.data = [
+      const data: WindDirectionGraphTestContext['data'] = [
         {
           id: 'reading',
           direction: 180,
@@ -334,7 +350,9 @@ module(
         },
       ];
 
-      await render(hbs`<Station::WindDirection::Graph @data={{this.data}} />`);
+      await render(
+        <template><StationWindDirectionGraph @data={{data}} /></template>
+      );
 
       const series = (await renderedPolarChart())?.series[0];
       const tooltip =
