@@ -44,8 +44,6 @@ import {
 // MapLibre's own Vite integration test:
 // https://github.com/maplibre/maplibre-gl-js/blob/main/test/integration/bundler/vite-rollup-esbuild/src/main.ts
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-
-setWorkerUrl(workerUrl);
 import { windLegendBands } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
@@ -77,6 +75,36 @@ import {
   TrackedMapView,
   type MapBounds,
 } from 'winds-mobi-client-web/utils/map-view';
+
+setWorkerUrl(workerUrl);
+
+const LEGEND_BANDS: WindLegendBand[] = windLegendBands();
+
+const STATION_MARKER_OPTIONS = {
+  anchor: 'center' as const,
+  // `cursor-pointer` and `rounded-full` here, not on anything inside
+  // `<MapStationMarker>`: this `className` lands on MapLibre's own marker
+  // element, the one `<marker.on @event="click">` listens on and the reliable
+  // click target (see `map/station-marker.gts`'s top-of-file comment for why
+  // click is routed through it rather than a second clickable element). This
+  // element shrink-wraps to `<MapStationMarker>`'s own content, so the cursor
+  // and the selected-state ring (see the `selectMapMarker` modifier) always
+  // match the marker's current size.
+  className: 'cursor-pointer rounded-full',
+  // Pin the marker to the map plane so MapLibre counter-rotates it by the
+  // bearing and tilts it by the pitch on every rotate/pitch event. The wind
+  // direction stays in the marker's own SVG `rotate(...)`, so the net effect
+  // is an arrow that keeps pointing at true compass north and lies flat on
+  // the ground in 3D, instead of staying fixed to the screen (#46).
+  pitchAlignment: 'map' as const,
+  rotationAlignment: 'map' as const,
+};
+
+const USER_LOCATION_MARKER_OPTIONS = {
+  anchor: 'center' as const,
+  pitchAlignment: 'viewport' as const,
+  rotationAlignment: 'viewport' as const,
+};
 
 export interface MapSignature {
   Args: Record<string, never>;
@@ -251,10 +279,6 @@ export default class Map extends Component<MapSignature> {
       : this.lastStations;
   }
 
-  get legendBands(): WindLegendBand[] {
-    return windLegendBands();
-  }
-
   get initOptions(): MapInitOptions {
     return {
       attributionControl: { compact: true },
@@ -266,38 +290,6 @@ export default class Map extends Component<MapSignature> {
       style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
       touchPitch: true,
       zoom: this.mapView.zoom,
-    };
-  }
-
-  get markerInitOptions() {
-    return {
-      anchor: 'center' as const,
-      // `cursor-pointer` and `rounded-full` here, not on anything inside
-      // `<MapStationMarker>`: this `className` lands on MapLibre's own
-      // marker element, the one `<marker.on @event="click">` listens on and
-      // the reliable click target (see `map/station-marker.gts`'s top-of-file
-      // comment for why click is routed through it rather than a second
-      // clickable element). This element shrink-wraps to `<MapStationMarker>`'s
-      // own content, so the cursor and the selected-state ring (see the
-      // `selectMapMarker` modifier) always match the marker's current size.
-      // This value is static and never varies, unlike the ring itself, so
-      // it's a plain `className` rather than something toggled by a modifier.
-      className: 'cursor-pointer rounded-full',
-      // Pin the marker to the map plane so MapLibre counter-rotates it by the
-      // bearing and tilts it by the pitch on every rotate/pitch event. The wind
-      // direction stays in the marker's own SVG `rotate(...)`, so the net effect
-      // is an arrow that keeps pointing at true compass north and lies flat on
-      // the ground in 3D, instead of staying fixed to the screen (#46).
-      pitchAlignment: 'map' as const,
-      rotationAlignment: 'map' as const,
-    };
-  }
-
-  get userLocationMarkerOptions() {
-    return {
-      anchor: 'center' as const,
-      pitchAlignment: 'viewport' as const,
-      rotationAlignment: 'viewport' as const,
     };
   }
 
@@ -436,7 +428,7 @@ export default class Map extends Component<MapSignature> {
 
         {{#if this.nearbyLocation.coordinates}}
           <map.marker
-            @initOptions={{this.userLocationMarkerOptions}}
+            @initOptions={{USER_LOCATION_MARKER_OPTIONS}}
             @lngLat={{array
               this.nearbyLocation.coordinates.longitude
               this.nearbyLocation.coordinates.latitude
@@ -448,7 +440,7 @@ export default class Map extends Component<MapSignature> {
 
         {{#each this.stations as |station|}}
           <map.marker
-            @initOptions={{this.markerInitOptions}}
+            @initOptions={{STATION_MARKER_OPTIONS}}
             @lngLat={{this.markerPosition station}}
             as |marker|
           >
@@ -467,7 +459,7 @@ export default class Map extends Component<MapSignature> {
         {{#in-element this.legendElement insertBefore=null}}
           <MapLegend
             class="pointer-events-none"
-            @bands={{this.legendBands}}
+            @bands={{LEGEND_BANDS}}
             @title={{t "map.legend.windSpeed"}}
           />
         {{/in-element}}

@@ -111,10 +111,6 @@ export function windBandForSpeed(speed: number) {
   return WIND_COLOUR_BANDS[WIND_COLOUR_BANDS.length - 1]!;
 }
 
-export function windToBackgroundClass(speed: number) {
-  return windBandForSpeed(speed).backgroundClass;
-}
-
 export function windToTextClass(speed: number) {
   return windBandForSpeed(speed).textClass;
 }

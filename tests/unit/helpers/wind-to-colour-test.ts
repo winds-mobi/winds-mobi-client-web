@@ -3,7 +3,6 @@ import windToColour, {
   windBandForSpeed,
   windColourZones,
   windLegendBands,
-  windToBackgroundClass,
   windToTextClass,
   WIND_COLOUR_BANDS,
 } from 'winds-mobi-client-web/helpers/wind-to-colour';
@@ -32,11 +31,10 @@ module('Unit | Helper | wind-to-colour', function () {
     }
   });
 
-  test('windToColour/windToBackgroundClass/windToTextClass mirror the matched band', function (assert) {
+  test('windToColour/windToTextClass mirror the matched band', function (assert) {
     const band = windBandForSpeed(12);
 
     assert.strictEqual(windToColour(12), band.color);
-    assert.strictEqual(windToBackgroundClass(12), band.backgroundClass);
     assert.strictEqual(windToTextClass(12), band.textClass);
   });
 
