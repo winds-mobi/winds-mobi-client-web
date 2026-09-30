@@ -5,7 +5,6 @@ import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import Heart from 'ember-phosphor-icons/components/ph-heart';
 import type FavoritesService from 'winds-mobi-client-web/services/favorites';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationFavoriteButtonSignature {
@@ -21,21 +20,6 @@ export interface StationFavoriteButtonSignature {
 
 export default class StationFavoriteButton extends Component<StationFavoriteButtonSignature> {
   @service declare favorites: FavoritesService;
-  @service declare settings: SettingsService;
-
-  // Favouriting is a beta feature (see app/services/settings.ts): renders
-  // nothing until beta is opted into *and* the favourites feature's own
-  // toggle is on. No account is required — favourites persist locally (see
-  // app/services/favorites.ts). Self-contained so any caller can drop this
-  // in unconditionally, wherever it belongs, without checking the gate
-  // itself first.
-  get isEnabled(): boolean {
-    return (
-      this.args.station !== undefined &&
-      this.settings.betaFeaturesEnabled &&
-      this.settings.favoritesFeatureEnabled
-    );
-  }
 
   get isFavorite(): boolean {
     return (
@@ -52,7 +36,7 @@ export default class StationFavoriteButton extends Component<StationFavoriteButt
   }
 
   <template>
-    {{#if this.isEnabled}}
+    {{#if @station}}
       <Button
         aria-label={{if
           this.isFavorite

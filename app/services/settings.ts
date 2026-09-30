@@ -60,17 +60,6 @@ export default class SettingsService extends Service {
   })
   useIconLabels!: boolean;
 
-  // Beta feature: the favourites view and the favourite heart on a station
-  // panel (app/components/navbar/menu/items.ts, app/components/station/header.gts).
-  // Its own toggle defaults on (this feature already shipped, gated only by
-  // `betaFeaturesEnabled` until now) but — like every beta feature — only
-  // takes effect while `betaFeaturesEnabled` is also on.
-  @trackedInLocalStorage({
-    keyName: 'settings.favoritesFeatureEnabled',
-    defaultValue: true,
-  })
-  favoritesFeatureEnabled!: boolean;
-
   // Wind direction arrows on the wind history chart
   // (app/components/station/wind/presenter.gts).
   @trackedInLocalStorage({
@@ -82,6 +71,7 @@ export default class SettingsService extends Service {
   // Early access to in-development features. Off by default; turning it on
   // reveals each individual beta feature's own toggle below it (see
   // app/templates/settings.gts for the warning shown alongside this toggle).
+  // No feature is in beta right now, so it reveals only a note saying so.
   @trackedInLocalStorage({
     keyName: 'settings.betaFeaturesEnabled',
     defaultValue: false,
@@ -100,7 +90,6 @@ export type BooleanSettingKey =
   | 'nearbyCompactList'
   | 'favoritesCompactList'
   | 'useIconLabels'
-  | 'favoritesFeatureEnabled'
   | 'windDirectionHistoryEnabled'
   | 'betaFeaturesEnabled';
 

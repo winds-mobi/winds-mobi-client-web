@@ -7,6 +7,8 @@
 - **🚀 Stable:** Clicking or tapping the map now always closes the open station panel, so you no longer have to aim for the close button. Clicking another station still switches straight to it, and panning the map leaves the panel open. The beta toggle for it is gone from Settings. ([#157](https://github.com/winds-mobi/winds-mobi-client-web/issues/157))
 - **🚀 Stable:** The refresh button's arrow now always plays a quick spin every time a refresh starts, whether you pressed it or it refreshed on its own, so you always see that fresh data is on its way. The beta toggle for it is gone from Settings. ([#172](https://github.com/winds-mobi/winds-mobi-client-web/issues/172))
 - **🚀 Stable:** "Wind direction on the wind history chart" is now a regular setting, next to the other display preferences, instead of being hidden under Beta features. It stays off until you turn it on. ([#174](https://github.com/winds-mobi/winds-mobi-client-web/issues/174))
+- **🚀 Stable:** Favourites is no longer a beta feature: the Favourites view and the heart on each station panel are now always there for everyone, with no setting to turn on. Your favourite stations stay stored in this browser only. ([#176](https://github.com/winds-mobi/winds-mobi-client-web/issues/176))
+- Turning on "Enable beta features" now tells you when nothing is in beta, instead of showing nothing. ([#176](https://github.com/winds-mobi/winds-mobi-client-web/issues/176))
 
 ## v0.25.0 - 2026-09-30
 

@@ -13,6 +13,8 @@ export const RETIRED_STORAGE_KEYS: readonly string[] = [
   // The "spin the refresh button when refreshing" toggle; the button now
   // always spins (#172).
   'settings.refreshButtonSpin',
+  // The Favourites toggle; favourites are now always available (#176).
+  'settings.favoritesFeatureEnabled',
 ];
 
 // Goes through the tracked-local-storage service rather than raw

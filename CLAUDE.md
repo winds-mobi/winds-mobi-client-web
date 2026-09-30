@@ -287,7 +287,7 @@ state, route models, and query params.
   default and no external caller overrides it, remove the argument rather than keeping a "future-proof" escape hatch.
 - **Don't build conditional-loading gymnastics (a flag gating a dynamic `import()`, a lazy branch, etc.) for a case
   that doesn't actually happen.** A dynamic import only pays off when the gated code is genuinely optional for some
-  real page view — e.g. `render-highcharts.ts`'s `needsWindbarb`, gated behind a beta feature that's off by default,
+  real page view — e.g. `render-highcharts.ts`'s `needsWindbarb`, gated behind a setting that's off by default,
   so most renders really do skip that module. `needsPolarSupport` was the same shape but not the same substance: it
   gated `highcharts/highcharts-more` behind a flag that every actual caller passed `true` — the polar wind-direction
   chart always renders on every station panel, right alongside the stock charts that need their own modules anyway,

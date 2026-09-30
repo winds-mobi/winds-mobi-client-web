@@ -1,10 +1,8 @@
 import Component from '@glimmer/component';
-import { service } from '@ember/service';
 import { TabNav } from 'frontile/navigation';
 import type { TabNavArgs } from 'frontile/navigation';
 import { t } from 'ember-intl';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
-import { visibleNavbarMenuItems } from './items';
+import { NAVBAR_MENU_ITEMS } from './items';
 
 export interface NavbarMenuLinksSignature {
   Args: {
@@ -17,15 +15,6 @@ export interface NavbarMenuLinksSignature {
 // through the same TabNav -- see navbar/menu/desktop.gts and
 // navbar/menu/mobile.gts, which just pick which variant they are.
 export default class NavbarMenuLinks extends Component<NavbarMenuLinksSignature> {
-  @service declare settings: SettingsService;
-
-  get visibleItems() {
-    return visibleNavbarMenuItems(
-      this.settings.betaFeaturesEnabled,
-      this.settings.favoritesFeatureEnabled
-    );
-  }
-
   get isMobile(): boolean {
     return this.args.variant === 'mobile';
   }
@@ -66,7 +55,7 @@ export default class NavbarMenuLinks extends Component<NavbarMenuLinksSignature>
       @classes={{this.classes}}
       as |nav|
     >
-      {{#each this.visibleItems as |item|}}
+      {{#each NAVBAR_MENU_ITEMS as |item|}}
         <nav.Item @route={{item.route}} data-test-navbar-link={{item.route}}>
           <item.icon @size={{16}} />
           {{t item.labelKey}}

@@ -62,16 +62,6 @@ module('Acceptance | station favorite toggle', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.lookup('service:settings').betaFeaturesEnabled = true;
-  });
-
-  test('with beta features off there is no favourite control', async function (assert) {
-    this.owner.lookup('service:settings').betaFeaturesEnabled = false;
-
-    await visit('/map/holfuy-1804');
-
-    assert.dom('[data-test-station-title]').exists();
-    assert.dom('[data-test-station-favorite]').doesNotExist();
   });
 
   test('starring a station saves it to the local favourites list', async function (assert) {

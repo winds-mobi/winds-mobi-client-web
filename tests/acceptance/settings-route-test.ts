@@ -31,7 +31,7 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows the seven preferences, on by default except the compact nearby/favourite lists, icon labels, and beta features', async function (this: SettingsRouteTestContext, assert) {
+  test('it shows every preference with its default: on, except the compact lists, icon labels, wind direction, and beta features', async function (this: SettingsRouteTestContext, assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
@@ -127,6 +127,18 @@ module('Acceptance | settings route', function (hooks) {
       null,
       'restoring the default clears the stored override'
     );
+  });
+
+  test('turning on beta features says none are in beta right now', async function (assert) {
+    await visit('/settings');
+
+    assert.dom('[data-test-beta-features-empty]').doesNotExist();
+
+    await click('[data-test-setting="betaFeaturesEnabled"]');
+
+    assert
+      .dom('[data-test-beta-features-empty]')
+      .hasText('No features are in beta right now. Check back later.');
   });
 
   test('it navigates to settings from the mobile menu without reloading', async function (assert) {

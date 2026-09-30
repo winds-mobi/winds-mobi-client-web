@@ -10,7 +10,6 @@ import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/sho
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
 import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
-import SettingsShowcaseFavorites from 'winds-mobi-client-web/components/settings/showcase/favorites';
 import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 
@@ -145,16 +144,15 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
                 </p>
               </SettingsRow>
 
+              {{! Nothing is in beta right now. Replace this note with the
+                beta features' own rows when the next one arrives. }}
               {{#if this.settings.betaFeaturesEnabled}}
-                <SettingsRow
-                  @settings={{this.settings}}
-                  @name="favoritesFeatureEnabled"
-                  class="border-t border-amber-200 pt-3"
+                <p
+                  class="border-t border-amber-200 pt-3 text-sm text-amber-800"
+                  data-test-beta-features-empty
                 >
-                  <SettingsShowcaseFavorites
-                    @enabled={{this.settings.favoritesFeatureEnabled}}
-                  />
-                </SettingsRow>
+                  {{t "settings.betaFeaturesEnabled.empty"}}
+                </p>
               {{/if}}
             </div>
           </StationSectionCard>

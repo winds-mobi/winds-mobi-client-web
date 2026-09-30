@@ -63,11 +63,6 @@ settings:
       Show a small icon instead of the text label for each value in the Now
       and Last hour cards. Each value then only takes as much width as it
       needs, so several fit per row instead of one per row.
-  favoritesFeatureEnabled:
-    label: Favourites
-    description: >-
-      Show the Favourites view in navigation and a heart on each station
-      panel to save it — stored in this browser only, no account needed.
   windDirectionHistoryEnabled:
     label: Wind direction on the wind history chart
     description: >-
@@ -80,6 +75,7 @@ settings:
     groupLabel: Beta features
     warning: >-
       Beta features are early access. We do not guarantee they work correctly.
+    empty: No features are in beta right now. Check back later.
 
 help:
   title: Help
