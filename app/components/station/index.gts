@@ -63,7 +63,7 @@ export default class StationIndex extends Component<StationIndexSignature> {
 
     No backdrop, no focus trap, and outside clicks never close it: the map
     behind the panel must stay fully interactive (see josemarluedke/frontile
-    issue 447 on GitHub). The separate map-click-to-dismiss beta feature
+    issue 447 on GitHub). Closing the panel by clicking the map
     (#157, map/index.gts's handleMapClick) is unrelated to this and
     intentionally not merged with it — it only reacts to clicks on the map
     itself, not anywhere outside the panel. @preventAutoFocus stops Overlay's
