@@ -1,4 +1,4 @@
-import { useLegacyStore } from '@warp-drive/legacy';
+import { useRecommendedStore } from '@warp-drive/core';
 import { DefaultCachePolicy } from '@warp-drive/core/store';
 import { JSONAPICache } from '@warp-drive/json-api';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
@@ -177,10 +177,7 @@ function composeReadingDerivation(record: unknown): unknown {
 }
 composeReadingDerivation[Type] = 'composeReading';
 
-const AppStore = useLegacyStore({
-  linksMode: false,
-  legacyRequests: true,
-  modelFragments: true,
+const AppStore = useRecommendedStore({
   cache: JSONAPICache,
   schemas: [LocationSchema, StationSchema, HistorySchema],
   handlers: [StationHandler, HistoryHandler],

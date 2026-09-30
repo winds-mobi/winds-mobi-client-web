@@ -9,10 +9,11 @@ a live wind/weather station map for free-flight (paragliding/hang-gliding) pilot
 MapLibre map of stations, per-station detail panels with Highcharts time series, a nearby-stations
 view backed by geolocation, and search.
 
-Stack: Ember 7 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive / EmberData
-5.8 (schema-record reactive store), Frontile components, Tailwind CSS v4, ember-intl, ember-concurrency,
-ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers, no wrapper addon — see
-Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is pinned in `engines`.
+Stack: Ember 7 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive 5.9 (schema-record
+reactive store via `useRecommendedStore`, no legacy/EmberData packages), Frontile components, Tailwind CSS v4,
+ember-intl, ember-concurrency, ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers,
+no wrapper addon — see Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is
+pinned in `engines`.
 
 ## Authoritative external references
 
@@ -49,8 +50,7 @@ Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); No
   `ember-tooling` GitHub org) — a second, more agent-oriented source alongside the `ember-mcp` tools above.
 - **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: Warp Drive ships its own
   official agent knowledge base as a real npm package, `@warp-drive/memory-alpha` — **installed** here as a
-  devDependency (this app is on warp-drive `5.8.2`; installed at `5.9.1`, the closest published stable release,
-  since `5.8.x` predates the package). It ships no `.claude/skills` wiring of its own (deliberately
+  devDependency, kept on the same version as the app's `@warp-drive/*` packages. It ships no `.claude/skills` wiring of its own (deliberately
   tool-agnostic, no YAML frontmatter) — consume it as a routing table, not a pile of docs to read wholesale:
   1. Read `node_modules/@warp-drive/memory-alpha/skills/index.md` first. It's a one-row-per-task table (e.g.
      defining a resource schema, fetching/caching data through the Store) pointing at exactly one file each —
