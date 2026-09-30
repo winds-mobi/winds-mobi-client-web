@@ -2,7 +2,7 @@ import { module, test } from 'qunit';
 import type { NextFn } from '@warp-drive/core/request';
 import type { RequestContext } from '@warp-drive/core/types/request';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
+import { handlerData } from 'winds-mobi-client-web/tests/helpers/handler-data';
 
 // `StationHandler.request` is called directly here (no store), so the
 // `context`/`next` args are faked rather than pulled from a real request
@@ -18,7 +18,7 @@ function fakeNext<T>(payload: unknown): NextFn<T> {
 
 module('Unit | Handler | station', function () {
   test('it only serializes station attributes present in the payload', async function (assert) {
-    const response = responseData(
+    const response = handlerData(
       await StationHandler.request<{
         data: {
           id: string;
@@ -55,7 +55,7 @@ module('Unit | Handler | station', function () {
   });
 
   test('it keeps explicit provider fields from a detail payload', async function (assert) {
-    const response = responseData(
+    const response = handlerData(
       await StationHandler.request<{
         data: {
           id: string;

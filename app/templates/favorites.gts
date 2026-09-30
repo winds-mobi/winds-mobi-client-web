@@ -19,7 +19,6 @@ import type {
   Station,
   StoreService,
 } from 'winds-mobi-client-web/services/store';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
 
 interface FavoritesTemplateSignature {
   Args: {
@@ -72,7 +71,7 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
 
   get stations(): Station[] {
     const stations = this.requestState?.isSuccess
-      ? responseData(this.requestState.value)
+      ? this.requestState.value.data
       : this.lastStations;
 
     // The API doesn't guarantee response order — present in the order

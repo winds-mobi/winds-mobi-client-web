@@ -60,7 +60,6 @@ import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
-import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import {
   OSM_SWISS_STYLE,
   TEST_MAP_STYLE,
@@ -275,7 +274,7 @@ export default class Map extends Component<MapSignature> {
   // routed view, `requestState` always reflects the Future for the current view.
   get stations(): Station[] {
     return this.requestState?.isSuccess
-      ? responseData(this.requestState.value)
+      ? this.requestState.value.data
       : this.lastStations;
   }
 
