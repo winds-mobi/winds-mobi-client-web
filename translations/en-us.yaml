@@ -95,6 +95,9 @@ settings:
 
 help:
   title: Help
+  liveStation:
+    loading: Loading live station example…
+    requestError: The live station example could not be loaded right now.
   intro: Winds.mobi shows live wind and weather stations on a map, so you can check conditions and plan your flight.
   sections:
     mapDescription: Browse stations on the map and open one for full detail.
