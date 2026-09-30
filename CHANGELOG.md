@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Opening a station straight from a link, a search result, or a card no longer visibly shifts the map into place — the map now always reserves the station panel's space, so the panel appears without moving anything under it. As a trade-off, the map's default framing sits a little off-centre even while no station is open.
+
 ## v0.26.0 - 2026-09-30
 
 ### Added

@@ -4,7 +4,6 @@ import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import {
   applyMapPadding,
   mapPaddingForPlacement,
-  NO_MAP_PADDING,
 } from 'winds-mobi-client-web/utils/map-padding';
 import {
   mapViewCenter,
@@ -18,19 +17,27 @@ interface DriveMapCameraSignature {
     Positional: [
       map: MaplibreMap | undefined,
       view: MapView,
-      isPanelOpen: boolean,
       isSidePanel: boolean,
     ];
   };
 }
 
+// The station panel's padding is reserved permanently, whether or not a panel
+// is actually open, rather than toggling on open/close. There is then no
+// padding *change* left for opening/closing a panel to cause, so #155 stays
+// fixed for a structural reason rather than an absorb-the-change trick --
+// traded for the map's routed center sitting off-center even with no panel
+// open, which reads as intentional framing (matching wherever the panel will
+// appear) rather than a bug.
+//
 // The one and only thing that moves the map's camera, attached to the station
 // panel's overlay slot so it can measure how much of the map that panel covers.
 // It does two things, in this order and never separately:
 //
-// 1. Matches MapLibre's padding to the covered area, absorbing the change so
-//    the view holds still (see `applyMapPadding`). Opening or closing the panel
-//    is nothing but this — the map stays exactly where the user left it (#155).
+// 1. Matches MapLibre's padding to the panel's breakpoint (see
+//    `applyMapPadding`), absorbing any *breakpoint* change (a rotation, a
+//    resize across the side-panel/bottom-sheet boundary) so the view holds
+//    still.
 // 2. Flies to the routed view, but only when that view actually changed — a
 //    search result, a nearby card, a deep link, the locate button. Compared by
 //    value, not by reference: a transition that leaves the view alone (opening
@@ -40,27 +47,21 @@ interface DriveMapCameraSignature {
 // Both live here, rather than the padding in a modifier and the flight in a
 // declarative `<map.call @func="flyTo">`, because those two run in different
 // phases: template helpers evaluate during render, modifiers afterwards during
-// commit, so a transition that opens the panel *and* moves the view would start
-// the flight first and then have the padding change stop it mid-air (MapLibre's
-// camera methods stop whatever is in flight). One writer, one order, no race:
-// padding is settled before the flight starts, so the flight already frames its
-// destination inside the part of the map the panel leaves visible.
+// commit, so a transition that moves the view *and* flips the breakpoint would
+// start the flight first and then have the padding change stop it mid-air
+// (MapLibre's camera methods stop whatever is in flight). One writer, one
+// order, no race: padding is settled before the flight starts, so the flight
+// already frames its destination inside the part of the map the panel leaves
+// visible.
 export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSignature> {
   private map?: MaplibreMap;
-  private isPanelOpen = false;
   private isSidePanel = false;
   private lastView?: MapView;
 
   modify(
     _element: HTMLElement,
-    [map, view, isPanelOpen, isSidePanel]: [
-      MaplibreMap | undefined,
-      MapView,
-      boolean,
-      boolean,
-    ]
+    [map, view, isSidePanel]: [MaplibreMap | undefined, MapView, boolean]
   ) {
-    this.isPanelOpen = isPanelOpen;
     this.isSidePanel = isSidePanel;
 
     if (!map) {
@@ -78,6 +79,21 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
       // (`applyMapPadding` no-ops).
       map.on('resize', this.syncPadding);
       registerDestructor(this, () => map.off('resize', this.syncPadding));
+
+      // A map MapLibre just finished constructing always starts at `view`
+      // with zero padding (its own `MapOptions` has no `padding` to
+      // construct with). Setting the true destination and the permanent
+      // padding together, in one jump, means there is no unpadded frame that
+      // ever gets shown for the panel to later "open into" — padding is a
+      // property of the map now, not of whether a panel happens to be open.
+      this.lastView = view;
+      map.jumpTo({
+        center: mapViewCenter(view),
+        zoom: view.zoom,
+        padding: mapPaddingForPlacement(isSidePanel),
+      });
+
+      return;
     }
 
     this.syncPadding();
@@ -99,11 +115,6 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
       return;
     }
 
-    applyMapPadding(
-      this.map,
-      this.isPanelOpen
-        ? mapPaddingForPlacement(this.isSidePanel)
-        : NO_MAP_PADDING
-    );
+    applyMapPadding(this.map, mapPaddingForPlacement(this.isSidePanel));
   };
 }
