@@ -61,7 +61,6 @@ import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loadi
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import type SettingsService from 'winds-mobi-client-web/services/settings';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import { responseData } from 'winds-mobi-client-web/utils/request-response';
 import {
@@ -91,7 +90,6 @@ export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
   @service declare router: RouterService;
   @service declare mapRefresh: MapRefreshService;
-  @service declare settings: SettingsService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
@@ -313,10 +311,8 @@ export default class Map extends Component<MapSignature> {
     // this same click also reaches `handleMapClick` below, which would read it
     // as a click on the map itself and close the panel this is about to open.
     // Consuming it here leaves that decision with the element that handled it,
-    // rather than having the map guess from the click's target. Unconditional,
-    // not gated on the beta toggle that governs that dismiss: a marker has
-    // handled its own click either way, and nothing else on the map reacts to
-    // one. Only `click` is stopped, so double-clicking a marker still zooms.
+    // rather than having the map guess from the click's target. Only `click` is
+    // stopped, so double-clicking a marker still zooms.
     event.originalEvent?.stopPropagation();
 
     // Opens the panel without moving the map. Recentering here used to race the
@@ -327,21 +323,14 @@ export default class Map extends Component<MapSignature> {
     void this.router.transitionTo('map.station', station.id);
   }
 
-  // Beta feature (see app/services/settings.ts): clicking the map dismisses the
-  // open station panel (#157). Only clicks on the map itself get here: the panel
-  // overlays the map as a sibling element, the map controls sit in MapLibre's own
-  // control container, station markers consume their click above, and MapLibre
-  // suppresses the click that ends a drag — so panning to look around never
-  // closes the panel either.
-  get isMapClickDismissEnabled(): boolean {
-    return (
-      this.settings.betaFeaturesEnabled && this.settings.mapClickClosesPanel
-    );
-  }
-
+  // Clicking the map dismisses the open station panel (#157). Only clicks on the
+  // map itself get here: the panel overlays the map as a sibling element, the
+  // map controls sit in MapLibre's own control container, station markers
+  // consume their click above, and MapLibre suppresses the click that ends a
+  // drag — so panning to look around never closes the panel either.
   @action
   handleMapClick() {
-    if (!this.isMapClickDismissEnabled || !this.isStationPanelOpen) {
+    if (!this.isStationPanelOpen) {
       return;
     }
 
