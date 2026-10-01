@@ -1,5 +1,11 @@
 import { module, test } from 'qunit';
-import { click, type TestContext, visit, waitUntil } from '@ember/test-helpers';
+import {
+  click,
+  settled,
+  type TestContext,
+  visit,
+  waitUntil,
+} from '@ember/test-helpers';
 import RefreshService from 'winds-mobi-client-web/services/refresh';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
@@ -67,9 +73,12 @@ module('Acceptance | refresh', function (hooks) {
   }
 
   // The map requests its stations once MapLibre has settled on the routed view
-  // (its `idle` event), a little after the visit itself resolves.
-  function waitForMapStations() {
-    return waitUntil(() => count().list > 0, { timeout: 5000 });
+  // (its `idle` event), a little after the visit itself resolves. If that lands
+  // after the station's own cycle has closed, it opens a new one and re-fetches
+  // the station too, so wait for whatever it set off to finish as well.
+  async function waitForMapStations() {
+    await waitUntil(() => count().list > 0, { timeout: 5000 });
+    await settled();
   }
 
   // Wind, air and last-hour each fetch their own history.
