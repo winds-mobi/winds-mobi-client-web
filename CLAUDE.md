@@ -321,7 +321,7 @@ state, route models, and query params.
   assumed compatible. This stack has burned time on both outcomes:
   - `ember-cli-mirage` was evaluated for acceptance-test fixtures and **rejected**: it's a classic (non-v2) addon
     whose `read-modules.js` does a runtime `require()` that Rollup can't resolve as ESM — `pnpm build` fails outright,
-    not just in dev. The existing fake-`service:store`-by-URL pattern (see Testing below) remains the right tool here.
+    not just in dev. Stubbing the network under the real store (see Testing below) is the right tool here.
   - `ember-tracked-local-storage` replaced this app's hand-rolled `trackedInLocalStorage` decorator (see
     [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: its per-owner
     `service:tracked-local-storage` architecture is a genuine improvement over the module-scope singleton the
@@ -494,23 +494,23 @@ obvious from the decorator call site:
 
 ### Testing
 
-- Acceptance tests register fake store services that satisfy requests by `url` and return typed `Station`/`History`
-  fixtures (see [tests/acceptance/](tests/acceptance/)). Build a `Station` with `stationFixture({...})` from
-  [tests/helpers/station-fixture.ts](tests/helpers/station-fixture.ts), passing only the fields the test depends on;
-  `OVERLAPPING_STATIONS` there is #167's pair of overlapping stations. This is deliberate over `ember-cli-mirage` — see the
-  addon-first note above for why mirage doesn't work in this app at all (build-breaking, not just a style choice).
-  Fake-store `request()` implementations that render history sections need to branch on `request.url` (e.g.
-  `.includes('/historic/')`) and return an **array** for history vs. a single record for a station fetch —
-  returning the wrong shape doesn't error at the fake-store layer, it throws deep inside Highcharts (`data.map is not
-a function`) when the chart tries to render it.
-- **Refreshing is the exception: test it against the real store.** Invalidation and `<Request @autorefresh>` need the
-  real store's cache policy and notifications, which a fake `service:store` doesn't have. Those tests keep the real
-  store and stub the network instead with `setupStubbedApi(hooks)` from
-  [tests/helpers/stub-api.ts](tests/helpers/stub-api.ts): it answers `https://winds.mobi/api/...` requests with raw
-  (terse, pre-handler) payloads from a settable `respond`, records every URL in `calls`, and passes other URLs
-  (MapLibre's style/tiles) through — see [tests/acceptance/refresh-test.ts](tests/acceptance/refresh-test.ts). A
-  held-open response (`respond` returning a pending promise) is a real in-flight request that `settled()` waits on, so
-  assert mid-flight state after `waitUntil`, not `settled`.
+- **Tests run against the real store, with only the network stubbed.** `setupStubbedApi(hooks)` from
+  [tests/helpers/stub-api.ts](tests/helpers/stub-api.ts) answers `https://winds.mobi/api/...` requests from a settable
+  `respond`, records every URL that reaches the network in `calls` (cache hits never do), and passes other URLs
+  (MapLibre's style/tiles) through. So every test exercises the real handlers, cache policy and invalidation — never
+  register a fake `service:store`. Build a `Station` with `stationFixture({...})` from
+  [tests/helpers/station-fixture.ts](tests/helpers/station-fixture.ts), passing only the fields the test depends on
+  (`OVERLAPPING_STATIONS` there is #167's pair of overlapping stations), and serve fixtures with
+  `api.respond = stationsApi({ stations, history })`: it answers a station by id, a list narrowed by the request's
+  `ids`/`search`, and history, turning each fixture back into the raw API payload (`rawStation`/`rawHistory`) that the
+  real handlers then rename again. `tests/integration/helpers/stub-api-test.ts` checks that round trip, so keep it
+  passing when a handler or `Station`/`History` changes. `apiError(status)` makes a request fail. This is deliberate
+  over `ember-cli-mirage` — see the addon-first note above for why mirage doesn't work in this app at all
+  (build-breaking, not just a style choice).
+- **Hold a request open with a promise from `respond`** to look at a loading or refresh-in-flight state (see
+  [tests/acceptance/refresh-test.ts](tests/acceptance/refresh-test.ts)). It's a real in-flight request that `settled()`
+  waits on, so wait for it with `waitUntil` (e.g. until its URL is in `api.calls`), assert, then release it before the
+  test ends — the test's teardown also waits for it.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.

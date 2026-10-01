@@ -1,20 +1,11 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-
-class FakeStoreService extends Service {
-  request() {
-    return Promise.resolve({ content: { data: [] } });
-  }
-}
+import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 
 module('Acceptance | not-found route', function (hooks) {
   setupApplicationTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
-  });
+  setupStubbedApi(hooks);
 
   test('an old pre-rebuild station URL redirects to the map', async function (assert) {
     await visit('/stations/holfuy-1804');

@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   click,
@@ -8,50 +7,15 @@ import {
   visit,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // The map view waits on MapLibre actually initializing — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
-
-type FakeStoreRequest = {
-  url?: string;
-};
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    this.calls.push(url);
-
-    // History is a list, a single station is one record, and the collection
-    // query is a list: returning the wrong shape doesn't fail here, it throws
-    // deep inside the station panel's charts instead.
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: [] }, request });
-    }
-
-    const singleStation = OVERLAPPING_STATIONS.find((station) =>
-      url.includes(`/stations/${station.id}/?`)
-    );
-
-    if (singleStation) {
-      return Promise.resolve({ content: { data: singleStation }, request });
-    }
-
-    return Promise.resolve({
-      content: {
-        data: OVERLAPPING_STATIONS,
-      },
-      // WarpDrive's `<Request>` `state.refresh()` replays the request it
-      // finds echoed back on a resolved response -- without it, a refresh
-      // resolves against an empty/unknown request instead of this same URL.
-      request,
-    });
-  }
-}
 
 function countStationRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations/')).length;
@@ -61,23 +25,20 @@ const HIDDEN_CARD_SELECTOR = '[data-test-nearby-station-card]';
 
 module('Acceptance | hidden route', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: OVERLAPPING_STATIONS });
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
   });
 
   test('with no hidden stations it shows the empty state and skips the station request', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/hidden');
 
     assert.dom('[data-test-id-list-empty="hidden"]').exists();
     assert.dom(HIDDEN_CARD_SELECTOR).doesNotExist();
-    assert.strictEqual(countStationRequests(store.calls), 0);
+    assert.strictEqual(countStationRequests(api.calls), 0);
   });
 
   test('it renders the hidden stations in the order they were hidden', async function (assert) {

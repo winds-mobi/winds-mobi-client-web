@@ -1,23 +1,17 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  apiError,
+  rawHistory,
+  setupStubbedApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { History } from 'winds-mobi-client-web/services/store';
 import StationWindDirectionThumbnail from 'winds-mobi-client-web/components/station/wind-direction-thumbnail';
 
 interface StationWindDirectionThumbnailTestContext extends RenderingTestContext {
   stationId: string;
-}
-
-class FakeStoreService extends Service {
-  response: Promise<{ content: { data: History[] } }> = Promise.resolve({
-    content: { data: [] },
-  });
-
-  request() {
-    return this.response;
-  }
 }
 
 // Marker colours/positions are Highcharts' rendering, not ours (see
@@ -28,33 +22,24 @@ module(
   'Integration | Component | station/wind-direction-thumbnail',
   function (hooks) {
     setupRenderingTest(hooks);
-
-    hooks.beforeEach(function () {
-      this.owner.register('service:store', FakeStoreService);
-    });
+    const api = setupStubbedApi(hooks);
 
     test('it renders the graph with the resolved history', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
-
-      store.response = Promise.resolve({
-        content: {
-          data: [
-            {
-              id: 'history-1',
-              direction: 180,
-              speed: 10,
-              gusts: 14,
-              temperature: 6,
-              humidity: 60,
-              rain: 0,
-              timestamp: Date.now() - 30 * 60 * 1000,
-              [Type]: 'history',
-            },
-          ],
+      const history: History[] = [
+        {
+          id: 'history-1',
+          direction: 180,
+          speed: 10,
+          gusts: 14,
+          temperature: 6,
+          humidity: 60,
+          rain: 0,
+          timestamp: Date.now() - 30 * 60 * 1000,
+          [Type]: 'history',
         },
-      });
+      ];
+
+      api.respond = () => rawHistory(history);
 
       const stationId: StationWindDirectionThumbnailTestContext['stationId'] =
         'holfuy-1804';
@@ -69,16 +54,7 @@ module(
     });
 
     test('it renders an empty graph when the request errors', async function (this: StationWindDirectionThumbnailTestContext, assert) {
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
-
-      const rejection = Promise.reject(new Error('boom'));
-      rejection.catch(() => {
-        // Prevent an unhandled-rejection warning; the assertion below cares
-        // only about how the component renders the error state.
-      });
-      store.response = rejection;
+      api.respond = () => apiError();
       const stationId: StationWindDirectionThumbnailTestContext['stationId'] =
         'holfuy-1804';
 

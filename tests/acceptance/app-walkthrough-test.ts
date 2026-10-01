@@ -1,8 +1,11 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, fillIn, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
@@ -12,11 +15,6 @@ import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixt
 // tests. This exercises how the pieces compose together (search -> panel ->
 // card view -> favourites -> settings -> help) rather than re-asserting details
 // already covered elsewhere.
-
-type FakeStoreRequest = {
-  url?: string;
-  method?: string;
-};
 
 const MAP_STATION: Station = stationFixture();
 
@@ -70,51 +68,6 @@ const HISTORY_FIXTURES: History[] = [
   },
 ];
 
-class FakeStoreService extends Service {
-  calls: { method: string; url: string }[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    const method = request.method ?? 'GET';
-
-    this.calls.push({ method, url });
-
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: HISTORY_FIXTURES } });
-    }
-
-    const singleStation = ALL_STATIONS.find((station) =>
-      url.includes(`/stations/${station.id}/?`)
-    );
-
-    if (singleStation) {
-      return Promise.resolve({ content: { data: singleStation } });
-    }
-
-    const params = new URL(url, 'https://winds.mobi').searchParams;
-
-    if (params.has('search')) {
-      const term = params.get('search') ?? '';
-      const matches = ALL_STATIONS.filter((station) =>
-        station.name.toLowerCase().includes(term.toLowerCase())
-      );
-
-      return Promise.resolve({ content: { data: matches } });
-    }
-
-    if (params.has('ids')) {
-      const ids = params.getAll('ids');
-      const matches = ALL_STATIONS.filter((station) =>
-        ids.includes(station.id)
-      );
-
-      return Promise.resolve({ content: { data: matches } });
-    }
-
-    return Promise.resolve({ content: { data: ALL_STATIONS } });
-  }
-}
-
 // Stubbed before the app boots, which is when the application route asks for
 // the visitor's position.
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
@@ -126,10 +79,16 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
 
 module('Acceptance | app walkthrough', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({
+      stations: ALL_STATIONS,
+      history: HISTORY_FIXTURES,
+    });
+  });
 
+  hooks.beforeEach(function () {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     stubGrantedPermission(nearbyLocation);
   });

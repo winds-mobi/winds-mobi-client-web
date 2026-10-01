@@ -30,9 +30,6 @@ class ShortIntervalRefreshService extends ShortGraceRefreshService {
   countdownTickMs = 10;
 }
 
-// Refreshing needs the real store's cache policy and invalidation, so this
-// module stubs the network (see tests/helpers/stub-api.ts) instead of
-// registering a fake `service:store` like the other acceptance modules.
 module('Acceptance | refresh', function (hooks) {
   setupApplicationTest(hooks);
 

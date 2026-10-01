@@ -1,13 +1,12 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
-
-type FakeStoreRequest = {
-  url?: string;
-};
 
 const STATION_FIXTURES: Station[] = [
   stationFixture({ latitude: 46.521, longitude: 6.632 }),
@@ -29,26 +28,6 @@ const STATION_FIXTURES: Station[] = [
   }),
 ];
 
-class FakeStoreService extends Service {
-  calls: string[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    this.calls.push(url);
-
-    return Promise.resolve({
-      content: {
-        data: STATION_FIXTURES,
-      },
-      // WarpDrive's `<Request>` `state.refresh()` replays the request it
-      // finds echoed back on a resolved response -- without it, a refresh
-      // resolves against an empty/unknown request instead of this same URL.
-      request,
-    });
-  }
-}
-
 function countStationRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations/')).length;
 }
@@ -57,21 +36,18 @@ const FAVORITES_CARD_SELECTOR = '[data-test-nearby-station-card]';
 
 module('Acceptance | favorites route', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: STATION_FIXTURES });
   });
 
   test('with no favourites it shows the empty state and skips the station request', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/favorites');
 
     assert.dom('[data-test-id-list-empty="favorites"]').exists();
     assert.dom(FAVORITES_CARD_SELECTOR).doesNotExist();
-    assert.strictEqual(countStationRequests(store.calls), 0);
+    assert.strictEqual(countStationRequests(api.calls), 0);
   });
 
   test('the navbar links to the favourites view', async function (assert) {

@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   render,
@@ -7,7 +6,10 @@ import {
 } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
-import { historyQuery } from 'winds-mobi-client-web/builders/history';
+import {
+  rawHistory,
+  setupStubbedApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { History } from 'winds-mobi-client-web/services/store';
 import StationLastHour from 'winds-mobi-client-web/components/station/last-hour';
 import StationWindPresenter from 'winds-mobi-client-web/components/station/wind/presenter';
@@ -17,32 +19,6 @@ import { trackedObject } from '@ember/reactive/collections';
 interface Ctx extends RenderingTestContext {
   data: History[];
   stationId: string;
-}
-
-type FakeStoreRequest = { url?: string };
-
-// Mirrors tests/integration/components/station/last-hour/index-test.ts's
-// FakeStoreService, keyed by request URL so each station resolves its own
-// fixed fixture.
-class FakeStoreService extends Service {
-  responses = new Map<string, History[]>();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    return Promise.resolve({
-      content: { data: this.responses.get(url) ?? [] },
-    });
-  }
-}
-
-function lastHourRequestUrl(stationId: string) {
-  return historyQuery<History>(
-    'history',
-    stationId,
-    { duration: 60 * 60, keys: ['w-dir', 'w-avg', 'w-max'] },
-    { backgroundReload: true }
-  ).url;
 }
 
 // Neither the polar wind-direction chart (a `scatter` series with a
@@ -57,6 +33,7 @@ function lastHourRequestUrl(stationId: string) {
 // defensively, so this guarantee currently rests on that upstream contract.
 module('Integration | Chart | point order', function (hooks) {
   setupRenderingTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   const now = Date.now();
   const outOfOrderHistory: History[] = [
@@ -186,20 +163,14 @@ module('Integration | Chart | point order', function (hooks) {
   // Highcharts' `series.setData()` rather than always destroying/recreating
   // it, and Highcharts' default point-matching falls back to raw x value
   // (wind direction here, a coarse 0-360 value) whenever it can't match an
-  // incoming point by id. On a *fresh* fetch (cache miss, as simulated by
-  // FakeStoreService below), StationHistorySection gets a genuinely new
+  // incoming point by id. On a *fresh* fetch (a cache miss: each station's
+  // history is its own request to the stubbed API), StationHistorySection gets a genuinely new
   // Future and `<Request>` tears its content block down -- so this
   // particular test would pass even without a fix. It's kept as a
   // regression guard on that teardown behavior; the actual bug (and the fix
   // below) only shows up when the surrounding tree does *not* tear down --
   // see the next two tests.
   test('a fresh station fetch replaces the chart instance', async function (this: Ctx, assert) {
-    this.owner.register('service:store', FakeStoreService);
-
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     const stationA: History[] = [
       {
         id: 'holfuy-1829:1',
@@ -249,8 +220,8 @@ module('Integration | Chart | point order', function (hooks) {
       },
     ];
 
-    store.responses.set(lastHourRequestUrl('holfuy-1829'), stationA);
-    store.responses.set(lastHourRequestUrl('holfuy-1808'), stationB);
+    api.respond = (url) =>
+      rawHistory(url.pathname.includes('/holfuy-1829/') ? stationA : stationB);
 
     const state = trackedObject({ stationId: 'holfuy-1829' });
     await render(

@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
 
@@ -6,6 +5,11 @@ import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
+import {
+  apiError,
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import HelpLiveStation from 'winds-mobi-client-web/components/help/live-station';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
@@ -16,31 +20,12 @@ interface HelpLiveStationTestContext extends RenderedTestContext {
 
 const STATION: Station = stationFixture({ last: { timestamp: Date.now() } });
 
-type FakeStoreRequest = {
-  url?: string;
-};
-
-class FakeStoreService extends Service {
-  stationResponse: Promise<unknown> = Promise.resolve({
-    content: { data: STATION },
-  });
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: [] } });
-    }
-
-    return this.stationResponse;
-  }
-}
-
 module('Integration | Component | help/live-station', function (hooks) {
   setupRenderingTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: [STATION] });
   });
 
   test('it renders the station once loaded', async function (this: HelpLiveStationTestContext, assert) {
@@ -54,15 +39,7 @@ module('Integration | Component | help/live-station', function (hooks) {
   });
 
   test('it shows an error message when the request fails', async function (this: HelpLiveStationTestContext, assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-    const rejection = Promise.reject(new Error('boom'));
-
-    rejection.catch(() => {
-      // Prevent an unhandled-rejection warning.
-    });
-    store.stationResponse = rejection;
+    api.respond = () => apiError();
     const stationId: HelpLiveStationTestContext['stationId'] = 'holfuy-1804';
 
     await render(

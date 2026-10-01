@@ -1,61 +1,20 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
-
-type FakeStoreRequest = {
-  url?: string;
-};
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    this.calls.push(url);
-
-    // History is a list, a single station is one record, and the collection
-    // query is a list: returning the wrong shape doesn't fail here, it throws
-    // deep inside the station panel's charts instead.
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: [] }, request });
-    }
-
-    const singleStation = OVERLAPPING_STATIONS.find((station) =>
-      url.includes(`/stations/${station.id}/?`)
-    );
-
-    if (singleStation) {
-      return Promise.resolve({ content: { data: singleStation }, request });
-    }
-
-    // A by-ids query returns just those stations, as the real API does.
-    const ids = new URL(url, 'https://winds.mobi').searchParams.getAll('ids');
-
-    return Promise.resolve({
-      content: {
-        data:
-          ids.length > 0
-            ? OVERLAPPING_STATIONS.filter((station) => ids.includes(station.id))
-            : OVERLAPPING_STATIONS,
-      },
-      // WarpDrive's `<Request>` `state.refresh()` replays the request it
-      // finds echoed back on a resolved response -- without it, a refresh
-      // resolves against an empty/unknown request instead of this same URL.
-      request,
-    });
-  }
-}
 
 const HIDDEN_CARD_SELECTOR = '[data-test-nearby-station-card]';
 
 module('Acceptance | hidden stations', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: OVERLAPPING_STATIONS });
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
   });

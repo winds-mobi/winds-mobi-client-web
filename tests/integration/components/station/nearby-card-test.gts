@@ -1,7 +1,7 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
@@ -10,22 +10,13 @@ interface StationNearbyCardTestContext extends RenderingTestContext {
   station: Station;
 }
 
-class FakeStoreService extends Service {
-  request() {
-    return Promise.resolve({ content: { data: [] } });
-  }
-}
-
 const STATION: Station = stationFixture({
   last: { timestamp: Date.now() - 5 * 60 * 1000 },
 });
 
 module('Integration | Component | station/nearby-card', function (hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
-  });
+  setupStubbedApi(hooks);
 
   test('it renders the header and the summary sections', async function (this: StationNearbyCardTestContext, assert) {
     const station: StationNearbyCardTestContext['station'] = STATION;

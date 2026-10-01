@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { Type } from '@warp-drive/core/types/symbols';
 import { module, test } from 'qunit';
 import {
@@ -9,8 +8,13 @@ import {
   type TestContext,
   triggerKeyEvent,
   visit,
+  waitUntil,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
@@ -40,19 +44,6 @@ function markerPosition(stationId: string) {
       }
     : undefined;
 }
-
-type DeferredRequest = {
-  promise: Promise<{ content: { data: Station } }>;
-  resolve: (value: { content: { data: Station } }) => void;
-};
-
-type FakeStoreRequest = {
-  url?: string;
-};
-
-type MapStationPanelTestContext = TestContext & {
-  deferredSecondaryStationRequest?: DeferredRequest;
-};
 
 const PRIMARY_STATION: Station = stationFixture();
 
@@ -99,101 +90,6 @@ const HISTORY: History[] = [
   },
 ];
 
-class FakeStoreService extends Service {
-  calls: string[] = [];
-  deferredSecondaryStationRequest?: DeferredRequest;
-  private requestCache = new Map<
-    string,
-    Promise<{
-      content: { data: History[] | Station | Station[] };
-      request?: FakeStoreRequest;
-    }>
-  >();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    this.calls.push(url);
-
-    let cachedRequest = this.requestCache.get(url);
-
-    if (cachedRequest) {
-      return cachedRequest;
-    }
-
-    if (url.includes('/historic/')) {
-      cachedRequest = Promise.resolve({
-        content: {
-          data: HISTORY,
-        },
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-      return cachedRequest;
-    }
-
-    if (url.includes('/stations/holfuy-1804/?')) {
-      cachedRequest = Promise.resolve({
-        content: {
-          data: PRIMARY_STATION,
-        },
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-      return cachedRequest;
-    }
-
-    if (url.includes('/stations/holfuy-2222/?')) {
-      if (this.deferredSecondaryStationRequest) {
-        cachedRequest = this.deferredSecondaryStationRequest.promise;
-        this.requestCache.set(url, cachedRequest);
-        return cachedRequest;
-      }
-
-      cachedRequest = Promise.resolve({
-        content: {
-          data: SECONDARY_STATION,
-        },
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-      return cachedRequest;
-    }
-
-    if (url.includes('/stations/?')) {
-      cachedRequest = Promise.resolve({
-        content: {
-          data: [PRIMARY_STATION, SECONDARY_STATION],
-        },
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-      return cachedRequest;
-    }
-
-    cachedRequest = Promise.resolve({
-      content: {
-        data: [],
-      },
-      request,
-    });
-    this.requestCache.set(url, cachedRequest);
-
-    return cachedRequest;
-  }
-}
-
-function createDeferredRequest(): DeferredRequest {
-  let resolve!: (value: { content: { data: Station } }) => void;
-
-  const promise = new Promise<{ content: { data: Station } }>(
-    (resolvePromise) => {
-      resolve = resolvePromise;
-    }
-  );
-
-  return { promise, resolve };
-}
-
 function assertCurrentRoute(
   assert: Assert,
   expectedPathname: string,
@@ -210,11 +106,13 @@ function assertCurrentRoute(
 
 module('Acceptance | map station panel', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
-  hooks.beforeEach(function (this: MapStationPanelTestContext) {
-    this.deferredSecondaryStationRequest = undefined;
-
-    this.owner.register('service:store', FakeStoreService);
+  hooks.beforeEach(function () {
+    api.respond = stationsApi({
+      stations: [PRIMARY_STATION, SECONDARY_STATION],
+      history: HISTORY,
+    });
   });
 
   test('it deep-links the panel and map state from the URL', async function (assert) {
@@ -291,7 +189,7 @@ module('Acceptance | map station panel', function (hooks) {
       .exists('the air history chart renders');
   });
 
-  test('it zooms in to the open station when its name is clicked', async function (this: MapStationPanelTestContext, assert) {
+  test('it zooms in to the open station when its name is clicked', async function (this: TestContext, assert) {
     await visit(
       '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=8'
     );
@@ -305,7 +203,7 @@ module('Acceptance | map station panel', function (hooks) {
     });
   });
 
-  test('it closes from the explicit close button and preserves map query params', async function (this: MapStationPanelTestContext, assert) {
+  test('it closes from the explicit close button and preserves map query params', async function (this: TestContext, assert) {
     await visit(
       '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
     );
@@ -319,7 +217,7 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-panel]').doesNotExist();
   });
 
-  test('it stays open when the panel itself is clicked', async function (this: MapStationPanelTestContext, assert) {
+  test('it stays open when the panel itself is clicked', async function (this: TestContext, assert) {
     await visit(
       '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
     );
@@ -341,7 +239,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'it closes when the map itself is clicked and preserves map query params',
     webGLAvailable,
-    async function (this: MapStationPanelTestContext, assert) {
+    async function (this: TestContext, assert) {
       await visit(
         '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
@@ -364,7 +262,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'it stays open when a map control is clicked',
     webGLAvailable,
-    async function (this: MapStationPanelTestContext, assert) {
+    async function (this: TestContext, assert) {
       await visit(
         '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
@@ -385,7 +283,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'it switches stations when another marker is clicked, rather than closing',
     webGLAvailable,
-    async function (this: MapStationPanelTestContext, assert) {
+    async function (this: TestContext, assert) {
       await visit(
         '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
@@ -428,15 +326,23 @@ module('Acceptance | map station panel', function (hooks) {
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
   });
 
-  test('it keeps the panel shell mounted while the next station loads', async function (this: MapStationPanelTestContext, assert) {
+  test('it keeps the panel shell mounted while the next station loads', async function (this: TestContext, assert) {
     const router = this.owner.lookup('service:router');
-    const deferredRequest = createDeferredRequest();
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
+    // Hold the second station's request open, so the test can look at the
+    // panel while it's still loading.
+    const serve = api.respond;
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
 
-    this.deferredSecondaryStationRequest = deferredRequest;
-    store.deferredSecondaryStationRequest = deferredRequest;
+    api.respond = async (url) => {
+      if (url.pathname.includes('/stations/holfuy-2222/')) {
+        await released;
+      }
+
+      return serve(url);
+    };
 
     await visit(
       '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
@@ -450,22 +356,22 @@ module('Acceptance | map station panel', function (hooks) {
       },
     });
 
-    // The deferred station request isn't a test waiter, so `settled()`
-    // resolves with it still pending: the panel is mid-way through loading.
-    await settled();
+    // Deliberately polls the URL rather than awaiting `settled()`/the
+    // transition promise directly: the held station request above is
+    // still pending by design, and fully awaiting either one lets enough
+    // of the app settle that the assertions below (the mid-loading state)
+    // no longer catch anything -- confirmed empirically, not just in theory.
+    await waitUntil(
+      () =>
+        new URL(currentURL(), 'https://winds.mobi').searchParams.get(
+          'station'
+        ) === 'holfuy-2222'
+    );
 
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-title]').doesNotExist();
 
-    deferredRequest.resolve({
-      content: {
-        data: SECONDARY_STATION,
-      },
-    });
-
-    this.deferredSecondaryStationRequest = undefined;
-    store.deferredSecondaryStationRequest = undefined;
-
+    release();
     await settled();
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
@@ -606,7 +512,7 @@ module('Acceptance | map station panel', function (hooks) {
   test.if(
     'the selected-station ring lives on the map marker element and follows selection',
     webGLAvailable,
-    async function (this: MapStationPanelTestContext, assert) {
+    async function (this: TestContext, assert) {
       const router = this.owner.lookup('service:router');
 
       await visit(

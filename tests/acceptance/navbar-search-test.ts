@@ -1,13 +1,12 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, fillIn, visit } from '@ember/test-helpers';
-import type { History, Station } from 'winds-mobi-client-web/services/store';
+import type { Station } from 'winds-mobi-client-web/services/store';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
-
-type FakeStoreRequest = {
-  url?: string;
-};
 
 const SEARCH_STATION: Station = stationFixture({
   id: 'holfuy-1850',
@@ -32,69 +31,6 @@ const HELP_STATION: Station = stationFixture({
   last: { timestamp: 1_775_333_618_000 },
 });
 
-class FakeStoreService extends Service {
-  calls: string[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    this.calls.push(url);
-
-    if (url.includes('search=leh')) {
-      return Promise.resolve({
-        content: {
-          data: [SEARCH_STATION],
-        },
-      });
-    }
-
-    if (url.includes('search=zz')) {
-      return Promise.resolve({
-        content: {
-          data: [],
-        },
-      });
-    }
-
-    if (url.includes('/stations/holfuy-1804/?')) {
-      return Promise.resolve({
-        content: {
-          data: HELP_STATION,
-        },
-      });
-    }
-
-    if (url.includes('/stations/holfuy-1850/?')) {
-      return Promise.resolve({
-        content: {
-          data: SEARCH_STATION,
-        },
-      });
-    }
-
-    if (url.includes('/historic/')) {
-      return Promise.resolve({
-        content: {
-          data: [] as History[],
-        },
-      });
-    }
-
-    if (url.includes('/stations/?')) {
-      return Promise.resolve({
-        content: {
-          data: [SEARCH_STATION],
-        },
-      });
-    }
-
-    return Promise.resolve({
-      content: {
-        data: [],
-      },
-    });
-  }
-}
-
 function currentSearchParams() {
   return Object.fromEntries(
     new URL(currentURL(), 'https://winds.mobi').searchParams.entries()
@@ -117,20 +53,17 @@ function lastSearchRequestParams(calls: string[]) {
 
 module('Acceptance | navbar search', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: [SEARCH_STATION, HELP_STATION] });
   });
 
   test('it searches from the desktop navbar and recenters on the selected station at zoom 10', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/all?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
 
-    const searchParams = lastSearchRequestParams(store.calls);
+    const searchParams = lastSearchRequestParams(api.calls);
     assert.strictEqual(
       searchParams?.get('near-lat'),
       '46.54321',
@@ -160,14 +93,10 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it biases toward the default view on a route with no map at all', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/help');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
 
-    const searchParams = lastSearchRequestParams(store.calls);
+    const searchParams = lastSearchRequestParams(api.calls);
     assert.strictEqual(
       searchParams?.get('near-lat'),
       '46.8011',
@@ -191,14 +120,10 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it shows empty state for unmatched queries and does not search for a single character', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/all');
     await fillIn('[data-test-navbar-search="navbar"] input', 'l');
 
-    assert.strictEqual(countSearchRequests(store.calls), 0);
+    assert.strictEqual(countSearchRequests(api.calls), 0);
 
     await fillIn('[data-test-navbar-search="navbar"] input', 'zz');
 

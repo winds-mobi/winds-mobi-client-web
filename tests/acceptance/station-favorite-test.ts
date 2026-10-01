@@ -1,14 +1,13 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
-
-type FakeStoreRequest = {
-  url?: string;
-};
 
 const STATION_FIXTURE: Station = stationFixture({
   latitude: 46.521,
@@ -29,30 +28,15 @@ const HISTORY_FIXTURES: History[] = [
   },
 ];
 
-class FakeStoreService extends Service {
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    // Shape matters per endpoint: history and the map's bounds query are
-    // lists, a single station is one record. Returning the wrong one doesn't
-    // fail here — it throws later, wherever the result gets used as the other.
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: HISTORY_FIXTURES } });
-    }
-
-    if (url.includes(`/stations/${STATION_FIXTURE.id}/?`)) {
-      return Promise.resolve({ content: { data: STATION_FIXTURE } });
-    }
-
-    return Promise.resolve({ content: { data: [STATION_FIXTURE] } });
-  }
-}
-
 module('Acceptance | station favorite toggle', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({
+      stations: [STATION_FIXTURE],
+      history: HISTORY_FIXTURES,
+    });
   });
 
   test('starring a station saves it to the local favourites list', async function (assert) {

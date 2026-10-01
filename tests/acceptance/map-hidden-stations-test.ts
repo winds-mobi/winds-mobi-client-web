@@ -1,54 +1,23 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { type TestContext, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
-import type { Station } from 'winds-mobi-client-web/services/store';
 import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // These render real markers, which needs a working MapLibre — see
 // tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
-type FakeStoreRequest = {
-  url?: string;
-};
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-  private requestCache = new Map<
-    string,
-    Promise<{ content: { data: Station[] }; request: FakeStoreRequest }>
-  >();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    this.calls.push(url);
-
-    let cachedRequest = this.requestCache.get(url);
-
-    if (!cachedRequest) {
-      cachedRequest = Promise.resolve({
-        content: {
-          data: OVERLAPPING_STATIONS,
-        },
-        // WarpDrive's `<Request>` `state.refresh()` replays the request it
-        // finds echoed back on a resolved response -- without it, a refresh
-        // resolves against an empty/unknown request instead of this same URL.
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-    }
-
-    return cachedRequest;
-  }
-}
-
 module('Acceptance | map hidden stations (#167)', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: OVERLAPPING_STATIONS });
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
   });
