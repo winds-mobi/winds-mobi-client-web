@@ -26,8 +26,8 @@ function stubCurrentRouteQueryParams(
 }
 
 // Regression coverage for the bug this modifier fixes: `ApplicationRoute#beforeModel`
-// no longer awaits `nearbyLocation.syncPermissionState()` before render (see
-// TODO.md item 2), so for an already-granted returning user, `coordinates` on the
+// doesn't await `nearbyLocation.syncPermissionState()` before render, so for an
+// already-granted returning user, `coordinates` on the
 // `nearby-location` service typically resolve *after* this modifier's host element
 // has already mounted. The modifier must react to that late arrival, not just check
 // once at setup.

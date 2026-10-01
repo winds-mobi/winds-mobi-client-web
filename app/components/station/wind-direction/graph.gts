@@ -39,7 +39,7 @@ export default class WindDirectionGraph extends Component<WindDirectionGraphSign
   // render pipeline performs in a single render pass. Without it, each read
   // built a fresh object, which made `render-highcharts`'s modifier see
   // "changed" args on every access and re-run its update mid-render -- the
-  // root cause of this component's flaky marker-rendering (see TODO.md).
+  // root cause of this component's flaky marker-rendering.
 
   // The radial window is always exactly one hour wide, anchored on the newest
   // reading: the outer ring is the last measurement and the center is exactly

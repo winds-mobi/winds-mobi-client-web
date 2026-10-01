@@ -27,7 +27,7 @@ if (typeof module !== 'undefined') {
           // (this repo used to pass both): that flag blocks headless Chromium's
           // software WebGL fallback entirely, which is what let MapLibre/map
           // tests actually run at all instead of being permanently skipped
-          // (see tests/helpers/webgl.ts, TODO.md). --disable-gpu alone doesn't
+          // (see tests/helpers/webgl.ts). --disable-gpu alone doesn't
           // affect that fallback — verified directly against this same
           // Chromium build.
           '--disable-gpu',
