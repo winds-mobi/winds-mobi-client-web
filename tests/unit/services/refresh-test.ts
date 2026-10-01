@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+import { waitUntil } from '@ember/test-helpers';
 import { setupTest } from 'winds-mobi-client-web/tests/helpers';
 import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
@@ -6,85 +7,102 @@ function lookup(context: { owner: { lookup(name: string): unknown } }) {
   return context.owner.lookup('service:refresh') as RefreshService;
 }
 
+// Records which request types the service invalidates on the real store's
+// cache policy, instead of letting it invalidate anything.
+function spyOnInvalidation(refresh: RefreshService): string[] {
+  const invalidated: string[] = [];
+
+  refresh.store.lifetimes.invalidateRequestsForType = (type: string) => {
+    invalidated.push(type);
+  };
+
+  return invalidated;
+}
+
 module('Unit | Service | refresh', function (hooks) {
   setupTest(hooks);
 
-  test('refreshNow is a no-op while inactive: lastRefresh and refreshCount stay unchanged', function (assert) {
+  test('refreshNow restarts the countdown and invalidates every station and history request', function (assert) {
     const refresh = lookup(this);
-
-    assert.false(refresh.isActive, 'nothing has called activate() yet');
-    assert.strictEqual(refresh.refreshCount, 0);
+    const invalidated = spyOnInvalidation(refresh);
+    const before = refresh.lastRefreshAt;
 
     refresh.refreshNow();
 
-    assert.strictEqual(
-      refresh.refreshCount,
-      0,
-      'refreshNow does nothing while inactive'
-    );
-    assert.strictEqual(refresh.lastRefresh, undefined);
+    assert.deepEqual(invalidated, ['station', 'history']);
+    assert.notStrictEqual(refresh.lastRefreshAt, before);
+    assert.strictEqual(refresh.elapsedMs, 0);
   });
 
-  test('refreshNow bumps lastRefresh and refreshCount once active', function (assert) {
+  test('a fetch while nothing is in flight opens a refresh cycle', function (assert) {
     const refresh = lookup(this);
-    const token = refresh.activate();
+    const invalidated = spyOnInvalidation(refresh);
 
-    refresh.refreshNow();
+    assert.false(refresh.isRefreshing, 'nothing in flight yet');
 
-    assert.strictEqual(refresh.refreshCount, 1, 'one refresh has been noted');
-    assert.true(
-      refresh.lastRefresh instanceof Date,
-      'lastRefresh is set once a refresh has happened'
+    const done = refresh.fetchStarted();
+
+    assert.strictEqual(refresh.refreshCount, 1, 'a cycle was counted');
+    assert.deepEqual(
+      invalidated,
+      ['station', 'history'],
+      'everything else on screen re-fetches with it'
     );
+    assert.true(refresh.isRefreshing, 'true while the fetch is in flight');
 
-    refresh.deactivate(token);
+    done();
+
+    assert.false(refresh.isRefreshing, 'false once it has settled');
   });
 
-  test('every refreshNow call while active bumps refreshCount by one and replaces lastRefresh', function (assert) {
+  test('a fetch while a cycle is open joins it instead of starting another', function (assert) {
     const refresh = lookup(this);
-    const token = refresh.activate();
+    const invalidated = spyOnInvalidation(refresh);
 
-    refresh.refreshNow();
-    const firstRefresh = refresh.lastRefresh;
+    const doneA = refresh.fetchStarted();
+    const doneB = refresh.fetchStarted();
 
-    refresh.refreshNow();
-    const secondRefresh = refresh.lastRefresh;
+    assert.strictEqual(refresh.refreshCount, 1, 'still one cycle');
+    assert.strictEqual(invalidated.length, 2, 'invalidated only once');
 
-    assert.strictEqual(
-      refresh.refreshCount,
-      2,
-      'refreshCount counts every refresh, not just whether one happened'
-    );
-    assert.notStrictEqual(
-      firstRefresh,
-      secondRefresh,
-      'lastRefresh is replaced with a new Date on every refresh, which is what lets dependents (e.g. the map/nearby/favorites station-request getters) reactively refetch'
-    );
+    doneA();
+    assert.true(refresh.isRefreshing, 'still refreshing until both settle');
 
-    refresh.deactivate(token);
+    doneB();
+    assert.false(refresh.isRefreshing);
   });
 
-  test('isActive reflects whether any consumer is currently activated', function (assert) {
+  test('a fetch right after the previous one settled still joins its cycle; a later one opens a new cycle', async function (assert) {
     const refresh = lookup(this);
 
-    assert.false(refresh.isActive);
+    spyOnInvalidation(refresh);
+    refresh.cycleGraceMs = 20;
 
-    const tokenA = refresh.activate();
-    assert.true(refresh.isActive);
+    refresh.fetchStarted()();
+    // A request waterfall: the child fetch starts just after its parent settled.
+    refresh.fetchStarted()();
 
-    const tokenB = refresh.activate();
-    assert.true(refresh.isActive, 'still active with two consumers');
+    assert.strictEqual(refresh.refreshCount, 1, 'the child joined');
 
-    refresh.deactivate(tokenA);
-    assert.true(
-      refresh.isActive,
-      'still active while the second consumer holds it open'
-    );
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    refresh.fetchStarted()();
 
-    refresh.deactivate(tokenB);
-    assert.false(
-      refresh.isActive,
-      'inactive once every consumer has deactivated'
-    );
+    assert.strictEqual(refresh.refreshCount, 2, 'a later fetch is its own');
+  });
+
+  test('the countdown refreshes once the interval elapses, until stopped', async function (assert) {
+    const refresh = lookup(this);
+    const invalidated = spyOnInvalidation(refresh);
+
+    refresh.refreshIntervalMs = 30;
+    refresh.countdownTickMs = 5;
+
+    const stop = refresh.start();
+
+    await waitUntil(() => invalidated.length > 0);
+    stop();
+
+    assert.deepEqual(invalidated.slice(0, 2), ['station', 'history']);
+    assert.false(refresh.refreshLoop.isRunning, 'stopped with the teardown');
   });
 });

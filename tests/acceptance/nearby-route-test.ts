@@ -3,7 +3,6 @@ import { module, test } from 'qunit';
 import { click, currentURL, settled, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import RefreshService from 'winds-mobi-client-web/services/refresh';
 import NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
@@ -104,11 +103,6 @@ class FakeStoreService extends Service {
       },
     });
   }
-}
-
-class ShortIntervalRefreshService extends RefreshService {
-  refreshIntervalMs = 75;
-  countdownTickMs = 10;
 }
 
 const NEARBY_STATION_CARD_SELECTOR = '[data-test-nearby-station-card]';
@@ -253,27 +247,5 @@ module('Acceptance | nearby route', function (hooks) {
 
     assert.dom(NEARBY_STATION_CARD_SELECTOR).exists({ count: 2 });
     assert.dom('[data-test-nearby-station-card-compact]').doesNotExist();
-  });
-
-  test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {
-    this.owner.register('service:refresh', ShortIntervalRefreshService);
-
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-    const nearbyLocation = this.owner.lookup('service:nearby-location');
-
-    stubGrantedPermission(nearbyLocation);
-
-    await visit('/nearby');
-
-    const initialStationRequestCount = countStationRequests(store.calls);
-
-    assert.dom(NEARBY_LOCATION_BUTTON_SELECTOR).doesNotExist();
-    assert.dom('[data-test-navbar-refresh]').exists();
-
-    await click('[data-test-navbar-refresh]');
-
-    assert.true(countStationRequests(store.calls) > initialStationRequestCount);
   });
 });

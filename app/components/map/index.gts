@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import { array, fn } from '@ember/helper';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
-import { getRequestState } from '@warp-drive/core/reactive';
+import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type {
   Station,
@@ -55,9 +55,7 @@ import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resol
 import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
-import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
-import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
@@ -118,7 +116,6 @@ export interface MapSignature {
 export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
   @service declare router: RouterService;
-  @service declare refresh: RefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
 
@@ -228,13 +225,12 @@ export default class Map extends Component<MapSignature> {
     this.requestBounds = bounds;
   };
 
-  // Recreated when the visible bounds change or the shared refresh tick fires —
-  // touching `lastRefresh` makes each tick refetch. No `backgroundReload`, so a
-  // reload is a real pending request that `loadingProbe` (and the navbar spinner)
-  // reflects; the latch keeps the previous markers on screen meanwhile, and
-  // refetches return the same cached record identities so markers update in place
-  // rather than remounting. `mapQuery` caps the result at 470 stations, which
-  // bounds the fetch even when a pitched view reaches far toward the horizon.
+  // Recreated when the visible bounds change. A refresh doesn't recreate it: it
+  // invalidates the cached response, and the `<Request @autorefresh>` in the
+  // template re-fetches it in place. Refetches return the same cached record
+  // identities, so markers update in place rather than remounting. `mapQuery`
+  // caps the result at 470 stations, which bounds the fetch even when a pitched
+  // view reaches far toward the horizon.
   @cached
   get request(): Future<{ data: Station[] }> | undefined {
     const bounds = this.requestBounds;
@@ -245,23 +241,10 @@ export default class Map extends Component<MapSignature> {
       return undefined;
     }
 
-    // Read so each refresh tick invalidates this getter and refetches.
-    void this.refresh.lastRefresh;
-
     return this.store.request<{ data: Station[] }>(
       mapQuery<Station>('station', bounds)
     );
   }
-
-  get requestState() {
-    return this.request ? getRequestState(this.request) : undefined;
-  }
-
-  // Reports to the shared refresh service whether the map is currently loading,
-  // so the navbar refresh control can spin while this request is in flight.
-  loadingProbe = (): boolean => {
-    return this.requestState?.isPending === true;
-  };
 
   // Last successfully-loaded stations, committed by `commitResolvedStations` on
   // each resolve. Holds the markers on screen while a new bounds query loads.
@@ -271,17 +254,10 @@ export default class Map extends Component<MapSignature> {
     this.lastStations = stations;
   };
 
-  // Render the current request's value once it resolves, otherwise fall back to
-  // the last loaded set so panning/zooming to new bounds doesn't blink markers
-  // off while the new Future is pending. Because `request` is cached on the
-  // routed view, `requestState` always reflects the Future for the current view.
-  // Hidden stations (#167) are left out.
+  // The last loaded set, so panning/zooming to new bounds doesn't blink markers
+  // off while the new request is pending. Hidden stations (#167) are left out.
   get stations(): Station[] {
-    return this.hiddenStations.visible(
-      this.requestState?.isSuccess
-        ? this.requestState.value.data
-        : this.lastStations
-    );
+    return this.hiddenStations.visible(this.lastStations);
   }
 
   get initOptions(): MapInitOptions {
@@ -406,10 +382,26 @@ export default class Map extends Component<MapSignature> {
       data-test-map-container
       class="relative h-full w-full"
       {{onRouteChange this.router this.handleRouteChange}}
-      {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.refresh this.loadingProbe}}
       {{flyToUserLocation this.isFlyToUserLocationEnabled}}
     >
+      {{! Headless: it only re-fetches the request when a refresh invalidates
+      it, and commits each resolved list into the lastStations latch. The map
+      renders outside its blocks, so it never remounts. }}
+      <Request
+        @request={{this.request}}
+        @autorefresh="invalid"
+        @autorefreshBehavior="refresh"
+      >
+        <:content as |result|>
+          <div
+            class="contents"
+            {{commitResolvedStations result.data this.commitStations}}
+          ></div>
+        </:content>
+        <:idle></:idle>
+        <:loading></:loading>
+        <:error></:error>
+      </Request>
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"

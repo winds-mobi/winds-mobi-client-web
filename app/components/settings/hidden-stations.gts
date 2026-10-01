@@ -45,7 +45,11 @@ export default class SettingsHiddenStations extends Component<SettingsHiddenStat
     >
       <div class="flex flex-col gap-3">
         {{#if this.hiddenIds.length}}
-          <Request @request={{this.stationsRequest}}>
+          <Request
+            @request={{this.stationsRequest}}
+            @autorefresh="invalid"
+            @autorefreshBehavior="refresh"
+          >
             <:content as |result|>
               <ul class="flex flex-col divide-y divide-slate-200">
                 {{#each result.data as |station|}}

@@ -1,6 +1,7 @@
 import { pageTitle } from 'ember-page-title';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
+import { Request } from '@warp-drive/ember';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
@@ -8,7 +9,6 @@ import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
-import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
   Station as StationModel,
@@ -24,7 +24,6 @@ interface MapStationTemplateSignature {
 export default class MapStationTemplate extends Component<MapStationTemplateSignature> {
   @service declare router: RouterService;
   @service declare store: StoreService;
-  @service declare refresh: RefreshService;
   @service declare settings: SettingsService;
 
   get stationId(): string | undefined {
@@ -33,18 +32,17 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
     return typeof id === 'string' ? id : undefined;
   }
 
+  // Recreated when the station changes. A refresh doesn't recreate it: it
+  // invalidates the cached response, and the `<Request @autorefresh>` in the
+  // template re-fetches it in place, updating this same station record.
   @cached
   get stationRequest(): Future<{ data: StationModel }> | undefined {
     if (!this.stationId) {
       return undefined;
     }
 
-    void this.refresh.lastRefresh;
-
     return this.store.request<{ data: StationModel }>(
-      findRecord<StationModel>('station', this.stationId, undefined, {
-        backgroundReload: true,
-      })
+      findRecord<StationModel>('station', this.stationId)
     );
   }
 
@@ -75,6 +73,17 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
 
   <template>
     {{#if this.stationId}}
+      <Request
+        @request={{this.stationRequest}}
+        @autorefresh="invalid"
+        @autorefreshBehavior="refresh"
+      >
+        <:content></:content>
+        <:idle></:idle>
+        <:loading></:loading>
+        <:error></:error>
+      </Request>
+
       {{#if this.station}}
         {{pageTitle this.station.name}}
 

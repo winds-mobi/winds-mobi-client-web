@@ -3,6 +3,7 @@ import { cached, tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
+import { Request } from '@warp-drive/ember';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
 import { Alert } from 'frontile/status';
@@ -10,9 +11,7 @@ import { byIdsQuery } from 'winds-mobi-client-web/builders/station';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
-import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
-import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type {
   Station,
   StoreService,
@@ -30,15 +29,14 @@ interface HiddenTemplateSignature {
 // favourites page (app/templates/favorites.gts).
 export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
-  @service declare refresh: RefreshService;
   @service declare store: StoreService;
 
   get hiddenIds(): string[] {
     return this.hiddenStations.stationIds;
   }
 
-  // Recreated when the hidden ids change or the shared refresh tick fires,
-  // same as the favourites page.
+  // Recreated when the hidden ids change; refreshed in place, same as the
+  // favourites page.
   @cached
   get stationsRequest(): Future<{ data: Station[] }> | undefined {
     const ids = this.hiddenIds;
@@ -46,9 +44,6 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
     if (ids.length === 0) {
       return undefined;
     }
-
-    // Read so each refresh tick invalidates this getter and refetches.
-    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       byIdsQuery<Station>('station', ids)
@@ -70,9 +65,7 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
   };
 
   get stations(): Station[] {
-    const stations = this.requestState?.isSuccess
-      ? this.requestState.value.data
-      : this.lastStations;
+    const stations = this.lastStations;
 
     // The API doesn't guarantee response order — present in the order they
     // were hidden.
@@ -83,14 +76,10 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
     );
   }
 
-  // Reports to the shared refresh service whether this view is loading, so
-  // the navbar refresh control spins while the request is in flight.
-  loadingProbe = (): boolean => {
-    return this.requestState?.isPending === true;
-  };
-
   get isInitialLoad(): boolean {
-    return this.loadingProbe() && this.lastStations.length === 0;
+    return (
+      this.requestState?.isPending === true && this.lastStations.length === 0
+    );
   }
 
   get isError(): boolean {
@@ -104,11 +93,22 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
   <template>
     {{pageTitle (t "hidden.title")}}
 
-    <section
-      class="min-h-0 flex-1 overflow-y-auto bg-slate-200"
-      {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.refresh this.loadingProbe}}
-    >
+    <section class="min-h-0 flex-1 overflow-y-auto bg-slate-200">
+      <Request
+        @request={{this.stationsRequest}}
+        @autorefresh="invalid"
+        @autorefreshBehavior="refresh"
+      >
+        <:content as |result|>
+          <div
+            class="contents"
+            {{commitResolvedStations result.data this.commitStations}}
+          ></div>
+        </:content>
+        <:idle></:idle>
+        <:loading></:loading>
+        <:error></:error>
+      </Request>
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.isError}}
           <StationSectionCard

@@ -10,6 +10,7 @@ import type {
 } from '@warp-drive/core/types/record';
 
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
+import { refreshable } from './refreshable';
 
 const defaultQuery: QueryParamsSource = {
   keys: ['w-dir', 'w-avg', 'w-max', 'temp', 'hum'],
@@ -49,7 +50,7 @@ function historyQuery<T extends TypedRecordInstance>(
 
   const jsonApiObject = jsonApiQuery<T>(type, mergedQuery, mergedOptions);
 
-  return { ...jsonApiObject, url };
+  return refreshable({ ...jsonApiObject, url }, type);
 }
 
 export { historyQuery };
