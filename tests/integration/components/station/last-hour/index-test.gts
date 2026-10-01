@@ -26,7 +26,7 @@ interface StationLastHourIndexTestContext extends RenderingTestContext {
   stationId: string;
 }
 
-class FakeMapRefreshService extends Service {
+class FakeRefreshService extends Service {
   lastRefresh = 0;
 }
 
@@ -85,7 +85,7 @@ module('Integration | Component | station/last-hour', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.register('service:map-refresh', FakeMapRefreshService);
+    this.owner.register('service:refresh', FakeRefreshService);
   });
 
   test('it keeps the first station graph stable when another station resolves late', async function (this: StationLastHourIndexTestContext, assert) {

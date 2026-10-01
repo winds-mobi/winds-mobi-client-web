@@ -57,7 +57,7 @@ import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-locat
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
@@ -117,7 +117,7 @@ export interface MapSignature {
 export default class Map extends Component<MapSignature> {
   @service declare store: StoreService;
   @service declare router: RouterService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
 
@@ -245,7 +245,7 @@ export default class Map extends Component<MapSignature> {
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       mapQuery<Station>('station', bounds)
@@ -406,7 +406,7 @@ export default class Map extends Component<MapSignature> {
       class="relative h-full w-full"
       {{onRouteChange this.router this.handleRouteChange}}
       {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
+      {{registerLoadingProbe this.refresh this.loadingProbe}}
       {{flyToUserLocation this.isFlyToUserLocationEnabled}}
     >
       <MapLibreGL

@@ -21,7 +21,7 @@ interface Ctx extends RenderingTestContext {
 
 type FakeStoreRequest = { url?: string };
 
-class FakeMapRefreshService extends Service {
+class FakeRefreshService extends Service {
   lastRefresh = 0;
 }
 
@@ -199,7 +199,7 @@ module('Integration | Chart | point order', function (hooks) {
   // see the next two tests.
   test('a fresh station fetch replaces the chart instance', async function (this: Ctx, assert) {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.register('service:map-refresh', FakeMapRefreshService);
+    this.owner.register('service:refresh', FakeRefreshService);
 
     const store = this.owner.lookup(
       'service:store'

@@ -5,7 +5,7 @@ import { click, render } from '@ember/test-helpers';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import NavbarRefreshControl from 'winds-mobi-client-web/components/navbar/refresh-control';
 
-class FakeMapRefreshService extends Service {
+class FakeRefreshService extends Service {
   @tracked isRefreshing = false;
   @tracked refreshCount = 0;
   @tracked elapsedMs = 0;
@@ -24,13 +24,13 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
   setupRenderingTest(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:map-refresh', FakeMapRefreshService);
+    this.owner.register('service:refresh', FakeRefreshService);
   });
 
   test('it spins while a refresh is in flight and is idle otherwise', async function (assert) {
-    const mapRefresh = this.owner.lookup(
-      'service:map-refresh'
-    ) as unknown as FakeMapRefreshService;
+    const refresh = this.owner.lookup(
+      'service:refresh'
+    ) as unknown as FakeRefreshService;
 
     await render(<template><NavbarRefreshControl /></template>);
 
@@ -38,21 +38,21 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       .dom('[data-test-navbar-refresh] span svg')
       .doesNotHaveClass('animate-spin');
 
-    mapRefresh.isRefreshing = true;
+    refresh.isRefreshing = true;
     await render(<template><NavbarRefreshControl /></template>);
 
     assert.dom('[data-test-navbar-refresh] span svg').hasClass('animate-spin');
   });
 
   test('pressing the button triggers a refresh', async function (assert) {
-    const mapRefresh = this.owner.lookup(
-      'service:map-refresh'
-    ) as unknown as FakeMapRefreshService;
+    const refresh = this.owner.lookup(
+      'service:refresh'
+    ) as unknown as FakeRefreshService;
 
     await render(<template><NavbarRefreshControl /></template>);
     await click('[data-test-navbar-refresh]');
 
-    assert.strictEqual(mapRefresh.refreshNowCallCount, 1);
+    assert.strictEqual(refresh.refreshNowCallCount, 1);
   });
 
   test('each refresh adds a full turn, so the transition replays every time', async function (assert) {
@@ -92,8 +92,8 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
   test('a refresh triggered from elsewhere (e.g. the auto-refresh tick) spins the icon too, not just a button press', async function (assert) {
     const refreshService = this.owner.lookup(
-      'service:map-refresh'
-    ) as unknown as FakeMapRefreshService;
+      'service:refresh'
+    ) as unknown as FakeRefreshService;
 
     await render(<template><NavbarRefreshControl /></template>);
 
@@ -111,9 +111,9 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
   });
 
   test('the button fills up as far through the refresh interval as the last refresh is', async function (assert) {
-    const mapRefresh = this.owner.lookup(
-      'service:map-refresh'
-    ) as unknown as FakeMapRefreshService;
+    const refresh = this.owner.lookup(
+      'service:refresh'
+    ) as unknown as FakeRefreshService;
 
     await render(<template><NavbarRefreshControl /></template>);
 
@@ -125,7 +125,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
         'no progress right after a refresh'
       );
 
-    mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs / 2;
+    refresh.elapsedMs = refresh.refreshIntervalMs / 2;
     await render(<template><NavbarRefreshControl /></template>);
 
     assert
@@ -137,7 +137,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       );
 
     // Clamped, not overshot, however far a test double's elapsed time drifts.
-    mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs * 10;
+    refresh.elapsedMs = refresh.refreshIntervalMs * 10;
     await render(<template><NavbarRefreshControl /></template>);
 
     assert

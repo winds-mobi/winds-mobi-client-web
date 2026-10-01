@@ -10,7 +10,7 @@ const DEFAULT_COUNTDOWN_TICK_MS = 1 * 1000;
 // A request site reports whether it is currently loading.
 type LoadingProbe = () => boolean;
 
-export default class MapRefreshService extends Service {
+export default class RefreshService extends Service {
   @tracked lastRefresh?: Date;
   @tracked scheduleStartedAt = new Date();
   @tracked currentTime = this.scheduleStartedAt;
@@ -173,6 +173,6 @@ export default class MapRefreshService extends Service {
 
 declare module '@ember/service' {
   interface Registry {
-    'map-refresh': MapRefreshService;
+    refresh: RefreshService;
   }
 }

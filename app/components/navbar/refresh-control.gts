@@ -4,14 +4,14 @@ import { htmlSafe } from '@ember/template';
 import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import ArrowClockwise from 'ember-phosphor-icons/components/ph-arrow-clockwise';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
 export interface NavbarRefreshControlSignature {
   Element: HTMLButtonElement;
 }
 
 export default class NavbarRefreshControl extends Component<NavbarRefreshControlSignature> {
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
 
   // One full turn per refresh, from any trigger (a press, the auto-refresh
   // tick, anything else that refreshes), derived from the service's
@@ -21,7 +21,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   // retargets the transition further on.
   get spinStyle() {
     return htmlSafe(
-      `transform: rotate(${this.mapRefresh.refreshCount * 360}deg);`
+      `transform: rotate(${this.refresh.refreshCount * 360}deg);`
     );
   }
 
@@ -33,7 +33,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
   // the countdown (most don't need to) draws no progress instead of a
   // broken one.
   get progress(): number {
-    const ratio = this.mapRefresh.elapsedMs / this.mapRefresh.refreshIntervalMs;
+    const ratio = this.refresh.elapsedMs / this.refresh.refreshIntervalMs;
 
     return Number.isFinite(ratio) ? Math.min(1, Math.max(0, ratio)) : 0;
   }
@@ -46,7 +46,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
     <Button
       aria-label={{t "map.refresh.ariaLabel"}}
       data-test-navbar-refresh
-      @onPress={{this.mapRefresh.refreshNow}}
+      @onPress={{this.refresh.refreshNow}}
       @variant="outline"
       @color="neutral"
       class="relative h-12"
@@ -84,7 +84,7 @@ export default class NavbarRefreshControl extends Component<NavbarRefreshControl
         button's own font-size -- now much larger per v0.18's typography
         rescale, making unscaled icons look oversized. }}
         <ArrowClockwise
-          class="size-4! {{if this.mapRefresh.isRefreshing 'animate-spin'}}"
+          class="size-4! {{if this.refresh.isRefreshing 'animate-spin'}}"
         />
       </span>
       {{! template-lint-enable no-inline-styles }}
