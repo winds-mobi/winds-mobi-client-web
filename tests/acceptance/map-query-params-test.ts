@@ -11,7 +11,7 @@ import {
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import { Type } from '@warp-drive/core/types/symbols';
-import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import RefreshService from 'winds-mobi-client-web/services/refresh';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 // Every test in this module waits on MapLibre's `idle` event (directly or
@@ -72,7 +72,7 @@ class FakeStoreService extends Service {
   }
 }
 
-class ShortIntervalMapRefreshService extends MapRefreshService {
+class ShortIntervalRefreshService extends RefreshService {
   refreshIntervalMs = 75;
   countdownTickMs = 10;
 }
@@ -160,10 +160,7 @@ module('Acceptance | map query params', function (hooks) {
     'it auto refreshes stations after the refresh interval',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      this.owner.register(
-        'service:map-refresh',
-        ShortIntervalMapRefreshService
-      );
+      this.owner.register('service:refresh', ShortIntervalRefreshService);
 
       const store = this.owner.lookup(
         'service:store'

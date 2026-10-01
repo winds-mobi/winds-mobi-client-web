@@ -12,7 +12,7 @@ import StationSectionCard from 'winds-mobi-client-web/components/station/section
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type {
   Station,
   StoreService,
@@ -30,7 +30,7 @@ interface HiddenTemplateSignature {
 // favourites page (app/templates/favorites.gts).
 export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
   @service declare store: StoreService;
 
   get hiddenIds(): string[] {
@@ -48,7 +48,7 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       byIdsQuery<Station>('station', ids)
@@ -107,7 +107,7 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
     <section
       class="min-h-0 flex-1 overflow-y-auto bg-slate-200"
       {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
+      {{registerLoadingProbe this.refresh this.loadingProbe}}
     >
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.isError}}

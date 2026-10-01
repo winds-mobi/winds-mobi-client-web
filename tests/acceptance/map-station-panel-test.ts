@@ -11,7 +11,7 @@ import {
   visit,
   waitUntil,
 } from '@ember/test-helpers';
-import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import RefreshService from 'winds-mobi-client-web/services/refresh';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
@@ -212,7 +212,7 @@ class FakeStoreService extends Service {
   }
 }
 
-class ShortIntervalMapRefreshService extends MapRefreshService {
+class ShortIntervalRefreshService extends RefreshService {
   refreshIntervalMs = 75;
   countdownTickMs = 10;
 }
@@ -553,10 +553,7 @@ module('Acceptance | map station panel', function (hooks) {
     'it auto refreshes map and station requests after the refresh interval',
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
-      this.owner.register(
-        'service:map-refresh',
-        ShortIntervalMapRefreshService
-      );
+      this.owner.register('service:refresh', ShortIntervalRefreshService);
 
       const store = this.owner.lookup(
         'service:store'

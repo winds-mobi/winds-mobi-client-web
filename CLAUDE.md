@@ -204,7 +204,7 @@ mid-interaction. Keep this direction; don't reintroduce imperative view bookkeep
 Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `hidden` (reached from Settings,
 not the navbar), `settings`, `help`; `index` redirects to `map`.
 
-Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `map-refresh`
+Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `refresh`
 (ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
 (geolocation + Permissions API state machine), `settings` (persisted display preferences, see
 [Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites`/`hidden-stations` (locally

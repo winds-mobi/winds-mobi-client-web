@@ -8,7 +8,7 @@ import type {
   History,
   StoreService,
 } from 'winds-mobi-client-web/services/store';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
 export interface StationHistorySectionSignature {
   Args: {
@@ -34,11 +34,11 @@ const EMPTY_HISTORY: History[] = [];
 // and presenter — see CLAUDE.md for the per-section keys.
 export default class StationHistorySection extends Component<StationHistorySectionSignature> {
   @service declare store: StoreService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
 
   @cached
   get historyRequest() {
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: History[] }>(
       historyQuery<History>(

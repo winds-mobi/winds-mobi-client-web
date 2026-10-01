@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
-import activateMapRefresh from 'winds-mobi-client-web/modifiers/activate-map-refresh';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import activateRefresh from 'winds-mobi-client-web/modifiers/activate-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import NavbarLogo from './logo';
 import NavbarSearch from './search';
 import NavbarLocateControl from './locate-control';
@@ -19,12 +19,12 @@ export interface NavbarSignature {
 }
 
 export default class Navbar extends Component<NavbarSignature> {
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
 
   <template>
     <nav
       class="border-b border-slate-200 bg-white shadow-md shadow-slate-900/12"
-      {{activateMapRefresh this.mapRefresh}}
+      {{activateRefresh this.refresh}}
     >
       <div class="px-2.5">
         <div class="flex h-16 items-center gap-2 md:gap-3">

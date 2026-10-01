@@ -1,10 +1,10 @@
 import { modifier } from 'ember-modifier';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
 interface RegisterLoadingProbeSignature {
   Element: Element;
   Args: {
-    Positional: [MapRefreshService, () => boolean];
+    Positional: [RefreshService, () => boolean];
   };
 }
 
@@ -15,7 +15,7 @@ interface RegisterLoadingProbeSignature {
 // the navbar reading the aggregate never mutates state it already read in the
 // same render.
 const registerLoadingProbe = modifier<RegisterLoadingProbeSignature>(
-  (_element, [mapRefresh, probe]) => mapRefresh.registerLoadingProbe(probe)
+  (_element, [refresh, probe]) => refresh.registerLoadingProbe(probe)
 );
 
 export default registerLoadingProbe;

@@ -3,7 +3,7 @@ import { module, test } from 'qunit';
 import { click, currentURL, settled, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
-import MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import RefreshService from 'winds-mobi-client-web/services/refresh';
 import NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
@@ -106,7 +106,7 @@ class FakeStoreService extends Service {
   }
 }
 
-class ShortIntervalMapRefreshService extends MapRefreshService {
+class ShortIntervalRefreshService extends RefreshService {
   refreshIntervalMs = 75;
   countdownTickMs = 10;
 }
@@ -256,7 +256,7 @@ module('Acceptance | nearby route', function (hooks) {
   });
 
   test('it keeps the refresh button visible and refreshes nearby stations', async function (assert) {
-    this.owner.register('service:map-refresh', ShortIntervalMapRefreshService);
+    this.owner.register('service:refresh', ShortIntervalRefreshService);
 
     const store = this.owner.lookup(
       'service:store'

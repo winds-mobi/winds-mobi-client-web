@@ -8,7 +8,7 @@ import { service } from '@ember/service';
 import type RouterService from '@ember/routing/router-service';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import { stationFaviconDataUri } from 'winds-mobi-client-web/utils/station-favicon';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
   Station as StationModel,
@@ -24,7 +24,7 @@ interface MapStationTemplateSignature {
 export default class MapStationTemplate extends Component<MapStationTemplateSignature> {
   @service declare router: RouterService;
   @service declare store: StoreService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
   @service declare settings: SettingsService;
 
   get stationId(): string | undefined {
@@ -39,7 +39,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
       return undefined;
     }
 
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: StationModel }>(
       findRecord<StationModel>('station', this.stationId, undefined, {

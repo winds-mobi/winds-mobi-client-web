@@ -294,7 +294,7 @@ Two candidate approaches, cheapest first:
 
 - **Workbox `StaleWhileRevalidate` for `^https://winds\.mobi/api/2\.3/stations`.** Zero app
   code: the SW answers from Cache Storage immediately and refreshes in the background, and
-  the existing 2-minute auto-refresh ([app/services/map-refresh.ts](app/services/map-refresh.ts))
+  the existing 2-minute auto-refresh ([app/services/refresh.ts](app/services/refresh.ts))
   picks the fresh copy up on its next tick. Cache-hit rate should be high because
   `roundBoundsForRequest` ([app/utils/map-view.ts](app/utils/map-view.ts)) snaps bounds to a
   grid, so reloading the same view produces a byte-identical URL. Set a short

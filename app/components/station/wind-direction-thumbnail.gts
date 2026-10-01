@@ -8,7 +8,7 @@ import type {
   History,
   StoreService,
 } from 'winds-mobi-client-web/services/store.js';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
 export interface StationWindDirectionThumbnailSignature {
   Args: {
@@ -31,11 +31,11 @@ const HISTORY_KEYS = ['w-dir', 'w-avg', 'w-max'];
 // different contexts and never appear together for the same station.
 export default class StationWindDirectionThumbnail extends Component<StationWindDirectionThumbnailSignature> {
   @service declare store: StoreService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
 
   @cached
   get historyRequest() {
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: History[] }>(
       historyQuery<History>(

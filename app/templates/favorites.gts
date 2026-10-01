@@ -13,7 +13,7 @@ import StationSectionCard from 'winds-mobi-client-web/components/station/section
 import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
 import type FavoritesService from 'winds-mobi-client-web/services/favorites';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type {
   Station,
@@ -28,7 +28,7 @@ interface FavoritesTemplateSignature {
 
 export default class FavoritesTemplate extends Component<FavoritesTemplateSignature> {
   @service declare favorites: FavoritesService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
   @service declare settings: SettingsService;
   @service declare store: StoreService;
 
@@ -48,7 +48,7 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       byIdsQuery<Station>('station', ids)
@@ -107,7 +107,7 @@ export default class FavoritesTemplate extends Component<FavoritesTemplateSignat
     <section
       class="min-h-0 flex-1 overflow-y-auto bg-slate-200"
       {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
+      {{registerLoadingProbe this.refresh this.loadingProbe}}
     >
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.isError}}

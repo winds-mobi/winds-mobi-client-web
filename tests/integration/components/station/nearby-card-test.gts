@@ -10,7 +10,7 @@ interface StationNearbyCardTestContext extends RenderingTestContext {
   station: Station;
 }
 
-class FakeMapRefreshService extends Service {
+class FakeRefreshService extends Service {
   lastRefresh = 0;
 }
 
@@ -47,7 +47,7 @@ module('Integration | Component | station/nearby-card', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.register('service:map-refresh', FakeMapRefreshService);
+    this.owner.register('service:refresh', FakeRefreshService);
   });
 
   test('it renders the header and the summary sections', async function (this: StationNearbyCardTestContext, assert) {

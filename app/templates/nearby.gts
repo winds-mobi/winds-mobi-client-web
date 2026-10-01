@@ -14,7 +14,7 @@ import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loadi
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
-import type MapRefreshService from 'winds-mobi-client-web/services/map-refresh';
+import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -36,7 +36,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service declare intl: IntlService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
-  @service declare mapRefresh: MapRefreshService;
+  @service declare refresh: RefreshService;
   @service declare settings: SettingsService;
   @service declare store: StoreService;
 
@@ -53,7 +53,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     }
 
     // Read so each refresh tick invalidates this getter and refetches.
-    void this.mapRefresh.lastRefresh;
+    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       nearbyQuery<Station>(
@@ -143,7 +143,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     <section
       class="min-h-0 flex-1 overflow-y-auto bg-slate-200"
       {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.mapRefresh this.loadingProbe}}
+      {{registerLoadingProbe this.refresh this.loadingProbe}}
     >
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.nearbyLocation.hasCoordinates}}

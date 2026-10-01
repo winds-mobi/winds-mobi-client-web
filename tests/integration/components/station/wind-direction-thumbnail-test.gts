@@ -10,7 +10,7 @@ interface StationWindDirectionThumbnailTestContext extends RenderingTestContext 
   stationId: string;
 }
 
-class FakeMapRefreshService extends Service {
+class FakeRefreshService extends Service {
   lastRefresh = 0;
 }
 
@@ -35,7 +35,7 @@ module(
 
     hooks.beforeEach(function () {
       this.owner.register('service:store', FakeStoreService);
-      this.owner.register('service:map-refresh', FakeMapRefreshService);
+      this.owner.register('service:refresh', FakeRefreshService);
     });
 
     test('it renders the graph with the resolved history', async function (this: StationWindDirectionThumbnailTestContext, assert) {
