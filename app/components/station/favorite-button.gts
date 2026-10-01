@@ -9,11 +9,7 @@ import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationFavoriteButtonSignature {
   Args: {
-    // Optional so callers can render this unconditionally while a station is
-    // still loading (see station/index.gts) -- rendering nothing then is
-    // this component's own call, not something the caller should have to
-    // guard against first.
-    station?: Station;
+    station: Station;
   };
   Element: null;
 }
@@ -22,45 +18,37 @@ export default class StationFavoriteButton extends Component<StationFavoriteButt
   @service declare favorites: FavoritesService;
 
   get isFavorite(): boolean {
-    return (
-      this.args.station !== undefined &&
-      this.favorites.has(this.args.station.id)
-    );
+    return this.favorites.has(this.args.station.id);
   }
 
   @action
   handleToggleFavorite() {
-    if (this.args.station) {
-      this.favorites.toggle(this.args.station.id);
-    }
+    this.favorites.toggle(this.args.station.id);
   }
 
   <template>
-    {{#if @station}}
-      <Button
-        aria-label={{if
-          this.isFavorite
-          (t "station.favorite.remove")
-          (t "station.favorite.add")
-        }}
-        aria-pressed={{if this.isFavorite "true" "false"}}
-        data-test-station-favorite
-        @variant="plain"
-        @size="xs"
-        @onPress={{this.handleToggleFavorite}}
-      >
-        {{! size-5! forces the icon past Frontile's own Button base class
-        (its [&_svg]:size-[1em] rule scales icons to the button's own
-        font-size), which otherwise silently overrides @size entirely --
-        CSS width/height always beats an SVG's own presentation
-        attributes, regardless of specificity. }}
-        <Heart
-          @size={{20}}
-          @weight={{if this.isFavorite "fill" "regular"}}
-          class="size-5!
-            {{if this.isFavorite 'text-rose-500' 'text-slate-400'}}"
-        />
-      </Button>
-    {{/if}}
+    <Button
+      aria-label={{if
+        this.isFavorite
+        (t "station.favorite.remove")
+        (t "station.favorite.add")
+      }}
+      aria-pressed={{if this.isFavorite "true" "false"}}
+      data-test-station-favorite
+      @variant="plain"
+      @size="xs"
+      @onPress={{this.handleToggleFavorite}}
+    >
+      {{! size-5! forces the icon past Frontile's own Button base class
+      (its [&_svg]:size-[1em] rule scales icons to the button's own
+      font-size), which otherwise silently overrides @size entirely --
+      CSS width/height always beats an SVG's own presentation
+      attributes, regardless of specificity. }}
+      <Heart
+        @size={{20}}
+        @weight={{if this.isFavorite "fill" "regular"}}
+        class="size-5! {{if this.isFavorite 'text-rose-500' 'text-slate-400'}}"
+      />
+    </Button>
   </template>
 }

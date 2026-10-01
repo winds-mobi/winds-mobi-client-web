@@ -9,6 +9,7 @@ import List from 'ember-phosphor-icons/components/ph-list';
 import { t } from 'ember-intl';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import NavbarMenuLinks from './links';
+import NavbarMenuViewSwitch from './view-switch';
 
 export interface NavbarMenuMobileSignature {
   Args: Record<string, never>;
@@ -71,7 +72,14 @@ export default class NavbarMenuMobile extends Component<NavbarMenuMobileSignatur
           <drawer.Header @title={{t "navigation.menu"}} />
 
           <drawer.Body>
-            <NavbarMenuLinks @variant="mobile" />
+            <div class="flex flex-col gap-4">
+              <NavbarMenuLinks @variant="mobile" @group="surfaces" />
+              <NavbarMenuViewSwitch @variant="mobile" />
+
+              <span aria-hidden="true" class="h-px w-full bg-slate-200"></span>
+
+              <NavbarMenuLinks @variant="mobile" @group="utilities" />
+            </div>
           </drawer.Body>
         </Drawer>
       {{/if}}

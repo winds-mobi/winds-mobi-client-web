@@ -9,7 +9,7 @@ import {
 
 <template>
   <LinkTo
-    @route="map"
+    @route="all"
     @query={{hash
       latitude=DEFAULT_MAP_LAT
       longitude=DEFAULT_MAP_LNG

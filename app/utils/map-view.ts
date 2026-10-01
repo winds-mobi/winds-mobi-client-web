@@ -1,4 +1,5 @@
 import { tracked } from '@glimmer/tracking';
+import { MercatorCoordinate } from 'maplibre-gl';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import type RouterService from '@ember/routing/router-service';
 
@@ -15,7 +16,9 @@ export const DEFAULT_MAP_ZOOM = 7;
 export const FOCUS_ZOOM = 10;
 // Query params that focus the map on a single station — shared by every
 // station-focusing entry point (search result, station name, nearby card/row)
-// so they all land on the same zoom (#47).
+// so they all land on the same zoom (#47) and, since focusing a station means
+// looking at it on the map, the same view mode — overriding whatever view the
+// visitor last had open, the same way it overrides the camera.
 export function focusQueryParamsFor(station: {
   latitude: number;
   longitude: number;
@@ -24,6 +27,7 @@ export function focusQueryParamsFor(station: {
     latitude: station.latitude,
     longitude: station.longitude,
     zoom: FOCUS_ZOOM,
+    view: 'map',
   };
 }
 
@@ -79,14 +83,60 @@ function snap(value: number, step: number) {
 // actually on screen — including when the map is pitched or rotated. The query's
 // `limit` (see `mapQuery`) caps how many stations come back when a pitched view
 // reaches far toward the horizon.
-export function boundsFromMap(map: MaplibreMap): MapBounds {
-  const bounds = map.getBounds();
-  const northEast = bounds.getNorthEast();
-  const southWest = bounds.getSouthWest();
+// MapLibre lays the world out in 512px tiles, so this many CSS pixels span the
+// whole world at zoom 0 — the scale that turns a viewport size in pixels into
+// a span in Mercator units.
+const WORLD_TILE_SIZE = 512;
+
+// Web Mercator is only defined to about ±85.051129°; the projection runs to
+// infinity past that.
+const MAX_MERCATOR_LATITUDE = 85.051129;
+
+export type ViewportSize = {
+  width: number;
+  height: number;
+};
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+// The area a viewport of this size covers when centred on this view.
+//
+// Derived rather than read back from a rendered map, so the station request
+// needs no live map to exist. MapLibre keeps
+// the camera-to-bounds direction internal — the transform classes that own
+// `getBounds` aren't part of its public API — but `MercatorCoordinate` is
+// public, so the corners are projected with the library's own maths rather
+// than a hand-rolled copy of it.
+//
+// Assumes a flat, north-up view: `MapView` carries no pitch or bearing, so a
+// tilted map reaching toward the horizon covers more ground than this returns.
+// `mapQuery` caps its result anyway, and the grid snapping below is coarser
+// than the error for ordinary views.
+export function boundsFromView(view: MapView, size: ViewportSize): MapBounds {
+  const worldSize = WORLD_TILE_SIZE * 2 ** view.zoom;
+  const center = MercatorCoordinate.fromLngLat({
+    lng: view.longitude,
+    lat: clamp(view.latitude, -MAX_MERCATOR_LATITUDE, MAX_MERCATOR_LATITUDE),
+  });
+
+  const halfWidth = size.width / 2 / worldSize;
+  const halfHeight = size.height / 2 / worldSize;
+
+  // Mercator y grows southward, so the north edge is the smaller y.
+  const northEast = new MercatorCoordinate(
+    center.x + halfWidth,
+    clamp(center.y - halfHeight, 0, 1)
+  ).toLngLat();
+  const southWest = new MercatorCoordinate(
+    center.x - halfWidth,
+    clamp(center.y + halfHeight, 0, 1)
+  ).toLngLat();
 
   return {
-    northEast: [northEast.lng, northEast.lat],
-    southWest: [southWest.lng, southWest.lat],
+    northEast: [clamp(northEast.lng, -180, 180), northEast.lat],
+    southWest: [clamp(southWest.lng, -180, 180), southWest.lat],
   };
 }
 
@@ -103,19 +153,6 @@ export function roundBoundsForRequest(bounds: MapBounds): MapBounds {
       snap(bounds.southWest[1], MAP_REQUEST_COORDINATE_THRESHOLD),
     ],
   };
-}
-
-export function mapBoundsEqual(left?: MapBounds, right?: MapBounds): boolean {
-  if (!left || !right) {
-    return left === right;
-  }
-
-  return (
-    left.northEast[0] === right.northEast[0] &&
-    left.northEast[1] === right.northEast[1] &&
-    left.southWest[0] === right.southWest[0] &&
-    left.southWest[1] === right.southWest[1]
-  );
 }
 
 export function parseMapView(queryParams?: MapQueryParams): MapView {

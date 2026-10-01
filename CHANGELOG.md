@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- Every station list — All stations, Favourites, Hidden — can now be shown as a map, as full cards, or as compact cards, switched from a control in the navbar that clearly highlights whichever one is active. Each list remembers its own choice, and the choice is part of that page's link, so a specific view can be shared or bookmarked. A list shown as a map is the same map as the main one — zoom and compass controls, 3D terrain, the wind legend and your own location are all there, framed to just that list's stations, and filling the page edge to edge.
+
 ### Changed
 
-- Everything on screen now refreshes together. Panning the map, opening a station or pressing refresh restarts the countdown and reloads the map, the open station and its charts, Nearby, Favourites and Hidden together, so nothing on screen is older than the countdown suggests.
+- Everything on screen now refreshes together. Panning the map, opening a station or pressing refresh restarts the countdown and reloads the map, the open station and its charts, and every station list together, so nothing on screen is older than the countdown suggests.
+- The Nearby view has been folded into All stations: pointing the map somewhere and switching to cards shows the stations closest to that spot, without needing location access. The locate button still centres the map on you. Old `/nearby` and `/map` links still work.
+- The navbar's Map link is now called "All stations" (its view can already be switched to full or compact cards, not only a map) and lives in its own group next to Favourites; Settings and Help now sit apart in a group of their own.
+- Choosing full or compact cards is no longer a Settings preference — it's controlled from the navbar, right next to what it changes.
+- Opening a station — a search result, a card's name, or a marker — always shows it on a map, without leaving whichever page you're on: opening one from Favourites or Hidden now shows it right there instead of jumping over to All stations.
 
 ### Fixed
 

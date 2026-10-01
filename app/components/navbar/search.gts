@@ -88,14 +88,15 @@ export default class NavbarSearch extends Component<NavbarSearchSignature> {
       return;
     }
 
-    const queryParams = focusQueryParamsFor(item.station);
+    const queryParams = {
+      ...focusQueryParamsFor(item.station),
+      station: item.station.id,
+    };
 
     this.query = '';
     this.selectedKey = null;
 
-    void this.router.transitionTo('map.station', item.station.id, {
-      queryParams,
-    });
+    void this.router.transitionTo('all', { queryParams });
   }
 
   <template>

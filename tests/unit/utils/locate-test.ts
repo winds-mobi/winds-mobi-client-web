@@ -33,13 +33,18 @@ module('Unit | Utility | locate', function () {
       latitude: 46.521,
       longitude: 6.632,
     });
-    const { router, replaceWithCalls } = fakeRouter('map.station');
+    const { router, replaceWithCalls } = fakeRouter('all.station');
 
     await requestAndFly(nearbyLocation, router);
 
     assert.strictEqual(replaceWithCalls.length, 1);
     assert.deepEqual(replaceWithCalls[0], {
-      queryParams: { latitude: 46.521, longitude: 6.632, zoom: 10 },
+      queryParams: {
+        latitude: 46.521,
+        longitude: 6.632,
+        zoom: 10,
+        view: 'map',
+      },
     });
   });
 
@@ -48,7 +53,7 @@ module('Unit | Utility | locate', function () {
       latitude: 46.521,
       longitude: 6.632,
     });
-    const { router, replaceWithCalls } = fakeRouter('nearby');
+    const { router, replaceWithCalls } = fakeRouter('favorites');
 
     await requestAndFly(nearbyLocation, router);
 
@@ -57,7 +62,7 @@ module('Unit | Utility | locate', function () {
 
   test('it does nothing when the position request yields no coordinates', async function (assert) {
     const nearbyLocation = fakeNearbyLocation(undefined);
-    const { router, replaceWithCalls } = fakeRouter('map');
+    const { router, replaceWithCalls } = fakeRouter('all');
 
     await requestAndFly(nearbyLocation, router);
 

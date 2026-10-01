@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, findAll, visit } from '@ember/test-helpers';
+import { click, currentURL, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -95,10 +95,6 @@ class FakeStoreService extends Service {
   }
 }
 
-function countStationRequests(calls: string[]) {
-  return calls.filter((url) => url.includes('/stations/')).length;
-}
-
 const HIDDEN_CARD_SELECTOR = '[data-test-nearby-station-card]';
 
 module('Acceptance | hidden stations', function (hooks) {
@@ -108,18 +104,6 @@ module('Acceptance | hidden stations', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
-  });
-
-  test('with no hidden stations the page shows the empty state and skips the station request', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
-    await visit('/hidden');
-
-    assert.dom('[data-test-hidden-empty]').exists();
-    assert.dom(HIDDEN_CARD_SELECTOR).doesNotExist();
-    assert.strictEqual(countStationRequests(store.calls), 0);
   });
 
   test('the navbar does not link to the hidden page', async function (assert) {
@@ -132,26 +116,6 @@ module('Acceptance | hidden stations', function (hooks) {
     assert
       .dom('[data-test-navbar-mobile-menu] [data-test-navbar-link="hidden"]')
       .doesNotExist();
-  });
-
-  test('the page renders the hidden stations in the order they were hidden', async function (assert) {
-    const hiddenStations = this.owner.lookup('service:hidden-stations');
-
-    // Added in reverse of STATION_FIXTURES to pin the ordering behaviour.
-    hiddenStations.add('slf-PMA2');
-    hiddenStations.add('meteoswiss-PMA');
-
-    await visit('/hidden');
-
-    const titles = findAll(
-      `${HIDDEN_CARD_SELECTOR} [data-test-station-title]`
-    ).map((element) => element.textContent?.trim());
-
-    assert.deepEqual(
-      titles,
-      ['Colms da Parsonz', 'Piz Martegnas'],
-      'cards follow the order stations were hidden, not the response order'
-    );
   });
 
   test('a card on the page unhides its station', async function (assert) {

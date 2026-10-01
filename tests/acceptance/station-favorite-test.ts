@@ -49,11 +49,18 @@ class FakeStoreService extends Service {
   request(request: FakeStoreRequest) {
     const url = request.url ?? '';
 
+    // Shape matters per endpoint: history and the map's bounds query are
+    // lists, a single station is one record. Returning the wrong one doesn't
+    // fail here — it throws later, wherever the result gets used as the other.
     if (url.includes('/historic/')) {
       return Promise.resolve({ content: { data: HISTORY_FIXTURES } });
     }
 
-    return Promise.resolve({ content: { data: STATION_FIXTURE } });
+    if (url.includes(`/stations/${STATION_FIXTURE.id}/?`)) {
+      return Promise.resolve({ content: { data: STATION_FIXTURE } });
+    }
+
+    return Promise.resolve({ content: { data: [STATION_FIXTURE] } });
   }
 }
 
@@ -65,7 +72,7 @@ module('Acceptance | station favorite toggle', function (hooks) {
   });
 
   test('starring a station saves it to the local favourites list', async function (assert) {
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     assert
       .dom('[data-test-station-favorite]')
@@ -89,7 +96,7 @@ module('Acceptance | station favorite toggle', function (hooks) {
 
     favorites.add('holfuy-1804');
 
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     assert
       .dom('[data-test-station-favorite]')

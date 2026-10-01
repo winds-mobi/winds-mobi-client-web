@@ -7,10 +7,7 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function () {
-  this.route('map', function () {
-    this.route('station', { path: '/:station_id' });
-  });
-  this.route('nearby');
+  this.route('all');
   this.route('favorites');
   this.route('hidden');
   this.route('settings');

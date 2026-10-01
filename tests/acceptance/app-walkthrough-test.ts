@@ -9,7 +9,7 @@ import type { History, Station } from 'winds-mobi-client-web/services/store';
 // A single continuous walk through the app's main routes and interactions,
 // on top of (not instead of) the focused per-route/per-feature acceptance
 // tests. This exercises how the pieces compose together (search -> panel ->
-// nearby -> favourites -> settings -> help) rather than re-asserting details
+// card view -> favourites -> settings -> help) rather than re-asserting details
 // already covered elsewhere.
 
 type FakeStoreRequest = {
@@ -171,9 +171,9 @@ module('Acceptance | app walkthrough', function (hooks) {
     stubGrantedPermission(nearbyLocation);
   });
 
-  test('an anonymous visitor searches, opens a station, browses nearby, and checks settings and help', async function (assert) {
+  test('an anonymous visitor searches, opens a station, switches to the card view, and checks settings and help', async function (assert) {
     // Land on the map with no station selected.
-    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
+    await visit('/all?latitude=46.54321&longitude=8.12345&zoom=9.5');
 
     assert.dom('[data-test-station-panel]').doesNotExist();
     assert.dom('[data-test-navbar-search="navbar"]').exists();
@@ -192,16 +192,19 @@ module('Acceptance | app walkthrough', function (hooks) {
 
     assert.dom('[data-test-station-panel]').doesNotExist();
 
-    // Head to the nearby view (location access already stubbed as granted).
-    await click('[data-test-navbar-link="nearby"]');
-    assert.strictEqual(currentURL(), '/nearby');
+    // Switch the map to its card view — the same stations it was drawing,
+    // listed closest-first instead.
+    await click('[data-test-navbar-view-option="cards"]');
 
-    assert.dom('[data-test-nearby-location-prompt]').doesNotExist();
+    assert.dom('[data-test-station-card-list="all"]').exists();
 
-    // Open a nearby station from its card, landing back on the map.
+    // Open one of them from its card; the panel opens over the list.
     await click('[data-test-nearby-station-card] [data-test-station-title]');
 
     assert.dom('[data-test-station-panel]').exists();
+
+    // Back to the map itself for the rest of the walkthrough.
+    await click('[data-test-navbar-view-option="map"]');
 
     // Check the settings page (toggle persistence itself is covered by
     // settings-route-test.ts; touching it here would leak into that file's
@@ -222,7 +225,9 @@ module('Acceptance | app walkthrough', function (hooks) {
   });
 
   test('a visitor favourites a station and finds it again in favourites', async function (assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
 
     const favorites = this.owner.lookup('service:favorites');
 

@@ -7,7 +7,7 @@ import {
 } from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 
-// The map needs real WebGL — see tests/helpers/webgl.ts.
+// The `/all` map needs real WebGL — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
 const STATION_ID = 'holfuy-1804';
@@ -70,7 +70,7 @@ module('Acceptance | refresh', function (hooks) {
     webGLAvailable,
     async function (assert) {
       await visit(
-        `/map/${STATION_ID}?latitude=46.67719&longitude=7.86323&zoom=13`
+        `/all?station=${STATION_ID}&latitude=46.67719&longitude=7.86323&zoom=13`
       );
 
       const before = count();
@@ -92,7 +92,7 @@ module('Acceptance | refresh', function (hooks) {
       this.owner.register('service:refresh', ShortIntervalRefreshService);
 
       await visit(
-        `/map/${STATION_ID}?latitude=46.67719&longitude=7.86323&zoom=13`
+        `/all?station=${STATION_ID}&latitude=46.67719&longitude=7.86323&zoom=13`
       );
 
       const before = count();
@@ -118,13 +118,15 @@ module('Acceptance | refresh', function (hooks) {
       const refresh = this.owner.lookup('service:refresh');
 
       await visit(
-        `/map/${STATION_ID}?latitude=46.67719&longitude=7.86323&zoom=13`
+        `/all?station=${STATION_ID}&latitude=46.67719&longitude=7.86323&zoom=13`
       );
 
       const before = count();
       const cyclesBefore = refresh.refreshCount;
 
-      await visit(`/map/${STATION_ID}?latitude=46.9&longitude=8.3&zoom=13`);
+      await visit(
+        `/all?station=${STATION_ID}&latitude=46.9&longitude=8.3&zoom=13`
+      );
 
       const after = count();
 
@@ -146,27 +148,4 @@ module('Acceptance | refresh', function (hooks) {
       );
     }
   );
-
-  test('the navbar button re-fetches the nearby list', async function (assert) {
-    const nearbyLocation = this.owner.lookup('service:nearby-location');
-
-    nearbyLocation.syncPermissionState = () => {
-      nearbyLocation.permissionState = 'granted';
-      nearbyLocation.requestState = 'ready';
-      nearbyLocation.coordinates = {
-        accuracy: 20,
-        latitude: 46.521,
-        longitude: 6.632,
-      };
-      return Promise.resolve();
-    };
-
-    await visit('/nearby');
-
-    const before = count();
-
-    await click('[data-test-navbar-refresh]');
-
-    assert.strictEqual(count().list, before.list + 1);
-  });
 });

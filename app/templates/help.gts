@@ -50,15 +50,17 @@ export default class HelpTemplate extends Component<HelpTemplateSignature> {
             <dl class="grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
               <div class="rounded-lg bg-slate-50 p-3">
                 <dt class="font-semibold text-slate-950">{{t
-                    "navigation.map"
+                    "navigation.allStations"
                   }}</dt>
-                <dd class="mt-1">{{t "help.sections.mapDescription"}}</dd>
+                <dd class="mt-1">{{t
+                    "help.sections.allStationsDescription"
+                  }}</dd>
               </div>
               <div class="rounded-lg bg-slate-50 p-3">
                 <dt class="font-semibold text-slate-950">{{t
-                    "navigation.nearby"
+                    "station.view.label"
                   }}</dt>
-                <dd class="mt-1">{{t "help.sections.nearbyDescription"}}</dd>
+                <dd class="mt-1">{{t "help.sections.viewDescription"}}</dd>
               </div>
               <div class="rounded-lg bg-slate-50 p-3">
                 <dt class="font-semibold text-slate-950">{{t

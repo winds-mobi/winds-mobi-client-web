@@ -55,7 +55,12 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
 
     assert.strictEqual(calls.length, 1);
     assert.deepEqual(calls[0], {
-      queryParams: { latitude: 46.521, longitude: 6.632, zoom: 10 },
+      queryParams: {
+        latitude: 46.521,
+        longitude: 6.632,
+        zoom: 10,
+        view: 'map',
+      },
     });
   });
 

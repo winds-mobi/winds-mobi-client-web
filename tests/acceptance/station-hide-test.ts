@@ -76,14 +76,14 @@ module('Acceptance | station hide toggle', function (hooks) {
   test('with the hidden-stations feature off there is no hide control', async function (assert) {
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = false;
 
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     assert.dom('[data-test-station-title]').exists();
     assert.dom('[data-test-station-hide]').doesNotExist();
   });
 
   test('hiding a station saves it to the local hidden-stations list', async function (assert) {
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     const panelButtons = findAll(
       '[data-test-station-panel] [data-test-station-hide], [data-test-station-panel] [data-test-station-favorite]'
@@ -116,7 +116,7 @@ module('Acceptance | station hide toggle', function (hooks) {
 
     hiddenStations.add('holfuy-1804');
 
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     assert
       .dom('[data-test-station-hide]')

@@ -15,6 +15,10 @@ export const RETIRED_STORAGE_KEYS: readonly string[] = [
   'settings.refreshButtonSpin',
   // The Favourites toggle; favourites are now always available (#176).
   'settings.favoritesFeatureEnabled',
+  // The per-list compact-card preferences; each station list now carries its
+  // own map/cards/compact choice in its `view` query param instead.
+  'settings.nearbyCompactList',
+  'settings.favoritesCompactList',
 ];
 
 // Goes through the tracked-local-storage service rather than raw

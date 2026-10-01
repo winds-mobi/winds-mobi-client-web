@@ -21,10 +21,6 @@ interface Ctx extends RenderingTestContext {
 
 type FakeStoreRequest = { url?: string };
 
-class FakeRefreshService extends Service {
-  lastRefresh = 0;
-}
-
 // Mirrors tests/integration/components/station/last-hour/index-test.ts's
 // FakeStoreService, keyed by request URL so each station resolves its own
 // fixed fixture.
@@ -199,7 +195,6 @@ module('Integration | Chart | point order', function (hooks) {
   // see the next two tests.
   test('a fresh station fetch replaces the chart instance', async function (this: Ctx, assert) {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.register('service:refresh', FakeRefreshService);
 
     const store = this.owner.lookup(
       'service:store'

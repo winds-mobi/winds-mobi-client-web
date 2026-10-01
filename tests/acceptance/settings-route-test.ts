@@ -31,15 +31,13 @@ module('Acceptance | settings route', function (hooks) {
     this.owner.register('service:store', FakeStoreService);
   });
 
-  test('it shows every preference with its default: on, except the compact lists, icon labels, wind direction, and beta features', async function (this: SettingsRouteTestContext, assert) {
+  test('it shows every preference with its default: on, except icon labels, wind direction, and beta features', async function (this: SettingsRouteTestContext, assert) {
     await visit('/settings');
 
     assert.dom('[data-test-navbar-link="settings"]').hasText('Settings');
     assert.dom('[data-test-setting="faviconFollowsStation"]').isChecked();
     assert.dom('[data-test-setting="showGustsOutline"]').isChecked();
     assert.dom('[data-test-setting="shrinkOldData"]').isChecked();
-    assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
-    assert.dom('[data-test-setting="favoritesCompactList"]').isNotChecked();
     assert.dom('[data-test-setting="useIconLabels"]').isNotChecked();
     assert
       .dom('[data-test-setting="windDirectionHistoryEnabled"]')
@@ -85,48 +83,11 @@ module('Acceptance | settings route', function (hooks) {
     );
   });
 
-  test('toggling the compact nearby list preference persists it to local storage', async function (assert) {
+  test('the card-size choice is not a setting — it lives on each list itself', async function (assert) {
     await visit('/settings');
 
-    await click('[data-test-setting="nearbyCompactList"]');
-
-    assert.dom('[data-test-setting="nearbyCompactList"]').isChecked();
-    assert.strictEqual(
-      window.localStorage.getItem('settings.nearbyCompactList'),
-      'true',
-      'the non-default preference is written to local storage'
-    );
-
-    await click('[data-test-setting="nearbyCompactList"]');
-
-    assert.dom('[data-test-setting="nearbyCompactList"]').isNotChecked();
-    assert.strictEqual(
-      window.localStorage.getItem('settings.nearbyCompactList'),
-      null,
-      'restoring the default clears the stored override'
-    );
-  });
-
-  test('toggling the compact favourites list preference persists it to local storage', async function (assert) {
-    await visit('/settings');
-
-    await click('[data-test-setting="favoritesCompactList"]');
-
-    assert.dom('[data-test-setting="favoritesCompactList"]').isChecked();
-    assert.strictEqual(
-      window.localStorage.getItem('settings.favoritesCompactList'),
-      'true',
-      'the non-default preference is written to local storage'
-    );
-
-    await click('[data-test-setting="favoritesCompactList"]');
-
-    assert.dom('[data-test-setting="favoritesCompactList"]').isNotChecked();
-    assert.strictEqual(
-      window.localStorage.getItem('settings.favoritesCompactList'),
-      null,
-      'restoring the default clears the stored override'
-    );
+    assert.dom('[data-test-setting="nearbyCompactList"]').doesNotExist();
+    assert.dom('[data-test-setting="favoritesCompactList"]').doesNotExist();
   });
 
   test('turning on beta features reveals the hide-stations toggle, off by default, instead of the nothing-in-beta note', async function (assert) {
@@ -145,7 +106,7 @@ module('Acceptance | settings route', function (hooks) {
   });
 
   test('it navigates to settings from the mobile menu without reloading', async function (assert) {
-    await visit('/map');
+    await visit('/all');
 
     await click('[data-test-navbar-mobile-menu-button]');
     await click(

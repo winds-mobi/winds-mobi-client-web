@@ -6,6 +6,6 @@ export default class IndexRoute extends Route {
   @service declare router: RouterService;
 
   beforeModel() {
-    this.router.transitionTo('map');
+    this.router.transitionTo('all');
   }
 }

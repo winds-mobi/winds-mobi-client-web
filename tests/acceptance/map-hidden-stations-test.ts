@@ -104,7 +104,7 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
     async function (this: TestContext, assert) {
       this.owner.lookup('service:hidden-stations').add('slf-PMA2');
 
-      await visit('/map?longitude=9.53&latitude=46.577&zoom=13');
+      await visit('/all?longitude=9.53&latitude=46.577&zoom=13');
       // Wait for the marker itself, not just the request: `<map.marker>` adds
       // its element asynchronously, so a resolved request doesn't mean the
       // markers are in the DOM yet — and this test is about which ones are.
@@ -126,7 +126,7 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
         false;
       this.owner.lookup('service:hidden-stations').add('slf-PMA2');
 
-      await visit('/map?longitude=9.53&latitude=46.577&zoom=13');
+      await visit('/all?longitude=9.53&latitude=46.577&zoom=13');
 
       assert.dom('[data-station-id="meteoswiss-PMA"]').exists();
       assert.dom('[data-station-id="slf-PMA2"]').exists();
@@ -140,7 +140,7 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
       this.owner.lookup('service:settings').betaFeaturesEnabled = false;
       this.owner.lookup('service:hidden-stations').add('slf-PMA2');
 
-      await visit('/map?longitude=9.53&latitude=46.577&zoom=13');
+      await visit('/all?longitude=9.53&latitude=46.577&zoom=13');
 
       assert.dom('[data-station-id="meteoswiss-PMA"]').exists();
       assert

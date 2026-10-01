@@ -24,7 +24,7 @@ export async function requestAndFly(
 ): Promise<void> {
   await nearbyLocation.requestCurrentPosition();
 
-  if (router.currentRouteName?.startsWith('map')) {
+  if (router.currentRouteName?.startsWith('all')) {
     flyToCoordinates(router, nearbyLocation);
   }
 }

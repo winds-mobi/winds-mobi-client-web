@@ -96,7 +96,7 @@ module('Acceptance | help route', function (hooks) {
   });
 
   test('it navigates to help from the mobile menu without reloading the app', async function (assert) {
-    await visit('/nearby');
+    await visit('/all');
 
     await click('[data-test-navbar-mobile-menu-button]');
 

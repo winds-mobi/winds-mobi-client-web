@@ -1,14 +1,9 @@
 import Component from '@glimmer/component';
 import { array, fn } from '@ember/helper';
 import { service } from '@ember/service';
-import type { Future } from '@warp-drive/core/request';
-import { mapQuery } from 'winds-mobi-client-web/builders/station';
-import type {
-  Station,
-  StoreService,
-} from 'winds-mobi-client-web/services/store.js';
+import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
-import { cached, tracked } from '@glimmer/tracking';
+import { tracked } from '@glimmer/tracking';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
@@ -48,14 +43,12 @@ import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
   type WindLegendBand,
 } from 'winds-mobi-client-web/components/map/legend';
-import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
 import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
+import fitMapToStations from 'winds-mobi-client-web/modifiers/fit-map-to-stations';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
-import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
-import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
@@ -64,15 +57,13 @@ import {
   TEST_MAP_STYLE,
 } from 'winds-mobi-client-web/utils/map-style';
 import {
-  boundsFromMap,
-  roundBoundsForRequest,
-  mapBoundsEqual,
   mapViewCenter,
   mapViewsEqual,
   mapViewFromMap,
-  TrackedMapView,
-  type MapBounds,
+  parseMapView,
+  type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
+import { currentStationDetailId } from 'winds-mobi-client-web/utils/station-detail';
 
 setWorkerUrl(workerUrl);
 
@@ -105,7 +96,19 @@ const USER_LOCATION_MARKER_OPTIONS = {
 };
 
 export interface MapSignature {
-  Args: Record<string, never>;
+  Args: {
+    // The stations to draw, owned by whichever page is showing them.
+    stations: Station[];
+    // The routed camera, passed only by the all-stations route itself. Its
+    // presence is what makes this *the* routed map: the camera follows the
+    // URL rather than the data, and user gestures are written back to it. A
+    // favourites or hidden list showing its stations on a map passes no view
+    // and gets the opposite: the camera frames the stations and nothing is
+    // written back on a gesture. Either way, opening a station (a marker
+    // click, or a card's name) only ever sets the `station` query param in
+    // place -- see `stationSelected` below.
+    mapView?: MapView;
+  };
   Blocks: {
     default: [];
   };
@@ -113,10 +116,8 @@ export interface MapSignature {
 }
 
 export default class Map extends Component<MapSignature> {
-  @service declare store: StoreService;
   @service declare router: RouterService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
-  @service('hidden-stations') declare hiddenStations: HiddenStationsService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
@@ -152,42 +153,32 @@ export default class Map extends Component<MapSignature> {
     onRemove: () => this.legendElement.remove(),
   };
 
-  // See `TrackedMapView` for why this needs to be more than `currentMapView(this.router)`
-  // read directly (issue #131). `handleRouteChange`, wired to the `onRouteChange`
-  // modifier below, is what keeps it in sync with the router. A `@cached` getter
-  // rather than a field initializer, so it's constructed lazily on first access —
-  // `@service` fields use `declare` and have no real instance initializer of their
-  // own, so reading `this.router` eagerly in a field initializer runs into it
-  // "not yet initialized" as far as TypeScript's control-flow analysis can tell.
-  @cached
-  get trackedMapView(): TrackedMapView {
-    return new TrackedMapView(this.router);
+  get isRoutedMap(): boolean {
+    return this.args.mapView !== undefined;
   }
 
-  get mapView() {
-    return this.trackedMapView.current;
+  // The camera to open at. For the routed map that's the view from the URL,
+  // kept stable across transitions by the route template's `TrackedMapView`
+  // (issue #131); otherwise it's only a starting point, since
+  // `fitMapToStations` frames the real stations as soon as the map is up.
+  get mapView(): MapView {
+    return this.args.mapView ?? parseMapView();
   }
 
-  @action
-  handleRouteChange() {
-    this.trackedMapView.sync();
+  // `driveMapCamera` flies the routed map to the routed view; `fitMapToStations`
+  // frames a list's own stations. Exactly one of them ever has a map to act on,
+  // so the two camera policies can't fight over the same instance.
+  get routedCameraMap(): MaplibreMap | undefined {
+    return this.isRoutedMap ? this.mapInstance : undefined;
   }
 
-  // The station whose detail panel is open (the `map.station/:station_id` route).
+  get fittedCameraMap(): MaplibreMap | undefined {
+    return this.isRoutedMap ? undefined : this.mapInstance;
+  }
+
+  // The station whose detail panel is open (the `station` query param).
   get selectedStationId(): string | undefined {
-    let route = this.router.currentRoute;
-
-    while (route) {
-      const id = route.params?.['station_id'];
-
-      if (typeof id === 'string') {
-        return id;
-      }
-
-      route = route.parent;
-    }
-
-    return undefined;
+    return currentStationDetailId(this.router);
   }
 
   get isStationPanelOpen(): boolean {
@@ -206,58 +197,6 @@ export default class Map extends Component<MapSignature> {
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
   };
-
-  // The map's current visible bounds in lng/lat, captured from MapLibre's own
-  // `getBounds` whenever the map settles (the `idle` event) and snapped to the
-  // refetch grid. Reading the live bounds means the request always covers what's
-  // actually on screen, including pitched/rotated views; `idle` fires after
-  // render, so writing this never clashes with reads in the same render.
-  @tracked private requestBounds?: MapBounds;
-
-  captureBounds = (event: { target: MaplibreMap }) => {
-    const bounds = roundBoundsForRequest(boundsFromMap(event.target));
-
-    if (mapBoundsEqual(this.requestBounds, bounds)) {
-      return;
-    }
-
-    this.requestBounds = bounds;
-  };
-
-  // Recreated when the visible bounds change. A refresh doesn't recreate it: it
-  // invalidates the cached response, and `<RefreshingRequest>` in the template
-  // re-fetches it in place. Refetches return the same cached record
-  // identities, so markers update in place rather than remounting. `mapQuery`
-  // caps the result at 470 stations, which bounds the fetch even when a pitched
-  // view reaches far toward the horizon.
-  @cached
-  get request(): Future<{ data: Station[] }> | undefined {
-    const bounds = this.requestBounds;
-
-    // Hold the request until the map reports its first bounds (the initial
-    // `idle`), so the first fetch already matches the real viewport.
-    if (!bounds) {
-      return undefined;
-    }
-
-    return this.store.request<{ data: Station[] }>(
-      mapQuery<Station>('station', bounds)
-    );
-  }
-
-  // Last successfully-loaded stations, committed by `<RefreshingRequest>` on
-  // each resolve. Holds the markers on screen while a new bounds query loads.
-  @tracked private lastStations: Station[] = [];
-
-  commitStations = (stations: Station[]) => {
-    this.lastStations = stations;
-  };
-
-  // The last loaded set, so panning/zooming to new bounds doesn't blink markers
-  // off while the new request is pending. Hidden stations (#167) are left out.
-  get stations(): Station[] {
-    return this.hiddenStations.visible(this.lastStations);
-  }
 
   get initOptions(): MapInitOptions {
     return {
@@ -287,12 +226,13 @@ export default class Map extends Component<MapSignature> {
     // stopped, so double-clicking a marker still zooms.
     event.originalEvent?.stopPropagation();
 
-    // Opens the panel without moving the map. Recentering here used to race the
-    // panel-open resize of the *already-mounted* map (#61) — clicking a marker
-    // means the station is already visible, so the simplest fix is to not try:
-    // the map stays exactly as the user left it, panel opens in place. Omitting
-    // queryParams leaves the current routed view untouched (Ember's sticky QPs).
-    void this.router.transitionTo('map.station', station.id);
+    // Opening a station never moves the camera: recentering here used to
+    // race the panel-open resize of the *already-mounted* routed map (#61),
+    // and either way, clicking a marker means the station is already
+    // visible. Setting `station` alone stays on whichever surface is
+    // already showing this map (see app/utils/station-detail.ts) instead of
+    // navigating anywhere.
+    void this.router.transitionTo({ queryParams: { station: station.id } });
   }
 
   // Clicking the map dismisses the open station panel (#157). Only clicks on the
@@ -306,9 +246,7 @@ export default class Map extends Component<MapSignature> {
       return;
     }
 
-    void this.router.transitionTo('map', {
-      queryParams: this.mapView,
-    });
+    void this.router.transitionTo({ queryParams: { station: null } });
   }
 
   // Gates the `flyToUserLocation` modifier below: don't auto-fly during the app's
@@ -320,7 +258,7 @@ export default class Map extends Component<MapSignature> {
   // has already mounted, since `ApplicationRoute#beforeModel` no longer awaits
   // `nearbyLocation.syncPermissionState()`.
   get isFlyToUserLocationEnabled() {
-    return config.environment !== 'test';
+    return this.isRoutedMap && config.environment !== 'test';
   }
 
   @action
@@ -329,7 +267,8 @@ export default class Map extends Component<MapSignature> {
     // initial settle, our URL-driven fly-to, the geolocate fly — either already
     // match the routed view or are handled where they originate, and writing back
     // here would drift the URL or mutate router state mid-transition.
-    if (!event.originalEvent) {
+    // Only the routed map owns the URL; a list's map moving never rewrites it.
+    if (!event.originalEvent || !this.isRoutedMap) {
       return;
     }
 
@@ -380,13 +319,9 @@ export default class Map extends Component<MapSignature> {
     <div
       data-test-map-container
       class="relative h-full w-full"
-      {{onRouteChange this.router this.handleRouteChange}}
       {{flyToUserLocation this.isFlyToUserLocationEnabled}}
+      {{fitMapToStations this.fittedCameraMap @stations}}
     >
-      <RefreshingRequest
-        @request={{this.request}}
-        @onResolve={{this.commitStations}}
-      />
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"
@@ -397,7 +332,6 @@ export default class Map extends Component<MapSignature> {
         as |map|
       >
         <map.on @event="click" @action={{this.handleMapClick}} />
-        <map.on @event="idle" @action={{this.captureBounds}} />
         <map.on @event="moveend" @action={{this.handleMoveEnd}} />
         <map.on @event="terrain" @action={{this.handleTerrainChange}} />
         <map.control @control={{this.legendControl}} @position="top-right" />
@@ -421,7 +355,7 @@ export default class Map extends Component<MapSignature> {
           </map.marker>
         {{/if}}
 
-        {{#each this.stations as |station|}}
+        {{#each @stations as |station|}}
           <map.marker
             @initOptions={{STATION_MARKER_OPTIONS}}
             @lngLat={{this.markerPosition station}}
@@ -463,7 +397,7 @@ export default class Map extends Component<MapSignature> {
         class="pointer-events-none absolute inset-0 z-20"
         {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
         {{driveMapCamera
-          this.mapInstance
+          this.routedCameraMap
           this.mapView
           this.isStationPanelOpen
           this.isSidePanel
