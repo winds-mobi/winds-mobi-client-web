@@ -1,13 +1,5 @@
 import { module, test } from 'qunit';
-import {
-  click,
-  find,
-  settled,
-  type TestContext,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
-import RefreshService from 'winds-mobi-client-web/services/refresh';
+import { click, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
@@ -36,12 +28,6 @@ const STATION_B = {
 
 const HOME_VIEW = 'latitude=46.67719&longitude=7.86323&zoom=13';
 const OTHER_VIEW = 'latitude=46.9&longitude=8.3&zoom=13';
-
-const SHORT_CYCLE_GRACE_MS = 20;
-
-class ShortGraceRefreshService extends RefreshService {
-  cycleGraceMs = SHORT_CYCLE_GRACE_MS;
-}
 
 // What a request was for, so the expectations read as the screen's data
 // rather than as URLs.
@@ -74,9 +60,7 @@ module('Acceptance | fetches per action', function (hooks) {
 
   const api = setupStubbedApi(hooks);
 
-  hooks.beforeEach(function (this: TestContext) {
-    this.owner.register('service:refresh', ShortGraceRefreshService);
-
+  hooks.beforeEach(function () {
     api.respond = (url) => {
       if (url.pathname.includes('/historic/')) {
         return [];
@@ -94,48 +78,24 @@ module('Acceptance | fetches per action', function (hooks) {
     };
   });
 
-  // Waits out the refresh cycle the last fetches opened, so the next action
-  // starts a cycle of its own instead of joining this one.
-  async function afterCycleCloses() {
-    await settled();
-    await new Promise((resolve) =>
-      setTimeout(resolve, SHORT_CYCLE_GRACE_MS * 5)
-    );
-    await settled();
-  }
-
-  // The requests `action` causes, once the expected number have arrived and
-  // the refresh cycle has closed — late enough that an unexpected extra fetch
-  // would be caught too. Sorted, since their order isn't the point.
+  // The requests `action` causes, sorted, since their order isn't the point.
   async function fetchesDuring(
-    expectedCount: number,
     action: () => Promise<unknown>
   ): Promise<string[]> {
     const start = api.calls.length;
 
     await action();
-    // The map fetches its area once MapLibre settles, after flying there.
-    await waitUntil(() => api.calls.length - start >= expectedCount, {
-      timeout: 5000,
-    });
-    await afterCycleCloses();
 
     return api.calls.slice(start).map(describe).sort();
-  }
-
-  async function openMapAt(view: string) {
-    await visit(`/map?${view}`);
-    await waitUntil(() => api.calls.length > 0, { timeout: 5000 });
-    await afterCycleCloses();
   }
 
   test.if(
     'moving the map with no station open fetches only the new area',
     webGLAvailable,
     async function (assert) {
-      await openMapAt(HOME_VIEW);
+      await visit(`/map?${HOME_VIEW}`);
 
-      const fetched = await fetchesDuring(1, () => visit(`/map?${OTHER_VIEW}`));
+      const fetched = await fetchesDuring(() => visit(`/map?${OTHER_VIEW}`));
 
       assert.deepEqual(fetched, ['map stations']);
     }
@@ -145,12 +105,9 @@ module('Acceptance | fetches per action', function (hooks) {
     'opening a station fetches it and its history, and refreshes the map stations with it',
     webGLAvailable,
     async function (assert) {
-      await openMapAt(HOME_VIEW);
-      await waitUntil(() => find(`[data-station-id="${STATION_A._id}"]`), {
-        timeout: 5000,
-      });
+      await visit(`/map?${HOME_VIEW}`);
 
-      const fetched = await fetchesDuring(5, () =>
+      const fetched = await fetchesDuring(() =>
         click(`[data-station-id="${STATION_A._id}"]`)
       );
 
@@ -165,10 +122,10 @@ module('Acceptance | fetches per action', function (hooks) {
     'switching to another station fetches it and refreshes the map stations with it',
     webGLAvailable,
     async function (assert) {
-      await openMapAt(HOME_VIEW);
-      await fetchesDuring(5, () => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/map?${HOME_VIEW}`);
+      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
 
-      const fetched = await fetchesDuring(5, () =>
+      const fetched = await fetchesDuring(() =>
         visit(`/map/${STATION_B._id}?${HOME_VIEW}`)
       );
 
@@ -183,10 +140,10 @@ module('Acceptance | fetches per action', function (hooks) {
     'moving the map with a station open refreshes the station and its history too',
     webGLAvailable,
     async function (assert) {
-      await openMapAt(HOME_VIEW);
-      await fetchesDuring(5, () => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/map?${HOME_VIEW}`);
+      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
 
-      const fetched = await fetchesDuring(5, () =>
+      const fetched = await fetchesDuring(() =>
         visit(`/map/${STATION_A._id}?${OTHER_VIEW}`)
       );
 
@@ -201,13 +158,12 @@ module('Acceptance | fetches per action', function (hooks) {
     'closing the station fetches nothing',
     webGLAvailable,
     async function (assert) {
-      await openMapAt(HOME_VIEW);
-      await fetchesDuring(5, () => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/map?${HOME_VIEW}`);
+      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
 
       const start = api.calls.length;
 
       await visit(`/map?${HOME_VIEW}`);
-      await afterCycleCloses();
 
       assert.deepEqual(api.calls.slice(start).map(describe), []);
     }

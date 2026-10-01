@@ -1,14 +1,10 @@
 import { module, test } from 'qunit';
-import {
-  click,
-  settled,
-  type TestContext,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
-import RefreshService from 'winds-mobi-client-web/services/refresh';
+import { click, type TestContext, visit, waitUntil } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
+import {
+  setupStubbedApi,
+  ShortGraceRefreshService,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 
 // The map needs real WebGL — see tests/helpers/webgl.ts.
@@ -29,15 +25,9 @@ const STATION_PAYLOAD = {
   last: { _id: 1_710_000_000, 'w-dir': 240, 'w-avg': 12, 'w-max': 18 },
 };
 
-class ShortIntervalRefreshService extends RefreshService {
+class ShortIntervalRefreshService extends ShortGraceRefreshService {
   refreshIntervalMs = 75;
   countdownTickMs = 10;
-}
-
-const SHORT_CYCLE_GRACE_MS = 20;
-
-class ShortGraceRefreshService extends RefreshService {
-  cycleGraceMs = SHORT_CYCLE_GRACE_MS;
 }
 
 // Refreshing needs the real store's cache policy and invalidation, so this
@@ -72,15 +62,6 @@ module('Acceptance | refresh', function (hooks) {
     };
   }
 
-  // The map requests its stations once MapLibre has settled on the routed view
-  // (its `idle` event), a little after the visit itself resolves. If that lands
-  // after the station's own cycle has closed, it opens a new one and re-fetches
-  // the station too, so wait for whatever it set off to finish as well.
-  async function waitForMapStations() {
-    await waitUntil(() => count().list > 0, { timeout: 5000 });
-    await settled();
-  }
-
   // Wind, air and last-hour each fetch their own history.
   const HISTORY_SECTIONS = 3;
 
@@ -91,8 +72,6 @@ module('Acceptance | refresh', function (hooks) {
       await visit(
         `/map/${STATION_ID}?latitude=46.67719&longitude=7.86323&zoom=13`
       );
-
-      await waitForMapStations();
 
       const before = count();
 
@@ -136,26 +115,16 @@ module('Acceptance | refresh', function (hooks) {
     'moving the map re-fetches the open station too and restarts the countdown',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      this.owner.register('service:refresh', ShortGraceRefreshService);
-
       const refresh = this.owner.lookup('service:refresh');
 
       await visit(
         `/map/${STATION_ID}?latitude=46.67719&longitude=7.86323&zoom=13`
-      );
-      await waitForMapStations();
-      // Let the page load's own refresh cycle close, so the move opens a new one.
-      await new Promise((resolve) =>
-        setTimeout(resolve, SHORT_CYCLE_GRACE_MS * 2)
       );
 
       const before = count();
       const cyclesBefore = refresh.refreshCount;
 
       await visit(`/map/${STATION_ID}?latitude=46.9&longitude=8.3&zoom=13`);
-      // The map flies to the new view and fetches its area once MapLibre has
-      // settled there.
-      await waitUntil(() => count().list > before.list, { timeout: 5000 });
 
       const after = count();
 

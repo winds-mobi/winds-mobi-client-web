@@ -1,6 +1,7 @@
 import { action } from '@ember/object';
 import Service, { service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { buildWaiter } from '@ember/test-waiters';
 import { rawTimeout, task } from 'ember-concurrency';
 import type { StoreService } from 'winds-mobi-client-web/services/store';
 
@@ -14,6 +15,10 @@ const REFRESHED_TYPES = ['station', 'history'];
 // same refresh cycle. Covers request waterfalls: a station's history sections
 // only start fetching once the station itself has loaded and rendered.
 const DEFAULT_CYCLE_GRACE_MS = 1000;
+
+// An open refresh cycle is pending work: `settled()` in tests waits for it to
+// close, so the next action starts a cycle of its own.
+const cycleWaiter = buildWaiter('refresh:cycle-grace');
 
 // The one refresh countdown behind the navbar's refresh button. A refresh
 // never touches a component directly: it invalidates every cached station and
@@ -35,7 +40,6 @@ export default class RefreshService extends Service {
 
   // Network fetches in flight, reported by `RefreshTrackingHandler`.
   @tracked private inFlightCount = 0;
-  @tracked private lastSettledAt = 0;
 
   get isRefreshing(): boolean {
     return this.inFlightCount > 0;
@@ -67,16 +71,25 @@ export default class RefreshService extends Service {
 
     return () => {
       this.inFlightCount--;
-      this.lastSettledAt = Date.now();
+      void this.cycleGrace.perform();
     };
   };
 
   private get isCycleOpen(): boolean {
-    return (
-      this.inFlightCount > 0 ||
-      Date.now() - this.lastSettledAt < this.cycleGraceMs
-    );
+    return this.inFlightCount > 0 || this.cycleGrace.isRunning;
   }
+
+  // Keeps the cycle open for `cycleGraceMs` after the last fetch settles;
+  // every settling fetch restarts it.
+  private cycleGrace = task({ restartable: true }, async () => {
+    const token = cycleWaiter.beginAsync();
+
+    try {
+      await rawTimeout(this.cycleGraceMs);
+    } finally {
+      cycleWaiter.endAsync(token);
+    }
+  });
 
   @action
   refreshNow() {

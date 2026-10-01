@@ -22,6 +22,8 @@ module('Unit | Handler | refresh-tracking', function (hooks) {
   test('it passes a refreshable request through and reports it to the refresh service until it settles', async function (assert) {
     const store = this.owner.lookup('service:store');
     const refresh = this.owner.lookup('service:refresh');
+    // `settled()` waits for the cycle this fetch opens to close; keep it short.
+    refresh.cycleGraceMs = 20;
     let resolveFetch!: (value: unknown) => void;
     const fetch = new Promise((resolve) => {
       resolveFetch = resolve;

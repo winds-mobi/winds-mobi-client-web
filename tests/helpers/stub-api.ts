@@ -1,4 +1,14 @@
+import type { TestContext } from '@ember/test-helpers';
+import RefreshService from 'winds-mobi-client-web/services/refresh';
+
 const API_URL = 'https://winds.mobi/api/';
+
+// `settled()` waits for an open refresh cycle to close (see
+// app/services/refresh.ts), so every fetch through the stubbed API would hold
+// a test for the full grace window; a short one keeps that wait short.
+export class ShortGraceRefreshService extends RefreshService {
+  cycleGraceMs = 20;
+}
 
 // What the stubbed API answers a request with: the raw (terse, pre-handler)
 // payload, or a promise of one to hold the request in flight.
@@ -30,7 +40,8 @@ export function setupStubbedApi(hooks: NestedHooks): StubbedApi {
   const api: StubbedApi = { calls: [], respond: defaultResponse };
   let originalFetch: typeof window.fetch;
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: TestContext) {
+    this.owner.register('service:refresh', ShortGraceRefreshService);
     api.calls = [];
     api.respond = defaultResponse;
     originalFetch = window.fetch.bind(window);

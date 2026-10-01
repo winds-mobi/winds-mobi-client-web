@@ -1,10 +1,16 @@
 import { module, test } from 'qunit';
-import { waitUntil } from '@ember/test-helpers';
+import { settled, waitUntil } from '@ember/test-helpers';
 import { setupTest } from 'winds-mobi-client-web/tests/helpers';
 import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
+// A short cycle grace keeps the tests quick, since `settled()` waits for an
+// open cycle to close.
 function lookup(context: { owner: { lookup(name: string): unknown } }) {
-  return context.owner.lookup('service:refresh') as RefreshService;
+  const refresh = context.owner.lookup('service:refresh') as RefreshService;
+
+  refresh.cycleGraceMs = 20;
+
+  return refresh;
 }
 
 // Records which request types the service invalidates on the real store's
@@ -76,7 +82,6 @@ module('Unit | Service | refresh', function (hooks) {
     const refresh = lookup(this);
 
     spyOnInvalidation(refresh);
-    refresh.cycleGraceMs = 20;
 
     refresh.fetchStarted()();
     // A request waterfall: the child fetch starts just after its parent settled.
@@ -84,7 +89,8 @@ module('Unit | Service | refresh', function (hooks) {
 
     assert.strictEqual(refresh.refreshCount, 1, 'the child joined');
 
-    await new Promise((resolve) => setTimeout(resolve, 40));
+    // `settled()` waits for the cycle to close.
+    await settled();
     refresh.fetchStarted()();
 
     assert.strictEqual(refresh.refreshCount, 2, 'a later fetch is its own');

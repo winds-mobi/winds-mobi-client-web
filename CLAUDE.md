@@ -191,6 +191,8 @@ in place — Warp Drive's own documented mechanism, no registry or per-component
   which would otherwise open a second cycle and fetch the station twice. `isRefreshing` (the navbar spinner) is "any
   refreshable fetch in flight". Don't wire individual triggers to the refresh service — any new refreshable request is
   covered automatically.
+  An open cycle holds a test waiter, so `settled()` waits for it to close and a test's next action starts a cycle of its
+  own; `setupStubbedApi` gives tests through the real store a short `cycleGraceMs` to keep that wait short.
 - **Requests a page reads itself go through `<RefreshingRequest>`** ([app/components/refreshing-request.gts](app/components/refreshing-request.gts)):
   a headless `<Request @autorefresh>` that renders nothing and hands each resolved response to `@onResolve`. The map's
   bounds query and the Nearby, Favourites and Hidden pages commit it into a tracked `lastStations` latch, and render
