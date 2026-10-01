@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, visit, waitFor } from '@ember/test-helpers';
+import { click, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -60,7 +60,6 @@ module('Acceptance | favourites availability', function (hooks) {
 
   test('the favourites nav link and heart always show', async function (assert) {
     await visit('/map/holfuy-1804');
-    await waitFor('[data-test-station-favorite]');
 
     assert.dom('[data-test-navbar-link="favorites"]').exists();
     assert.dom('[data-test-station-favorite]').exists();

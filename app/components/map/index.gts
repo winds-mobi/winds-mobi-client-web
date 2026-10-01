@@ -61,6 +61,7 @@ import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
+import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
   OSM_SWISS_STYLE,
   TEST_MAP_STYLE,
@@ -414,6 +415,7 @@ export default class Map extends Component<MapSignature> {
         class="h-full w-full"
         @initOptions={{this.initOptions}}
         @mapLoaded={{this.handleMapLoaded}}
+        @mapLib={{SettledMap}}
         @reuseMaps={{false}}
         as |map|
       >

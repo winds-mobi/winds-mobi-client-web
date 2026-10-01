@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, findAll, visit, waitFor } from '@ember/test-helpers';
+import { click, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
@@ -84,7 +84,6 @@ module('Acceptance | station hide toggle', function (hooks) {
 
   test('hiding a station saves it to the local hidden-stations list', async function (assert) {
     await visit('/map/holfuy-1804');
-    await waitFor('[data-test-station-hide]');
 
     const panelButtons = findAll(
       '[data-test-station-panel] [data-test-station-hide], [data-test-station-panel] [data-test-station-favorite]'
@@ -118,7 +117,6 @@ module('Acceptance | station hide toggle', function (hooks) {
     hiddenStations.add('holfuy-1804');
 
     await visit('/map/holfuy-1804');
-    await waitFor('[data-test-station-hide]');
 
     assert
       .dom('[data-test-station-hide]')

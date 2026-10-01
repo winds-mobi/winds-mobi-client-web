@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, currentURL, fillIn, visit, waitFor } from '@ember/test-helpers';
+import { click, currentURL, fillIn, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
@@ -180,7 +180,6 @@ module('Acceptance | app walkthrough', function (hooks) {
 
     // Search for a station and open it.
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
-    await waitFor('[data-test-navbar-search-result="holfuy-1850"]');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 
@@ -224,7 +223,6 @@ module('Acceptance | app walkthrough', function (hooks) {
 
   test('a visitor favourites a station and finds it again in favourites', async function (assert) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
-    await waitFor('[data-test-station-favorite]');
 
     const favorites = this.owner.lookup('service:favorites');
 
@@ -251,7 +249,6 @@ module('Acceptance | app walkthrough', function (hooks) {
     // Reopen it from the favourites card: a fresh mount, so the star
     // correctly reflects the now-favourited state.
     await click('[data-test-nearby-station-card] [data-test-station-title]');
-    await waitFor('[data-test-station-favorite]');
 
     assert
       .dom('[data-test-station-favorite]')
@@ -264,7 +261,6 @@ module('Acceptance | app walkthrough', function (hooks) {
 
     // Back in favourites, a fresh mount shows the now-empty list.
     await click('[data-test-navbar-link="favorites"]');
-    await waitFor('[data-test-favorites-empty]');
 
     assert.dom('[data-test-nearby-station-card]').doesNotExist();
   });

@@ -3,7 +3,6 @@ import { module, test } from 'qunit';
 import {
   click,
   currentURL,
-  settled,
   type TestContext,
   visit,
   waitUntil,
@@ -110,7 +109,6 @@ module('Acceptance | map query params', function (hooks) {
       ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-      await waitUntil(() => countStationRequests(store.calls) > 0);
 
       assertCurrentMapUrl(assert, {
         latitude: '46.54321',
@@ -140,8 +138,6 @@ module('Acceptance | map query params', function (hooks) {
       ) as unknown as FakeStoreService;
 
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-      await waitUntil(() => countStationRequests(store.calls) > 0);
-      await settled();
 
       const initialStationRequestCount = countStationRequests(store.calls);
 
@@ -186,8 +182,6 @@ module('Acceptance | map query params', function (hooks) {
     async function (assert) {
       await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
       await click('[data-test-navbar-logo]');
-      await waitUntil(() => currentURL() === '/map');
-      await settled();
 
       // The logo link's @query targets app/controllers/map.ts's own declared
       // defaults (DEFAULT_MAP_LNG/LAT/ZOOM) exactly -- Ember's query-param

@@ -1,11 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  findAll,
-  type TestContext,
-  visit,
-  waitUntil,
-} from '@ember/test-helpers';
+import { type TestContext, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import { Type } from '@warp-drive/core/types/symbols';
@@ -113,7 +108,6 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
       // Wait for the marker itself, not just the request: `<map.marker>` adds
       // its element asynchronously, so a resolved request doesn't mean the
       // markers are in the DOM yet — and this test is about which ones are.
-      await waitUntil(() => findAll('[data-station-id]').length > 0);
 
       assert
         .dom('[data-station-id="meteoswiss-PMA"]')
@@ -133,7 +127,6 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
       this.owner.lookup('service:hidden-stations').add('slf-PMA2');
 
       await visit('/map?longitude=9.53&latitude=46.577&zoom=13');
-      await waitUntil(() => findAll('[data-station-id]').length === 2);
 
       assert.dom('[data-station-id="meteoswiss-PMA"]').exists();
       assert.dom('[data-station-id="slf-PMA2"]').exists();
@@ -148,7 +141,6 @@ module('Acceptance | map hidden stations (#167)', function (hooks) {
       this.owner.lookup('service:hidden-stations').add('slf-PMA2');
 
       await visit('/map?longitude=9.53&latitude=46.577&zoom=13');
-      await waitUntil(() => findAll('[data-station-id]').length === 2);
 
       assert.dom('[data-station-id="meteoswiss-PMA"]').exists();
       assert

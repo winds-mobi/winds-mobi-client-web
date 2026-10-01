@@ -22,19 +22,6 @@ import type { History, Station } from 'winds-mobi-client-web/services/store';
 // unrelated to map bounds — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
-// `<map.marker>` adds its element to the map asynchronously (real WebGL
-// context/canvas setup), and Ember's test helpers have no visibility into
-// that -- `await visit(...)` resolving doesn't mean the marker DOM exists
-// yet. These tests were always skipped before this container had real
-// WebGL (see tests/helpers/webgl.ts), so this gap was never exercised.
-// Waiting for the marker directly, rather than for a broader MapLibre
-// lifecycle event, keeps this independent of the `idle`-only tests above.
-async function waitForMarker(stationId: string) {
-  await waitUntil(() => find(`[data-station-id="${stationId}"]`) !== null, {
-    timeout: 5000,
-  });
-}
-
 // Where MapLibre currently draws a station's marker, relative to the map's own
 // box, so it measures the camera rather than where the page happens to sit.
 function markerPosition(stationId: string) {
@@ -46,13 +33,6 @@ function markerPosition(stationId: string) {
   return map && marker
     ? { x: marker.x - map.x, y: marker.y - map.y, width: marker.width }
     : undefined;
-}
-
-// MapLibre's camera animations run outside anything `settled()` knows about, so
-// a map that is merely slow to leave still looks still right after a click.
-// Long enough for MapLibre's own default ease (500ms) to have visibly started.
-function afterAnyCameraAnimation() {
-  return new Promise((resolve) => setTimeout(resolve, 400));
 }
 
 type DeferredRequest = {
@@ -315,10 +295,6 @@ module('Acceptance | map station panel', function (hooks) {
     await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
     await triggerKeyEvent('[data-test-station-panel]', 'keydown', 'Escape');
 
-    await waitUntil(() =>
-      new URL(currentURL(), 'https://winds.mobi').pathname.startsWith('/map')
-    );
-
     assertCurrentRoute(assert, '/map', {
       latitude: '46.67719',
       longitude: '7.86323',
@@ -384,7 +360,6 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-      await waitForMarker('holfuy-1804');
 
       await click('.maplibregl-canvas');
 
@@ -408,10 +383,8 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-      await waitForMarker('holfuy-1804');
 
       await click('.maplibregl-ctrl-zoom-in');
-      await afterAnyCameraAnimation();
 
       assert.dom('[data-test-station-panel]').exists('the panel is still open');
       assert.strictEqual(
@@ -431,7 +404,6 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-      await waitForMarker('holfuy-2222');
 
       await click('[data-station-id="holfuy-2222"]');
 
@@ -485,12 +457,9 @@ module('Acceptance | map station panel', function (hooks) {
       },
     });
 
-    // Deliberately polls the URL rather than awaiting `settled()`/the
-    // transition promise directly: the deferred station request above is
-    // still pending by design, and fully awaiting either one lets enough
-    // of the app settle that the assertions below (the mid-loading state)
-    // no longer catch anything -- confirmed empirically, not just in theory.
-    await waitUntil(() => currentURL().startsWith('/map/holfuy-2222?'));
+    // The deferred station request isn't a test waiter, so `settled()`
+    // resolves with it still pending: the panel is mid-way through loading.
+    await settled();
 
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-title]').doesNotExist();
@@ -520,8 +489,6 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-
-      await waitUntil(() => countStationListRequests(store.calls) > 0);
 
       const initialStationListRequests = countStationListRequests(store.calls);
       const initialStationDetailRequests = countStationDetailRequests(
@@ -634,7 +601,6 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-      await waitForMarker('holfuy-1804');
 
       assert
         .dom('[data-station-id="holfuy-1804"].cursor-pointer')
@@ -663,12 +629,10 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (assert) {
       await visit('/map?latitude=46.67719&longitude=7.86323&zoom=13');
-      await waitForMarker('holfuy-2222');
 
       const before = markerPosition('holfuy-2222');
 
       await click('[data-station-id="holfuy-1804"]');
-      await waitForMarker('holfuy-2222');
 
       assert.dom('[data-test-station-panel]').exists('the panel opened');
       assert.deepEqual(
@@ -677,8 +641,6 @@ module('Acceptance | map station panel', function (hooks) {
         'the other station’s marker has not moved on screen'
       );
 
-      await afterAnyCameraAnimation();
-
       assert.deepEqual(
         markerPosition('holfuy-2222'),
         before,
@@ -686,7 +648,6 @@ module('Acceptance | map station panel', function (hooks) {
       );
 
       await click('[data-part="header-close-button"]');
-      await waitForMarker('holfuy-2222');
 
       assert.deepEqual(
         markerPosition('holfuy-2222'),
@@ -709,11 +670,8 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.70719&longitude=7.91323&zoom=8'
       );
-      await waitForMarker('holfuy-1804');
 
       await click('[data-test-station-title]');
-      await waitForMarker('holfuy-1804');
-      await afterAnyCameraAnimation();
 
       // Same units as `markerPosition`, which measures against this same box.
       const mapWidth =
@@ -744,7 +702,6 @@ module('Acceptance | map station panel', function (hooks) {
       await visit(
         '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
       );
-      await waitForMarker('holfuy-1804');
 
       assert
         .dom(
@@ -765,7 +722,6 @@ module('Acceptance | map station panel', function (hooks) {
         },
       });
       await settled();
-      await waitForMarker('holfuy-2222');
 
       assert
         .dom(

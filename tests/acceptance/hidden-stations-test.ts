@@ -1,12 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import {
-  click,
-  currentURL,
-  findAll,
-  visit,
-  waitFor,
-} from '@ember/test-helpers';
+import { click, currentURL, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -122,7 +116,6 @@ module('Acceptance | hidden stations', function (hooks) {
     ) as unknown as FakeStoreService;
 
     await visit('/hidden');
-    await waitFor('[data-test-hidden-empty]');
 
     assert.dom('[data-test-hidden-empty]').exists();
     assert.dom(HIDDEN_CARD_SELECTOR).doesNotExist();
@@ -149,7 +142,6 @@ module('Acceptance | hidden stations', function (hooks) {
     hiddenStations.add('meteoswiss-PMA');
 
     await visit('/hidden');
-    await waitFor(HIDDEN_CARD_SELECTOR);
 
     const titles = findAll(
       `${HIDDEN_CARD_SELECTOR} [data-test-station-title]`
@@ -168,7 +160,6 @@ module('Acceptance | hidden stations', function (hooks) {
     hiddenStations.add('slf-PMA2');
 
     await visit('/hidden');
-    await waitFor(`${HIDDEN_CARD_SELECTOR} [data-test-station-hide]`);
 
     await click(`${HIDDEN_CARD_SELECTOR} [data-test-station-hide]`);
 
@@ -181,7 +172,6 @@ module('Acceptance | hidden stations', function (hooks) {
     hiddenStations.add('slf-PMA2');
 
     await visit('/settings');
-    await waitFor('[data-test-settings-hidden-station="slf-PMA2"]');
 
     assert
       .dom('[data-test-settings-hidden-station="slf-PMA2"]')
