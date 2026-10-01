@@ -4,6 +4,7 @@ import { service } from '@ember/service';
 import { LinkTo } from '@ember/routing';
 import { Request } from '@warp-drive/ember';
 import { t } from 'ember-intl';
+import { Alert } from 'frontile/status';
 import { byIdsQuery } from 'winds-mobi-client-web/builders/station';
 import StationHideButton from 'winds-mobi-client-web/components/station/hide-button';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
@@ -61,14 +62,10 @@ export default class SettingsHiddenStations extends Component<SettingsHiddenStat
               </ul>
             </:content>
             <:loading>
-              <p class="text-sm text-slate-500">
-                {{t "hidden.loading"}}
-              </p>
+              <Alert @status="neutral" @title={{t "hidden.loading"}} />
             </:loading>
             <:error>
-              <p class="text-sm text-rose-700">
-                {{t "hidden.requestError"}}
-              </p>
+              <Alert @status="danger" @title={{t "hidden.requestError"}} />
             </:error>
           </Request>
         {{else}}
