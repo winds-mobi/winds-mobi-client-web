@@ -1,6 +1,7 @@
 import type { TOC } from '@ember/component/template-only';
 import { t } from 'ember-intl';
 import StationHistorySection from '../history-section';
+import { LAST_HOUR_DURATION, LAST_HOUR_KEYS } from '../history-request';
 import StationLastHourContent from './presenter';
 
 export interface StationLastHourSignature {
@@ -10,15 +11,12 @@ export interface StationLastHourSignature {
   Element: null;
 }
 
-const DURATION = 1 * 60 * 60;
-const KEYS = ['w-dir', 'w-avg', 'w-max'];
-
 const StationLastHour: TOC<StationLastHourSignature> = <template>
   <StationHistorySection
     @stationId={{@stationId}}
     @title={{t "wind.lastHour"}}
-    @duration={{DURATION}}
-    @keys={{KEYS}}
+    @duration={{LAST_HOUR_DURATION}}
+    @keys={{LAST_HOUR_KEYS}}
     as |history|
   >
     <StationLastHourContent @history={{history}} />
