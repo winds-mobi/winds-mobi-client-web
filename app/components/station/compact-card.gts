@@ -1,12 +1,11 @@
 import Component from '@glimmer/component';
 import { service } from '@ember/service';
-import { LinkTo } from '@ember/routing';
 import { formatNumber } from 'ember-intl';
 import { t } from 'ember-intl';
 import Mountains from 'ember-phosphor-icons/components/ph-mountains';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
-import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
 import SettingsWindArrow from 'winds-mobi-client-web/components/settings/wind-arrow';
+import StationLink from './link';
 import StationMetaItem from './meta-item';
 import StationUpdatedMeta from './updated-meta';
 import StationWindDirectionThumbnail from './wind-direction-thumbnail';
@@ -33,16 +32,10 @@ export default class StationCompactCard extends Component<StationCompactCardSign
       data-test-nearby-station-card-compact={{@station.id}}
     >
       <div class="flex min-w-0 items-center justify-between gap-2">
-        <LinkTo
-          data-test-station-title
-          @route="map.station"
-          @model={{@station.id}}
-          @query={{focusQueryParamsFor @station}}
-          title={{t "station.showOnMap"}}
+        <StationLink
+          @station={{@station}}
           class="min-w-0 flex-1 truncate text-sm font-semibold text-slate-950 underline decoration-transparent underline-offset-3 transition hover:decoration-slate-300"
-        >
-          {{@station.name}}
-        </LinkTo>
+        />
 
         <dl class="m-0 shrink-0">
           <StationMetaItem

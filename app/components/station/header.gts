@@ -1,8 +1,6 @@
 import type { TOC } from '@ember/component/template-only';
-import { LinkTo } from '@ember/routing';
-import { t } from 'ember-intl';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
-import { focusQueryParamsFor } from 'winds-mobi-client-web/utils/map-view';
+import StationLink from './link';
 
 export interface StationHeaderSignature {
   Args: {
@@ -21,15 +19,7 @@ export interface StationHeaderSignature {
 // favourites at all.
 const StationHeader: TOC<StationHeaderSignature> = <template>
   {{#if @station}}
-    <LinkTo
-      data-test-station-title
-      @route="map.station"
-      @model={{@station.id}}
-      @query={{focusQueryParamsFor @station}}
-      title={{t "station.showOnMap"}}
-    >
-      {{@station.name}}
-    </LinkTo>
+    <StationLink @station={{@station}} />
   {{/if}}
 </template>;
 
