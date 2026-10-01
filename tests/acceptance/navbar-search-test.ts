@@ -148,7 +148,7 @@ module('Acceptance | navbar search', function (hooks) {
       'service:store'
     ) as unknown as FakeStoreService;
 
-    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
+    await visit('/all?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
 
     const searchParams = lastSearchRequestParams(store.calls);
@@ -173,6 +173,7 @@ module('Acceptance | navbar search', function (hooks) {
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 
     assert.deepEqual(currentSearchParams(), {
+      station: 'holfuy-1850',
       latitude: '46.68084',
       longitude: '7.82554',
       zoom: '10',
@@ -203,6 +204,7 @@ module('Acceptance | navbar search', function (hooks) {
     await click('[data-test-navbar-search-result="holfuy-1850"]');
 
     assert.deepEqual(currentSearchParams(), {
+      station: 'holfuy-1850',
       latitude: '46.68084',
       longitude: '7.82554',
       zoom: '10',
@@ -214,7 +216,7 @@ module('Acceptance | navbar search', function (hooks) {
       'service:store'
     ) as unknown as FakeStoreService;
 
-    await visit('/map');
+    await visit('/all');
     await fillIn('[data-test-navbar-search="navbar"] input', 'l');
 
     assert.strictEqual(countSearchRequests(store.calls), 0);
@@ -227,7 +229,7 @@ module('Acceptance | navbar search', function (hooks) {
   });
 
   test('it clears the search field and closes the results after selecting a station', async function (assert) {
-    await visit('/map?latitude=46.54321&longitude=8.12345&zoom=9.5');
+    await visit('/all?latitude=46.54321&longitude=8.12345&zoom=9.5');
     await fillIn('[data-test-navbar-search="navbar"] input', 'leh');
 
     await click('[data-test-navbar-search-result="holfuy-1850"]');

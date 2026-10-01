@@ -21,11 +21,10 @@ export default class ApplicationRoute extends Route {
     this.intl.setFormats(formats);
     this.intl.setLocale(['en-us']);
 
-    // Not awaited: nothing needs the result synchronously (every consumer
-    // derives from the service's tracked state, and isCheckingPermission
-    // already models "not known yet"), and awaiting it here means the whole
-    // app waits behind a cold GPS fix -- up to the 15s timeout in
-    // utils/location.ts -- before anything renders.
-    void this.nearbyLocation.syncPermissionState();
+    // Not awaited: every consumer derives from the service's tracked
+    // `coordinates`, and awaiting would hold the whole app behind a cold GPS
+    // fix -- up to the 15s timeout in utils/location.ts -- before anything
+    // renders.
+    void this.nearbyLocation.locateIfPermitted();
   }
 }

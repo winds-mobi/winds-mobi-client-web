@@ -6,8 +6,7 @@ import {
   DEFAULT_MAP_LAT,
   DEFAULT_MAP_LNG,
   DEFAULT_MAP_ZOOM,
-  boundsFromMap,
-  mapBoundsEqual,
+  boundsFromView,
   mapViewFromMap,
   mapViewsEqual,
   parseMapView,
@@ -90,24 +89,61 @@ module('Unit | Utility | map-view', function () {
     });
   });
 
-  test('boundsFromMap reads the visible bounds from the map', function (assert) {
-    const map = {
-      getBounds() {
-        return {
-          getNorthEast() {
-            return { lng: 8.5, lat: 47.2 };
-          },
-          getSouthWest() {
-            return { lng: 7.6, lat: 46.4 };
-          },
-        };
-      },
-    } as unknown as MaplibreMap;
+  test('boundsFromView projects the area a viewport covers', function (assert) {
+    const view = { longitude: 8, latitude: 46.8, zoom: 9 };
+    const bounds = boundsFromView(view, { width: 1000, height: 600 });
 
-    assert.deepEqual(boundsFromMap(map), {
-      northEast: [8.5, 47.2],
-      southWest: [7.6, 46.4],
-    });
+    assert.true(
+      bounds.southWest[0] < view.longitude &&
+        view.longitude < bounds.northEast[0],
+      'the view centre lies inside the bounds horizontally'
+    );
+    assert.true(
+      bounds.southWest[1] < view.latitude &&
+        view.latitude < bounds.northEast[1],
+      'and vertically'
+    );
+
+    // At zoom 9 the world is 512 * 2^9 = 262144px around, so 1000px of it is
+    // 1000 / 262144 * 360 ≈ 1.37° of longitude.
+    const width = bounds.northEast[0] - bounds.southWest[0];
+    assert.true(
+      Math.abs(width - 1.373) < 0.01,
+      `a 1000px viewport at zoom 9 spans about 1.37° of longitude (got ${width})`
+    );
+
+    // The centre is unmoved, so the two halves are the same width.
+    assert.true(
+      Math.abs(
+        view.longitude -
+          bounds.southWest[0] -
+          (bounds.northEast[0] - view.longitude)
+      ) < 1e-9,
+      'the bounds are centred on the view'
+    );
+  });
+
+  test('boundsFromView covers less ground the further in it is zoomed', function (assert) {
+    const view = { longitude: 8, latitude: 46.8, zoom: 9 };
+    const size = { width: 1000, height: 600 };
+    const wide = boundsFromView({ ...view, zoom: view.zoom - 1 }, size);
+    const close = boundsFromView(view, size);
+
+    assert.true(
+      wide.northEast[0] - wide.southWest[0] >
+        close.northEast[0] - close.southWest[0],
+      'one zoom level out covers a wider span'
+    );
+  });
+
+  test('boundsFromView clamps to the limits of the projection', function (assert) {
+    const bounds = boundsFromView(
+      { longitude: 0, latitude: 0, zoom: 0 },
+      { width: 4000, height: 4000 }
+    );
+
+    assert.true(bounds.northEast[1] <= 90 && bounds.southWest[1] >= -90);
+    assert.true(bounds.northEast[0] <= 180 && bounds.southWest[0] >= -180);
   });
 
   test('roundBoundsForRequest snaps bounds to the ~0.01° refetch grid', function (assert) {
@@ -135,9 +171,10 @@ module('Unit | Utility | map-view', function () {
       southWest: [7.6019, 46.3971],
     });
 
-    assert.true(
-      mapBoundsEqual(a, b),
-      'tiny pans round to the same request bounds, so they do not refetch'
+    assert.deepEqual(
+      a,
+      b,
+      'tiny pans round to the same request bounds, so they build the same URL'
     );
   });
 

@@ -14,13 +14,12 @@ hidden:
   requestError: Your hidden stations could not be loaded right now.
   emptyTitle: You have no hidden stations.
   emptyDescription: >-
-    Stations you hide no longer show on the map or in the nearby list. Unhide
-    them here to bring them back.
+    Stations you hide no longer show in All stations, on the map or in the
+    card views. Unhide them here to bring them back.
 
 navigation:
   menu: Menu
-  map: Map
-  nearby: Nearby
+  allStations: All stations
   favorites: Favourites
   settings: Settings
   help: Help
@@ -51,18 +50,6 @@ settings:
       Shrink each wind arrow the older its last reading is, so fresh stations
       stand out and stale ones recede. Arrows scale linearly from full size
       now down to half size at 30 minutes, and never shrink below half size.
-  nearbyCompactList:
-    label: Compact nearby cards
-    description: >-
-      Show nearby stations as compact cards (name, altitude, wind, gusts, last
-      update, and a small wind-direction thumbnail) instead of full-size
-      cards, so more stations fit on screen without scrolling.
-  favoritesCompactList:
-    label: Compact favourite cards
-    description: >-
-      Show favourite stations as compact cards (name, altitude, wind, gusts,
-      last update, and a small wind-direction thumbnail) instead of full-size
-      cards, so more stations fit on screen without scrolling.
   useIconLabels:
     label: Use icons for labels
     description: >-
@@ -77,8 +64,8 @@ settings:
   hiddenStationsFeatureEnabled:
     label: Hide stations
     description: >-
-      Show an eye button on each station panel to hide that station from the
-      map and the nearby list, for stations that overlap a more useful one.
+      Show an eye button on each station panel to hide that station from All
+      stations, for stations that overlap a more useful one.
       Hidden stations are listed below. Stored in this browser only, no
       account needed.
   hiddenStations:
@@ -91,7 +78,6 @@ settings:
     groupLabel: Beta features
     warning: >-
       Beta features are early access. We do not guarantee they work correctly.
-    empty: No features are in beta right now. Check back later.
 
 help:
   title: Help
@@ -100,8 +86,8 @@ help:
     requestError: The live station example could not be loaded right now.
   intro: Winds.mobi shows live wind and weather stations on a map, so you can check conditions and plan your flight.
   sections:
-    mapDescription: Browse stations on the map and open one for full detail.
-    nearbyDescription: Use your location to compare the closest stations side by side.
+    allStationsDescription: Browse every station in view and open one for full detail.
+    viewDescription: Switch any list between the map, full cards, and compact cards — each view is remembered separately.
     favoritesDescription: Save stations for quick access — stored in your browser, no account needed.
     settingsDescription: Turn display preferences on or off, like gusts outline or compact cards.
   liveExample:
@@ -133,7 +119,7 @@ help:
     description: Works best in a recent desktop or mobile browser.
   privacy:
     title: Privacy
-    description: Location is only used when you ask, for the nearby view and distances. Favourites are saved in your browser only — no account or cross-device sync.
+    description: Location is only used when you ask, for the locate button and distances. Favourites are saved in your browser only — no account or cross-device sync.
   faq:
     title: FAQ about v2 of the web app
     items:
@@ -186,36 +172,25 @@ help:
 map:
   legend:
     windSpeed: wind [km/h]
-  locate:
-    ariaLabel: Show my location on the map
   refresh:
     ariaLabel: Refresh map and station data
     sinceLast: '{value} since last refresh'
 
-nearby:
-  title: Nearby stations
-  description: Use your location to find the closest stations around your current position and compare the live reading with the last hour at a glance.
-  loading: Looking up the closest stations…
-  requestError: Nearby stations could not be loaded right now.
-  location:
-    checking: Checking location access…
-    locatingDescription: Trying to determine your current location…
-    cta: Use location
-    permissionDenied: This view needs your location to find nearby stations. Location access is currently blocked in the browser.
-    positionUnavailable: This view needs your location to find nearby stations, but the device could not determine it right now.
-    timeout: This view needs your location to find nearby stations, but the request timed out.
-    unsupported: This browser cannot provide location access for the nearby stations view.
-    unknownError: This view needs your location to find nearby stations, but the browser did not return it.
-
 station:
   lastPickup: Last pickup
   showOnMap: Show on map
+  requestError: This station could not be loaded right now.
   favorite:
     add: Add to favourites
     remove: Remove from favourites
   hide:
     add: Hide station
     remove: Unhide station
+  view:
+    label: View
+    cards: Full cards
+    compact: Compact cards
+    map: Map
   meta:
     altitude: Altitude
     updated: Updated

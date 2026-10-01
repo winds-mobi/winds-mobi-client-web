@@ -93,9 +93,9 @@ module('Acceptance | fetches per action', function (hooks) {
     'moving the map with no station open fetches only the new area',
     webGLAvailable,
     async function (assert) {
-      await visit(`/map?${HOME_VIEW}`);
+      await visit(`/all?${HOME_VIEW}`);
 
-      const fetched = await fetchesDuring(() => visit(`/map?${OTHER_VIEW}`));
+      const fetched = await fetchesDuring(() => visit(`/all?${OTHER_VIEW}`));
 
       assert.deepEqual(fetched, ['map stations']);
     }
@@ -105,7 +105,7 @@ module('Acceptance | fetches per action', function (hooks) {
     'opening a station fetches it and its history, and refreshes the map stations with it',
     webGLAvailable,
     async function (assert) {
-      await visit(`/map?${HOME_VIEW}`);
+      await visit(`/all?${HOME_VIEW}`);
 
       const fetched = await fetchesDuring(() =>
         click(`[data-station-id="${STATION_A._id}"]`)
@@ -122,11 +122,13 @@ module('Acceptance | fetches per action', function (hooks) {
     'switching to another station fetches it and refreshes the map stations with it',
     webGLAvailable,
     async function (assert) {
-      await visit(`/map?${HOME_VIEW}`);
-      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/all?${HOME_VIEW}`);
+      await fetchesDuring(() =>
+        visit(`/all?${HOME_VIEW}&station=${STATION_A._id}`)
+      );
 
       const fetched = await fetchesDuring(() =>
-        visit(`/map/${STATION_B._id}?${HOME_VIEW}`)
+        visit(`/all?${HOME_VIEW}&station=${STATION_B._id}`)
       );
 
       assert.deepEqual(
@@ -140,11 +142,13 @@ module('Acceptance | fetches per action', function (hooks) {
     'moving the map with a station open refreshes the station and its history too',
     webGLAvailable,
     async function (assert) {
-      await visit(`/map?${HOME_VIEW}`);
-      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/all?${HOME_VIEW}`);
+      await fetchesDuring(() =>
+        visit(`/all?${HOME_VIEW}&station=${STATION_A._id}`)
+      );
 
       const fetched = await fetchesDuring(() =>
-        visit(`/map/${STATION_A._id}?${OTHER_VIEW}`)
+        visit(`/all?${OTHER_VIEW}&station=${STATION_A._id}`)
       );
 
       assert.deepEqual(
@@ -158,12 +162,14 @@ module('Acceptance | fetches per action', function (hooks) {
     'closing the station fetches nothing',
     webGLAvailable,
     async function (assert) {
-      await visit(`/map?${HOME_VIEW}`);
-      await fetchesDuring(() => visit(`/map/${STATION_A._id}?${HOME_VIEW}`));
+      await visit(`/all?${HOME_VIEW}`);
+      await fetchesDuring(() =>
+        visit(`/all?${HOME_VIEW}&station=${STATION_A._id}`)
+      );
 
       const start = api.calls.length;
 
-      await visit(`/map?${HOME_VIEW}`);
+      await visit(`/all?${HOME_VIEW}`);
 
       assert.deepEqual(api.calls.slice(start).map(describe), []);
     }

@@ -14,7 +14,7 @@ export interface StationWindDirectionThumbnailSignature {
 
 // A shrunk version of `station/last-hour`'s polar graph, for rows where there
 // is no room for a full section card with min/mean/max stats (e.g. the
-// compact nearby list, #64). Asks for the same last-hour history as
+// compact card view, #64). Asks for the same last-hour history as
 // `StationLastHour` (see LAST_HOUR_DURATION/LAST_HOUR_KEYS), so the two share
 // one cached request.
 const StationWindDirectionThumbnail: TOC<StationWindDirectionThumbnailSignature> =

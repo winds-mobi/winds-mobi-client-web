@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, settled, visit } from '@ember/test-helpers';
+import { click, findAll, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -66,6 +66,10 @@ class FakeStoreService extends Service {
       content: {
         data: STATION_FIXTURES,
       },
+      // WarpDrive's `<Request>` `state.refresh()` replays the request it
+      // finds echoed back on a resolved response -- without it, a refresh
+      // resolves against an empty/unknown request instead of this same URL.
+      request,
     });
   }
 }
@@ -90,7 +94,7 @@ module('Acceptance | favorites route', function (hooks) {
 
     await visit('/favorites');
 
-    assert.dom('[data-test-favorites-empty]').exists();
+    assert.dom('[data-test-id-list-empty="favorites"]').exists();
     assert.dom(FAVORITES_CARD_SELECTOR).doesNotExist();
     assert.strictEqual(countStationRequests(store.calls), 0);
   });
@@ -110,7 +114,7 @@ module('Acceptance | favorites route', function (hooks) {
 
     await visit('/favorites');
 
-    assert.dom('[data-test-favorites-empty]').doesNotExist();
+    assert.dom('[data-test-id-list-empty="favorites"]').doesNotExist();
 
     const titles = findAll(
       `${FAVORITES_CARD_SELECTOR} [data-test-station-title]`
@@ -123,7 +127,7 @@ module('Acceptance | favorites route', function (hooks) {
     );
   });
 
-  test('it shows compact cards when the compact favourites list preference is on', async function (assert) {
+  test('the navbar view switch switches between full and compact cards', async function (assert) {
     const favorites = this.owner.lookup('service:favorites');
 
     favorites.add('holfuy-1804');
@@ -131,13 +135,13 @@ module('Acceptance | favorites route', function (hooks) {
 
     await visit('/favorites');
 
-    assert.dom('[data-test-favorites-stations-compact]').doesNotExist();
+    assert.dom('[data-test-navbar-view-switch="favorites"]').exists();
+    assert.dom('[data-test-station-grid-compact="favorites"]').doesNotExist();
     assert
       .dom('[data-test-nearby-station-card-compact]')
       .doesNotExist('compact cards are not rendered in card view');
 
-    this.owner.lookup('service:settings').favoritesCompactList = true;
-    await settled();
+    await click('[data-test-navbar-view-option="compact"]');
 
     assert
       .dom(FAVORITES_CARD_SELECTOR)
@@ -145,5 +149,20 @@ module('Acceptance | favorites route', function (hooks) {
     assert
       .dom('[data-test-nearby-station-card-compact]')
       .exists({ count: STATION_FIXTURES.length });
+  });
+
+  test('each surface remembers its own card size', async function (assert) {
+    const favorites = this.owner.lookup('service:favorites');
+
+    favorites.add('holfuy-1804');
+
+    // Each surface's view lives in its own route's `view` query param, so
+    // picking compact on hidden can't reach favourites' own.
+    await visit('/hidden?view=compact');
+    await visit('/favorites');
+
+    assert
+      .dom(FAVORITES_CARD_SELECTOR)
+      .exists('choosing compact on hidden leaves favourites on full cards');
   });
 });

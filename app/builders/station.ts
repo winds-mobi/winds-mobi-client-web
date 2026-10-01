@@ -103,7 +103,7 @@ function query<T extends TypedRecordInstance>(
   };
 
   // Trailing slash avoids a 307 redirect round-trip: the API redirects
-  // slash-less collection URLs, doubling every map/search/nearby call.
+  // slash-less collection URLs, doubling every map/search/by-ids call.
   const baseURL = buildBaseURL({
     resourcePath: pluralize(type),
     op: 'query',
@@ -145,31 +145,9 @@ function mapQuery<T extends TypedRecordInstance>(
   );
 }
 
-function nearbyQuery<T extends TypedRecordInstance>(
-  type: TypeFromInstance<T>,
-  latitude: number,
-  longitude: number,
-  limit = 10,
-  options?: ConstrainedRequestOptions
-): QueryRequestOptions<{ data: T[] }> {
-  return refreshable(
-    query<T>(
-      type,
-      {
-        'is-highest-duplicates-rating': true,
-        limit,
-        'near-lat': latitude,
-        'near-lon': longitude,
-      },
-      options
-    ),
-    type
-  );
-}
-
-// Fetches an explicit set of stations by id — used by the locally persisted
-// id lists (favourites, hidden stations). No duplicates filtering: the visitor
-// picked these exact stations.
+// Fetches an explicit set of stations by id — used by any view backed by a
+// locally-persisted id list (favourites, hidden stations). No duplicates
+// filtering: the caller picked these exact stations.
 function byIdsQuery<T extends TypedRecordInstance>(
   type: TypeFromInstance<T>,
   ids: string[],
@@ -213,4 +191,4 @@ function searchQuery<T extends TypedRecordInstance>(
   );
 }
 
-export { byIdsQuery, findRecord, mapQuery, nearbyQuery, query, searchQuery };
+export { byIdsQuery, findRecord, mapQuery, query, searchQuery };

@@ -145,9 +145,11 @@ expected utility class is present rather than measuring pixels at all.
 There is no `fetch()` in app code and no classic EmberData adapters/serializers. All reads go through Warp Drive:
 
 1. **Builders** ([app/builders/](app/builders/)) construct typed request objects. [station.ts](app/builders/station.ts)
-   exposes `findRecord`, `query`, `mapQuery` (bounding box, capped at 470), `nearbyQuery` (`near-lat`/`near-lon`),
-   and `searchQuery`. Builders inject default `keys` (sparse-fieldset selection) and `arrayFormat: 'repeat'` query
-   serialization. Narrow `keys` to exactly what the consuming UI needs.
+   exposes `findRecord`, `query`, `mapQuery` (bounding box, capped at 470), `byIdsQuery` (favourites/hidden), and
+   `searchQuery`; [history.ts](app/builders/history.ts) exposes `historyQuery`. Builders inject default `keys`
+   (sparse-fieldset selection) and `arrayFormat: 'repeat'` query serialization, and mark on-screen data as
+   refreshable (see [Refreshing](#refreshing-one-countdown-invalidation-and-request-autorefreshinvalid)). Narrow
+   `keys` to exactly what the consuming UI needs.
 2. **`this.store.request(builder(...))`** issues the request. The API base URL/namespace is set once in
    [app/app.ts](app/app.ts) via `setBuildURLConfig` (`https://winds.mobi/api`, namespace `2.3`; a commented
    localhost line is the dev override).
@@ -166,6 +168,16 @@ There is no `fetch()` in app code and no classic EmberData adapters/serializers.
 In components, read responses through the `<Request>` component (`result.data`) or `getRequestState`
 (`state.value.data`); an awaited `store.request(...)` resolves to `{ content: { data } }`.
 
+```mermaid
+flowchart LR
+    B["Builder<br/>app/builders/*.ts<br/>(findRecord / query / mapQuery / byIdsQuery)"] -->|typed RequestInfo| S["store.request(...)"]
+    S -->|HTTP fetch| API[("winds.mobi API")]
+    API -->|terse raw JSON| H["Handler<br/>app/handlers/*.ts<br/>(renames fields, drops absent ones)"]
+    H -->|JSON:API shaped| SR["Schema-record store<br/>Station / History"]
+    SR -->|reactive resource| RQ["&lt;Request&gt; / getRequestState"]
+    RQ --> UI["Component template"]
+```
+
 ### Refreshing: one countdown, invalidation, and `<Request @autorefresh="invalid">`
 
 The navbar's refresh button/countdown (`app/services/refresh.ts`) never touches components. A refresh
@@ -174,50 +186,58 @@ in place — Warp Drive's own documented mechanism, no registry or per-component
 
 - **Builders mark on-screen data as refreshable.** `app/builders/refreshable.ts` sets `cacheOptions.types`, which is
   what the cache policy's `invalidateRequestsForType` matches on (it never infers types from response data). `findRecord`,
-  `mapQuery`, `nearbyQuery`, `byIdsQuery` and `historyQuery` use it; `searchQuery` deliberately doesn't — search results
-  are a one-off lookup, not data that ages on screen.
+  `mapQuery`, `byIdsQuery` and `historyQuery` use it; `searchQuery` deliberately doesn't — search results are a one-off
+  lookup, not data that ages on screen.
 - **Every `<Request>` rendering refreshable data passes `@autorefresh="invalid" @autorefreshBehavior="refresh"`.**
-  On invalidation it re-fetches and keeps `:content` on screen until the new data lands — no `:loading`.
+  On invalidation it re-fetches synchronously and keeps `:content` on screen until the new data lands — no `:loading`.
   `app/services/store.ts` narrows `lifetimes` to `DefaultCachePolicy`, since the generic `CachePolicy` type lacks
-  `invalidateRequestsForType`. A request getter never reads a refresh tick: it only changes when what it asks for
-  changes (bounds, coordinates, ids, a station id).
+  `invalidateRequestsForType`.
 - **Every fetch is a refresh of everything on screen.** `app/handlers/refresh-tracking.ts` is the first handler in the
   store's chain, so it sees every refreshable request that actually reaches the network (cache hits never get that
   far) and reports it via `refresh.fetchStarted()`. A fetch that isn't already part of a cycle — a pan, a station
   switch, an edited id list, the countdown, the button — opens a **refresh cycle**: the countdown restarts,
-  `refreshCount` bumps, and everything else re-fetches alongside it, so all data on screen shares one timestamp.
-  Fetches while a cycle is open join it, as does one starting within `cycleGraceMs` (1s) of the last fetch settling:
-  that covers request waterfalls (a station's history sections only start fetching once the station has rendered),
-  which would otherwise open a second cycle and fetch the station twice. `isRefreshing` (the navbar spinner) is "any
+  `refreshCount` bumps, and everything else re-fetches alongside it. Deliberate: a pan must refetch the map, and a
+  restarted countdown must never imply the station panel is fresh when it isn't — all data on screen shares one
+  timestamp. Fetches while a cycle is open join it, as does one starting within `cycleGraceMs` (1s) of the last fetch
+  settling: that covers request waterfalls (a station's history sections only start fetching once the station has
+  rendered), which would otherwise open a second cycle and fetch the station twice. `isRefreshing` is "any
   refreshable fetch in flight". Don't wire individual triggers to the refresh service — any new refreshable request is
   covered automatically.
   An open cycle holds a test waiter, so `settled()` waits for it to close and a test's next action starts a cycle of its
   own; `setupStubbedApi` gives tests through the real store a short `cycleGraceMs` to keep that wait short.
-- **Requests a page reads itself go through `<RefreshingRequest>`** ([app/components/refreshing-request.gts](app/components/refreshing-request.gts)):
-  a headless `<Request @autorefresh>` that renders nothing and hands each resolved response to `@onResolve`. The map's
-  bounds query and the Nearby, Favourites and Hidden pages commit it into a tracked `lastStations` latch, and render
-  the list from the latch, so a pan or an edited id list never blinks the previous results away — and the map never
-  remounts. Their own first-load and error states still come from the request's state. The station panel passes no
-  `@onResolve`: a refresh updates the same station record in place.
+- **A genuinely new identity (a different station id, a different id list, moved map bounds) is a brand-new
+  request** — `<Request>` swaps from `:content` to `:loading` and back, and those are _different named blocks_: Glimmer
+  tears down and rebuilds everything rendered inside one when switching to another. **Never render anything with state
+  worth keeping — especially `<Map>`, a real MapLibre/WebGL instance — separately inside more than one of
+  `<Request>`'s blocks.** Two fixes, picked per how often the identity changes — **prefer the first**:
+  1. **Put `<Request>` _inside_ the thing that must not remount, not around it** — `station/index.gts` is the model:
+     the Drawer is the outermost element, and `<Request>` lives inside it, wrapping only `d.Header`/`d.Body`, so a
+     station switch never replays the Drawer's open animation and `:loading` is a real Frontile `<Skeleton>`.
+     `id-list-page.gts` (favourites/hidden) renders `<StationListView>` straight inside `:content`, accepting that
+     editing the id list while viewing it as a map remounts that map — a rare, deliberate action, not worth a latch.
+  2. **`all.gts`'s bounds query is the one place a latch earns its keep**, because pan/zoom changes that identity
+     _continuously_. There the request goes through the headless `<RefreshingRequest>`
+     ([app/components/refreshing-request.gts](app/components/refreshing-request.gts)), which only hands each resolved
+     list to `@onResolve` to commit into a tracked `lastStations` latch, and `<StationListView>` renders once outside it,
+     so the map never remounts mid-drag.
 
 ### Map state is unidirectional and lives in query params
 
-Map center/zoom are route query params on [app/controllers/map.ts](app/controllers/map.ts) (`mapLng`/`mapLat`/
-`mapZoom`), making views shareable and refresh-stable. [app/utils/map-view.ts](app/utils/map-view.ts) is the single
-source of map math: parse/serialize/normalize views, equality checks, `boundsFromMap` (reads MapLibre's `getBounds`),
-and `roundBoundsForRequest` (snaps the captured bounds to the refetch grid so sub-threshold pans don't refetch). The map
-component syncs query params → MapLibre declaratively (fly-to from state) rather than imperatively writing back
-mid-interaction. Keep this direction; don't reintroduce imperative view bookkeeping.
+Map center/zoom are route query params on [app/controllers/all.ts](app/controllers/all.ts) (`longitude`/`latitude`/
+`zoom`, alongside `view` and the open `station`), making views shareable and refresh-stable.
+[app/utils/map-view.ts](app/utils/map-view.ts) is the single source of map math: parse/serialize/normalize views,
+equality checks, `boundsFromView` (projects the area a viewport covers from a view, with MapLibre's public
+`MercatorCoordinate`), and `roundBoundsForRequest` (snaps bounds to the refetch grid so sub-threshold pans don't
+refetch). The map component syncs query params → MapLibre declaratively (fly-to from state) rather than imperatively
+writing back mid-interaction. Keep this direction; don't reintroduce imperative view bookkeeping.
 
 **The two directions, and why `moveend` only writes back for user gestures** (learned the hard way — don't undo this):
 
-- **URL → map → request.** A declarative `<map.call @func="flyTo">` flies the map to the routed view whenever it
-  changes (deep link, search select, logo reset, locate). The station **request follows the live map, not the URL**:
-  `captureBounds` reads `map.getBounds()` on the map's `idle` event into a tracked `requestBounds` (rounded via
-  `roundBoundsForRequest`, deduped), and the `request` getter derives from that — so it covers exactly what's on screen,
-  including pitched/rotated views, and a resize or any settle refetches without the query params changing. `mapQuery`
-  caps the result at 470. Capturing on `idle` (not `moveend`) is deliberate: `idle` fires _after_ render, so writing
-  `requestBounds` can't hit the backtracking assertion the `moveend` guard below avoids.
+- **URL → map, URL → request.** A declarative `<map.call @func="flyTo">` flies the map to the routed view whenever it
+  changes (deep link, search select, logo reset, locate). The station **request follows the routed view, not the live
+  map**: `all.gts`'s `stationsRequest` projects the view with the window size (`boundsFromView`, re-derived on resize)
+  and rounds it via `roundBoundsForRequest` — so it needs no rendered map, which is what lets the card view work with
+  none. `mapQuery` caps the result at 470.
 - **map → URL only on user gestures.** `handleMoveEnd` calls `router.replaceWith` **only when `event.originalEvent` is
   set** (a real pan/zoom). It must _not_ write back on programmatic moves, because:
   - the initial/style-driven settle reports a slightly different view (notably in tests) and would drift the URL; and
@@ -235,14 +255,18 @@ mid-interaction. Keep this direction; don't reintroduce imperative view bookkeep
 
 ### Routes & services
 
-Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites`, `hidden` (reached from Settings,
-not the navbar), `settings`, `help`; `index` redirects to `map`.
+Routes: `all` (every station in the map's area, as a map or cards), `favorites`, `hidden` (reached from Settings,
+not the navbar), `settings`, `help`,
+`not-found`; `index` redirects to `all`. The station detail panel is the `station` query param on whichever of
+`all`/`favorites`/`hidden` is showing (see `app/utils/station-detail.ts`), not a route of its own.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `refresh`
-(the refresh countdown and refresh cycles, see [Refreshing](#refreshing-one-countdown-invalidation-and-request-autorefreshinvalid)), `nearby-location`
-(geolocation + Permissions API state machine), `settings` (persisted display preferences, see
-[Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites`/`hidden-stations` (locally
-persisted station id lists; `hiddenStations.visible(stations)` is the one place hidden stations are filtered out).
+(the refresh countdown and refresh cycles, see [Refreshing](#refreshing-one-countdown-invalidation-and-request-autorefreshinvalid)),
+`favorites`/`hidden-stations` (locally persisted station id lists; `hiddenStations.visible(stations)` is the one place
+hidden stations are filtered out), `station-view` (map/cards view mode per surface),
+`nearby-location` (the visitor's position, looked up at boot only if geolocation is already granted, and
+updated by the map's locate control), `settings` (persisted display preferences, see
+[Settings persistence](#settings-persistence-tracked-local-storage) below).
 Route/component-local UI state (open panels, selected tab, map view) does **not** belong in services — use component
 state, route models, and query params.
 

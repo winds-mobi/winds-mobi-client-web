@@ -15,10 +15,6 @@ interface StationCompactCardTestContext extends RenderedTestContext {
   station: Station;
 }
 
-class FakeRefreshService extends Service {
-  lastRefresh = 0;
-}
-
 class FakeStoreService extends Service {
   request() {
     return Promise.resolve({ content: { data: [] } });
@@ -52,7 +48,6 @@ module('Integration | Component | station/compact-card', function (hooks) {
 
   hooks.beforeEach(function () {
     this.owner.register('service:store', FakeStoreService);
-    this.owner.register('service:refresh', FakeRefreshService);
   });
 
   test('it renders the name, altitude, and wind speed/gusts', async function (this: StationCompactCardTestContext, assert) {

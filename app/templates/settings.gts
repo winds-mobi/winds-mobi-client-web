@@ -8,10 +8,9 @@ import SettingsRow from 'winds-mobi-client-web/components/settings/row';
 import SettingsShowcaseFavicon from 'winds-mobi-client-web/components/settings/showcase/favicon';
 import SettingsShowcaseGusts from 'winds-mobi-client-web/components/settings/showcase/gusts';
 import SettingsShowcaseShrink from 'winds-mobi-client-web/components/settings/showcase/shrink';
-import SettingsShowcaseCompactList from 'winds-mobi-client-web/components/settings/showcase/compact-list';
 import SettingsShowcaseIconLabels from 'winds-mobi-client-web/components/settings/showcase/icon-labels';
-import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import SettingsShowcaseHidden from 'winds-mobi-client-web/components/settings/showcase/hidden';
+import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 import SettingsHiddenStations from 'winds-mobi-client-web/components/settings/hidden-stations';
 import {
   BETA_FEATURE_KEYS,
@@ -81,31 +80,6 @@ export default class SettingsTemplate extends Component<SettingsTemplateSignatur
             <SettingsRow @settings={{this.settings}} @name="shrinkOldData">
               <SettingsShowcaseShrink
                 @enabled={{this.settings.shrinkOldData}}
-              />
-            </SettingsRow>
-          </StationSectionCard>
-
-          <StationSectionCard
-            @title={{t "settings.nearbyCompactList.label"}}
-            @titleClass="sr-only"
-          >
-            <SettingsRow @settings={{this.settings}} @name="nearbyCompactList">
-              <SettingsShowcaseCompactList
-                @enabled={{this.settings.nearbyCompactList}}
-              />
-            </SettingsRow>
-          </StationSectionCard>
-
-          <StationSectionCard
-            @title={{t "settings.favoritesCompactList.label"}}
-            @titleClass="sr-only"
-          >
-            <SettingsRow
-              @settings={{this.settings}}
-              @name="favoritesCompactList"
-            >
-              <SettingsShowcaseCompactList
-                @enabled={{this.settings.favoritesCompactList}}
               />
             </SettingsRow>
           </StationSectionCard>

@@ -4,8 +4,9 @@ import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import NavbarLogo from 'winds-mobi-client-web/components/navbar/logo';
 
 // The link's query-param reset-to-default behaviour needs a full app boot to
-// resolve the map controller's queryParams (a bare rendering test renders a
-// bare `/map` href with no query string at all) — see the acceptance test
+// resolve the all-stations controller's queryParams (a bare rendering test
+// renders a bare `/all` href with no query string at all) — see the
+// acceptance test
 // "it resets to the default view when the logo is clicked" in
 // map-query-params-test.ts for that coverage.
 module('Integration | Component | navbar/logo', function (hooks) {

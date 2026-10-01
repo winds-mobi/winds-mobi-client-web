@@ -80,7 +80,6 @@ module('Integration | Component | navbar/search-result', function (hooks) {
   test('it shows the distance when the current position is known', async function (this: NavbarSearchResultTestContext, assert) {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     nearbyLocation.coordinates = {
-      accuracy: 10,
       latitude: 46.69299,
       longitude: 7.82667,
     };

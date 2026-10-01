@@ -19,12 +19,12 @@ module('Acceptance | not-found route', function (hooks) {
   test('an old pre-rebuild station URL redirects to the map', async function (assert) {
     await visit('/stations/holfuy-1804');
 
-    assert.strictEqual(currentURL(), '/map');
+    assert.strictEqual(currentURL(), '/all');
   });
 
   test('an unrecognized path redirects to the map', async function (assert) {
     await visit('/this/path/does/not/exist');
 
-    assert.strictEqual(currentURL(), '/map');
+    assert.strictEqual(currentURL(), '/all');
   });
 });

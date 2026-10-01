@@ -10,10 +10,6 @@ interface StationWindDirectionThumbnailTestContext extends RenderingTestContext 
   stationId: string;
 }
 
-class FakeRefreshService extends Service {
-  lastRefresh = 0;
-}
-
 class FakeStoreService extends Service {
   response: Promise<{ content: { data: History[] } }> = Promise.resolve({
     content: { data: [] },
@@ -35,7 +31,6 @@ module(
 
     hooks.beforeEach(function () {
       this.owner.register('service:store', FakeStoreService);
-      this.owner.register('service:refresh', FakeRefreshService);
     });
 
     test('it renders the graph with the resolved history', async function (this: StationWindDirectionThumbnailTestContext, assert) {

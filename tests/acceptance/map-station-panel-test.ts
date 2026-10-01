@@ -15,12 +15,16 @@ import { stubMatchMedia } from 'winds-mobi-client-web/tests/helpers/match-media'
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
 
-// The tests gated on this need a real MapLibre map (markers, clicks on the
-// canvas) — see tests/helpers/webgl.ts.
+// Tests that drive the map itself (markers, clicks, the camera) need real
+// WebGL — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
 // Where MapLibre currently draws a station's marker, relative to the map's own
 // box, so it measures the camera rather than where the page happens to sit.
+// Rounded to whole pixels: MapLibre settles a marker's transform onto the pixel
+// grid as the map finishes rendering, so the same unmoved marker can measure
+// 588.77 one moment and 589 the next. That sub-pixel difference is not a move,
+// and comparing raw floats would fail on it.
 function markerPosition(stationId: string) {
   const map = find('[data-test-map-container]')?.getBoundingClientRect();
   const marker = find(
@@ -28,7 +32,11 @@ function markerPosition(stationId: string) {
   )?.getBoundingClientRect();
 
   return map && marker
-    ? { x: marker.x - map.x, y: marker.y - map.y, width: marker.width }
+    ? {
+        x: Math.round(marker.x - map.x),
+        y: Math.round(marker.y - map.y),
+        width: Math.round(marker.width),
+      }
     : undefined;
 }
 
@@ -119,7 +127,10 @@ class FakeStoreService extends Service {
   deferredSecondaryStationRequest?: DeferredRequest;
   private requestCache = new Map<
     string,
-    Promise<{ content: { data: History[] | Station | Station[] } }>
+    Promise<{
+      content: { data: History[] | Station | Station[] };
+      request?: FakeStoreRequest;
+    }>
   >();
 
   request(request: FakeStoreRequest) {
@@ -137,6 +148,7 @@ class FakeStoreService extends Service {
         content: {
           data: HISTORY,
         },
+        request,
       });
       this.requestCache.set(url, cachedRequest);
       return cachedRequest;
@@ -147,6 +159,7 @@ class FakeStoreService extends Service {
         content: {
           data: PRIMARY_STATION,
         },
+        request,
       });
       this.requestCache.set(url, cachedRequest);
       return cachedRequest;
@@ -163,6 +176,7 @@ class FakeStoreService extends Service {
         content: {
           data: SECONDARY_STATION,
         },
+        request,
       });
       this.requestCache.set(url, cachedRequest);
       return cachedRequest;
@@ -173,6 +187,7 @@ class FakeStoreService extends Service {
         content: {
           data: [PRIMARY_STATION, SECONDARY_STATION],
         },
+        request,
       });
       this.requestCache.set(url, cachedRequest);
       return cachedRequest;
@@ -182,6 +197,7 @@ class FakeStoreService extends Service {
       content: {
         data: [],
       },
+      request,
     });
     this.requestCache.set(url, cachedRequest);
 
@@ -225,9 +241,12 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it deep-links the panel and map state from the URL', async function (assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
 
-    assertCurrentRoute(assert, '/map/holfuy-1804', {
+    assertCurrentRoute(assert, '/all', {
+      station: 'holfuy-1804',
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '13',
@@ -245,7 +264,7 @@ module('Acceptance | map station panel', function (hooks) {
 
     try {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       assert.dom('[data-test-station-panel-placement="left"]').exists();
@@ -259,7 +278,7 @@ module('Acceptance | map station panel', function (hooks) {
 
     try {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       assert.dom('[data-test-station-panel-placement="bottom"]').exists();
@@ -269,10 +288,12 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it closes on escape and preserves map query params', async function (assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
     await triggerKeyEvent('[data-test-station-panel]', 'keydown', 'Escape');
 
-    assertCurrentRoute(assert, '/map', {
+    assertCurrentRoute(assert, '/all', {
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '13',
@@ -281,7 +302,9 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it renders the wind and air history charts with the loaded history', async function (assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
 
     assert
       .dom('[data-test-station-wind-section] .highcharts-container')
@@ -292,10 +315,13 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it zooms in to the open station when its name is clicked', async function (this: MapStationPanelTestContext, assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=8');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=8'
+    );
     await click('[data-test-station-title]');
 
-    assertCurrentRoute(assert, '/map/holfuy-1804', {
+    assertCurrentRoute(assert, '/all', {
+      station: 'holfuy-1804',
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '10',
@@ -303,10 +329,12 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it closes from the explicit close button and preserves map query params', async function (this: MapStationPanelTestContext, assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
     await click('[data-part="header-close-button"]');
 
-    assertCurrentRoute(assert, '/map', {
+    assertCurrentRoute(assert, '/all', {
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '13',
@@ -315,10 +343,13 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it stays open when the panel itself is clicked', async function (this: MapStationPanelTestContext, assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
     await click('[data-test-station-panel]');
 
-    assertCurrentRoute(assert, '/map/holfuy-1804', {
+    assertCurrentRoute(assert, '/all', {
+      station: 'holfuy-1804',
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '13',
@@ -335,12 +366,12 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       await click('.maplibregl-canvas');
 
-      assertCurrentRoute(assert, '/map', {
+      assertCurrentRoute(assert, '/all', {
         latitude: '46.67719',
         longitude: '7.86323',
         zoom: '13',
@@ -358,15 +389,15 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       await click('.maplibregl-ctrl-zoom-in');
 
       assert.dom('[data-test-station-panel]').exists('the panel is still open');
       assert.strictEqual(
-        new URL(currentURL(), 'https://winds.mobi').pathname,
-        '/map/holfuy-1804',
+        new URL(currentURL(), 'https://winds.mobi').searchParams.get('station'),
+        'holfuy-1804',
         'and the station is still the routed one'
       );
     }
@@ -379,12 +410,13 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (this: MapStationPanelTestContext, assert) {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       await click('[data-station-id="holfuy-2222"]');
 
-      assertCurrentRoute(assert, '/map/holfuy-2222', {
+      assertCurrentRoute(assert, '/all', {
+        station: 'holfuy-2222',
         latitude: '46.67719',
         longitude: '7.86323',
         zoom: '13',
@@ -396,9 +428,12 @@ module('Acceptance | map station panel', function (hooks) {
   test('it keeps the current map view when transitioning to another station', async function (assert) {
     const router = this.owner.lookup('service:router');
 
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
-    void router.transitionTo('map.station', 'holfuy-2222', {
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
+    void router.transitionTo('all', {
       queryParams: {
+        station: 'holfuy-2222',
         latitude: 46.67719,
         longitude: 7.86323,
         zoom: 13,
@@ -407,7 +442,8 @@ module('Acceptance | map station panel', function (hooks) {
 
     await settled();
 
-    assertCurrentRoute(assert, '/map/holfuy-2222', {
+    assertCurrentRoute(assert, '/all', {
+      station: 'holfuy-2222',
       latitude: '46.67719',
       longitude: '7.86323',
       zoom: '13',
@@ -425,9 +461,12 @@ module('Acceptance | map station panel', function (hooks) {
     this.deferredSecondaryStationRequest = deferredRequest;
     store.deferredSecondaryStationRequest = deferredRequest;
 
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
-    void router.transitionTo('map.station', 'holfuy-2222', {
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
+    void router.transitionTo('all', {
       queryParams: {
+        station: 'holfuy-2222',
         latitude: 46.67719,
         longitude: 7.86323,
         zoom: 13,
@@ -456,7 +495,9 @@ module('Acceptance | map station panel', function (hooks) {
   });
 
   test('it shows the selected station as the browser favicon and restores it on close', async function (assert) {
-    await visit('/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13');
+    await visit(
+      '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
+    );
 
     assert
       .dom("link[type='image/svg+xml']", document.head)
@@ -491,7 +532,7 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (assert) {
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       assert
@@ -520,7 +561,7 @@ module('Acceptance | map station panel', function (hooks) {
     'opening a station panel leaves the map exactly where it was',
     webGLAvailable,
     async function (assert) {
-      await visit('/map?latitude=46.67719&longitude=7.86323&zoom=13');
+      await visit('/all?latitude=46.67719&longitude=7.86323&zoom=13');
 
       const before = markerPosition('holfuy-2222');
 
@@ -560,7 +601,7 @@ module('Acceptance | map station panel', function (hooks) {
     webGLAvailable,
     async function (assert) {
       await visit(
-        '/map/holfuy-1804?latitude=46.70719&longitude=7.91323&zoom=8'
+        '/all?station=holfuy-1804&latitude=46.70719&longitude=7.91323&zoom=8'
       );
 
       await click('[data-test-station-title]');
@@ -592,7 +633,7 @@ module('Acceptance | map station panel', function (hooks) {
       const router = this.owner.lookup('service:router');
 
       await visit(
-        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+        '/all?station=holfuy-1804&latitude=46.67719&longitude=7.86323&zoom=13'
       );
 
       assert
@@ -606,8 +647,9 @@ module('Acceptance | map station panel', function (hooks) {
         )
         .doesNotExist('the other station does not');
 
-      void router.transitionTo('map.station', 'holfuy-2222', {
+      void router.transitionTo('all', {
         queryParams: {
+          station: 'holfuy-2222',
           latitude: 46.67719,
           longitude: 7.86323,
           zoom: 13,

@@ -36,22 +36,6 @@ export default class SettingsService extends Service {
   })
   shrinkOldData!: boolean;
 
-  // Show the /nearby stations list as dense rows instead of full cards, so
-  // more stations fit on screen without scrolling (#64).
-  @trackedInLocalStorage({
-    keyName: 'settings.nearbyCompactList',
-    defaultValue: false,
-  })
-  nearbyCompactList!: boolean;
-
-  // Show the /favorites stations list as dense rows instead of full cards,
-  // mirroring nearbyCompactList.
-  @trackedInLocalStorage({
-    keyName: 'settings.favoritesCompactList',
-    defaultValue: false,
-  })
-  favoritesCompactList!: boolean;
-
   // Replace the Now/Last hour cards' text labels with small icons, so each
   // value shrinks to fit its content instead of stretching full width.
   @trackedInLocalStorage({
@@ -69,7 +53,7 @@ export default class SettingsService extends Service {
   windDirectionHistoryEnabled!: boolean;
 
   // Beta feature: hiding a station (app/components/station/hide-button.gts)
-  // removes it from the map and the nearby list (#167), so a less useful
+  // removes it from All stations, map and cards (#167), so a less useful
   // station overlapping a better one doesn't have to be seen at all. Hidden
   // stations are listed at the bottom of Settings and on the Hidden page
   // (app/templates/hidden.gts). Defaults off, so opting in takes two
@@ -112,8 +96,6 @@ export type BooleanSettingKey =
   | 'faviconFollowsStation'
   | 'showGustsOutline'
   | 'shrinkOldData'
-  | 'nearbyCompactList'
-  | 'favoritesCompactList'
   | 'useIconLabels'
   | 'windDirectionHistoryEnabled'
   | 'hiddenStationsFeatureEnabled'

@@ -59,7 +59,7 @@ module('Acceptance | favourites availability', function (hooks) {
   });
 
   test('the favourites nav link and heart always show', async function (assert) {
-    await visit('/map/holfuy-1804');
+    await visit('/all?station=holfuy-1804');
 
     assert.dom('[data-test-navbar-link="favorites"]').exists();
     assert.dom('[data-test-station-favorite]').exists();

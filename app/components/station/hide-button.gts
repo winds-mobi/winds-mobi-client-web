@@ -11,9 +11,7 @@ import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationHideButtonSignature {
   Args: {
-    // Optional so callers can render this unconditionally while a station is
-    // still loading, same as StationFavoriteButton.
-    station?: Station;
+    station: Station;
   };
   Element: null;
 }
@@ -22,27 +20,19 @@ export default class StationHideButton extends Component<StationHideButtonSignat
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
   @service declare settings: SettingsService;
 
-  // Hiding is a beta feature (see app/services/settings.ts): renders nothing
-  // while it's off, so callers can render this unconditionally.
+  // Hiding is a beta feature (see app/services/settings.ts): renders
+  // nothing while it's off, so callers can render this unconditionally.
   get isEnabled(): boolean {
-    return (
-      this.args.station !== undefined &&
-      this.settings.betaFeatureOn('hiddenStationsFeatureEnabled')
-    );
+    return this.settings.betaFeatureOn('hiddenStationsFeatureEnabled');
   }
 
   get isHidden(): boolean {
-    return (
-      this.args.station !== undefined &&
-      this.hiddenStations.has(this.args.station.id)
-    );
+    return this.hiddenStations.has(this.args.station.id);
   }
 
   @action
   handleToggleHidden() {
-    if (this.args.station) {
-      this.hiddenStations.toggle(this.args.station.id);
-    }
+    this.hiddenStations.toggle(this.args.station.id);
   }
 
   <template>
