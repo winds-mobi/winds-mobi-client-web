@@ -1,6 +1,7 @@
 import { useRecommendedStore } from '@warp-drive/core';
-import { DefaultCachePolicy } from '@warp-drive/core/store';
+import type { DefaultCachePolicy } from '@warp-drive/core/store';
 import { JSONAPICache } from '@warp-drive/json-api';
+import RefreshTrackingHandler from 'winds-mobi-client-web/handlers/refresh-tracking';
 import StationHandler from 'winds-mobi-client-web/handlers/station';
 import HistoryHandler from 'winds-mobi-client-web/handlers/history';
 import { withDefaults } from '@warp-drive/core/reactive';
@@ -177,23 +178,19 @@ function composeReadingDerivation(record: unknown): unknown {
 }
 composeReadingDerivation[Type] = 'composeReading';
 
-const AppStore = useRecommendedStore({
+class AppStore extends useRecommendedStore({
   cache: JSONAPICache,
   schemas: [LocationSchema, StationSchema, HistorySchema],
-  handlers: [StationHandler, HistoryHandler],
+  // RefreshTrackingHandler goes first so it sees every request that reaches
+  // the network, whichever handler goes on to shape it.
+  handlers: [RefreshTrackingHandler, StationHandler, HistoryHandler],
   derivations: [unwrapDerivation, composeReadingDerivation],
-  // Warp Drive's own default (30s soft / 15min hard) means a manual refresh
-  // pressed within 30s of the last fetch does nothing at all -- no request,
-  // foreground or background (see issue #118). Shortening apiCacheSoftExpires
-  // to 15s doesn't remove that dead window, but it does halve it, so a manual
-  // refresh reflects new data sooner without forcing every refresh to bypass
-  // the cache outright (which would defeat its point of avoiding redundant
-  // requests). apiCacheHardExpires is left at Warp Drive's own default.
-  policy: new DefaultCachePolicy({
-    apiCacheSoftExpires: 15 * 1000,
-    apiCacheHardExpires: 15 * 60 * 1000,
-  }),
-});
+}) {
+  // `useRecommendedStore` configures a `DefaultCachePolicy`; the generic
+  // `CachePolicy` type lacks the `invalidateRequestsForType` the refresh
+  // service calls.
+  declare lifetimes: DefaultCachePolicy;
+}
 
 // The store *instance* type — exposes the generic `request<RT>(builder): Future<RT>`,
 // unlike `typeof AppStore` (the class), so injecting `store: StoreService` lets call

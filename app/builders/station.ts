@@ -14,6 +14,7 @@ import type {
 import { query as jsonApiQuery } from '@warp-drive/utilities/json-api';
 import type { MapBounds } from 'winds-mobi-client-web/utils/map-view';
 import type { Coordinates } from 'winds-mobi-client-web/utils/location';
+import { refreshable } from './refreshable';
 
 import { findRecord as jsonApiFindRecord } from '@warp-drive/utilities/json-api';
 
@@ -84,10 +85,7 @@ function findRecord<T extends TypedRecordInstance>(
   const url = `${baseURL}/?${qp}`;
 
   const jsonApiObject = jsonApiFindRecord<T>(type, id, mergedOptions);
-  return {
-    ...jsonApiObject,
-    url,
-  };
+  return refreshable({ ...jsonApiObject, url }, type);
 }
 
 function query<T extends TypedRecordInstance>(
@@ -129,18 +127,21 @@ function mapQuery<T extends TypedRecordInstance>(
   bounds: MapBounds,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
-  return query<T>(
-    type,
-    {
-      'is-highest-duplicates-rating': true,
-      keys: [...summaryStationQueryKeys],
-      limit: 470,
-      'within-pt1-lat': bounds.northEast[1],
-      'within-pt1-lon': bounds.northEast[0],
-      'within-pt2-lat': bounds.southWest[1],
-      'within-pt2-lon': bounds.southWest[0],
-    },
-    options
+  return refreshable(
+    query<T>(
+      type,
+      {
+        'is-highest-duplicates-rating': true,
+        keys: [...summaryStationQueryKeys],
+        limit: 470,
+        'within-pt1-lat': bounds.northEast[1],
+        'within-pt1-lon': bounds.northEast[0],
+        'within-pt2-lat': bounds.southWest[1],
+        'within-pt2-lon': bounds.southWest[0],
+      },
+      options
+    ),
+    type
   );
 }
 
@@ -151,15 +152,18 @@ function nearbyQuery<T extends TypedRecordInstance>(
   limit = 10,
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
-  return query<T>(
-    type,
-    {
-      'is-highest-duplicates-rating': true,
-      limit,
-      'near-lat': latitude,
-      'near-lon': longitude,
-    },
-    options
+  return refreshable(
+    query<T>(
+      type,
+      {
+        'is-highest-duplicates-rating': true,
+        limit,
+        'near-lat': latitude,
+        'near-lon': longitude,
+      },
+      options
+    ),
+    type
   );
 }
 
@@ -171,15 +175,18 @@ function byIdsQuery<T extends TypedRecordInstance>(
   ids: string[],
   options?: ConstrainedRequestOptions
 ): QueryRequestOptions<{ data: T[] }> {
-  return query<T>(
-    type,
-    {
-      // Copy: buildQueryParams sorts array params in place for stable cache
-      // URLs, and the caller's array is a service's own id list.
-      ids: [...ids],
-      limit: ids.length,
-    },
-    options
+  return refreshable(
+    query<T>(
+      type,
+      {
+        // Copy: buildQueryParams sorts array params in place for stable cache
+        // URLs, and the caller's array is a service's own id list.
+        ids: [...ids],
+        limit: ids.length,
+      },
+      options
+    ),
+    type
   );
 }
 

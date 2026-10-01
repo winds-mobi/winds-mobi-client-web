@@ -166,6 +166,40 @@ There is no `fetch()` in app code and no classic EmberData adapters/serializers.
 In components, read responses through the `<Request>` component (`result.data`) or `getRequestState`
 (`state.value.data`); an awaited `store.request(...)` resolves to `{ content: { data } }`.
 
+### Refreshing: one countdown, invalidation, and `<Request @autorefresh="invalid">`
+
+The navbar's refresh button/countdown (`app/services/refresh.ts`) never touches components. A refresh
+**invalidates** every cached station and history request, and every `<Request>` showing one re-fetches its own request
+in place — Warp Drive's own documented mechanism, no registry or per-component wiring:
+
+- **Builders mark on-screen data as refreshable.** `app/builders/refreshable.ts` sets `cacheOptions.types`, which is
+  what the cache policy's `invalidateRequestsForType` matches on (it never infers types from response data). `findRecord`,
+  `mapQuery`, `nearbyQuery`, `byIdsQuery` and `historyQuery` use it; `searchQuery` deliberately doesn't — search results
+  are a one-off lookup, not data that ages on screen.
+- **Every `<Request>` rendering refreshable data passes `@autorefresh="invalid" @autorefreshBehavior="refresh"`.**
+  On invalidation it re-fetches and keeps `:content` on screen until the new data lands — no `:loading`.
+  `app/services/store.ts` narrows `lifetimes` to `DefaultCachePolicy`, since the generic `CachePolicy` type lacks
+  `invalidateRequestsForType`. A request getter never reads a refresh tick: it only changes when what it asks for
+  changes (bounds, coordinates, ids, a station id).
+- **Every fetch is a refresh of everything on screen.** `app/handlers/refresh-tracking.ts` is the first handler in the
+  store's chain, so it sees every refreshable request that actually reaches the network (cache hits never get that
+  far) and reports it via `refresh.fetchStarted()`. A fetch that isn't already part of a cycle — a pan, a station
+  switch, an edited id list, the countdown, the button — opens a **refresh cycle**: the countdown restarts,
+  `refreshCount` bumps, and everything else re-fetches alongside it, so all data on screen shares one timestamp.
+  Fetches while a cycle is open join it, as does one starting within `cycleGraceMs` (1s) of the last fetch settling:
+  that covers request waterfalls (a station's history sections only start fetching once the station has rendered),
+  which would otherwise open a second cycle and fetch the station twice. `isRefreshing` (the navbar spinner) is "any
+  refreshable fetch in flight". Don't wire individual triggers to the refresh service — any new refreshable request is
+  covered automatically.
+  An open cycle holds a test waiter, so `settled()` waits for it to close and a test's next action starts a cycle of its
+  own; `setupStubbedApi` gives tests through the real store a short `cycleGraceMs` to keep that wait short.
+- **Requests a page reads itself go through `<RefreshingRequest>`** ([app/components/refreshing-request.gts](app/components/refreshing-request.gts)):
+  a headless `<Request @autorefresh>` that renders nothing and hands each resolved response to `@onResolve`. The map's
+  bounds query and the Nearby, Favourites and Hidden pages commit it into a tracked `lastStations` latch, and render
+  the list from the latch, so a pan or an edited id list never blinks the previous results away — and the map never
+  remounts. Their own first-load and error states still come from the request's state. The station panel passes no
+  `@onResolve`: a refresh updates the same station record in place.
+
 ### Map state is unidirectional and lives in query params
 
 Map center/zoom are route query params on [app/controllers/map.ts](app/controllers/map.ts) (`mapLng`/`mapLat`/
@@ -205,7 +239,7 @@ Routes: `map` (with nested `map/:station_id` detail panel), `nearby`, `favorites
 not the navbar), `settings`, `help`; `index` redirects to `map`.
 
 Services ([app/services/](app/services/)) hold only cross-cutting, long-lived concerns: `store`, `refresh`
-(ref-counted auto-refresh loop driving the countdown, ember-concurrency `restartable` task), `nearby-location`
+(the refresh countdown and refresh cycles, see [Refreshing](#refreshing-one-countdown-invalidation-and-request-autorefreshinvalid)), `nearby-location`
 (geolocation + Permissions API state machine), `settings` (persisted display preferences, see
 [Settings persistence](#settings-persistence-tracked-local-storage) below), and `favorites`/`hidden-stations` (locally
 persisted station id lists; `hiddenStations.visible(stations)` is the one place hidden stations are filtered out).
@@ -443,6 +477,14 @@ obvious from the decorator call site:
   `.includes('/historic/')`) and return an **array** for history vs. a single record for a station fetch —
   returning the wrong shape doesn't error at the fake-store layer, it throws deep inside Highcharts (`data.map is not
 a function`) when the chart tries to render it.
+- **Refreshing is the exception: test it against the real store.** Invalidation and `<Request @autorefresh>` need the
+  real store's cache policy and notifications, which a fake `service:store` doesn't have. Those tests keep the real
+  store and stub the network instead with `setupStubbedApi(hooks)` from
+  [tests/helpers/stub-api.ts](tests/helpers/stub-api.ts): it answers `https://winds.mobi/api/...` requests with raw
+  (terse, pre-handler) payloads from a settable `respond`, records every URL in `calls`, and passes other URLs
+  (MapLibre's style/tiles) through — see [tests/acceptance/refresh-test.ts](tests/acceptance/refresh-test.ts). A
+  held-open response (`respond` returning a pending promise) is a real in-flight request that `settled()` waits on, so
+  assert mid-flight state after `waitUntil`, not `settled`.
 - Do **not** add test-only seams, exposed instance handles, or DOM hacks to production components to make them testable.
   DOM selectors in tests are fine; production test hooks are not. Prefer a smaller real test, or skip the test, over
   complicating the production API.

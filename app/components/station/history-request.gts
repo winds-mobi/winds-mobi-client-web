@@ -7,7 +7,6 @@ import type {
   History,
   StoreService,
 } from 'winds-mobi-client-web/services/store';
-import type RefreshService from 'winds-mobi-client-web/services/refresh';
 
 export interface StationHistoryRequestSignature {
   Args: {
@@ -31,34 +30,27 @@ export const LAST_HOUR_KEYS = ['w-dir', 'w-avg', 'w-max'];
 const EMPTY_HISTORY: History[] = [];
 
 // Requests the `history` for a station over `@duration` with the given
-// sparse-fieldset `@keys`, re-fetching on each refresh tick, and yields the
-// readings. Renders no markup of its own: callers decide what wraps it (a
-// section card, a thumbnail's box).
+// sparse-fieldset `@keys`, and yields the readings. Renders no markup of its
+// own: callers decide what wraps it (a section card, a thumbnail's box).
 export default class StationHistoryRequest extends Component<StationHistoryRequestSignature> {
   @service declare store: StoreService;
-  @service declare refresh: RefreshService;
 
   @cached
   get historyRequest() {
-    void this.refresh.lastRefresh;
-
     return this.store.request<{ data: History[] }>(
-      historyQuery<History>(
-        'history',
-        this.args.stationId,
-        {
-          duration: this.args.duration,
-          keys: this.args.keys,
-        },
-        {
-          backgroundReload: true,
-        }
-      )
+      historyQuery<History>('history', this.args.stationId, {
+        duration: this.args.duration,
+        keys: this.args.keys,
+      })
     );
   }
 
   <template>
-    <Request @request={{this.historyRequest}}>
+    <Request
+      @request={{this.historyRequest}}
+      @autorefresh="invalid"
+      @autorefreshBehavior="refresh"
+    >
       <:content as |result|>
         {{yield result.data}}
       </:content>

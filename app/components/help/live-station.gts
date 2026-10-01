@@ -38,7 +38,11 @@ export default class HelpLiveStation extends Component<HelpLiveStationSignature>
   }
 
   <template>
-    <Request @request={{this.stationRequest}}>
+    <Request
+      @request={{this.stationRequest}}
+      @autorefresh="invalid"
+      @autorefreshBehavior="refresh"
+    >
       <:content as |result|>
         <div class="grid gap-4">
           <div

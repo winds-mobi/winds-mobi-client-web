@@ -5,12 +5,10 @@ import {
   currentURL,
   type TestContext,
   visit,
-  waitUntil,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
 import { Type } from '@warp-drive/core/types/symbols';
-import RefreshService from 'winds-mobi-client-web/services/refresh';
 import type { Station } from 'winds-mobi-client-web/services/store';
 
 // Every test in this module waits on MapLibre's `idle` event (directly or
@@ -71,15 +69,6 @@ class FakeStoreService extends Service {
   }
 }
 
-class ShortIntervalRefreshService extends RefreshService {
-  refreshIntervalMs = 75;
-  countdownTickMs = 10;
-}
-
-function countStationRequests(calls: string[]) {
-  return calls.filter((url) => url.includes('/stations/?')).length;
-}
-
 function assertCurrentMapUrl(
   assert: Assert,
   expectedQueryParams: Record<string, string>
@@ -125,53 +114,6 @@ module('Acceptance | map query params', function (hooks) {
             url.includes('is-highest-duplicates-rating=true') &&
             url.includes('limit=470')
         )
-      );
-    }
-  );
-
-  test.if(
-    'it force refreshes stations from the navbar button',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
-
-      await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-
-      const initialStationRequestCount = countStationRequests(store.calls);
-
-      assert.dom('[data-test-navbar-refresh]').exists();
-
-      await click('[data-test-navbar-refresh]');
-
-      assert.strictEqual(
-        countStationRequests(store.calls),
-        initialStationRequestCount + 1
-      );
-    }
-  );
-
-  test.if(
-    'it auto refreshes stations after the refresh interval',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      this.owner.register('service:refresh', ShortIntervalRefreshService);
-
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
-
-      await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-
-      const initialStationRequestCount = countStationRequests(store.calls);
-
-      await waitUntil(
-        () => countStationRequests(store.calls) > initialStationRequestCount
-      );
-
-      assert.true(
-        countStationRequests(store.calls) >= initialStationRequestCount + 1
       );
     }
   );

@@ -8,14 +8,9 @@ interface ActivateRefreshSignature {
   };
 }
 
+// Runs the refresh countdown while the attached element is mounted.
 const activateRefresh = modifier<ActivateRefreshSignature>(
-  (_element, [refresh]) => {
-    const token = refresh.activate();
-
-    return () => {
-      refresh.deactivate(token);
-    };
-  }
+  (_element, [refresh]) => refresh.start()
 );
 
 export default activateRefresh;

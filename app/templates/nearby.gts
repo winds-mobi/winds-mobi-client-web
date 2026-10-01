@@ -9,12 +9,10 @@ import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
-import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
-import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
+import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
-import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
@@ -36,14 +34,13 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service declare intl: IntlService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
-  @service declare refresh: RefreshService;
   @service declare settings: SettingsService;
   @service declare store: StoreService;
 
-  // Recreated when the located coordinates change or the shared refresh tick fires
-  // — touching `lastRefresh` makes each tick refetch. No `backgroundReload`, so a
-  // reload is a real pending request that `loadingProbe` (and the navbar spinner)
-  // reflects; the latch keeps the previous cards on screen meanwhile.
+  // Recreated when the located coordinates change. A refresh doesn't recreate
+  // it: it invalidates the cached response, and `<RefreshingRequest>` in the
+  // template re-fetches it in place while the latch keeps the cards on
+  // screen.
   @cached
   get stationsRequest(): Future<{ data: Station[] }> | undefined {
     const coordinates = this.nearbyLocation.coordinates;
@@ -51,9 +48,6 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     if (!coordinates) {
       return undefined;
     }
-
-    // Read so each refresh tick invalidates this getter and refetches.
-    void this.refresh.lastRefresh;
 
     return this.store.request<{ data: Station[] }>(
       nearbyQuery<Station>(
@@ -71,8 +65,8 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
       : undefined;
   }
 
-  // Last successfully-loaded stations, committed by `commitResolvedStations` on
-  // each resolve, so the cards stay on screen while a refresh tick reloads.
+  // Last successfully-loaded stations, committed by `<RefreshingRequest>` on
+  // each resolve, so the cards stay on screen while a refresh reloads.
   @tracked private lastStations: Station[] = [];
 
   commitStations = (stations: Station[]) => {
@@ -81,23 +75,15 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
 
   // Hidden stations (#167) are left out.
   get stations(): Station[] {
-    return this.hiddenStations.visible(
-      this.requestState?.isSuccess
-        ? this.requestState.value.data
-        : this.lastStations
-    );
+    return this.hiddenStations.visible(this.lastStations);
   }
-
-  // Reports to the shared refresh service whether nearby is currently loading, so
-  // the navbar refresh control spins while this request is in flight.
-  loadingProbe = (): boolean => {
-    return this.requestState?.isPending === true;
-  };
 
   // True only on the first load, when there are no previous cards to keep; later
   // refreshes keep the cards on screen and spin the navbar control instead.
   get isInitialLoad(): boolean {
-    return this.loadingProbe() && this.lastStations.length === 0;
+    return (
+      this.requestState?.isPending === true && this.lastStations.length === 0
+    );
   }
 
   get isError(): boolean {
@@ -140,11 +126,11 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   <template>
     {{pageTitle (t "nearby.title")}}
 
-    <section
-      class="min-h-0 flex-1 overflow-y-auto bg-slate-200"
-      {{commitResolvedStations this.requestState this.commitStations}}
-      {{registerLoadingProbe this.refresh this.loadingProbe}}
-    >
+    <section class="min-h-0 flex-1 overflow-y-auto bg-slate-200">
+      <RefreshingRequest
+        @request={{this.stationsRequest}}
+        @onResolve={{this.commitStations}}
+      />
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.nearbyLocation.hasCoordinates}}
           {{#if this.isError}}

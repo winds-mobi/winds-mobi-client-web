@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Everything on screen now refreshes together. Panning the map, opening a station or pressing refresh restarts the countdown and reloads the map, the open station and its charts, Nearby, Favourites and Hidden together, so nothing on screen is older than the countdown suggests.
+
+### Fixed
+
+- The station panel's history charts keep showing their current readings while a refresh loads, instead of briefly emptying and redrawing.
+
 ## v0.26.1 - 2026-10-01
 
 ### Changed
