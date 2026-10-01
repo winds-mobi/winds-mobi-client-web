@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { findAll, settled, visit, waitFor } from '@ember/test-helpers';
+import { findAll, settled, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
@@ -89,7 +89,6 @@ module('Acceptance | favorites route', function (hooks) {
     ) as unknown as FakeStoreService;
 
     await visit('/favorites');
-    await waitFor('[data-test-favorites-empty]');
 
     assert.dom('[data-test-favorites-empty]').exists();
     assert.dom(FAVORITES_CARD_SELECTOR).doesNotExist();

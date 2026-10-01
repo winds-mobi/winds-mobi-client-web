@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
-import { click, visit, waitFor } from '@ember/test-helpers';
+import { click, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
@@ -66,7 +66,6 @@ module('Acceptance | station favorite toggle', function (hooks) {
 
   test('starring a station saves it to the local favourites list', async function (assert) {
     await visit('/map/holfuy-1804');
-    await waitFor('[data-test-station-favorite]');
 
     assert
       .dom('[data-test-station-favorite]')
@@ -91,7 +90,6 @@ module('Acceptance | station favorite toggle', function (hooks) {
     favorites.add('holfuy-1804');
 
     await visit('/map/holfuy-1804');
-    await waitFor('[data-test-station-favorite]');
 
     assert
       .dom('[data-test-station-favorite]')
