@@ -3,7 +3,7 @@ import type { PaddingOptions } from 'maplibre-gl';
 
 // MapLibre types every edge as optional (an unset one means 0); this app always
 // states all four, so its own padding values are safe to do arithmetic on.
-export type MapPadding = Required<PaddingOptions>;
+type MapPadding = Required<PaddingOptions>;
 
 export const NO_MAP_PADDING: MapPadding = {
   top: 0,
@@ -34,7 +34,7 @@ export function mapPaddingForPlacement(isSidePanel: boolean): MapPadding {
     : { ...NO_MAP_PADDING, bottom: DRAWER_SM_PX };
 }
 
-export function mapPaddingsEqual(
+function mapPaddingsEqual(
   left: PaddingOptions,
   right: PaddingOptions
 ): boolean {

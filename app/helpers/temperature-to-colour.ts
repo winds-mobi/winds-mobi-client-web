@@ -1,10 +1,10 @@
-export interface TemperatureColourBand {
+interface TemperatureColourBand {
   color: string;
   max: number;
   textClass: string;
 }
 
-export interface TemperatureColourZone {
+interface TemperatureColourZone {
   color: string;
   value?: number;
 }

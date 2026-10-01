@@ -2,6 +2,8 @@ import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { Request } from '@warp-drive/ember';
+import { t } from 'ember-intl';
+import { Alert } from 'frontile/status';
 import { findRecord } from 'winds-mobi-client-web/builders/station';
 import type {
   Station,
@@ -63,19 +65,11 @@ export default class HelpLiveStation extends Component<HelpLiveStationSignature>
       </:content>
 
       <:loading>
-        <div
-          class="rounded-xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-sm"
-        >
-          Loading live station example…
-        </div>
+        <Alert @status="neutral" @title={{t "help.liveStation.loading"}} />
       </:loading>
 
       <:error>
-        <div
-          class="rounded-xl border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700 shadow-sm"
-        >
-          The live station example could not be loaded right now.
-        </div>
+        <Alert @status="danger" @title={{t "help.liveStation.requestError"}} />
       </:error>
     </Request>
   </template>

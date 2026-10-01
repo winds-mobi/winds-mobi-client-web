@@ -1,6 +1,6 @@
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 
-export interface WindDirectionMarkerColours {
+interface WindDirectionMarkerColours {
   lineColor: string;
   fillColor: string;
 }

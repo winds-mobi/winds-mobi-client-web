@@ -1,4 +1,4 @@
-export interface WindColourBand {
+interface WindColourBand {
   backgroundClass: string;
   color: string;
   key: string;
@@ -7,7 +7,7 @@ export interface WindColourBand {
   textClass: string;
 }
 
-export interface WindColourZone {
+interface WindColourZone {
   color: string;
   value?: number;
 }

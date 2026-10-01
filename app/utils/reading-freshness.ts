@@ -1,4 +1,4 @@
-export interface ReadingFreshnessLegendBand {
+interface ReadingFreshnessLegendBand {
   backgroundClass: string;
   label: string;
 }
