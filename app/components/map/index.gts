@@ -2,7 +2,6 @@ import Component from '@glimmer/component';
 import { array, fn } from '@ember/helper';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
-import { Request } from '@warp-drive/ember';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
 import type {
   Station,
@@ -49,9 +48,9 @@ import config from 'winds-mobi-client-web/config/environment';
 import MapLegend, {
   type WindLegendBand,
 } from 'winds-mobi-client-web/components/map/legend';
+import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import MapStationMarker from 'winds-mobi-client-web/components/map/station-marker';
 import MapUserLocationMarker from 'winds-mobi-client-web/components/map/user-location-marker';
-import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
@@ -226,8 +225,8 @@ export default class Map extends Component<MapSignature> {
   };
 
   // Recreated when the visible bounds change. A refresh doesn't recreate it: it
-  // invalidates the cached response, and the `<Request @autorefresh>` in the
-  // template re-fetches it in place. Refetches return the same cached record
+  // invalidates the cached response, and `<RefreshingRequest>` in the template
+  // re-fetches it in place. Refetches return the same cached record
   // identities, so markers update in place rather than remounting. `mapQuery`
   // caps the result at 470 stations, which bounds the fetch even when a pitched
   // view reaches far toward the horizon.
@@ -246,7 +245,7 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
-  // Last successfully-loaded stations, committed by `commitResolvedStations` on
+  // Last successfully-loaded stations, committed by `<RefreshingRequest>` on
   // each resolve. Holds the markers on screen while a new bounds query loads.
   @tracked private lastStations: Station[] = [];
 
@@ -384,24 +383,10 @@ export default class Map extends Component<MapSignature> {
       {{onRouteChange this.router this.handleRouteChange}}
       {{flyToUserLocation this.isFlyToUserLocationEnabled}}
     >
-      {{! Headless: it only re-fetches the request when a refresh invalidates
-      it, and commits each resolved list into the lastStations latch. The map
-      renders outside its blocks, so it never remounts. }}
-      <Request
+      <RefreshingRequest
         @request={{this.request}}
-        @autorefresh="invalid"
-        @autorefreshBehavior="refresh"
-      >
-        <:content as |result|>
-          <div
-            class="contents"
-            {{commitResolvedStations result.data this.commitStations}}
-          ></div>
-        </:content>
-        <:idle></:idle>
-        <:loading></:loading>
-        <:error></:error>
-      </Request>
+        @onResolve={{this.commitStations}}
+      />
       <MapLibreGL
         data-test-map-canvas
         class="h-full w-full"

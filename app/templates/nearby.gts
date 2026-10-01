@@ -3,14 +3,13 @@ import { cached, tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
-import { Request } from '@warp-drive/ember';
 import { pageTitle } from 'ember-page-title';
 import { action } from '@ember/object';
 import { Button } from 'frontile/buttons';
 import { t } from 'ember-intl';
 import type { IntlService } from 'ember-intl';
 import { nearbyQuery } from 'winds-mobi-client-web/builders/station';
-import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
+import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
@@ -39,8 +38,8 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
   @service declare store: StoreService;
 
   // Recreated when the located coordinates change. A refresh doesn't recreate
-  // it: it invalidates the cached response, and the `<Request @autorefresh>` in
-  // the template re-fetches it in place while the latch keeps the cards on
+  // it: it invalidates the cached response, and `<RefreshingRequest>` in the
+  // template re-fetches it in place while the latch keeps the cards on
   // screen.
   @cached
   get stationsRequest(): Future<{ data: Station[] }> | undefined {
@@ -66,7 +65,7 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
       : undefined;
   }
 
-  // Last successfully-loaded stations, committed by `commitResolvedStations` on
+  // Last successfully-loaded stations, committed by `<RefreshingRequest>` on
   // each resolve, so the cards stay on screen while a refresh reloads.
   @tracked private lastStations: Station[] = [];
 
@@ -128,21 +127,10 @@ export default class NearbyTemplate extends Component<NearbyTemplateSignature> {
     {{pageTitle (t "nearby.title")}}
 
     <section class="min-h-0 flex-1 overflow-y-auto bg-slate-200">
-      <Request
+      <RefreshingRequest
         @request={{this.stationsRequest}}
-        @autorefresh="invalid"
-        @autorefreshBehavior="refresh"
-      >
-        <:content as |result|>
-          <div
-            class="contents"
-            {{commitResolvedStations result.data this.commitStations}}
-          ></div>
-        </:content>
-        <:idle></:idle>
-        <:loading></:loading>
-        <:error></:error>
-      </Request>
+        @onResolve={{this.commitStations}}
+      />
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.nearbyLocation.hasCoordinates}}
           {{#if this.isError}}

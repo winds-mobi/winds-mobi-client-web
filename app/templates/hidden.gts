@@ -3,14 +3,13 @@ import { cached, tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
-import { Request } from '@warp-drive/ember';
 import { pageTitle } from 'ember-page-title';
 import { t } from 'ember-intl';
 import { Alert } from 'frontile/status';
 import { byIdsQuery } from 'winds-mobi-client-web/builders/station';
+import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 import StationSectionCard from 'winds-mobi-client-web/components/station/section-card';
-import commitResolvedStations from 'winds-mobi-client-web/modifiers/commit-resolved-stations';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type {
   Station,
@@ -56,7 +55,7 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
       : undefined;
   }
 
-  // Last successfully-loaded stations, committed by `commitResolvedStations`
+  // Last successfully-loaded stations, committed by `<RefreshingRequest>`
   // on each resolve, so the cards stay on screen while a refresh reloads.
   @tracked private lastStations: Station[] = [];
 
@@ -94,21 +93,10 @@ export default class HiddenTemplate extends Component<HiddenTemplateSignature> {
     {{pageTitle (t "hidden.title")}}
 
     <section class="min-h-0 flex-1 overflow-y-auto bg-slate-200">
-      <Request
+      <RefreshingRequest
         @request={{this.stationsRequest}}
-        @autorefresh="invalid"
-        @autorefreshBehavior="refresh"
-      >
-        <:content as |result|>
-          <div
-            class="contents"
-            {{commitResolvedStations result.data this.commitStations}}
-          ></div>
-        </:content>
-        <:idle></:idle>
-        <:loading></:loading>
-        <:error></:error>
-      </Request>
+        @onResolve={{this.commitStations}}
+      />
       <div class="flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {{#if this.isError}}
           <StationSectionCard

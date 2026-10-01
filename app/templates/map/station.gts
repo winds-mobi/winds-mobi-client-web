@@ -1,7 +1,7 @@
 import { pageTitle } from 'ember-page-title';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
-import { Request } from '@warp-drive/ember';
+import RefreshingRequest from 'winds-mobi-client-web/components/refreshing-request';
 import Station from 'winds-mobi-client-web/components/station';
 import Component from '@glimmer/component';
 import { cached } from '@glimmer/tracking';
@@ -33,8 +33,8 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
   }
 
   // Recreated when the station changes. A refresh doesn't recreate it: it
-  // invalidates the cached response, and the `<Request @autorefresh>` in the
-  // template re-fetches it in place, updating this same station record.
+  // invalidates the cached response, and `<RefreshingRequest>` in the template
+  // re-fetches it in place, updating this same station record.
   @cached
   get stationRequest(): Future<{ data: StationModel }> | undefined {
     if (!this.stationId) {
@@ -73,16 +73,7 @@ export default class MapStationTemplate extends Component<MapStationTemplateSign
 
   <template>
     {{#if this.stationId}}
-      <Request
-        @request={{this.stationRequest}}
-        @autorefresh="invalid"
-        @autorefreshBehavior="refresh"
-      >
-        <:content></:content>
-        <:idle></:idle>
-        <:loading></:loading>
-        <:error></:error>
-      </Request>
+      <RefreshingRequest @request={{this.stationRequest}} />
 
       {{#if this.station}}
         {{pageTitle this.station.name}}

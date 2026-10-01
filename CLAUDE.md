@@ -191,12 +191,12 @@ in place — Warp Drive's own documented mechanism, no registry or per-component
   which would otherwise open a second cycle and fetch the station twice. `isRefreshing` (the navbar spinner) is "any
   refreshable fetch in flight". Don't wire individual triggers to the refresh service — any new refreshable request is
   covered automatically.
-- **Station lists keep their previous results across a new request.** The map's bounds query and the Nearby,
-  Favourites and Hidden pages each render a headless `<Request>` that only commits each resolved list into a tracked
-  `lastStations` latch (`commit-resolved-stations.ts`); the list renders from the latch outside `<Request>`'s blocks,
-  so a pan or an edited id list never blinks the previous results away — and the map never remounts. Their own
-  first-load and error states still come from the request's state. The station panel needs no latch: a refresh
-  updates the same station record in place.
+- **Requests a page reads itself go through `<RefreshingRequest>`** ([app/components/refreshing-request.gts](app/components/refreshing-request.gts)):
+  a headless `<Request @autorefresh>` that renders nothing and hands each resolved response to `@onResolve`. The map's
+  bounds query and the Nearby, Favourites and Hidden pages commit it into a tracked `lastStations` latch, and render
+  the list from the latch, so a pan or an edited id list never blinks the previous results away — and the map never
+  remounts. Their own first-load and error states still come from the request's state. The station panel passes no
+  `@onResolve`: a refresh updates the same station record in place.
 
 ### Map state is unidirectional and lives in query params
 
