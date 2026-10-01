@@ -22,7 +22,7 @@ module.exports = {
         // behind package exports instead. Resolve it explicitly rather than
         // relying on the plugin's own runtime auto-detection, which goes through
         // `import-meta-resolve` and can fail unpredictably inside Vite's own
-        // process (see TODO.md's Ember 7 upgrade section).
+        // process.
         compilerPath:
           require.resolve('ember-source/ember-template-compiler/index.js'),
         enableLegacyModules: [
