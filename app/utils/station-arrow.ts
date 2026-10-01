@@ -8,7 +8,7 @@ import { arrows } from 'virtual:station-arrows';
 // ([app/components/map/station-marker.gts]) and the dynamic browser favicon
 // ([app/utils/station-favicon.ts]). `StationArrowGeometry` re-exports the data
 // shape so consumers code against one type.
-export type StationArrowGeometry = (typeof arrows)[keyof typeof arrows];
+type StationArrowGeometry = (typeof arrows)[keyof typeof arrows];
 
 const STALE_READING_THRESHOLD = 24 * 60 * 60 * 1000;
 export const STALE_STATION_COLOUR = 'rgb(148, 163, 184)';

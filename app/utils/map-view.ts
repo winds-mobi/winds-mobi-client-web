@@ -47,7 +47,7 @@ export type MapView = {
 // Query params share the `MapView` field names so a routed view round-trips
 // without any renaming — `parseMapView` only parses/defaults, and a `MapView`
 // *is* the query-param object.
-export type MapQueryParams = {
+type MapQueryParams = {
   longitude?: number | string;
   latitude?: number | string;
   zoom?: number | string;
