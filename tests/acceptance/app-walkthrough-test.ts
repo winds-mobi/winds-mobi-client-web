@@ -144,19 +144,11 @@ class FakeStoreService extends Service {
   }
 }
 
-// Stubbed before navigating to /nearby: the permission sync runs once, when
-// the route's location-permission modifier first mounts, so it must already
-// be in place before that transition — registering it after arriving on the
-// route (e.g. after a nav-link click) is too late to be picked up.
+// Stubbed before the app boots, which is when the application route asks for
+// the visitor's position.
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
-  nearbyLocation.syncPermissionState = () => {
-    nearbyLocation.permissionState = 'granted';
-    nearbyLocation.requestState = 'ready';
-    nearbyLocation.coordinates = {
-      accuracy: 20,
-      latitude: 46.7,
-      longitude: 7.9,
-    };
+  nearbyLocation.locateIfPermitted = () => {
+    nearbyLocation.coordinates = { latitude: 46.7, longitude: 7.9 };
     return Promise.resolve();
   };
 }

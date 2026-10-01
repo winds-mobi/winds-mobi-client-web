@@ -5,135 +5,39 @@ import {
   DEFAULT_POSITION_OPTIONS,
 } from 'winds-mobi-client-web/utils/location';
 
-export type NearbyCoordinates = Coordinates & {
-  accuracy: number;
-};
-
-export type NearbyLocationErrorCode =
-  | 'permission-denied'
-  | 'position-unavailable'
-  | 'timeout'
-  | 'unsupported'
-  | 'unknown';
-
-// 'checking' = initial state, no query attempted yet
-// 'syncing'  = navigator.permissions.query in flight (synchronous gate so a
-//              concurrent call during the async gap can't re-enter)
-type NearbyPermissionState =
-  PermissionState | 'checking' | 'syncing' | 'unsupported';
-type NearbyRequestState = 'idle' | 'requesting' | 'ready' | 'error';
-
-const GEOLOCATION_PERMISSION_DENIED = 1;
-const GEOLOCATION_POSITION_UNAVAILABLE = 2;
-const GEOLOCATION_TIMEOUT = 3;
-
+// The visitor's position, when known: drawn on the map, used for distances
+// and to open the map where they are.
 export default class NearbyLocationService extends Service {
-  @tracked coordinates?: NearbyCoordinates;
-  @tracked errorCode?: NearbyLocationErrorCode;
-  @tracked permissionState: NearbyPermissionState = 'checking';
-  @tracked requestState: NearbyRequestState = 'idle';
+  @tracked coordinates?: Coordinates;
 
-  #permissionStatus?: PermissionStatus;
-
-  get hasCoordinates() {
-    return this.coordinates !== undefined;
-  }
-
-  get isCheckingPermission() {
-    return (
-      this.permissionState === 'checking' || this.permissionState === 'syncing'
-    );
-  }
-
-  get isRequestingLocation() {
-    return this.requestState === 'requesting';
-  }
-
-  get canRequestLocation() {
-    return (
-      this.permissionState !== 'unsupported' &&
-      this.requestState !== 'requesting'
-    );
-  }
-
-  beginLocationRequest() {
-    this.errorCode = undefined;
-    this.requestState = 'requesting';
-  }
-
-  updateFromPosition(position: GeolocationPosition) {
+  // Only `.coords` is ever read -- the shape MapLibre's own
+  // `GeolocatePositionEvent` carries, as well as a real `GeolocationPosition`.
+  updateFromPosition(position: { coords: GeolocationCoordinates }) {
     this.coordinates = {
-      accuracy: position.coords.accuracy,
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
     };
-    this.errorCode = undefined;
-    this.permissionState = 'granted';
-    this.requestState = 'ready';
   }
 
-  updateFromError(error?: GeolocationPositionError) {
-    this.errorCode = this.#mapErrorCode(error);
-    this.requestState = 'error';
-
-    if (this.errorCode === 'permission-denied') {
-      this.permissionState = 'denied';
-    }
-  }
-
-  async syncPermissionState() {
-    if (this.permissionState !== 'checking') {
-      return;
-    }
-
-    // Transition synchronously before the first await so any concurrent call
-    // during the async gap is blocked by the guard above.
-    this.permissionState = 'syncing';
-
-    if (!this.#hasGeolocationSupport()) {
-      this.permissionState = 'unsupported';
-      this.errorCode = 'unsupported';
-
-      return;
-    }
-
-    if (typeof navigator.permissions?.query !== 'function') {
-      this.permissionState = 'prompt';
-
+  // Locates the visitor only if they have already granted geolocation --
+  // never prompts. Without a position the map just shows none.
+  async locateIfPermitted() {
+    if (
+      !navigator.geolocation ||
+      typeof navigator.permissions?.query !== 'function'
+    ) {
       return;
     }
 
     try {
-      const permissionStatus = await navigator.permissions.query({
+      const { state } = await navigator.permissions.query({
         name: 'geolocation',
       });
 
-      this.#permissionStatus = permissionStatus;
-      this.#permissionStatus.onchange = () => {
-        this.permissionState = permissionStatus.state;
-      };
-      this.permissionState = permissionStatus.state;
-
-      if (permissionStatus.state === 'granted' && !this.hasCoordinates) {
-        await this.requestCurrentPosition();
+      if (state !== 'granted') {
+        return;
       }
-    } catch {
-      this.permissionState = 'prompt';
-    }
-  }
 
-  async requestCurrentPosition() {
-    if (!this.#hasGeolocationSupport()) {
-      this.permissionState = 'unsupported';
-      this.errorCode = 'unsupported';
-      this.requestState = 'error';
-
-      return;
-    }
-
-    this.beginLocationRequest();
-
-    try {
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
@@ -145,35 +49,8 @@ export default class NearbyLocationService extends Service {
       );
 
       this.updateFromPosition(position);
-    } catch (error) {
-      this.updateFromError(error as GeolocationPositionError | undefined);
-    }
-  }
-
-  willDestroy(): void {
-    super.willDestroy();
-
-    if (this.#permissionStatus) {
-      this.#permissionStatus.onchange = null;
-    }
-  }
-
-  #hasGeolocationSupport() {
-    return (
-      typeof navigator !== 'undefined' && navigator.geolocation !== undefined
-    );
-  }
-
-  #mapErrorCode(error?: GeolocationPositionError): NearbyLocationErrorCode {
-    switch (error?.code) {
-      case GEOLOCATION_PERMISSION_DENIED:
-        return 'permission-denied';
-      case GEOLOCATION_POSITION_UNAVAILABLE:
-        return 'position-unavailable';
-      case GEOLOCATION_TIMEOUT:
-        return 'timeout';
-      default:
-        return 'unknown';
+    } catch {
+      // No position: nothing to show.
     }
   }
 }

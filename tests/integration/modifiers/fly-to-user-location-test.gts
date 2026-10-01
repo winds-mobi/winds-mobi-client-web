@@ -25,12 +25,11 @@ function stubCurrentRouteQueryParams(
   });
 }
 
-// Regression coverage for the bug this modifier fixes: `ApplicationRoute#beforeModel`
-// doesn't await `nearbyLocation.syncPermissionState()` before render, so for an
-// already-granted returning user, `coordinates` on the
-// `nearby-location` service typically resolve *after* this modifier's host element
-// has already mounted. The modifier must react to that late arrival, not just check
-// once at setup.
+// `ApplicationRoute#beforeModel` doesn't await
+// `nearbyLocation.locateIfPermitted()` before render, so for an
+// already-granted returning visitor, `coordinates` typically resolve *after*
+// this modifier's host element has mounted. The modifier must react to that
+// late arrival, not just check once at setup.
 module('Integration | Modifier | fly-to-user-location', function (hooks) {
   setupRenderingTest(hooks);
 
@@ -41,7 +40,6 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
 
     stubCurrentRouteQueryParams(router, {});
     nearbyLocation.coordinates = {
-      accuracy: 10,
       latitude: 46.521,
       longitude: 6.632,
     };
@@ -71,7 +69,6 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
 
     stubCurrentRouteQueryParams(router, {});
     nearbyLocation.coordinates = {
-      accuracy: 10,
       latitude: 46.521,
       longitude: 6.632,
     };
@@ -113,7 +110,6 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
       zoom: '5',
     });
     nearbyLocation.coordinates = {
-      accuracy: 10,
       latitude: 46.521,
       longitude: 6.632,
     };
@@ -145,7 +141,6 @@ module('Integration | Modifier | fly-to-user-location', function (hooks) {
     assert.strictEqual(calls.length, 0, 'nothing yet -- coordinates unknown');
 
     nearbyLocation.coordinates = {
-      accuracy: 10,
       latitude: 46.521,
       longitude: 6.632,
     };

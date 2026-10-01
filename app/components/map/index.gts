@@ -4,14 +4,17 @@ import { service } from '@ember/service';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
+import type Owner from '@ember/owner';
 import type RouterService from '@ember/routing/router-service';
 import { t } from 'ember-intl';
 import MapLibreGL from 'ember-maplibre-gl/components/maplibre-gl';
 import type { Map as MaplibreMap, MapInitOptions } from 'ember-maplibre-gl';
 import {
+  GeolocateControl,
   NavigationControl,
   TerrainControl,
   setWorkerUrl,
+  type GeolocatePositionEvent,
   type IControl,
 } from 'maplibre-gl';
 // maplibre-gl v6 is ESM-only and resolves its worker file at runtime via
@@ -50,6 +53,8 @@ import fitMapToStations from 'winds-mobi-client-web/modifiers/fit-map-to-station
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
+import { flyToCoordinates } from 'winds-mobi-client-web/utils/locate';
+import { DEFAULT_POSITION_OPTIONS } from 'winds-mobi-client-web/utils/location';
 import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
@@ -57,6 +62,7 @@ import {
   TEST_MAP_STYLE,
 } from 'winds-mobi-client-web/utils/map-style';
 import {
+  FOCUS_ZOOM,
   mapViewCenter,
   mapViewsEqual,
   mapViewFromMap,
@@ -119,6 +125,15 @@ export default class Map extends Component<MapSignature> {
   @service declare router: RouterService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
 
+  // Wired here rather than declaratively (there's no `<control.on>` block-param
+  // equivalent to `<marker.on>`): `GeolocateControl` extends MapLibre's own
+  // `Evented`, so it can be listened to directly, and it exists (this field is
+  // initialized) well before the map or template does.
+  constructor(owner: Owner, args: MapSignature['Args']) {
+    super(owner, args);
+    this.geolocateControl.on('geolocate', this.handleGeolocate);
+  }
+
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
   // side panel in landscape and on desktop) now that the panel overlays the map
@@ -137,6 +152,25 @@ export default class Map extends Component<MapSignature> {
           source: 'terrainSource',
           exaggeration: 1,
         });
+
+  // On every map, routed or fitted -- one fully-capable map means the same
+  // controls everywhere, not a lesser one for favourites/hidden. On a fitted
+  // map this moves it away from the framed stations, same as a manual pan
+  // already can; the next stations refresh reframes it, same as it would
+  // undo that pan. `showUserLocation: false` because `MapUserLocationMarker`
+  // already draws one, reactively, from `nearbyLocation.coordinates` -- on
+  // every map, not just this control's own; two dots would stack otherwise.
+  // `fitBoundsOptions.maxZoom` keeps its own first-fix camera move from
+  // landing tighter than `FOCUS_ZOOM`, the zoom every other "focus on this"
+  // action in the app uses (the `geolocate` handler below re-settles the
+  // routed map there anyway, via the same URL round-trip every other focus
+  // action takes -- this just keeps that correction small).
+  private geolocateControl = new GeolocateControl({
+    fitBoundsOptions: { maxZoom: FOCUS_ZOOM },
+    positionOptions: DEFAULT_POSITION_OPTIONS,
+    showUserLocation: false,
+    trackUserLocation: false,
+  });
 
   // The wind legend as a control of MapLibre's own, so it stacks under the
   // buttons natively rather than being positioned against them by hand. The
@@ -255,8 +289,8 @@ export default class Map extends Component<MapSignature> {
   // view is still the fresh-load default, whether coordinates are known -- the
   // modifier derives and reacts to itself (it injects `router` and `nearbyLocation`
   // directly), including the case where `coordinates` resolves after this component
-  // has already mounted, since `ApplicationRoute#beforeModel` no longer awaits
-  // `nearbyLocation.syncPermissionState()`.
+  // has already mounted (`ApplicationRoute#beforeModel` doesn't await
+  // `nearbyLocation.locateIfPermitted()`).
   get isFlyToUserLocationEnabled() {
     return this.isRoutedMap && config.environment !== 'test';
   }
@@ -282,6 +316,17 @@ export default class Map extends Component<MapSignature> {
       queryParams: view,
     });
   }
+
+  // The control's own fix, mirrored into `nearbyLocation` (so distance
+  // displays and the marker update the same way a boot-time fix would) and
+  // into the URL via the same `flyToCoordinates` the boot-time auto-fly uses
+  // -- not just a camera move: `all`'s station list is bounds-sourced from
+  // the *routed* view (see `all.gts`'s `stationsRequest`), not the live map, so without this
+  // the list would never refetch for the new area.
+  handleGeolocate = (event: GeolocatePositionEvent) => {
+    this.nearbyLocation.updateFromPosition({ coords: event.coords });
+    flyToCoordinates(this.router, this.nearbyLocation);
+  };
 
   @action
   handleTerrainChange(event: { target: MaplibreMap }) {
@@ -339,6 +384,7 @@ export default class Map extends Component<MapSignature> {
           @control={{this.navigationControl}}
           @position="top-right"
         />
+        <map.control @control={{this.geolocateControl}} @position="top-right" />
         {{#if this.terrainControl}}
           <map.control @control={{this.terrainControl}} @position="top-right" />
         {{/if}}

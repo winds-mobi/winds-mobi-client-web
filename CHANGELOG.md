@@ -13,6 +13,7 @@
 - The navbar's Map link is now called "All stations" (its view can already be switched to full or compact cards, not only a map) and lives in its own group next to Favourites; Settings and Help now sit apart in a group of their own.
 - Choosing full or compact cards is no longer a Settings preference — it's controlled from the navbar, right next to what it changes.
 - Opening a station — a search result, a card's name, or a marker — always shows it on a map, without leaving whichever page you're on: opening one from Favourites or Hidden now shows it right there instead of jumping over to All stations.
+- The locate-me button has moved off the navbar and onto the map itself, next to the zoom controls, and now appears on every map — All stations, Favourites, and Hidden — not just the main one.
 
 ### Fixed
 
