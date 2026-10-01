@@ -1,10 +1,14 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, fillIn, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // A single continuous walk through the app's main routes and interactions,
 // on top of (not instead of) the focused per-route/per-feature acceptance
@@ -12,76 +16,41 @@ import type { History, Station } from 'winds-mobi-client-web/services/store';
 // card view -> favourites -> settings -> help) rather than re-asserting details
 // already covered elsewhere.
 
-type FakeStoreRequest = {
-  url?: string;
-  method?: string;
-};
+const MAP_STATION: Station = stationFixture();
 
-const MAP_STATION: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
-
-const NEARBY_STATION: Station = {
+const NEARBY_STATION: Station = stationFixture({
   id: 'holfuy-2222',
   altitude: 2222,
   latitude: 46.7,
   longitude: 7.9,
   isPeak: true,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-2222',
   name: 'Holfuy 2222',
   last: {
-    timestamp: 1_710_000_000_000,
     direction: 220,
     speed: 20,
     gusts: 28,
     temperature: 3,
     humidity: 58,
     pressure: 1008,
-    rain: 0,
   },
-  [Type]: 'station',
-};
+});
 
-const SEARCH_STATION: Station = {
+const SEARCH_STATION: Station = stationFixture({
   id: 'holfuy-1850',
   altitude: 560,
   latitude: 46.68084,
   longitude: 7.82554,
-  isPeak: false,
   providerName: 'holfuy.com',
-  providerUrl: 'https://example.com/stations/holfuy-1850',
   name: 'Lehn',
   last: {
-    timestamp: 1_710_000_000_000,
     direction: 30,
     speed: 19,
     gusts: 22,
     temperature: 12,
     humidity: 60,
     pressure: 1010,
-    rain: 0,
   },
-  [Type]: 'station',
-};
+});
 
 const ALL_STATIONS = [MAP_STATION, NEARBY_STATION, SEARCH_STATION];
 
@@ -99,51 +68,6 @@ const HISTORY_FIXTURES: History[] = [
   },
 ];
 
-class FakeStoreService extends Service {
-  calls: { method: string; url: string }[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    const method = request.method ?? 'GET';
-
-    this.calls.push({ method, url });
-
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: HISTORY_FIXTURES } });
-    }
-
-    const singleStation = ALL_STATIONS.find((station) =>
-      url.includes(`/stations/${station.id}/?`)
-    );
-
-    if (singleStation) {
-      return Promise.resolve({ content: { data: singleStation } });
-    }
-
-    const params = new URL(url, 'https://winds.mobi').searchParams;
-
-    if (params.has('search')) {
-      const term = params.get('search') ?? '';
-      const matches = ALL_STATIONS.filter((station) =>
-        station.name.toLowerCase().includes(term.toLowerCase())
-      );
-
-      return Promise.resolve({ content: { data: matches } });
-    }
-
-    if (params.has('ids')) {
-      const ids = params.getAll('ids');
-      const matches = ALL_STATIONS.filter((station) =>
-        ids.includes(station.id)
-      );
-
-      return Promise.resolve({ content: { data: matches } });
-    }
-
-    return Promise.resolve({ content: { data: ALL_STATIONS } });
-  }
-}
-
 // Stubbed before the app boots, which is when the application route asks for
 // the visitor's position.
 function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
@@ -155,10 +79,16 @@ function stubGrantedPermission(nearbyLocation: NearbyLocationService) {
 
 module('Acceptance | app walkthrough', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({
+      stations: ALL_STATIONS,
+      history: HISTORY_FIXTURES,
+    });
+  });
 
+  hooks.beforeEach(function () {
     const nearbyLocation = this.owner.lookup('service:nearby-location');
     stubGrantedPermission(nearbyLocation);
   });

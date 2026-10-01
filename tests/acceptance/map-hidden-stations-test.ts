@@ -1,99 +1,23 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { type TestContext, visit } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
-import { Type } from '@warp-drive/core/types/symbols';
-import type { Station } from 'winds-mobi-client-web/services/store';
+import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // These render real markers, which needs a working MapLibre — see
 // tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
-type FakeStoreRequest = {
-  url?: string;
-};
-
-const STATION_FIXTURES: Station[] = [
-  {
-    id: 'meteoswiss-PMA',
-    altitude: 2500,
-    latitude: 46.577,
-    longitude: 9.53,
-    isPeak: true,
-    providerName: 'MeteoSwiss',
-    providerUrl: 'https://example.com/stations/meteoswiss-PMA',
-    name: 'Piz Martegnas',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-  {
-    id: 'slf-PMA2',
-    altitude: 2450,
-    latitude: 46.5768,
-    longitude: 9.5292,
-    isPeak: false,
-    providerName: 'SLF',
-    providerUrl: 'https://example.com/stations/slf-PMA2',
-    name: 'Colms da Parsonz',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 220,
-      speed: 2,
-      gusts: 4,
-      temperature: 3,
-      humidity: 58,
-      pressure: 1008,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-];
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-  private requestCache = new Map<
-    string,
-    Promise<{ content: { data: Station[] }; request: FakeStoreRequest }>
-  >();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    this.calls.push(url);
-
-    let cachedRequest = this.requestCache.get(url);
-
-    if (!cachedRequest) {
-      cachedRequest = Promise.resolve({
-        content: {
-          data: STATION_FIXTURES,
-        },
-        // WarpDrive's `<Request>` `state.refresh()` replays the request it
-        // finds echoed back on a resolved response -- without it, a refresh
-        // resolves against an empty/unknown request instead of this same URL.
-        request,
-      });
-      this.requestCache.set(url, cachedRequest);
-    }
-
-    return cachedRequest;
-  }
-}
-
 module('Acceptance | map hidden stations (#167)', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: OVERLAPPING_STATIONS });
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
   });

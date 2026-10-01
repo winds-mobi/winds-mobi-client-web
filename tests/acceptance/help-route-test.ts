@@ -1,35 +1,15 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { click, currentURL, visit } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { History, Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
-type FakeStoreRequest = {
-  url?: string;
-};
-
-const STATION_FIXTURE: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: 1_710_000_000_000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+const STATION_FIXTURE: Station = stationFixture();
 
 const HISTORY_FIXTURES: History[] = [
   {
@@ -45,31 +25,15 @@ const HISTORY_FIXTURES: History[] = [
   },
 ];
 
-class FakeStoreService extends Service {
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    if (url.includes('/historic/')) {
-      return Promise.resolve({
-        content: {
-          data: HISTORY_FIXTURES,
-        },
-      });
-    }
-
-    return Promise.resolve({
-      content: {
-        data: STATION_FIXTURE,
-      },
-    });
-  }
-}
-
 module('Acceptance | help route', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({
+      stations: [STATION_FIXTURE],
+      history: HISTORY_FIXTURES,
+    });
   });
 
   test('it shows the help page and live station example', async function (assert) {

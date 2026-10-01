@@ -1,72 +1,23 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   findAll,
   render,
   settled,
   type RenderingTestContext,
+  waitUntil,
 } from '@ember/test-helpers';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
-import { historyQuery } from 'winds-mobi-client-web/builders/history';
+import {
+  rawHistory,
+  setupStubbedApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import type { History } from 'winds-mobi-client-web/services/store';
 import StationLastHour from 'winds-mobi-client-web/components/station/last-hour';
 import { trackedObject } from '@ember/reactive/collections';
 
-type DeferredHistoryRequest = {
-  promise: Promise<{ content: { data: History[] } }>;
-  resolve: (value: { content: { data: History[] } }) => void;
-};
-
-type FakeStoreRequest = {
-  url?: string;
-};
-
 interface StationLastHourIndexTestContext extends RenderingTestContext {
   stationId: string;
-}
-
-class FakeStoreService extends Service {
-  responses = new Map<string, Promise<{ content: { data: History[] } }>>();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    return (
-      this.responses.get(url) ??
-      Promise.resolve({
-        content: {
-          data: [],
-        },
-      })
-    );
-  }
-}
-
-function createDeferredHistoryRequest(): DeferredHistoryRequest {
-  let resolve!: (value: { content: { data: History[] } }) => void;
-
-  const promise = new Promise<{ content: { data: History[] } }>(
-    (resolvePromise) => {
-      resolve = resolvePromise;
-    }
-  );
-
-  return { promise, resolve };
-}
-
-function lastHourRequestUrl(stationId: string) {
-  return historyQuery<History>(
-    'history',
-    stationId,
-    {
-      duration: 60 * 60,
-      keys: ['w-dir', 'w-avg', 'w-max'],
-    },
-    {
-      backgroundReload: true,
-    }
-  ).url;
 }
 
 // The min/mean/max metric cards render our own derived values (not
@@ -78,15 +29,9 @@ function renderedMetricValues() {
 
 module('Integration | Component | station/last-hour', function (hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
-  });
+  const api = setupStubbedApi(hooks);
 
   test('it keeps the first station graph stable when another station resolves late', async function (this: StationLastHourIndexTestContext, assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
     const now = Date.now();
 
     const stationAHistory: History[] = [
@@ -161,20 +106,22 @@ module('Integration | Component | station/last-hour', function (hooks) {
       },
     ];
 
-    const deferredStationBHistory = createDeferredHistoryRequest();
+    // Station B's history is held until the test releases it, so it lands
+    // only after the panel has already gone back to station A.
+    let releaseStationB!: () => void;
+    const stationBReleased = new Promise<void>((resolve) => {
+      releaseStationB = resolve;
+    });
 
-    store.responses.set(
-      lastHourRequestUrl('station-a'),
-      Promise.resolve({
-        content: {
-          data: stationAHistory,
-        },
-      })
-    );
-    store.responses.set(
-      lastHourRequestUrl('station-b'),
-      deferredStationBHistory.promise
-    );
+    api.respond = async (url) => {
+      if (url.pathname.includes('/station-b/')) {
+        await stationBReleased;
+
+        return rawHistory(stationBHistory);
+      }
+
+      return rawHistory(stationAHistory);
+    };
 
     const state = trackedObject({ stationId: 'station-a' });
 
@@ -186,19 +133,19 @@ module('Integration | Component | station/last-hour', function (hooks) {
 
     assert.true(stationAInitialMetrics.length > 0);
 
+    // `settled()` would wait on station B's held request, so these steps
+    // wait for exactly what they need instead.
     state.stationId = 'station-b';
-    await settled();
+    await waitUntil(() => api.calls.some((url) => url.includes('/station-b/')));
 
     state.stationId = 'station-a';
-    await settled();
+    await waitUntil(
+      () =>
+        JSON.stringify(renderedMetricValues()) ===
+        JSON.stringify(stationAInitialMetrics)
+    );
 
-    assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);
-
-    deferredStationBHistory.resolve({
-      content: {
-        data: stationBHistory,
-      },
-    });
+    releaseStationB();
     await settled();
 
     assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);

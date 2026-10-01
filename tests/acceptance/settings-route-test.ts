@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   click,
@@ -8,14 +7,7 @@ import {
   visit,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
-
-// The settings route doesn't fetch stations, but the shared navbar is always
-// rendered; a no-op store keeps any incidental request from failing.
-class FakeStoreService extends Service {
-  request() {
-    return Promise.resolve({ content: { data: [] } });
-  }
-}
+import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 
 // `@ember/test-helpers` doesn't publicly export its `ApplicationTestContext`
 // (only the base `TestContext` and `RenderingTestContext`), so acceptance
@@ -26,10 +18,7 @@ interface SettingsRouteTestContext extends TestContext {
 
 module('Acceptance | settings route', function (hooks) {
   setupApplicationTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
-  });
+  setupStubbedApi(hooks);
 
   test('it shows every preference with its default: on, except icon labels, wind direction, and beta features', async function (this: SettingsRouteTestContext, assert) {
     await visit('/settings');

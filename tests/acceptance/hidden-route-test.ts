@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   click,
@@ -8,96 +7,15 @@ import {
   visit,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
-import { Type } from '@warp-drive/core/types/symbols';
-import type { Station } from 'winds-mobi-client-web/services/store';
+import { OVERLAPPING_STATIONS } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // The map view waits on MapLibre actually initializing — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
-
-type FakeStoreRequest = {
-  url?: string;
-};
-
-const STATION_FIXTURES: Station[] = [
-  {
-    id: 'meteoswiss-PMA',
-    altitude: 2500,
-    latitude: 46.577,
-    longitude: 9.53,
-    isPeak: true,
-    providerName: 'MeteoSwiss',
-    providerUrl: 'https://example.com/stations/meteoswiss-PMA',
-    name: 'Piz Martegnas',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-  {
-    id: 'slf-PMA2',
-    altitude: 2450,
-    latitude: 46.5768,
-    longitude: 9.5292,
-    isPeak: false,
-    providerName: 'SLF',
-    providerUrl: 'https://example.com/stations/slf-PMA2',
-    name: 'Colms da Parsonz',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 220,
-      speed: 2,
-      gusts: 4,
-      temperature: 3,
-      humidity: 58,
-      pressure: 1008,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-];
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-
-    this.calls.push(url);
-
-    // History is a list, a single station is one record, and the collection
-    // query is a list: returning the wrong shape doesn't fail here, it throws
-    // deep inside the station panel's charts instead.
-    if (url.includes('/historic/')) {
-      return Promise.resolve({ content: { data: [] }, request });
-    }
-
-    const singleStation = STATION_FIXTURES.find((station) =>
-      url.includes(`/stations/${station.id}/?`)
-    );
-
-    if (singleStation) {
-      return Promise.resolve({ content: { data: singleStation }, request });
-    }
-
-    return Promise.resolve({
-      content: {
-        data: STATION_FIXTURES,
-      },
-      // WarpDrive's `<Request>` `state.refresh()` replays the request it
-      // finds echoed back on a resolved response -- without it, a refresh
-      // resolves against an empty/unknown request instead of this same URL.
-      request,
-    });
-  }
-}
 
 function countStationRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations/')).length;
@@ -107,29 +25,26 @@ const HIDDEN_CARD_SELECTOR = '[data-test-nearby-station-card]';
 
 module('Acceptance | hidden route', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: OVERLAPPING_STATIONS });
     this.owner.lookup('service:settings').betaFeaturesEnabled = true;
     this.owner.lookup('service:settings').hiddenStationsFeatureEnabled = true;
   });
 
   test('with no hidden stations it shows the empty state and skips the station request', async function (assert) {
-    const store = this.owner.lookup(
-      'service:store'
-    ) as unknown as FakeStoreService;
-
     await visit('/hidden');
 
     assert.dom('[data-test-id-list-empty="hidden"]').exists();
     assert.dom(HIDDEN_CARD_SELECTOR).doesNotExist();
-    assert.strictEqual(countStationRequests(store.calls), 0);
+    assert.strictEqual(countStationRequests(api.calls), 0);
   });
 
   test('it renders the hidden stations in the order they were hidden', async function (assert) {
     const hiddenStations = this.owner.lookup('service:hidden-stations');
 
-    // Added in reverse of STATION_FIXTURES to pin the ordering behaviour.
+    // Added in reverse of OVERLAPPING_STATIONS to pin the ordering behaviour.
     hiddenStations.add('slf-PMA2');
     hiddenStations.add('meteoswiss-PMA');
 
@@ -169,7 +84,7 @@ module('Acceptance | hidden route', function (hooks) {
       .doesNotExist('full cards are not rendered in compact view');
     assert
       .dom('[data-test-nearby-station-card-compact]')
-      .exists({ count: STATION_FIXTURES.length });
+      .exists({ count: OVERLAPPING_STATIONS.length });
   });
 
   test.if(

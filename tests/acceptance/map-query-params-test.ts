@@ -1,4 +1,3 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import {
   click,
@@ -6,101 +5,22 @@ import {
   settled,
   type TestContext,
   visit,
+  waitUntil,
 } from '@ember/test-helpers';
 import { setupApplicationTest } from 'winds-mobi-client-web/tests/helpers';
+import {
+  setupStubbedApi,
+  stationsApi,
+} from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { hasWebGL } from 'winds-mobi-client-web/tests/helpers/webgl';
-import { Type } from '@warp-drive/core/types/symbols';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 // Every test in this module waits on MapLibre's `idle` event (directly or
 // via the bounds-driven station request it feeds) — see tests/helpers/webgl.ts.
 const webGLAvailable = hasWebGL();
 
-type FakeStoreRequest = {
-  url?: string;
-};
-
-const STATION_FIXTURES: Station[] = [
-  {
-    id: 'holfuy-1804',
-    altitude: 1804,
-    latitude: 46.67719,
-    longitude: 7.86323,
-    isPeak: false,
-    providerName: 'Holfuy',
-    providerUrl: 'https://example.com/stations/holfuy-1804',
-    name: 'Holfuy 1804',
-    last: {
-      timestamp: 1_710_000_000_000,
-      direction: 240,
-      speed: 12,
-      gusts: 18,
-      temperature: 7,
-      humidity: 65,
-      pressure: 1012,
-      rain: 0,
-    },
-    [Type]: 'station',
-  },
-];
-
-type StoreResponse = {
-  content: { data: Station[] };
-  request: FakeStoreRequest;
-};
-
-type DeferredResponse = {
-  promise: Promise<StoreResponse>;
-  resolve: (value: StoreResponse) => void;
-};
-
-function createDeferredResponse(): DeferredResponse {
-  let resolve!: (value: StoreResponse) => void;
-
-  const promise = new Promise<StoreResponse>((resolvePromise) => {
-    resolve = resolvePromise;
-  });
-
-  return { promise, resolve };
-}
-
-class FakeStoreService extends Service {
-  calls: string[] = [];
-  // Set to defer the next genuinely new URL (one not already cached) instead
-  // of resolving it immediately -- lets a test inspect the map mid-pan/zoom,
-  // while the new bounds request is still in flight.
-  deferredNextRequest?: DeferredResponse;
-  private requestCache = new Map<string, Promise<StoreResponse>>();
-
-  request(request: FakeStoreRequest) {
-    const url = request.url ?? '';
-    this.calls.push(url);
-
-    let cachedRequest = this.requestCache.get(url);
-
-    if (!cachedRequest) {
-      if (this.deferredNextRequest) {
-        cachedRequest = this.deferredNextRequest.promise;
-        this.deferredNextRequest = undefined;
-      } else {
-        cachedRequest = Promise.resolve({
-          content: {
-            data: STATION_FIXTURES,
-          },
-          // WarpDrive's `<Request>` `state.refresh()` replays the request it
-          // finds echoed back on a resolved response -- without it, a refresh
-          // resolves against an empty/unknown request instead of this same
-          // URL (confirmed by tracing WarpDrive's own `performRefresh`).
-          request,
-        });
-      }
-
-      this.requestCache.set(url, cachedRequest);
-    }
-
-    return cachedRequest;
-  }
-}
+const STATION_FIXTURES: Station[] = [stationFixture()];
 
 function assertCurrentMapUrl(
   assert: Assert,
@@ -117,19 +37,16 @@ function assertCurrentMapUrl(
 
 module('Acceptance | map query params', function (hooks) {
   setupApplicationTest(hooks);
+  const api = setupStubbedApi(hooks);
 
   hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
+    api.respond = stationsApi({ stations: STATION_FIXTURES });
   });
 
   test.if(
     'it uses the URL view for the initial map and station request',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
-
       await visit('/all?longitude=8.12345&latitude=46.54321&zoom=9.5');
 
       assertCurrentMapUrl(assert, {
@@ -138,7 +55,7 @@ module('Acceptance | map query params', function (hooks) {
         zoom: '9.5',
       });
       assert.true(
-        store.calls.some(
+        api.calls.some(
           (url) =>
             url.includes('within-pt1-lat=') &&
             url.includes('within-pt1-lon=') &&
@@ -155,26 +72,38 @@ module('Acceptance | map query params', function (hooks) {
     'panning the map keeps the previous markers on screen while the new bounds load',
     webGLAvailable,
     async function (this: TestContext, assert) {
-      const store = this.owner.lookup(
-        'service:store'
-      ) as unknown as FakeStoreService;
       const router = this.owner.lookup('service:router');
 
       await visit('/all?longitude=8.12345&latitude=46.54321&zoom=9.5');
 
-      const deferred = createDeferredResponse();
+      // Hold the new bounds' request open, so the test can look at the map
+      // while it's still in flight.
+      const serve = api.respond;
+      let release!: () => void;
+      const released = new Promise<void>((resolve) => {
+        release = resolve;
+      });
 
-      store.deferredNextRequest = deferred;
+      api.respond = async (url) => {
+        await released;
+
+        return serve(url);
+      };
       void router.transitionTo({
         queryParams: { longitude: 9, latitude: 47, zoom: 9.5 },
       });
 
-      // The deferred request isn't a test waiter, so `settled()` resolves
-      // with it still pending.
-      await settled();
+      // The held request is a test waiter, so `settled()` would wait for it;
+      // wait for the transition to land instead.
+      await waitUntil(
+        () =>
+          new URL(currentURL(), 'https://winds.mobi').searchParams.get(
+            'longitude'
+          ) === '9'
+      );
 
-      // The new bounds' own request is still pending (deliberately, via
-      // `deferredNextRequest`) -- the map must keep showing the previous
+      // The new bounds' own request is still pending (deliberately, see
+      // above) -- the map must keep showing the previous
       // area's markers instead of blinking them away in the meantime (this
       // is what `<Request>`'s `:loading` block, and `all.gts`'s own
       // `lastStations` latch, exist to prevent -- see CLAUDE.md's
@@ -185,10 +114,7 @@ module('Acceptance | map query params', function (hooks) {
           'the previous marker is still on screen while the new bounds are loading'
         );
 
-      deferred.resolve({
-        content: { data: STATION_FIXTURES },
-        request: {},
-      });
+      release();
       await settled();
 
       assert

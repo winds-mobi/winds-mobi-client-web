@@ -1,54 +1,28 @@
-import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { findAll, render } from '@ember/test-helpers';
-import { Type } from '@warp-drive/core/types/symbols';
+
 import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
+import { setupStubbedApi } from 'winds-mobi-client-web/tests/helpers/stub-api';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
 import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
 import { trackedObject } from '@ember/reactive/collections';
+import { stationFixture } from 'winds-mobi-client-web/tests/helpers/station-fixture';
 
 interface StationCompactCardTestContext extends RenderedTestContext {
   station: Station;
 }
 
-class FakeStoreService extends Service {
-  request() {
-    return Promise.resolve({ content: { data: [] } });
-  }
-}
-
-const STATION: Station = {
-  id: 'holfuy-1804',
-  altitude: 1804,
-  latitude: 46.67719,
-  longitude: 7.86323,
-  isPeak: false,
-  providerName: 'Holfuy',
-  providerUrl: 'https://example.com/stations/holfuy-1804',
-  name: 'Holfuy 1804',
-  last: {
-    timestamp: Date.now() - 5 * 60 * 1000,
-    direction: 240,
-    speed: 12,
-    gusts: 18,
-    temperature: 7,
-    humidity: 65,
-    pressure: 1012,
-    rain: 0,
-  },
-  [Type]: 'station',
-};
+const STATION: Station = stationFixture({
+  last: { timestamp: Date.now() - 5 * 60 * 1000 },
+});
 
 module('Integration | Component | station/compact-card', function (hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function () {
-    this.owner.register('service:store', FakeStoreService);
-  });
+  setupStubbedApi(hooks);
 
   test('it renders the name, altitude, and wind speed/gusts', async function (this: StationCompactCardTestContext, assert) {
     const station: StationCompactCardTestContext['station'] = STATION;
