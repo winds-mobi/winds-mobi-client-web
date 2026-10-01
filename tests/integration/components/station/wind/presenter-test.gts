@@ -1,6 +1,5 @@
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import type { Point } from 'highcharts';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
@@ -8,6 +7,7 @@ import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal
 import windToColour from 'winds-mobi-client-web/helpers/wind-to-colour';
 import { KM_H_PER_M_S } from 'winds-mobi-client-web/utils/highcharts-options';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationWindPresenter from 'winds-mobi-client-web/components/station/wind/presenter';
 
 interface WindPresenterTestContext extends RenderingTestContext {
   history: History[];
@@ -37,7 +37,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
   test('it renders the chart for recent history', async function (this: WindPresenterTestContext, assert) {
     const now = Date.now();
 
-    this.history = [
+    const history: WindPresenterTestContext['history'] = [
       {
         id: 'history-1',
         direction: 180,
@@ -63,17 +63,21 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
     ];
 
     await render(
-      hbs`<Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationWindPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();
   });
 
   test('it renders the chart when there is no history', async function (this: WindPresenterTestContext, assert) {
-    this.history = [];
+    const history: WindPresenterTestContext['history'] = [];
 
     await render(
-      hbs`<Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationWindPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();
@@ -85,7 +89,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
   // the reading's own direction. See CLAUDE.md's Testing section on why
   // this is testing us, not Highcharts.
   test('it does not include a Direction series while the setting is off (the default)', async function (this: WindPresenterTestContext, assert) {
-    this.history = [
+    const history: WindPresenterTestContext['history'] = [
       {
         id: 'history-1',
         direction: 180,
@@ -100,7 +104,9 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
     ];
 
     await render(
-      hbs`<Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationWindPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     const Highcharts = (await import('highcharts')).default;
@@ -119,7 +125,7 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
 
     const now = Date.now();
 
-    this.history = [
+    const history: WindPresenterTestContext['history'] = [
       {
         id: 'history-1',
         direction: 180,
@@ -145,7 +151,9 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
     ];
 
     await render(
-      hbs`<Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" />`
+      <template>
+        <StationWindPresenter @history={{history}} @stationId="holfuy-1829" />
+      </template>
     );
 
     const Highcharts = (await import('highcharts')).default;
@@ -177,28 +185,36 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
 
     const now = Date.now();
 
-    this.history = Array.from({ length: 400 }, (_, i) => ({
-      id: `history-${i}`,
-      // Alternating between two clearly different readings: any group
-      // spanning more than one raw point averages to a value/direction
-      // that doesn't equal either raw reading, so a stale field would be
-      // visibly wrong, not coincidentally right. Gusts alternate (not
-      // speed) because the Direction series is keyed off gusts.
-      direction: i % 2 === 0 ? 10 : 90,
-      speed: 22,
-      gusts: i % 2 === 0 ? 3 : 45,
-      temperature: 6,
-      humidity: 60,
-      rain: 0,
-      // Oldest first, matching the chronological order app/handlers/
-      // history.ts always delivers -- Highcharts Stock's data grouping
-      // isn't well-defined over unsorted data (see point-order-test.ts).
-      timestamp: now - (400 - i) * 30 * 1000,
-      [Type]: 'history',
-    }));
+    const history: WindPresenterTestContext['history'] = Array.from(
+      { length: 400 },
+      (_, i) => ({
+        id: `history-${i}`,
+        // Alternating between two clearly different readings: any group
+        // spanning more than one raw point averages to a value/direction
+        // that doesn't equal either raw reading, so a stale field would be
+        // visibly wrong, not coincidentally right. Gusts alternate (not
+        // speed) because the Direction series is keyed off gusts.
+        direction: i % 2 === 0 ? 10 : 90,
+        speed: 22,
+        gusts: i % 2 === 0 ? 3 : 45,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        // Oldest first, matching the chronological order app/handlers/
+        // history.ts always delivers -- Highcharts Stock's data grouping
+        // isn't well-defined over unsorted data (see point-order-test.ts).
+        timestamp: now - (400 - i) * 30 * 1000,
+        [Type]: 'history',
+      })
+    );
 
     await render(
-      hbs`<div class="h-64 w-64"><Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" /></div>`
+      <template>
+        <div class="h-64 w-64"><StationWindPresenter
+            @history={{history}}
+            @stationId="holfuy-1829"
+          /></div>
+      </template>
     );
 
     const Highcharts = (await import('highcharts')).default;
@@ -257,23 +273,31 @@ module('Integration | Component | station/wind/presenter', function (hooks) {
 
     const now = Date.now();
 
-    this.history = Array.from({ length: 400 }, (_, i) => ({
-      id: `history-${i}`,
-      // Constant direction, alternating gusts only: forces grouping (same
-      // as the test above) while keeping the vector average exactly 200°
-      // (recovered by atan2 as -160°) rather than some other blend.
-      direction: 200,
-      speed: 22,
-      gusts: i % 2 === 0 ? 3 : 45,
-      temperature: 6,
-      humidity: 60,
-      rain: 0,
-      timestamp: now - (400 - i) * 30 * 1000,
-      [Type]: 'history',
-    }));
+    const history: WindPresenterTestContext['history'] = Array.from(
+      { length: 400 },
+      (_, i) => ({
+        id: `history-${i}`,
+        // Constant direction, alternating gusts only: forces grouping (same
+        // as the test above) while keeping the vector average exactly 200°
+        // (recovered by atan2 as -160°) rather than some other blend.
+        direction: 200,
+        speed: 22,
+        gusts: i % 2 === 0 ? 3 : 45,
+        temperature: 6,
+        humidity: 60,
+        rain: 0,
+        timestamp: now - (400 - i) * 30 * 1000,
+        [Type]: 'history',
+      })
+    );
 
     await render(
-      hbs`<div class="h-64 w-64"><Station::Wind::Presenter @history={{this.history}} @stationId="holfuy-1829" /></div>`
+      <template>
+        <div class="h-64 w-64"><StationWindPresenter
+            @history={{history}}
+            @stationId="holfuy-1829"
+          /></div>
+      </template>
     );
 
     const Highcharts = (await import('highcharts')).default;

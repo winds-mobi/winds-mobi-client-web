@@ -4,12 +4,12 @@ import {
   settled,
   type RenderingTestContext,
 } from '@ember/test-helpers';
-import { set } from '@ember/object';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
 import type { ChartWithRangeSelector } from 'winds-mobi-client-web/modifiers/render-highcharts';
+import StationWindPresenter from 'winds-mobi-client-web/components/station/wind/presenter';
+import { trackedObject } from '@ember/reactive/collections';
 
 interface Ctx extends RenderingTestContext {
   history: History[];
@@ -24,7 +24,7 @@ const now = Date.now();
 // charts' actual 5-day request duration -- long enough that "6h" (the
 // default range) and "all data" produce clearly distinguishable axis spans.
 function fiveDaysOfHistory(idPrefix: string, endTime: number): History[] {
-  const history: History[] = [];
+  const history: Ctx['history'] = [];
   for (let t = endTime - 5 * DAY; t <= endTime; t += HOUR) {
     history.push({
       id: `${idPrefix}:${t}`,
@@ -60,14 +60,21 @@ module('Integration | Chart | range selector reset', function (hooks) {
   setupRenderingTest(hooks);
 
   test('switching stations resets the range selector to its default instead of leaving it at "All"', async function (this: Ctx, assert) {
-    set(this, 'history', fiveDaysOfHistory('holfuy-1829', now));
-    set(this, 'stationId', 'holfuy-1829');
+    const state = trackedObject({
+      history: fiveDaysOfHistory('holfuy-1829', now),
+      stationId: 'holfuy-1829',
+    });
 
-    await render(hbs`
-      <div class="h-64 w-64">
-        <Station::Wind::Presenter @history={{this.history}} @stationId={{this.stationId}} />
-      </div>
-    `);
+    await render(
+      <template>
+        <div class="h-64 w-64">
+          <StationWindPresenter
+            @history={{state.history}}
+            @stationId={{state.stationId}}
+          />
+        </div>
+      </template>
+    );
 
     const Highcharts = (await import('highcharts')).default;
     const findChart = () =>
@@ -83,8 +90,8 @@ module('Integration | Chart | range selector reset', function (hooks) {
       'the initial render defaults to the "6h" range selector button'
     );
 
-    set(this, 'history', fiveDaysOfHistory('holfuy-1808', now + 1000));
-    set(this, 'stationId', 'holfuy-1808');
+    state.history = fiveDaysOfHistory('holfuy-1808', now + 1000);
+    state.stationId = 'holfuy-1808';
     await settled();
 
     const chartAfter = findChart();

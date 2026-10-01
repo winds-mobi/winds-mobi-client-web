@@ -1,6 +1,6 @@
 export default {
   buildOptions: {
-    inputPath: 'translations',
-    wrapTranslationsWithNamespace: true,
+    translationsDir: 'translations',
+    namespaceKeysByDir: true,
   },
 };

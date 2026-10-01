@@ -5,7 +5,7 @@ import azimuthToCardinal from 'winds-mobi-client-web/helpers/azimuth-to-cardinal
 import type { IconComponent } from 'winds-mobi-client-web/utils/icon-component';
 
 type MetricValue = number | string | null | undefined;
-type StationMetricFormat =
+export type StationMetricFormat =
   | 'azimuth'
   | 'humidity'
   | 'integer'

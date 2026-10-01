@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import StationMeta from 'winds-mobi-client-web/components/station/meta';
 
 interface StationMetaTestContext extends RenderedTestContext {
   station: Station;
@@ -37,35 +37,35 @@ module('Integration | Component | station/meta', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it hides the provider meta item when the provider name is missing', async function (this: StationMetaTestContext, assert) {
-    this.station = {
+    const station: StationMetaTestContext['station'] = {
       ...BASE_STATION,
       providerName: undefined,
     };
 
-    await render(hbs`<Station::Meta @station={{this.station}} />`);
+    await render(<template><StationMeta @station={{station}} /></template>);
 
     assert.dom('[data-test-station-provider-link]').doesNotExist();
     assert.dom(this.element).doesNotIncludeText('Provider');
   });
 
   test('it hides the provider meta item when the provider URL is missing', async function (this: StationMetaTestContext, assert) {
-    this.station = {
+    const station: StationMetaTestContext['station'] = {
       ...BASE_STATION,
     };
 
-    await render(hbs`<Station::Meta @station={{this.station}} />`);
+    await render(<template><StationMeta @station={{station}} /></template>);
 
     assert.dom('[data-test-station-provider-link]').doesNotExist();
     assert.dom(this.element).doesNotIncludeText('Provider');
   });
 
   test('it renders the provider link when the provider URL is available', async function (this: StationMetaTestContext, assert) {
-    this.station = {
+    const station: StationMetaTestContext['station'] = {
       ...BASE_STATION,
       providerUrl: 'https://windline.ch/station/4109',
     };
 
-    await render(hbs`<Station::Meta @station={{this.station}} />`);
+    await render(<template><StationMeta @station={{station}} /></template>);
 
     assert
       .dom('[data-test-station-provider-link]')

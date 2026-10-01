@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import SettingsShowcaseWindDirection from 'winds-mobi-client-web/components/settings/showcase/wind-direction';
 
 // Wind direction is a setting, off by default -- see the identical helper in
 // tests/integration/components/station/wind/presenter-test.ts.
@@ -15,7 +15,7 @@ module(
     setupRenderingTest(hooks);
 
     test('it renders no Direction series when the setting is off', async function (assert) {
-      await render(hbs`<Settings::Showcase::WindDirection />`);
+      await render(<template><SettingsShowcaseWindDirection /></template>);
 
       const Highcharts = (await import('highcharts')).default;
       const chart = Highcharts.charts.findLast((c) => c?.container);
@@ -31,7 +31,7 @@ module(
     test('it renders a real windbarb series once the setting is on', async function (this: RenderingTestContext, assert) {
       enableWindDirection(this);
 
-      await render(hbs`<Settings::Showcase::WindDirection />`);
+      await render(<template><SettingsShowcaseWindDirection /></template>);
 
       const Highcharts = (await import('highcharts')).default;
       const chart = Highcharts.charts.findLast((c) =>

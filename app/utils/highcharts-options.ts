@@ -33,12 +33,7 @@ export function defaultYAxis(overrides: YAxisOverrides = {}) {
 }
 
 type NumericHistoryKey =
-  | 'direction'
-  | 'speed'
-  | 'gusts'
-  | 'temperature'
-  | 'humidity'
-  | 'rain';
+  'direction' | 'speed' | 'gusts' | 'temperature' | 'humidity' | 'rain';
 
 export function seriesFor(history: History[], key: NumericHistoryKey) {
   return buildTimeSeriesData(

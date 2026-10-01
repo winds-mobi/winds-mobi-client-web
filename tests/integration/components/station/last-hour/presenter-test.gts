@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
 import { render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import {
   setupRenderingTest,
   type RenderedTestContext,
 } from 'winds-mobi-client-web/tests/helpers';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationLastHourPresenter from 'winds-mobi-client-web/components/station/last-hour/presenter';
 
 interface StationLastHourPresenterTestContext extends RenderedTestContext {
   history: History[];
@@ -18,7 +18,7 @@ module(
     setupRenderingTest(hooks);
 
     test('it renders the minimum and mean average speed, and the maximum gust', async function (this: StationLastHourPresenterTestContext, assert) {
-      this.history = [
+      const history: StationLastHourPresenterTestContext['history'] = [
         {
           id: 'three',
           direction: 200,
@@ -57,7 +57,7 @@ module(
       ];
 
       await render(
-        hbs`<Station::LastHour::Presenter @history={{this.history}} />`
+        <template><StationLastHourPresenter @history={{history}} /></template>
       );
 
       assert.dom(this.element).includesText('Maximum');

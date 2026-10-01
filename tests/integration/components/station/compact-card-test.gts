@@ -1,7 +1,6 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { findAll, render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import {
   setupRenderingTest,
@@ -9,6 +8,8 @@ import {
 } from 'winds-mobi-client-web/tests/helpers';
 import { windToTextClass } from 'winds-mobi-client-web/helpers/wind-to-colour';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import StationCompactCard from 'winds-mobi-client-web/components/station/compact-card';
+import { trackedObject } from '@ember/reactive/collections';
 
 interface StationCompactCardTestContext extends RenderedTestContext {
   station: Station;
@@ -55,9 +56,11 @@ module('Integration | Component | station/compact-card', function (hooks) {
   });
 
   test('it renders the name, altitude, and wind speed/gusts', async function (this: StationCompactCardTestContext, assert) {
-    this.station = STATION;
+    const station: StationCompactCardTestContext['station'] = STATION;
 
-    await render(hbs`<Station::CompactCard @station={{this.station}} />`);
+    await render(
+      <template><StationCompactCard @station={{station}} /></template>
+    );
 
     assert
       .dom(`[data-test-nearby-station-card-compact="${STATION.id}"]`)
@@ -69,20 +72,26 @@ module('Integration | Component | station/compact-card', function (hooks) {
   });
 
   test('it shows the peak icon only for peak stations', async function (this: StationCompactCardTestContext, assert) {
-    this.station = { ...STATION, isPeak: false };
+    const state = trackedObject({ station: { ...STATION, isPeak: false } });
 
-    await render(hbs`<Station::CompactCard @station={{this.station}} />`);
+    await render(
+      <template><StationCompactCard @station={{state.station}} /></template>
+    );
     assert.dom('svg', findAll('dl')[0]).doesNotExist();
 
-    this.station = { ...STATION, isPeak: true };
-    await render(hbs`<Station::CompactCard @station={{this.station}} />`);
+    state.station = { ...STATION, isPeak: true };
+    await render(
+      <template><StationCompactCard @station={{state.station}} /></template>
+    );
     assert.dom('svg', findAll('dl')[0]).exists();
   });
 
   test('it colours the wind speed by its band', async function (this: StationCompactCardTestContext, assert) {
-    this.station = STATION;
+    const station: StationCompactCardTestContext['station'] = STATION;
 
-    await render(hbs`<Station::CompactCard @station={{this.station}} />`);
+    await render(
+      <template><StationCompactCard @station={{station}} /></template>
+    );
 
     const speedDd = findAll('dd').find(
       (element) => element.textContent?.trim() === '12'

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Upgraded the underlying framework (Ember) to 7.3, along with its build tooling (Embroider, Vite) and linting/formatting tools, following Ember's official application blueprint, and the data layer (Warp Drive) to 5.9 without its legacy compatibility packages, which makes the app's download slightly smaller.
+  - _aka: fresh oil and new filters under the bonnet. Nothing should look or behave differently — if anything does, that's a bug, not a feature._
+
 ## v0.26.0 - 2026-09-30
 
 ### Added

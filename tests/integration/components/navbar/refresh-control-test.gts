@@ -2,8 +2,8 @@ import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import { module, test } from 'qunit';
 import { click, render } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
+import NavbarRefreshControl from 'winds-mobi-client-web/components/navbar/refresh-control';
 
 class FakeMapRefreshService extends Service {
   @tracked isRefreshing = false;
@@ -32,14 +32,14 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
 
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh] span svg')
       .doesNotHaveClass('animate-spin');
 
     mapRefresh.isRefreshing = true;
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert.dom('[data-test-navbar-refresh] span svg').hasClass('animate-spin');
   });
@@ -49,14 +49,14 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
 
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
     await click('[data-test-navbar-refresh]');
 
     assert.strictEqual(mapRefresh.refreshNowCallCount, 1);
   });
 
   test('each refresh adds a full turn, so the transition replays every time', async function (assert) {
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh-spin]')
@@ -95,11 +95,11 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
 
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     // Simulate the auto-refresh loop firing on its own, with no click.
     refreshService.refreshCount++;
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh-spin]')
@@ -115,7 +115,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       'service:map-refresh'
     ) as unknown as FakeMapRefreshService;
 
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh-progress]')
@@ -126,7 +126,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
       );
 
     mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs / 2;
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh-progress]')
@@ -138,7 +138,7 @@ module('Integration | Component | navbar/refresh-control', function (hooks) {
 
     // Clamped, not overshot, however far a test double's elapsed time drifts.
     mapRefresh.elapsedMs = mapRefresh.refreshIntervalMs * 10;
-    await render(hbs`<Navbar::RefreshControl />`);
+    await render(<template><NavbarRefreshControl /></template>);
 
     assert
       .dom('[data-test-navbar-refresh-progress]')

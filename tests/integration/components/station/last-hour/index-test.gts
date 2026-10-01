@@ -6,12 +6,12 @@ import {
   settled,
   type RenderingTestContext,
 } from '@ember/test-helpers';
-import { set } from '@ember/object';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import { historyQuery } from 'winds-mobi-client-web/builders/history';
 import type { History } from 'winds-mobi-client-web/services/store';
+import StationLastHour from 'winds-mobi-client-web/components/station/last-hour';
+import { trackedObject } from '@ember/reactive/collections';
 
 type DeferredHistoryRequest = {
   promise: Promise<{ content: { data: History[] } }>;
@@ -181,18 +181,20 @@ module('Integration | Component | station/last-hour', function (hooks) {
       deferredStationBHistory.promise
     );
 
-    set(this, 'stationId', 'station-a');
+    const state = trackedObject({ stationId: 'station-a' });
 
-    await render(hbs`<Station::LastHour @stationId={{this.stationId}} />`);
+    await render(
+      <template><StationLastHour @stationId={{state.stationId}} /></template>
+    );
 
     const stationAInitialMetrics = renderedMetricValues();
 
     assert.true(stationAInitialMetrics.length > 0);
 
-    set(this, 'stationId', 'station-b');
+    state.stationId = 'station-b';
     await settled();
 
-    set(this, 'stationId', 'station-a');
+    state.stationId = 'station-a';
     await settled();
 
     assert.deepEqual(renderedMetricValues(), stationAInitialMetrics);

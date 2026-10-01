@@ -1,8 +1,8 @@
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { TimeSeriesPoint } from 'winds-mobi-client-web/utils/chart-series';
+import ChartTimeSeries from 'winds-mobi-client-web/components/chart/time-series';
 
 interface TimeSeriesTestContext extends RenderingTestContext {
   chartData: { name: string; data: TimeSeriesPoint[] }[];
@@ -18,7 +18,7 @@ module('Integration | Component | chart/time-series', function (hooks) {
   test('it renders with series data', async function (this: TimeSeriesTestContext, assert) {
     const now = Date.now();
 
-    this.chartData = [
+    const chartData: TimeSeriesTestContext['chartData'] = [
       {
         name: 'Wind',
         data: [
@@ -29,17 +29,21 @@ module('Integration | Component | chart/time-series', function (hooks) {
     ];
 
     await render(
-      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+      <template>
+        <ChartTimeSeries @chartData={{chartData}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();
   });
 
   test('it renders with no series data', async function (this: TimeSeriesTestContext, assert) {
-    this.chartData = [];
+    const chartData: TimeSeriesTestContext['chartData'] = [];
 
     await render(
-      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+      <template>
+        <ChartTimeSeries @chartData={{chartData}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert.dom('.highcharts-container').exists();
@@ -54,10 +58,14 @@ module('Integration | Component | chart/time-series', function (hooks) {
   // confirms our option actually reached and took effect on the real chart,
   // not just that we passed it.
   test('it pins the chart to light mode regardless of the OS/browser color scheme preference', async function (this: TimeSeriesTestContext, assert) {
-    this.chartData = [{ name: 'Wind', data: [[Date.now(), 10]] }];
+    const chartData: TimeSeriesTestContext['chartData'] = [
+      { name: 'Wind', data: [[Date.now(), 10]] },
+    ];
 
     await render(
-      hbs`<Chart::TimeSeries @chartData={{this.chartData}} @stationId="holfuy-1829" />`
+      <template>
+        <ChartTimeSeries @chartData={{chartData}} @stationId="holfuy-1829" />
+      </template>
     );
 
     assert

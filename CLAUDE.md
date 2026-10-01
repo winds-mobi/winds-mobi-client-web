@@ -9,10 +9,11 @@ a live wind/weather station map for free-flight (paragliding/hang-gliding) pilot
 MapLibre map of stations, per-station detail panels with Highcharts time series, a nearby-stations
 view backed by geolocation, and search.
 
-Stack: Ember 7 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive / EmberData
-5.8 (schema-record reactive store), Frontile components, Tailwind CSS v4, ember-intl, ember-concurrency,
-ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers, no wrapper addon — see
-Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is pinned in `engines`.
+Stack: Ember 7 (Octane, Polaris-style `.gts`/TypeScript), Vite + Embroider, Warp Drive 5.9 (schema-record
+reactive store via `useRecommendedStore`, no legacy/EmberData packages), Frontile components, Tailwind CSS v4,
+ember-intl, ember-concurrency, ember-maplibre-gl, Highcharts (driven directly through this app's own modifiers,
+no wrapper addon — see Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); Node is
+pinned in `engines`.
 
 ## Authoritative external references
 
@@ -49,8 +50,7 @@ Highcharts below). Package manager is **pnpm** (pinned via `packageManager`); No
   `ember-tooling` GitHub org) — a second, more agent-oriented source alongside the `ember-mcp` tools above.
 - **Warp Drive / EmberData** request, builder, handler, and `<Request>` patterns: Warp Drive ships its own
   official agent knowledge base as a real npm package, `@warp-drive/memory-alpha` — **installed** here as a
-  devDependency (this app is on warp-drive `5.8.2`; installed at `5.9.1`, the closest published stable release,
-  since `5.8.x` predates the package). It ships no `.claude/skills` wiring of its own (deliberately
+  devDependency, kept on the same version as the app's `@warp-drive/*` packages. It ships no `.claude/skills` wiring of its own (deliberately
   tool-agnostic, no YAML frontmatter) — consume it as a routing table, not a pile of docs to read wholesale:
   1. Read `node_modules/@warp-drive/memory-alpha/skills/index.md` first. It's a one-row-per-task table (e.g.
      defining a resource schema, fetching/caching data through the Store) pointing at exactly one file each —
@@ -265,9 +265,12 @@ state, route models, and query params.
     whose `read-modules.js` does a runtime `require()` that Rollup can't resolve as ESM — `pnpm build` fails outright,
     not just in dev. The existing fake-`service:store`-by-URL pattern (see Testing below) remains the right tool here.
   - `ember-tracked-local-storage` replaced this app's hand-rolled `trackedInLocalStorage` decorator (see
-    [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: also a classic addon,
-    but it builds cleanly, and its per-owner `service:tracked-local-storage` architecture is a genuine improvement
-    over the module-scope singleton the hand-rolled version used.
+    [Settings persistence](#settings-persistence-tracked-local-storage)) and was **adopted**: its per-owner
+    `service:tracked-local-storage` architecture is a genuine improvement over the module-scope singleton the
+    hand-rolled version used. It's installed from a prebuilt v2 build (the `convert-to-v2-addon-dist` branch of
+    `MichalBryxi/ember-tracked-local-storage`, pinned to a commit tarball, because the dev container has no `git`)
+    until upstream PR adopted-ember-addons/ember-tracked-local-storage#46 is released — then switch back to a
+    normal version range.
   - `ember-responsive` (breakpoint/`matchMedia` service, considered for driving a Frontile `<Drawer>`'s `@placement`
     off a media query) was **rejected**: last published 2022 (`5.0.0`), a classic addon never updated for Embroider's
     current strict-vendoring resolver. It imports `@ember/string` as a resolver "virtual peer dep," which Embroider
@@ -465,6 +468,11 @@ a function`) when the chart tries to render it.
   string whose exact ICU/Intl unit-format output isn't worth hand-deriving (e.g. `station/metric-card`'s
   `intl.formatNumber(..., {format: 'windSpeed'})`), capture it empirically via a throwaway debug render
   (`console.log` the text, read it from the test-runner output, delete the debug test) rather than guessing.
+- Rendering tests are `.gts` files that render `<template>` tags, importing each component they use (no `hbs`
+  strings, no resolver `::` names), so Glint type-checks their arguments. Pass values as locals the template closes
+  over; for a value a test changes after rendering, use a `trackedObject` from `@ember/reactive/collections` and
+  assign to it. Don't alias `this` into a template (`@typescript-eslint/no-this-alias` rejects `const self = this`),
+  and don't use `this.set`.
 - `pnpm lint` runs ESLint (type-aware, cached) and Glint type-checking (`lint:types`, `ember-tsc --noEmit`)
   alongside the other linters, and CI enforces all of them. The tree is typecheck-clean — keep it that way; fix new
   errors rather than working around them. When a rendering test needs a custom `this` context type, extend

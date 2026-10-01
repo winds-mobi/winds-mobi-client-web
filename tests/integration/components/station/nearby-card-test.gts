@@ -1,10 +1,10 @@
 import Service from '@ember/service';
 import { module, test } from 'qunit';
 import { render, type RenderingTestContext } from '@ember/test-helpers';
-import { hbs } from 'ember-cli-htmlbars';
 import { Type } from '@warp-drive/core/types/symbols';
 import { setupRenderingTest } from 'winds-mobi-client-web/tests/helpers';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import StationNearbyCard from 'winds-mobi-client-web/components/station/nearby-card';
 
 interface StationNearbyCardTestContext extends RenderingTestContext {
   station: Station;
@@ -51,9 +51,11 @@ module('Integration | Component | station/nearby-card', function (hooks) {
   });
 
   test('it renders the header and the summary sections', async function (this: StationNearbyCardTestContext, assert) {
-    this.station = STATION;
+    const station: StationNearbyCardTestContext['station'] = STATION;
 
-    await render(hbs`<Station::NearbyCard @station={{this.station}} />`);
+    await render(
+      <template><StationNearbyCard @station={{station}} /></template>
+    );
 
     assert.dom('[data-test-nearby-station-card]').exists();
     assert.dom('[data-test-station-title]').hasText('Holfuy 1804');

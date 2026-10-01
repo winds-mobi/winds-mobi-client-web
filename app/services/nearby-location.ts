@@ -20,10 +20,7 @@ export type NearbyLocationErrorCode =
 // 'syncing'  = navigator.permissions.query in flight (synchronous gate so a
 //              concurrent call during the async gap can't re-enter)
 type NearbyPermissionState =
-  | PermissionState
-  | 'checking'
-  | 'syncing'
-  | 'unsupported';
+  PermissionState | 'checking' | 'syncing' | 'unsupported';
 type NearbyRequestState = 'idle' | 'requesting' | 'ready' | 'error';
 
 const GEOLOCATION_PERMISSION_DENIED = 1;
