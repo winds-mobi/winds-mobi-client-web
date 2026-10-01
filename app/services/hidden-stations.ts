@@ -1,34 +1,13 @@
-import Service, { service } from '@ember/service';
-import { trackedInLocalStorage } from 'ember-tracked-local-storage';
+import { service } from '@ember/service';
 import type SettingsService from 'winds-mobi-client-web/services/settings';
 import type { Station } from 'winds-mobi-client-web/services/store';
+import StationIdListService from 'winds-mobi-client-web/utils/station-id-list';
 
-// Station ids the visitor has hidden from the map and the nearby list (#167),
-// persisted in the browser via ember-tracked-local-storage, same as
-// app/services/favorites.ts. There are no accounts: this list lives on this
-// device only.
-export default class HiddenStationsService extends Service {
+// Station ids the visitor has hidden (#167).
+export default class HiddenStationsService extends StationIdListService {
+  readonly storageKey = 'hiddenStations.stationIds';
+
   @service declare settings: SettingsService;
-
-  @trackedInLocalStorage({
-    keyName: 'hiddenStations.stationIds',
-    defaultValue: [] as string[],
-  })
-  stationIds!: string[];
-
-  has(stationId: string): boolean {
-    return this.stationIds.includes(stationId);
-  }
-
-  add(stationId: string): void {
-    if (!this.has(stationId)) {
-      this.stationIds = [...this.stationIds, stationId];
-    }
-  }
-
-  remove(stationId: string): void {
-    this.stationIds = this.stationIds.filter((id) => id !== stationId);
-  }
 
   // The stations to show: everything but the hidden ones, while hiding is on.
   // Hiding is a beta feature, so turning beta features off shows every
@@ -39,14 +18,6 @@ export default class HiddenStationsService extends Service {
     }
 
     return stations.filter((station) => !this.has(station.id));
-  }
-
-  toggle(stationId: string): void {
-    if (this.has(stationId)) {
-      this.remove(stationId);
-    } else {
-      this.add(stationId);
-    }
   }
 }
 
