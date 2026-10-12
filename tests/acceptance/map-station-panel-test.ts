@@ -735,4 +735,27 @@ module('Acceptance | map station panel', function (hooks) {
         .exists('the newly-selected station has it instead');
     }
   );
+
+  test.if(
+    'a cold start onto a station link reopens the remembered map view behind it',
+    webGLAvailable,
+    async function (this: TestContext, assert) {
+      this.owner
+        .lookup('service:tracked-local-storage')
+        .setItem('map.lastView', {
+          longitude: 9.87654,
+          latitude: 46.12345,
+          zoom: 11.5,
+        });
+
+      await visit('/map/holfuy-1804');
+
+      assertCurrentRoute(assert, '/map/holfuy-1804', {
+        latitude: '46.12345',
+        longitude: '9.87654',
+        zoom: '11.5',
+      });
+      assert.dom('[data-test-station-panel]').exists();
+    }
+  );
 });

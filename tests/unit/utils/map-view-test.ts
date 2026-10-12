@@ -2,15 +2,19 @@ import { module, test } from 'qunit';
 import { cached } from '@glimmer/tracking';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import type RouterService from '@ember/routing/router-service';
+import type { Registry as Services } from '@ember/service';
 import {
   DEFAULT_MAP_LAT,
   DEFAULT_MAP_LNG,
   DEFAULT_MAP_ZOOM,
   boundsFromMap,
+  isDefaultMapView,
   mapBoundsEqual,
   mapViewFromMap,
   mapViewsEqual,
   parseMapView,
+  rememberedMapView,
+  rememberMapView,
   roundBoundsForRequest,
   stableMapView,
   TrackedMapView,
@@ -255,5 +259,37 @@ module('Unit | Utility | map-view', function () {
       3,
       'a transition that changes the routed view does trigger a downstream recompute'
     );
+  });
+
+  test('isDefaultMapView is true only for the default overview', function (assert) {
+    assert.true(isDefaultMapView(parseMapView()));
+    assert.true(isDefaultMapView(parseMapView({})));
+    assert.false(isDefaultMapView(parseMapView({ zoom: '9' })));
+  });
+
+  test('rememberedMapView reads back a remembered view and ignores anything else', function (assert) {
+    const items = new Map<string, unknown>();
+    const storage = {
+      getItem: (key: string) => items.get(key),
+      setItem: (key: string, value: unknown) => items.set(key, value),
+    } as unknown as Services['tracked-local-storage'];
+
+    assert.strictEqual(rememberedMapView(storage), undefined);
+
+    rememberMapView(storage, { longitude: 8, latitude: 46, zoom: 9 });
+
+    assert.deepEqual(rememberedMapView(storage), {
+      longitude: 8,
+      latitude: 46,
+      zoom: 9,
+    });
+
+    items.set('map.lastView', { longitude: 8, latitude: '46', zoom: 9 });
+
+    assert.strictEqual(rememberedMapView(storage), undefined);
+
+    items.set('map.lastView', null);
+
+    assert.strictEqual(rememberedMapView(storage), undefined);
   });
 });

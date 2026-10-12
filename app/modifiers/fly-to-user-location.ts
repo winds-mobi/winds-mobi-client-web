@@ -5,8 +5,7 @@ import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-lo
 import { flyToCoordinates } from 'winds-mobi-client-web/utils/locate';
 import {
   currentMapView,
-  mapViewsEqual,
-  parseMapView,
+  isDefaultMapView,
 } from 'winds-mobi-client-web/utils/map-view';
 
 interface FlyToUserLocationSignature {
@@ -41,12 +40,10 @@ export default class FlyToUserLocationModifier extends Modifier<FlyToUserLocatio
       return;
     }
 
-    const isInitialDefaultView = mapViewsEqual(
-      currentMapView(this.router),
-      parseMapView()
-    );
-
-    if (isInitialDefaultView && this.nearbyLocation.coordinates) {
+    if (
+      isDefaultMapView(currentMapView(this.router)) &&
+      this.nearbyLocation.coordinates
+    ) {
       flyToCoordinates(this.router, this.nearbyLocation);
     }
   }
