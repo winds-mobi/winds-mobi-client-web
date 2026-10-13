@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Reopening the app, in a new tab or after your phone's browser closed it in the background, now brings the map back to where you left it, at the same zoom, instead of showing all of Switzerland and then jumping to your location. Links to a specific map view still open there, and the logo still resets to the overview. ([#202](https://github.com/winds-mobi/winds-mobi-client-web/issues/202))
+
 ## v0.26.1 - 2026-10-01
 
 ### Changed
