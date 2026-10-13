@@ -342,9 +342,8 @@ export default class Map extends Component<MapSignature> {
       return;
     }
 
-    void this.router.transitionTo('map', {
-      queryParams: this.mapView,
-    });
+    // Ember's sticky query params keep the map's view, as when opening one.
+    void this.router.transitionTo('map');
   }
 
   // Gates the `flyToUserLocation` modifier below: don't auto-fly during the app's

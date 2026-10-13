@@ -12,7 +12,6 @@ import StationMeta from './meta';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
-import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
 import type PanelPlacementService from 'winds-mobi-client-web/services/panel-placement';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
@@ -30,15 +29,10 @@ export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
   @service('panel-placement') declare panelPlacement: PanelPlacementService;
 
-  get mapView() {
-    return currentMapView(this.router);
-  }
-
   @action
   close() {
-    this.router.transitionTo('map', {
-      queryParams: this.mapView,
-    });
+    // Ember's sticky query params keep the map's view.
+    this.router.transitionTo('map');
   }
 
   <template>
