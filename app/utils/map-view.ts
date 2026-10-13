@@ -1,7 +1,6 @@
 import { tracked } from '@glimmer/tracking';
 import type { Map as MaplibreMap } from 'ember-maplibre-gl';
 import type RouterService from '@ember/routing/router-service';
-import type { Registry as Services } from '@ember/service';
 
 // Whole-Switzerland overview: the default when no view is in the URL and the
 // user's location is unavailable (see issue #32).
@@ -125,36 +124,6 @@ export function parseMapView(queryParams?: MapQueryParams): MapView {
     latitude: parseNumber(queryParams?.latitude, DEFAULT_MAP_LAT),
     zoom: parseNumber(queryParams?.zoom, DEFAULT_MAP_ZOOM),
   };
-}
-
-// The last routed view, kept in this browser so a cold start (a new tab, or a
-// mobile browser that dropped the app from memory) reopens where the visitor
-// left off instead of at the default overview.
-const LAST_MAP_VIEW_KEY = 'map.lastView';
-
-export function rememberMapView(
-  storage: Services['tracked-local-storage'],
-  view: MapView
-): void {
-  storage.setItem(LAST_MAP_VIEW_KEY, view);
-}
-
-export function rememberedMapView(
-  storage: Services['tracked-local-storage']
-): MapView | undefined {
-  const stored = storage.getItem(LAST_MAP_VIEW_KEY) as
-    Partial<Record<keyof MapView, unknown>> | null | undefined;
-  const { longitude, latitude, zoom } = stored ?? {};
-
-  if (
-    typeof longitude === 'number' &&
-    typeof latitude === 'number' &&
-    typeof zoom === 'number'
-  ) {
-    return { longitude, latitude, zoom };
-  }
-
-  return undefined;
 }
 
 // Whether `view` is the controller's default overview — what a URL without any

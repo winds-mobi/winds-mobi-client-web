@@ -15,6 +15,8 @@ export const RETIRED_STORAGE_KEYS: readonly string[] = [
   'settings.refreshButtonSpin',
   // The Favourites toggle; favourites are now always available (#176).
   'settings.favoritesFeatureEnabled',
+  // The last map view; the whole last URL is remembered instead (#204).
+  'map.lastView',
 ];
 
 // Goes through the tracked-local-storage service rather than raw
