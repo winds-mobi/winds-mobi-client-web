@@ -69,6 +69,7 @@ import {
   SIDE_PANEL_QUERY,
   type default as PanelPlacementService,
 } from 'winds-mobi-client-web/services/panel-placement';
+import { openStationId } from 'winds-mobi-client-web/utils/open-station';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
   OSM_SWISS_STYLE,
@@ -186,21 +187,8 @@ export default class Map extends Component<MapSignature> {
     this.trackedMapView.sync();
   }
 
-  // The station whose detail panel is open (the `map.station/:station_id` route).
   get selectedStationId(): string | undefined {
-    let route = this.router.currentRoute;
-
-    while (route) {
-      const id = route.params?.['station_id'];
-
-      if (typeof id === 'string') {
-        return id;
-      }
-
-      route = route.parent;
-    }
-
-    return undefined;
+    return openStationId(this.router);
   }
 
   get isStationPanelOpen(): boolean {
