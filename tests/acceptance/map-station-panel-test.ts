@@ -736,26 +736,21 @@ module('Acceptance | map station panel', function (hooks) {
     }
   );
 
-  test.if(
-    'a cold start onto a station link reopens the remembered map view behind it',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      this.owner
-        .lookup('service:tracked-local-storage')
-        .setItem('map.lastView', {
-          longitude: 9.87654,
-          latitude: 46.12345,
-          zoom: 11.5,
-        });
+  test('a cold start at the root reopens the last station panel and map view', async function (assert) {
+    this.owner
+      .lookup('service:tracked-local-storage')
+      .setItem(
+        'app.lastUrl',
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
 
-      await visit('/map/holfuy-1804');
+    await visit('/');
 
-      assertCurrentRoute(assert, '/map/holfuy-1804', {
-        latitude: '46.12345',
-        longitude: '9.87654',
-        zoom: '11.5',
-      });
-      assert.dom('[data-test-station-panel]').exists();
-    }
-  );
+    assertCurrentRoute(assert, '/map/holfuy-1804', {
+      latitude: '46.67719',
+      longitude: '7.86323',
+      zoom: '13',
+    });
+    assert.dom('[data-test-station-title]').hasText('Holfuy 1804');
+  });
 });

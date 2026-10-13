@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { array, fn } from '@ember/helper';
-import { type Registry as Services, service } from '@ember/service';
+import { service } from '@ember/service';
 import type { Future } from '@warp-drive/core/request';
 import { getRequestState } from '@warp-drive/core/reactive';
 import { mapQuery } from 'winds-mobi-client-web/builders/station';
@@ -56,7 +56,6 @@ import driveMapCamera from 'winds-mobi-client-web/modifiers/drive-map-camera';
 import flyToUserLocation from 'winds-mobi-client-web/modifiers/fly-to-user-location';
 import onRouteChange from 'winds-mobi-client-web/modifiers/on-route-change';
 import registerLoadingProbe from 'winds-mobi-client-web/modifiers/register-loading-probe';
-import rememberMapView from 'winds-mobi-client-web/modifiers/remember-map-view';
 import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
@@ -122,8 +121,6 @@ export default class Map extends Component<MapSignature> {
   @service declare refresh: RefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
-  @service('tracked-local-storage')
-  declare trackedLocalStorage: Services['tracked-local-storage'];
 
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
@@ -412,7 +409,6 @@ export default class Map extends Component<MapSignature> {
       {{commitResolvedStations this.requestState this.commitStations}}
       {{registerLoadingProbe this.refresh this.loadingProbe}}
       {{flyToUserLocation this.isFlyToUserLocationEnabled}}
-      {{rememberMapView this.trackedLocalStorage this.mapView}}
     >
       <MapLibreGL
         data-test-map-canvas

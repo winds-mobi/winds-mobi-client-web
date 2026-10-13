@@ -175,15 +175,11 @@ and `roundBoundsForRequest` (snaps the captured bounds to the refetch grid so su
 component syncs query params → MapLibre declaratively (fly-to from state) rather than imperatively writing back
 mid-interaction. Keep this direction; don't reintroduce imperative view bookkeeping.
 
-**The last view is remembered for cold starts.** The map component stores the routed view in localStorage
-(`map.lastView`) through the `rememberMapView` modifier, which runs on install and whenever the view changes.
-`app/routes/map.ts`'s `beforeModel` swaps it in on the app's _first_ transition only when the URL's view is the default
-one (Ember fills in controller defaults even for a bare `/map`, so "default" is the only way to tell "no view in the
-URL"). Restoring has to be the route (it alone decides the first URL before the map renders); saving has to be something
-alive while the map is (a router hook on the component misses the first transition, and firing it on install writes
-tracked state mid-render). In-app navigation never restores — sticky query params already keep the view, and a bare
-`/map` from inside the app is the logo's deliberate reset. A restored view is not the default, so `fly-to-user-location`
-doesn't then jump to the GPS fix.
+**The last URL is remembered for cold starts.** The class-based `rememberUrl` modifier on the application template
+stores `router.currentURL` (route, dynamic segments and every query param) in localStorage (`app.lastUrl`); it runs on
+install and whenever that tracked URL changes, so the app's first transition is covered too, which a `routeDidChange`
+listener attached at render would miss. `app/routes/index.ts` transitions to it instead of `map` on the app's _first_
+transition only, so opening the root reopens the last screen while any explicit URL (`/map` included) opens as asked.
 
 **The two directions, and why `moveend` only writes back for user gestures** (learned the hard way — don't undo this):
 

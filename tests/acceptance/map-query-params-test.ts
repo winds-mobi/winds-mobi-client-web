@@ -80,8 +80,6 @@ function countStationRequests(calls: string[]) {
   return calls.filter((url) => url.includes('/stations/?')).length;
 }
 
-const REMEMBERED_VIEW = { longitude: 9.87654, latitude: 46.12345, zoom: 11.5 };
-
 function assertCurrentMapUrl(
   assert: Assert,
   expectedQueryParams: Record<string, string>
@@ -196,38 +194,15 @@ module('Acceptance | map query params', function (hooks) {
   );
 
   test.if(
-    'it remembers the routed view in this browser',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-
-      assert.deepEqual(
-        this.owner
-          .lookup('service:tracked-local-storage')
-          .getItem('map.lastView'),
-        { longitude: 8.12345, latitude: 46.54321, zoom: 9.5 },
-        'a view opened from a link is remembered without moving the map'
-      );
-
-      await visit('/map?longitude=7.5&latitude=46.25&zoom=10');
-
-      assert.deepEqual(
-        this.owner
-          .lookup('service:tracked-local-storage')
-          .getItem('map.lastView'),
-        { longitude: 7.5, latitude: 46.25, zoom: 10 },
-        'a later view replaces it'
-      );
-    }
-  );
-
-  test.if(
-    'a cold start without a view in the URL reopens the remembered view',
+    'a cold start at the root reopens the last map view',
     webGLAvailable,
     async function (this: TestContext, assert) {
       this.owner
         .lookup('service:tracked-local-storage')
-        .setItem('map.lastView', REMEMBERED_VIEW);
+        .setItem(
+          'app.lastUrl',
+          '/map?latitude=46.12345&longitude=9.87654&zoom=11.5'
+        );
 
       await visit('/');
 
@@ -236,39 +211,6 @@ module('Acceptance | map query params', function (hooks) {
         longitude: '9.87654',
         zoom: '11.5',
       });
-    }
-  );
-
-  test.if(
-    'a view in the URL wins over the remembered one',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      this.owner
-        .lookup('service:tracked-local-storage')
-        .setItem('map.lastView', REMEMBERED_VIEW);
-
-      await visit('/map?longitude=8.12345&latitude=46.54321&zoom=9.5');
-
-      assertCurrentMapUrl(assert, {
-        latitude: '46.54321',
-        longitude: '8.12345',
-        zoom: '9.5',
-      });
-    }
-  );
-
-  test.if(
-    'the logo still resets to the default view once the app is running',
-    webGLAvailable,
-    async function (this: TestContext, assert) {
-      this.owner
-        .lookup('service:tracked-local-storage')
-        .setItem('map.lastView', REMEMBERED_VIEW);
-
-      await visit('/settings');
-      await click('[data-test-navbar-logo]');
-
-      assertCurrentMapUrl(assert, {});
     }
   );
 });

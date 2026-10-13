@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Reopening the app now brings back exactly the screen you left, not just the map's position: the open station panel, the Nearby or Favourites list, Settings, and so on. Any link you open still goes where it points. ([#204](https://github.com/winds-mobi/winds-mobi-client-web/issues/204))
+
 ## v0.27.0 - 2026-10-13
 
 ### Changed
