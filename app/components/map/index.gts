@@ -64,8 +64,11 @@ import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-lo
 import {
   mapPaddingForPlacement,
   NO_MAP_PADDING,
-  SIDE_PANEL_QUERY,
 } from 'winds-mobi-client-web/utils/map-padding';
+import {
+  SIDE_PANEL_QUERY,
+  type default as PanelPlacementService,
+} from 'winds-mobi-client-web/services/panel-placement';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
   OSM_SWISS_STYLE,
@@ -126,6 +129,7 @@ export default class Map extends Component<MapSignature> {
   @service declare refresh: RefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
+  @service('panel-placement') declare panelPlacement: PanelPlacementService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
@@ -202,15 +206,6 @@ export default class Map extends Component<MapSignature> {
   get isStationPanelOpen(): boolean {
     return this.selectedStationId !== undefined;
   }
-
-  // Mirrors the overlay slot's own bottom-sheet/side-panel breakpoint (see the
-  // slot div's `landscape:`/`md:` classes below), so `driveMapCamera` can pad
-  // the map for whichever shape the panel actually takes without measuring it.
-  @tracked isSidePanel = false;
-
-  setIsSidePanel = (matches: boolean) => {
-    this.isSidePanel = matches;
-  };
 
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
@@ -289,13 +284,12 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
-  // Read once, when the map is built (`SettledMap` takes it before the first
-  // frame). The panel's shape is read straight from the media query because
-  // `isSidePanel` is only filled in by a modifier, after this first render.
+  // Read once, when the map is built: `SettledMap` sets the padding before the
+  // first frame, so a map opening with the station panel never jumps.
   get initOptions(): MapInitOptions & { padding: PaddingOptions } {
     return {
       padding: this.isStationPanelOpen
-        ? mapPaddingForPlacement(window.matchMedia(SIDE_PANEL_QUERY).matches)
+        ? mapPaddingForPlacement(this.panelPlacement.isSidePanel)
         : NO_MAP_PADDING,
       attributionControl: { compact: true },
       bearing: 0,
@@ -495,12 +489,12 @@ export default class Map extends Component<MapSignature> {
       sync with the Drawer's size argument if that ever changes. }}
       <div
         class="pointer-events-none absolute inset-0 z-20"
-        {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
+        {{trackMediaQuery SIDE_PANEL_QUERY this.panelPlacement.setIsSidePanel}}
         {{driveMapCamera
           this.mapInstance
           this.mapView
           this.isStationPanelOpen
-          this.isSidePanel
+          this.panelPlacement.isSidePanel
         }}
       >
         {{yield}}

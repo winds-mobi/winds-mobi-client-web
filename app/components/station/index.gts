@@ -1,5 +1,4 @@
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { hash } from '@ember/helper';
@@ -14,8 +13,7 @@ import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
 import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
-import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
-import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
+import type PanelPlacementService from 'winds-mobi-client-web/services/panel-placement';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationIndexSignature {
@@ -30,16 +28,7 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
-
-  @tracked isSidePanel = false;
-
-  setIsSidePanel = (matches: boolean) => {
-    this.isSidePanel = matches;
-  };
-
-  get placement(): 'left' | 'bottom' {
-    return this.isSidePanel ? 'left' : 'bottom';
-  }
+  @service('panel-placement') declare panelPlacement: PanelPlacementService;
 
   get mapView() {
     return currentMapView(this.router);
@@ -59,9 +48,9 @@ export default class StationIndex extends Component<StationIndexSignature> {
     scoped to that slot (instead of Frontile's default full-viewport portal),
     so its w-full/h-full base classes resolve against the slot's own
     responsive size, and its placement classes just pin it to the slot's
-    edges — no width/height math of our own needed. @placement mirrors the
-    slot's own bottom-sheet/side-panel breakpoint (SIDE_PANEL_QUERY above)
-    so the slide direction always matches the box actually on screen.
+    edges — no width/height math of our own needed. @placement follows the
+    slot's own bottom-sheet/side-panel breakpoint (the panel-placement
+    service) so the slide direction always matches the box actually on screen.
 
     No backdrop, no focus trap, and outside clicks never close it: the map
     behind the panel must stay fully interactive (see josemarluedke/frontile
@@ -111,12 +100,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
     component.) }}
     <Drawer
       data-test-station-panel
-      data-test-station-panel-placement={{this.placement}}
-      {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
+      data-test-station-panel-placement={{this.panelPlacement.placement}}
       @isOpen={{true}}
       @onClose={{this.close}}
       @renderInPlace={{true}}
-      @placement={{this.placement}}
+      @placement={{this.panelPlacement.placement}}
       @variant="flat"
       @size="sm"
       @backdrop="none"
