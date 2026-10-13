@@ -5,7 +5,7 @@ import {
   type MapPadding,
 } from 'winds-mobi-client-web/utils/map-padding';
 import {
-  mapViewCenter,
+  mapViewCamera,
   mapViewsEqual,
   type MapView,
 } from 'winds-mobi-client-web/utils/map-view';
@@ -61,7 +61,7 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
       // set (`SettledMap`), so this jump normally changes nothing: it only
       // catches the routed view up if it changed while the map was loading. A
       // jump, not a flight, so a map that just appeared never slides.
-      map.jumpTo({ center: mapViewCenter(view), zoom: view.zoom, padding });
+      map.jumpTo({ ...mapViewCamera(view), padding });
       this.lastView = view;
 
       return;
@@ -80,6 +80,6 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
     // No `padding` of its own: the transform already carries the padding
     // `applyMapPadding` just settled, and MapLibre keeps it for any camera call
     // that doesn't name one.
-    map.flyTo({ center: mapViewCenter(view), zoom: view.zoom });
+    map.flyTo(mapViewCamera(view));
   }
 }

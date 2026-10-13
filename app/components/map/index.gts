@@ -79,7 +79,7 @@ import {
   boundsFromMap,
   roundBoundsForRequest,
   mapBoundsEqual,
-  mapViewCenter,
+  mapViewCamera,
   mapViewsEqual,
   mapViewFromMap,
   TrackedMapView,
@@ -287,13 +287,12 @@ export default class Map extends Component<MapSignature> {
       padding: this.panelPadding,
       attributionControl: { compact: true },
       bearing: 0,
-      center: mapViewCenter(this.mapView),
       dragRotate: true,
       maxPitch: 85,
       pitch: 0,
       style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
       touchPitch: true,
-      zoom: this.mapView.zoom,
+      ...mapViewCamera(this.mapView),
     };
   }
 
