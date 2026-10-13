@@ -19,7 +19,6 @@ import {
   TerrainControl,
   setWorkerUrl,
   type IControl,
-  type PaddingOptions,
 } from 'maplibre-gl';
 // maplibre-gl v6 is ESM-only and resolves its worker file at runtime via
 // `new URL('./maplibre-gl-worker.mjs', import.meta.url)` relative to its own
@@ -64,6 +63,7 @@ import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-lo
 import {
   mapPaddingForPlacement,
   NO_MAP_PADDING,
+  type MapPadding,
 } from 'winds-mobi-client-web/utils/map-padding';
 import {
   SIDE_PANEL_QUERY,
@@ -207,6 +207,14 @@ export default class Map extends Component<MapSignature> {
     return this.selectedStationId !== undefined;
   }
 
+  // How much of the map the station panel covers, as MapLibre padding: what the
+  // map is built with and what `driveMapCamera` keeps it at.
+  get panelPadding(): MapPadding {
+    return this.isStationPanelOpen
+      ? mapPaddingForPlacement(this.panelPlacement.isSidePanel)
+      : NO_MAP_PADDING;
+  }
+
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
   };
@@ -286,11 +294,9 @@ export default class Map extends Component<MapSignature> {
 
   // Read once, when the map is built: `SettledMap` sets the padding before the
   // first frame, so a map opening with the station panel never jumps.
-  get initOptions(): MapInitOptions & { padding: PaddingOptions } {
+  get initOptions(): MapInitOptions & { padding: MapPadding } {
     return {
-      padding: this.isStationPanelOpen
-        ? mapPaddingForPlacement(this.panelPlacement.isSidePanel)
-        : NO_MAP_PADDING,
+      padding: this.panelPadding,
       attributionControl: { compact: true },
       bearing: 0,
       center: mapViewCenter(this.mapView),
@@ -490,12 +496,7 @@ export default class Map extends Component<MapSignature> {
       <div
         class="pointer-events-none absolute inset-0 z-20"
         {{trackMediaQuery SIDE_PANEL_QUERY this.panelPlacement.setIsSidePanel}}
-        {{driveMapCamera
-          this.mapInstance
-          this.mapView
-          this.isStationPanelOpen
-          this.panelPlacement.isSidePanel
-        }}
+        {{driveMapCamera this.mapInstance this.mapView this.panelPadding}}
       >
         {{yield}}
       </div>
