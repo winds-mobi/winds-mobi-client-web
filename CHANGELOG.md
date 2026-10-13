@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The station panel now shows a placeholder of its layout while the station loads, instead of sitting empty.
+
 ## v0.28.0 - 2026-10-13
 
 ### Changed

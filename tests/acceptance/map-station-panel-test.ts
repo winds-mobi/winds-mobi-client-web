@@ -463,6 +463,7 @@ module('Acceptance | map station panel', function (hooks) {
 
     assert.dom('[data-test-station-panel]').exists();
     assert.dom('[data-test-station-title]').doesNotExist();
+    assert.dom('[data-test-station-panel-loading]').exists();
 
     deferredRequest.resolve({
       content: {
@@ -476,6 +477,7 @@ module('Acceptance | map station panel', function (hooks) {
     await settled();
 
     assert.dom('[data-test-station-title]').hasText('Holfuy 2222');
+    assert.dom('[data-test-station-panel-loading]').doesNotExist();
   });
 
   test.if(
