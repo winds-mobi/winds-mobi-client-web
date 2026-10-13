@@ -1,10 +1,10 @@
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
 import { service } from '@ember/service';
 import { action } from '@ember/object';
 import { hash } from '@ember/helper';
 import type RouterService from '@ember/routing/router-service';
 import { Drawer } from 'frontile/overlays';
+import { Skeleton } from 'frontile/utilities';
 import StationFavoriteButton from './favorite-button';
 import StationHideButton from './hide-button';
 import StationHeader from './header';
@@ -12,9 +12,7 @@ import StationMeta from './meta';
 import StationSummary from './summary';
 import StationAir from './air';
 import StationWind from './wind';
-import { currentMapView } from 'winds-mobi-client-web/utils/map-view';
-import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
-import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
+import type PanelPlacementService from 'winds-mobi-client-web/services/panel-placement';
 import type { Station } from 'winds-mobi-client-web/services/store.js';
 
 export interface StationIndexSignature {
@@ -29,26 +27,12 @@ export interface StationIndexSignature {
 
 export default class StationIndex extends Component<StationIndexSignature> {
   @service declare router: RouterService;
-
-  @tracked isSidePanel = false;
-
-  setIsSidePanel = (matches: boolean) => {
-    this.isSidePanel = matches;
-  };
-
-  get placement(): 'left' | 'bottom' {
-    return this.isSidePanel ? 'left' : 'bottom';
-  }
-
-  get mapView() {
-    return currentMapView(this.router);
-  }
+  @service('panel-placement') declare panelPlacement: PanelPlacementService;
 
   @action
   close() {
-    this.router.transitionTo('map', {
-      queryParams: this.mapView,
-    });
+    // Ember's sticky query params keep the map's view.
+    this.router.transitionTo('map');
   }
 
   <template>
@@ -58,9 +42,9 @@ export default class StationIndex extends Component<StationIndexSignature> {
     scoped to that slot (instead of Frontile's default full-viewport portal),
     so its w-full/h-full base classes resolve against the slot's own
     responsive size, and its placement classes just pin it to the slot's
-    edges — no width/height math of our own needed. @placement mirrors the
-    slot's own bottom-sheet/side-panel breakpoint (SIDE_PANEL_QUERY above)
-    so the slide direction always matches the box actually on screen.
+    edges — no width/height math of our own needed. @placement follows the
+    slot's own bottom-sheet/side-panel breakpoint (the panel-placement
+    service) so the slide direction always matches the box actually on screen.
 
     No backdrop, no focus trap, and outside clicks never close it: the map
     behind the panel must stay fully interactive (see josemarluedke/frontile
@@ -110,12 +94,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
     component.) }}
     <Drawer
       data-test-station-panel
-      data-test-station-panel-placement={{this.placement}}
-      {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
+      data-test-station-panel-placement={{this.panelPlacement.placement}}
       @isOpen={{true}}
       @onClose={{this.close}}
       @renderInPlace={{true}}
-      @placement={{this.placement}}
+      @placement={{this.panelPlacement.placement}}
       @variant="flat"
       @size="sm"
       @backdrop="none"
@@ -138,7 +121,11 @@ export default class StationIndex extends Component<StationIndexSignature> {
       <d.Header>
         <:default as |h|>
           <h.Title>
-            <StationHeader @station={{@station}} />
+            {{#if @station}}
+              <StationHeader @station={{@station}} />
+            {{else}}
+              <Skeleton @size="lg" @class="w-48" />
+            {{/if}}
           </h.Title>
         </:default>
         <:actions>
@@ -159,12 +146,22 @@ export default class StationIndex extends Component<StationIndexSignature> {
       restore the stock value once the wider side-panel layout (@placement
       remains "left") has the room for it. }}
       <d.Body @class="px-4 py-0 md:px-8 md:py-6">
+        {{! The panel opens with the route, before the station has loaded;
+        until then the skeleton holds the shape of the meta line, the summary
+        cards and the two charts. }}
         {{#if @station}}
           <div class="grid gap-3 md:gap-4">
             <StationMeta @station={{@station}} />
             <StationSummary @station={{@station}} />
             <StationWind @stationId={{@station.id}} />
             <StationAir @stationId={{@station.id}} />
+          </div>
+        {{else}}
+          <div class="grid gap-3 md:gap-4" data-test-station-panel-loading>
+            <Skeleton @size="sm" @class="w-2/3" />
+            <Skeleton @shape="rounded" @class="h-28" />
+            <Skeleton @shape="rounded" @class="h-72" />
+            <Skeleton @shape="rounded" @class="h-72" />
           </div>
         {{/if}}
       </d.Body>

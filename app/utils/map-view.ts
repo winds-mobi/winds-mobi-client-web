@@ -175,10 +175,13 @@ export function stableMapView(
   return previous && mapViewsEqual(previous, next) ? previous : next;
 }
 
-// The two coordinates most map-init/fly-to option objects need, in the
-// [lng, lat] tuple order MapLibre itself expects.
-export function mapViewCenter(view: MapView): [number, number] {
-  return [view.longitude, view.latitude];
+// A routed view as MapLibre camera options, for building the map and for every
+// camera move: the center in the [lng, lat] tuple order MapLibre expects.
+export function mapViewCamera(view: MapView): {
+  center: [number, number];
+  zoom: number;
+} {
+  return { center: [view.longitude, view.latitude], zoom: view.zoom };
 }
 
 // Tracks the routed `MapView` with a reference that stays stable across

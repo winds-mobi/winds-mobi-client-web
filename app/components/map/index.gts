@@ -60,7 +60,16 @@ import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
+import {
+  mapPaddingForPlacement,
+  NO_MAP_PADDING,
+  type MapPadding,
+} from 'winds-mobi-client-web/utils/map-padding';
+import {
+  SIDE_PANEL_QUERY,
+  type default as PanelPlacementService,
+} from 'winds-mobi-client-web/services/panel-placement';
+import { openStationId } from 'winds-mobi-client-web/utils/open-station';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
   OSM_SWISS_STYLE,
@@ -70,7 +79,7 @@ import {
   boundsFromMap,
   roundBoundsForRequest,
   mapBoundsEqual,
-  mapViewCenter,
+  mapViewCamera,
   mapViewsEqual,
   mapViewFromMap,
   TrackedMapView,
@@ -121,6 +130,7 @@ export default class Map extends Component<MapSignature> {
   @service declare refresh: RefreshService;
   @service('nearby-location') declare nearbyLocation: NearbyLocationService;
   @service('hidden-stations') declare hiddenStations: HiddenStationsService;
+  @service('panel-placement') declare panelPlacement: PanelPlacementService;
 
   // The buttons and the wind legend live in the top-right corner, the one area
   // neither shape of the station panel covers (a bottom sheet in portrait, a
@@ -177,35 +187,21 @@ export default class Map extends Component<MapSignature> {
     this.trackedMapView.sync();
   }
 
-  // The station whose detail panel is open (the `map.station/:station_id` route).
   get selectedStationId(): string | undefined {
-    let route = this.router.currentRoute;
-
-    while (route) {
-      const id = route.params?.['station_id'];
-
-      if (typeof id === 'string') {
-        return id;
-      }
-
-      route = route.parent;
-    }
-
-    return undefined;
+    return openStationId(this.router);
   }
 
   get isStationPanelOpen(): boolean {
     return this.selectedStationId !== undefined;
   }
 
-  // Mirrors the overlay slot's own bottom-sheet/side-panel breakpoint (see the
-  // slot div's `landscape:`/`md:` classes below), so `driveMapCamera` can pad
-  // the map for whichever shape the panel actually takes without measuring it.
-  @tracked isSidePanel = false;
-
-  setIsSidePanel = (matches: boolean) => {
-    this.isSidePanel = matches;
-  };
+  // How much of the map the station panel covers, as MapLibre padding: what the
+  // map is built with and what `driveMapCamera` keeps it at.
+  get panelPadding(): MapPadding {
+    return this.isStationPanelOpen
+      ? mapPaddingForPlacement(this.panelPlacement.isSidePanel)
+      : NO_MAP_PADDING;
+  }
 
   isStationSelected = (station: Station): boolean => {
     return station.id === this.selectedStationId;
@@ -284,17 +280,19 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
-  get initOptions(): MapInitOptions {
+  // Read once, when the map is built: `SettledMap` sets the padding before the
+  // first frame, so a map opening with the station panel never jumps.
+  get initOptions(): MapInitOptions & { padding: MapPadding } {
     return {
+      padding: this.panelPadding,
       attributionControl: { compact: true },
       bearing: 0,
-      center: mapViewCenter(this.mapView),
       dragRotate: true,
       maxPitch: 85,
       pitch: 0,
       style: config.environment === 'test' ? TEST_MAP_STYLE : OSM_SWISS_STYLE,
       touchPitch: true,
-      zoom: this.mapView.zoom,
+      ...mapViewCamera(this.mapView),
     };
   }
 
@@ -331,9 +329,8 @@ export default class Map extends Component<MapSignature> {
       return;
     }
 
-    void this.router.transitionTo('map', {
-      queryParams: this.mapView,
-    });
+    // Ember's sticky query params keep the map's view, as when opening one.
+    void this.router.transitionTo('map');
   }
 
   // Gates the `flyToUserLocation` modifier below: don't auto-fly during the app's
@@ -484,13 +481,8 @@ export default class Map extends Component<MapSignature> {
       sync with the Drawer's size argument if that ever changes. }}
       <div
         class="pointer-events-none absolute inset-0 z-20"
-        {{trackMediaQuery SIDE_PANEL_QUERY this.setIsSidePanel}}
-        {{driveMapCamera
-          this.mapInstance
-          this.mapView
-          this.isStationPanelOpen
-          this.isSidePanel
-        }}
+        {{trackMediaQuery SIDE_PANEL_QUERY this.panelPlacement.setIsSidePanel}}
+        {{driveMapCamera this.mapInstance this.mapView this.panelPadding}}
       >
         {{yield}}
       </div>

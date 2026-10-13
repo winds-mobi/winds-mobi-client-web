@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The station panel now shows a placeholder of its layout while the station loads, instead of sitting empty. ([#206](https://github.com/winds-mobi/winds-mobi-client-web/issues/206))
+- Opening a link to a station, or reopening the app on one, no longer slides the map sideways as the station panel appears: the map shows the station's area beside the panel straight away. ([#206](https://github.com/winds-mobi/winds-mobi-client-web/issues/206))
+
 ## v0.28.0 - 2026-10-13
 
 ### Changed

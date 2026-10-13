@@ -3,7 +3,7 @@ import type { PaddingOptions } from 'maplibre-gl';
 
 // MapLibre types every edge as optional (an unset one means 0); this app always
 // states all four, so its own padding values are safe to do arithmetic on.
-type MapPadding = Required<PaddingOptions>;
+export type MapPadding = Required<PaddingOptions>;
 
 export const NO_MAP_PADDING: MapPadding = {
   top: 0,
@@ -11,13 +11,6 @@ export const NO_MAP_PADDING: MapPadding = {
   left: 0,
   right: 0,
 };
-
-// The same condition the station panel's overlay slot uses to switch shape
-// (see `app/components/map/index.gts`'s slot div: default is a bottom sheet,
-// `landscape:`/`md:` switch to a side panel) and the Drawer uses to switch
-// slide direction (`app/components/station/index.gts`). One shared constant
-// so the three can't drift apart.
-export const SIDE_PANEL_QUERY = '(orientation: landscape), (min-width: 768px)';
 
 // How much of the map the station panel covers, in MapLibre `padding` terms
 // (its own "edge insets" / vanishing-point concept). Hardcoded to Frontile's
