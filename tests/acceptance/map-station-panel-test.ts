@@ -687,6 +687,33 @@ module('Acceptance | map station panel', function (hooks) {
     }
   );
 
+  // A deep link to a station opens the panel with the map, so the routed view
+  // starts out framed in the part of the map the panel leaves visible: the
+  // station at the routed centre is drawn in the middle of that part, not in
+  // the middle of the whole map (behind the panel's edge).
+  test.if(
+    'a deep link frames the routed view beside the open panel',
+    webGLAvailable,
+    async function (assert) {
+      await visit(
+        '/map/holfuy-1804?latitude=46.67719&longitude=7.86323&zoom=13'
+      );
+
+      // Measured rather than taken from the Drawer's size, since the test
+      // container is scaled.
+      const map = find('[data-test-map-container]')?.getBoundingClientRect();
+      const panel = find('[data-test-station-panel]')?.getBoundingClientRect();
+      const marker = markerPosition('holfuy-1804');
+      const visibleCentre =
+        map && panel ? panel.width + (map.width - panel.width) / 2 : NaN;
+
+      assert.ok(
+        marker && Math.abs(marker.x + marker.width / 2 - visibleCentre) <= 1,
+        'the station sits in the middle of the part the panel leaves visible'
+      );
+    }
+  );
+
   // The selected-station ring/disc is toggled by the `selectMapMarker`
   // modifier directly on MapLibre's own marker element (the same element
   // `cursor-pointer` lives on, see the test above), not on anything inside

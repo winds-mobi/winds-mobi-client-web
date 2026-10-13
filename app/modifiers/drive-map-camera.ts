@@ -78,6 +78,19 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
       // (`applyMapPadding` no-ops).
       map.on('resize', this.syncPadding);
       registerDestructor(this, () => map.off('resize', this.syncPadding));
+
+      // The map was built at the routed view with the panel's padding already
+      // set (`SettledMap`), so this jump normally changes nothing: it only
+      // catches the routed view up if it changed while the map was loading. A
+      // jump, not a flight, so a map that just appeared never slides.
+      map.jumpTo({
+        center: mapViewCenter(view),
+        zoom: view.zoom,
+        padding: this.padding,
+      });
+      this.lastView = view;
+
+      return;
     }
 
     this.syncPadding();
@@ -94,16 +107,15 @@ export default class DriveMapCameraModifier extends Modifier<DriveMapCameraSigna
     map.flyTo({ center: mapViewCenter(view), zoom: view.zoom });
   }
 
-  private syncPadding = () => {
-    if (!this.map) {
-      return;
-    }
+  private get padding() {
+    return this.isPanelOpen
+      ? mapPaddingForPlacement(this.isSidePanel)
+      : NO_MAP_PADDING;
+  }
 
-    applyMapPadding(
-      this.map,
-      this.isPanelOpen
-        ? mapPaddingForPlacement(this.isSidePanel)
-        : NO_MAP_PADDING
-    );
+  private syncPadding = () => {
+    if (this.map) {
+      applyMapPadding(this.map, this.padding);
+    }
   };
 }

@@ -5,6 +5,7 @@
 ### Changed
 
 - The station panel now shows a placeholder of its layout while the station loads, instead of sitting empty.
+- Opening a link to a station, or reopening the app on one, no longer slides the map sideways as the station panel appears: the map shows the station's area beside the panel straight away.
 
 ## v0.28.0 - 2026-10-13
 

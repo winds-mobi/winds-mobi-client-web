@@ -19,6 +19,7 @@ import {
   TerrainControl,
   setWorkerUrl,
   type IControl,
+  type PaddingOptions,
 } from 'maplibre-gl';
 // maplibre-gl v6 is ESM-only and resolves its worker file at runtime via
 // `new URL('./maplibre-gl-worker.mjs', import.meta.url)` relative to its own
@@ -60,7 +61,11 @@ import trackMediaQuery from 'winds-mobi-client-web/modifiers/track-media-query';
 import type RefreshService from 'winds-mobi-client-web/services/refresh';
 import type HiddenStationsService from 'winds-mobi-client-web/services/hidden-stations';
 import type NearbyLocationService from 'winds-mobi-client-web/services/nearby-location';
-import { SIDE_PANEL_QUERY } from 'winds-mobi-client-web/utils/map-padding';
+import {
+  mapPaddingForPlacement,
+  NO_MAP_PADDING,
+  SIDE_PANEL_QUERY,
+} from 'winds-mobi-client-web/utils/map-padding';
 import SettledMap from 'winds-mobi-client-web/utils/settled-map';
 import {
   OSM_SWISS_STYLE,
@@ -284,8 +289,14 @@ export default class Map extends Component<MapSignature> {
     );
   }
 
-  get initOptions(): MapInitOptions {
+  // Read once, when the map is built (`SettledMap` takes it before the first
+  // frame). The panel's shape is read straight from the media query because
+  // `isSidePanel` is only filled in by a modifier, after this first render.
+  get initOptions(): MapInitOptions & { padding: PaddingOptions } {
     return {
+      padding: this.isStationPanelOpen
+        ? mapPaddingForPlacement(window.matchMedia(SIDE_PANEL_QUERY).matches)
+        : NO_MAP_PADDING,
       attributionControl: { compact: true },
       bearing: 0,
       center: mapViewCenter(this.mapView),

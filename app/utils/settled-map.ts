@@ -1,7 +1,17 @@
 import { waitForPromise } from '@ember/test-waiters';
-import { Map as MaplibreMap, type MapOptions } from 'maplibre-gl';
+import {
+  Map as MaplibreMap,
+  type MapOptions,
+  type PaddingOptions,
+} from 'maplibre-gl';
 
-// A MapLibre map that tells Ember's test waiters while it's busy: from
+// A MapLibre map that also takes a `padding` at construction, which MapLibre's
+// own options don't: setting it before the first frame is drawn means a map
+// that opens with the station panel already shows the routed view beside the
+// panel, instead of drawing it once in the middle of the whole map and then
+// jumping (see `drive-map-camera`).
+//
+// It also tells Ember's test waiters while it's busy: from
 // construction until it first goes idle (style, tiles and markers in place),
 // and from every camera move until it settles again. Loading and camera
 // animations run outside anything Ember tracks, so without this `settled()`
@@ -15,8 +25,16 @@ class SettledMap extends MaplibreMap {
     this.markRemoved = resolve;
   });
 
-  constructor(options: MapOptions) {
+  constructor({
+    padding,
+    ...options
+  }: MapOptions & { padding?: PaddingOptions }) {
     super(options);
+
+    if (padding) {
+      this.setPadding(padding);
+    }
+
     this.waitUntilIdle();
     this.on('movestart', () => this.waitUntilIdle());
   }
